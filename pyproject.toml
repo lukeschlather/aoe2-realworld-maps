@@ -1,0 +1,36 @@
+[project]
+name = "rwmaps"
+version = "0.1.0"
+description = "Generate AoE2 DE real-world random maps from arbitrary map projections"
+readme = "README.md"
+authors = [
+    { name = "Luke Schlather", email = "luke.schlather@strivr.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "aoe2scenarioparser>=0.8.3",
+    "numpy>=2.5.1",
+    "pillow>=12.3.0",
+    "pyproj>=3.7.2",
+    "pyshp>=3.1.6",
+    "scipy>=1.18.0",
+    "shapely>=2.1.2",
+]
+
+[project.scripts]
+rwmaps = "rwmaps.cli:main"
+rwmaps-batch = "rwmaps.batch:main"
+
+[build-system]
+requires = ["uv_build>=0.11.28,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "capstone>=5.0.9",
+    "frida>=17.16.4",
+    "frida-tools>=14.10.4",
+    "pefile>=2024.8.26",
+    "pymem>=1.14.0",
+    "pytest>=9.1.1",
+]
