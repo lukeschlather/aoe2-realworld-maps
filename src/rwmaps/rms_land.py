@@ -35,7 +35,7 @@ def cover_mask(
     mask: np.ndarray,
     budget: int = 400,
     max_radius: float = 12.0,
-    overlap: float = 0.72,
+    overlap: float = 1.0,
 ) -> list[Disc]:
     """Greedily cover ``mask`` with at most ``budget`` discs.
 
@@ -140,12 +140,6 @@ PLAYER_LAND_TILES = 240
 #: Every coastline blob shares one zone id - see the note in ``_land_block``.
 COASTLINE_LAND_ID = 1
 
-#: Land tiles are budgeted slightly over the true land area so neighbouring
-#: lands actually meet. Budgeting exactly leaves them just shy of touching, and
-#: the gaps show up as ponds all through the interior.
-FILL_FACTOR = 1.18
-
-
 def build_land_generation(
     discs: list[Disc],
     size: int,
@@ -178,7 +172,7 @@ def build_land_generation(
     if target_tiles is None:
         scale = 1.0
     else:
-        budget = max(0, target_tiles * FILL_FACTOR - PLAYER_LAND_TILES * len(starts or []))
+        budget = max(0, target_tiles - PLAYER_LAND_TILES * len(starts or []))
         scale = budget / total
 
     if starts:

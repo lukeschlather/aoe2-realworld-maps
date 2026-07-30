@@ -138,6 +138,10 @@ def build_parser() -> argparse.ArgumentParser:
     grid.add_argument("--resolution", default="10m", choices=["10m", "50m", "110m"])
     grid.add_argument("--no-elevation", action="store_true")
     grid.add_argument("--ai-map-type", help="override the auto-detected ai_info_map_type")
+    grid.add_argument("--min-island-tiles", type=int, default=0,
+                      help="drop connected land blobs smaller than this many tiles "
+                           "(e.g. 16 for a 4x4-tile floor) - matches the liberty the "
+                           "shipped real-world maps take with speckle islands")
 
     out = p.add_argument_group("output")
     out.add_argument("--outdir", type=Path, default=Path("out"))
@@ -169,7 +173,8 @@ def generate(args) -> dict:
 
     window = MapWindow.from_center(args.proj, lon, lat, span, size, args.rotate)
     result = raster.rasterize(
-        window, terrain.BIOMES[args.biome], resolution=args.resolution
+        window, terrain.BIOMES[args.biome], resolution=args.resolution,
+        min_island_tiles=args.min_island_tiles,
     )
     mask = result.land_mask
 

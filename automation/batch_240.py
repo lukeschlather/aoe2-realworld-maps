@@ -1,0 +1,62 @@
+"""Regenerate a handful of specific maps at size 240 (requires the editor's
+Map Size dropdown already switched to Huge [240] by hand - see
+RENDER_PIPELINE.md; that list is one of the crash-prone ones automation must
+never touch).
+
+Usage:
+    uv run python automation/batch_240.py
+"""
+
+import sys
+import time
+import traceback
+from pathlib import Path
+
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+REPO = Path(__file__).parent.parent
+sys.path.insert(0, str(REPO / "src"))
+sys.path.insert(0, str(Path(__file__).parent))
+
+import gen_loop  # noqa: E402
+from rwmaps import real_preview, scx_read  # noqa: E402
+
+MIN_ISLAND = 20
+
+VARIANTS = [
+    ("italy_240", ["--region", "italy"]),
+    ("denmark_v2_240", ["--region", "denmark", "--min-island-tiles", str(MIN_ISLAND)]),
+    ("japan_rot35_v2_240", ["--region", "japan", "--rotate", "35",
+                            "--min-island-tiles", str(MIN_ISLAND)]),
+]
+
+
+def main():
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    outdir = REPO / "out" / f"size240-{stamp}"
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    for i, (name, extra) in enumerate(VARIANTS, start=1):
+        print(f"\n[240] ({i}/{len(VARIANTS)}) {name} {extra}")
+        sys.argv = ["gen_loop.py", name, "--size", "240", "--players", "8",
+                    "--outdir", str(outdir), *extra]
+        try:
+            dest = gen_loop.main()
+        except BaseException:
+            print(f"[240] {name} FAILED during generation:")
+            traceback.print_exc()
+            continue
+        mask = scx_read.read_land_mask(dest)
+        tcs = scx_read.read_town_centers(dest)
+        png = real_preview.save_real_render(
+            mask, tcs, dest.with_suffix(".png"),
+            title=f"{name}  {mask.shape[1]}x{mask.shape[0]}  {len(tcs)} TCs (real engine)",
+        )
+        print(f"[240] {name}: {len(tcs)} TCs -> {png}")
+
+    print(f"[240] done. Output: {outdir}")
+
+
+if __name__ == "__main__":
+    main()

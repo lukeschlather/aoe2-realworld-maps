@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import shapely
+from scipy import ndimage
 from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
@@ -68,6 +69,27 @@ class RasterResult:
         return float(self.land_mask.mean())
 
 
+def drop_small_islands(mask: np.ndarray, min_tiles: int = 16) -> np.ndarray:
+    """Remove connected land components smaller than ``min_tiles``.
+
+    The shipped real-world maps take this liberty by hand: a speckle of
+    single-tile islets doesn't read as geography, it reads as rendering
+    noise, and it isn't worth a player's attention either. ``min_tiles=16``
+    is a 4x4-tile equivalent - the smallest patch that could plausibly hold
+    anything. This does not (yet) try to bridge a dropped island to a
+    neighbour via shallows first; it just removes it.
+    """
+    if min_tiles <= 0:
+        return mask
+    labels, count = ndimage.label(mask, structure=np.ones((3, 3), dtype=bool))
+    if count == 0:
+        return mask
+    sizes = np.bincount(labels.reshape(-1), minlength=count + 1)
+    keep = sizes >= min_tiles
+    keep[0] = False  # background label
+    return keep[labels]
+
+
 def rasterize(
     window: MapWindow,
     palette: T.Palette | None = None,
@@ -78,6 +100,7 @@ def rasterize(
     medium_width: int = 5,
     offmap_is_land: bool = False,
     resolution: str = "10m",
+    min_island_tiles: int = 0,
 ) -> RasterResult:
     """Rasterise real coastlines into a grid of AoE2 terrain ids.
 
@@ -98,6 +121,9 @@ def rasterize(
 
     if offmap_is_land:
         is_land |= offmap
+
+    if min_island_tiles:
+        is_land = drop_small_islands(is_land, min_island_tiles)
 
     grid = np.full(is_land.shape, palette.deep, dtype=np.uint8)
     # Water depth bands, measured outward from the coastline.

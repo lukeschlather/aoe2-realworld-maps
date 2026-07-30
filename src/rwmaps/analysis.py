@@ -79,21 +79,72 @@ def start_quality(mask: np.ndarray, radius: int = 20) -> np.ndarray:
     return ndimage.convolve(mask.astype(np.float64), disc, mode="constant", cval=0.0)
 
 
-def _greedy_pack(
-    order: np.ndarray, coords: np.ndarray, players: int, separation: float
+def _farthest_point_pack_from_seed(
+    coords: np.ndarray, players: int, seed: int
 ) -> list[int]:
-    """Take the best-quality candidates that stay ``separation`` apart."""
-    picked: list[int] = []
-    for idx in order:
-        p = coords[idx]
-        if all(
-            (p[0] - coords[j][0]) ** 2 + (p[1] - coords[j][1]) ** 2 >= separation**2
-            for j in picked
-        ):
-            picked.append(int(idx))
-            if len(picked) == players:
-                break
+    """Farthest-point / k-center-greedy selection starting from ``seed``."""
+    picked = [seed]
+    if players == 1 or len(coords) == 1:
+        return picked
+    dist = np.hypot(coords[:, 0] - coords[picked[0]][0], coords[:, 1] - coords[picked[0]][1])
+    while len(picked) < players and len(picked) < len(coords):
+        idx = int(np.argmax(dist))
+        picked.append(idx)
+        new_dist = np.hypot(coords[:, 0] - coords[idx][0], coords[:, 1] - coords[idx][1])
+        dist = np.minimum(dist, new_dist)
     return picked
+
+
+def _min_pairwise_dist(coords: np.ndarray, picked: list[int]) -> float:
+    best = float("inf")
+    for i in range(len(picked)):
+        for j in range(i + 1, len(picked)):
+            a, b = coords[picked[i]], coords[picked[j]]
+            best = min(best, float(np.hypot(a[0] - b[0], a[1] - b[1])))
+    return best
+
+
+def _farthest_point_pack(
+    coords: np.ndarray, quality: np.ndarray, players: int,
+    min_separation: float = 0.0, n_seeds: int = 12,
+) -> list[int]:
+    """Pick ``players`` quality-filtered candidates, spread as far apart as
+    possible (farthest-point / k-center-greedy selection).
+
+    A quality-ranked "accept if it clears a separation bar" greedy pack (the
+    previous approach here) never has to leave the single best-quality region
+    of a landmass if it can keep finding acceptable points nearby - since
+    quality is spatially smooth, that means every start can end up clustered
+    on the one fattest part of the shape, even on an elongated coastline with
+    plenty of usable land elsewhere. Farthest-point selection instead always
+    grows toward whatever candidate is most isolated from what's already
+    picked, which is what actually forces reach into a landmass's far ends -
+    or its other islands, if the candidate pool spans more than one.
+
+    Farthest-point's result depends on which point seeds it - forcing a
+    per-step separation threshold sounds appealing but is path-dependent and
+    can make the final minimum separation *worse* (an early forced pick can
+    use up the "room" a later pick needed). Instead this runs the plain,
+    well-behaved greedy from several different seeds (the top
+    ``n_seeds`` candidates by quality) and keeps whichever run has the best
+    achieved minimum pairwise separation - still just seating the best
+    farthest-point solution available, not fighting the algorithm.
+    ``min_separation`` is purely informational here (kept as a parameter for
+    callers) once a seed search is in play; it doesn't change selection.
+    """
+    if len(coords) == 0:
+        return []
+    if players == 1 or len(coords) == 1:
+        return [int(np.argmax(quality))]
+
+    seed_candidates = np.argsort(-quality)[:n_seeds]
+    best_pick, best_min_sep = None, -1.0
+    for seed in seed_candidates:
+        pick = _farthest_point_pack_from_seed(coords, players, int(seed))
+        sep = _min_pairwise_dist(coords, pick)
+        if sep > best_min_sep:
+            best_min_sep, best_pick = sep, pick
+    return best_pick
 
 
 def choose_starts(
@@ -103,17 +154,37 @@ def choose_starts(
     radius: int = 20,
     min_inland: float = 3.0,
     edge_margin: int = 8,
-    same_component: bool = True,
+    same_component: bool = False,
+    min_component_tiles: int = 200,
     quality_percentile: float = 60.0,
     max_candidates: int = 6000,
+    min_separation: float = 56.0,
 ) -> list[tuple[int, int]]:
     """Pick start tiles that are both *good* and *far apart*.
 
     Farthest-point sampling alone is a poor model of fair placement: maximising
     spread drives every start onto a coastal tip or peninsula, which is exactly
     where a player has least room. Instead this keeps only positions above a
-    quality floor and then finds the largest separation at which ``players`` of
-    them can still be packed - a binary search over the separation constraint.
+    quality floor and then spreads players across those candidates by
+    farthest-point selection (see ``_farthest_point_pack``).
+
+    ``same_component`` restricts to the single largest connected landmass -
+    useful for a map meant to be one continuous continent, but wrong for a
+    genuine archipelago (Caribbean, Philippines, Indonesia, Denmark), where it
+    throws away every island except whichever one happens to be biggest. The
+    default instead keeps every component at least ``min_component_tiles``
+    tiles (big enough to plausibly hold a start and its economy), so
+    candidates can spread across separate islands too.
+
+    ``min_separation`` is a soft floor (tiles) on TC-to-TC distance, passed to
+    ``_farthest_point_pack``. The stock resource include places each player's
+    gold/stone/deer 14-30 tiles from their own start regardless of map size
+    (fixed tile counts, not scaled), so two starts closer than about
+    ``2 * 28 = 56`` tiles have overlapping resource rings - a shared resource
+    is fine, but the point of this floor is to make a resource landing
+    reachable by *nobody* (an unlucky ring-overlap roll) much rarer. It's a
+    preference, not a hard requirement: geography that can't fit ``players``
+    starts this far apart still gets all of them seated, just closer.
     """
     depth = distance_to_water(mask)
     quality = start_quality(mask, radius)
@@ -125,47 +196,110 @@ def choose_starts(
         valid[:, :edge_margin] = False
         valid[:, -edge_margin:] = False
 
+    labels, sizes = components(mask)
     if same_component:
-        labels, sizes = components(mask)
         usable = [i for i in range(1, len(sizes)) if (valid & (labels == i)).any()]
         if usable:
             best = max(usable, key=lambda i: int((valid & (labels == i)).sum()))
             valid &= labels == best
+    elif min_component_tiles:
+        big = np.zeros(len(sizes), dtype=bool)
+        big[1:] = sizes[1:] >= min_component_tiles
+        valid &= big[labels]
 
     if not valid.any():
         return []
 
-    floor = float(np.percentile(quality[valid], quality_percentile))
-    cand = valid & (quality >= floor)
-    if cand.sum() < players:
-        cand = valid
+    def candidates_at(percentile: float) -> tuple[np.ndarray, np.ndarray]:
+        # The quality floor has to be computed *per landmass*, not as one
+        # global percentile: "land within a 20-tile radius" is structurally
+        # lower on a narrow island than on a big landmass no matter how solid
+        # the island is, so a single global floor (set by whichever component
+        # is biggest) can filter out every candidate on an otherwise
+        # perfectly playable smaller island - which silently defeats
+        # same_component=False for archipelagos.
+        cand = np.zeros_like(valid)
+        for lbl in np.unique(labels[valid]):
+            comp = valid & (labels == lbl)
+            floor = float(np.percentile(quality[comp], percentile))
+            cand |= comp & (quality >= floor)
+        if cand.sum() < players:
+            cand = valid
+        ys, xs = np.nonzero(cand)
+        q = quality[ys, xs]
+        if len(ys) > max_candidates:
+            keep = np.argpartition(-q, max_candidates)[:max_candidates]
+            ys, xs, q = ys[keep], xs[keep], q[keep]
+        return np.stack([ys, xs], axis=1).astype(float), q
 
-    ys, xs = np.nonzero(cand)
-    q = quality[ys, xs]
-    # Work with the best candidates only; ranking is by quality anyway.
-    if len(ys) > max_candidates:
-        keep = np.argpartition(-q, max_candidates)[:max_candidates]
-        ys, xs, q = ys[keep], xs[keep], q[keep]
-
-    coords = np.stack([ys, xs], axis=1).astype(float)
-    order = np.argsort(-q)
+    coords, q = candidates_at(quality_percentile)
 
     if players <= 1:
-        return [(int(coords[order[0]][0]), int(coords[order[0]][1]))]
+        best = int(np.argmax(q))
+        return [(int(coords[best][0]), int(coords[best][1]))]
 
-    # Largest separation at which we can still seat everyone.
-    lo, hi = 0.0, float(np.hypot(*mask.shape))
-    best_pick = _greedy_pack(order, coords, players, 0.0)
-    for _ in range(24):
-        mid = (lo + hi) / 2
-        pick = _greedy_pack(order, coords, players, mid)
-        if len(pick) == players:
-            best_pick = pick
-            lo = mid
+    best_pick = _farthest_point_pack(coords, q, players)
+    best_coords = coords
+    best_sep = _min_pairwise_dist(coords, best_pick)
+
+    # If the default quality floor can't seat `players` starts min_separation
+    # apart, progressively admit lower-quality land (a real, if imperfect,
+    # start is better than an artificially tight cluster) and keep whichever
+    # attempt gets closest - this is a soft target, not a hard requirement,
+    # since some coastlines genuinely can't fit `players` starts this far
+    # apart no matter how much land is admitted.
+    if best_sep < min_separation:
+        for percentile in (40.0, 25.0, 10.0, 0.0):
+            if percentile >= quality_percentile:
+                continue
+            c2, q2 = candidates_at(percentile)
+            pick2 = _farthest_point_pack(c2, q2, players)
+            sep2 = _min_pairwise_dist(c2, pick2)
+            if sep2 > best_sep:
+                best_pick, best_coords, best_sep = pick2, c2, sep2
+            if best_sep >= min_separation:
+                break
+
+    return [(int(best_coords[i][0]), int(best_coords[i][1])) for i in best_pick]
+
+
+def resource_ownership(
+    mask: np.ndarray,
+    tcs: list[tuple[int, float, float]],
+    resources: list[tuple[str, float, float]],
+    max_distance: float = 30.0,
+) -> tuple[dict[int, dict[str, int]], dict[str, int]]:
+    """Assign each resource to whichever TC can actually walk to it first.
+
+    A resource only counts for a player if it's reachable over connected
+    land (``land_path_distance``, not straight-line) from *that player's* TC
+    and closer to it than to any other TC - a resource nearer another
+    player's TC is effectively theirs, not a shared pool. ``max_distance``
+    caps how far a villager will realistically walk for it (defaults to 30
+    tiles, matching this project's own DEER placement's own
+    ``max_distance_to_players``).
+
+    Returns ``(per_player, unclaimed)`` - ``per_player[player][kind]`` is a
+    count; ``unclaimed[kind]`` counts resources too far from every TC (by
+    walking distance) to belong to anyone, or on a landmass no TC can reach.
+    """
+    paths = {p: land_path_distance(mask, (int(y), int(x))) for p, x, y in tcs}
+    per_player: dict[int, dict[str, int]] = {p: {} for p, _, _ in tcs}
+    unclaimed: dict[str, int] = {}
+
+    for kind, x, y in resources:
+        xi, yi = int(x), int(y)
+        best_p, best_d = None, float("inf")
+        for p, dist in paths.items():
+            d = dist[yi, xi]
+            if d < best_d:
+                best_d, best_p = d, p
+        if best_p is not None and best_d <= max_distance:
+            per_player[best_p][kind] = per_player[best_p].get(kind, 0) + 1
         else:
-            hi = mid
+            unclaimed[kind] = unclaimed.get(kind, 0) + 1
 
-    return [(int(coords[i][0]), int(coords[i][1])) for i in best_pick]
+    return per_player, unclaimed
 
 
 @dataclass

@@ -12,6 +12,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
+from AoE2ScenarioParser.datasets.buildings import BuildingInfo
 from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 
 from . import terrain as T
@@ -38,3 +39,65 @@ def read_land_mask(path: str | Path) -> np.ndarray:
     for wid in T.WATER_IDS:
         water |= grid == wid
     return ~water
+
+
+def read_town_centers(path: str | Path) -> list[tuple[int, float, float]]:
+    """Load a ``.scx`` and return each player's actual Town Centre placement.
+
+    Returns ``(player, x, y)`` tuples in the same ``[y][x]``-north-up tile
+    convention as ``read_terrain_grid`` - this is where the engine's own
+    placement logic actually dropped the TC, not the ``land_position`` the
+    script asked for.
+    """
+    scenario = AoE2DEScenario.from_file(str(path))
+    tcs = []
+    for player_units in scenario.unit_manager.units:
+        for unit in player_units:
+            if unit.unit_const == BuildingInfo.TOWN_CENTER.ID:
+                tcs.append((int(unit.player), unit.x, unit.y))
+    return sorted(tcs, key=lambda t: t[0])
+
+
+#: Land-economy gaia resources a villager reaches on foot - gold, stone,
+#: forage bushes, sheep, deer, boar. Fish are a separate water/dock economy
+#: and deliberately excluded. Gold/stone/classic-sheep/deer/boar/forage ids
+#: are the well-known, stable ones used by the older stock resource include
+#: (``land_and_water_resources.inc``) this project's own ``rms.py`` uses.
+#:
+#: The *current* stock Arabia (and other modern DE random maps) instead
+#: route herdable/huntable/forage placement through ``includes/themes.inc``,
+#: which randomly re-skins each role per generation (a "sheep" might place
+#: as a Capybara, Goat, Turkey, Water Buffalo or Pig; a "deer" as a Guanaco,
+#: Rhea, Mouflon, Ibex, Gazelle, Argali, Ostrich or Zebra; a forage bush as
+#: a Fruit Bush, Papaya Tree or Pineapple Bush) - functionally identical,
+#: cosmetically different. Every reskin id found in that file (as of this
+#: game version) is included below under the role it actually fills, found
+#: by reading ``includes/themes.inc`` directly since none of this is in
+#: AoE2ScenarioParser's ``UnitInfo`` dataset.
+RESOURCE_UNITS: dict[int, str] = {
+    66: "gold",
+    102: "stone",
+    # forage-bush role (FORAGE_PLANT)
+    59: "forage", 1059: "forage", 2599: "forage", 2650: "forage",
+    # herdable role (HERDABLE_A) - docile, walk-up food
+    594: "sheep", 1243: "sheep", 833: "sheep", 2590: "sheep",
+    1245: "sheep", 1060: "sheep", 1142: "sheep",
+    # huntable role (HUNTABLE_A) - docile but flees, needs chasing
+    65: "deer", 2591: "deer", 2597: "deer", 2340: "deer", 1239: "deer",
+    1796: "deer", 1896: "deer", 1026: "deer", 1019: "deer",
+    # classic wild boar and the small-huntable role (HUNTABLE_SMALL_A) -
+    # aggressive/fights back, distinct from the docile huntable role above.
+    48: "boar", 2100: "boar",
+}
+
+
+def read_resources(path: str | Path) -> list[tuple[str, float, float]]:
+    """Load a ``.scx`` and return each land-economy resource as ``(kind, x, y)``."""
+    scenario = AoE2DEScenario.from_file(str(path))
+    out = []
+    for player_units in scenario.unit_manager.units:
+        for unit in player_units:
+            kind = RESOURCE_UNITS.get(unit.unit_const)
+            if kind:
+                out.append((kind, unit.x, unit.y))
+    return out

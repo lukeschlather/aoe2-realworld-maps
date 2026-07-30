@@ -20,8 +20,7 @@ REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
 from rwmaps import install as install_mod  # noqa: E402
 
-SLOT_PATH = install_mod.scripts_dir() / "rw_anatolia_220.rms"  # TODO: switch back to
-# AA_rw_placeholder_tester.rms once that's selected in-game (see EDITOR_WORKFLOW.md)
+SLOT_PATH = install_mod.scripts_dir() / "AA_rw_placeholder_tester.rms"
 SCENARIO_DIR = install_mod.find_profile() / "resources" / "_common" / "scenario"
 UI_DRIVER = Path(__file__).parent / "ui_driver.ps1"
 
@@ -66,7 +65,7 @@ def newest_scenario():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("name")
-    ap.add_argument("--region", required=True)
+    ap.add_argument("--region")  # or pass --center/--span-km through `extra`
     ap.add_argument("--size", type=int, default=220)
     ap.add_argument("--players", type=int, default=8)
     ap.add_argument("--outdir", default="out")
@@ -81,7 +80,8 @@ def main():
 
     gen_cmd = [
         "uv", "run", "rwmaps", args.name,
-        "--region", args.region, "--size", str(args.size),
+        *(["--region", args.region] if args.region else []),
+        "--size", str(args.size),
         "--players", str(args.players), "--outdir", str(outdir), "--no-preview",
         *extra,
     ]

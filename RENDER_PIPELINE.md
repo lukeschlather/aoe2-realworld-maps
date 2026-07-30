@@ -36,8 +36,7 @@ In the running game:
 3. Map Size → pick the size that matches what you'll generate (e.g. "Large
    (8 player) [220]").
 4. Random Map location → select the slot script by hand once. **Currently
-   `rw_anatolia_220`** (see "Current slot" below for why it's not the
-   originally-planned dedicated placeholder file).
+   `AA_rw_placeholder_tester`** (see "Current slot" below).
 5. Players → set player count (8, to guarantee enough player slots/TCs for
    any script).
 6. Click "Generate Map" once by hand, just to leave the editor sitting on
@@ -70,13 +69,14 @@ mask = read_land_mask("out/loop-.../whatever.aoe2scenario")     # [y][x] bool
 ## Current slot
 
 `automation/gen_loop.py`'s `SLOT_PATH` points at
-`rw_anatolia_220.rms` in the local mod's `random-map-scripts` folder, not
-the originally-planned `AA_rw_placeholder_tester.rms` — that file exists
-(created to sort near the front of the combined script list, avoiding the
-crash described below) but was never actually selected in-game mid-session.
-Functionally it doesn't matter which file is used, only that it's the one
-currently selected in the editor's "Random Map location" list. Switch
-`SLOT_PATH` if you reselect a different file by hand.
+`AA_rw_placeholder_tester.rms` in the local mod's `random-map-scripts`
+folder. The `AA_` prefix makes it sort near the front of the combined
+script list (100+ entries once subscribed map packs are included), which
+matters because reaching either end of that list crashes the game (see
+"Why the fixed-slot trick" below). Functionally it doesn't matter
+which file is used, only that it's the one currently selected in the
+editor's "Random Map location" list. Switch `SLOT_PATH` if you reselect a
+different file by hand.
 
 ## Why the fixed-slot trick, not just picking a new script each time
 
