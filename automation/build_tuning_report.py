@@ -3,8 +3,10 @@
 Deliberately does NOT touch AoE2ScenarioParser or re-derive anything - every
 preview image and every fact (placement geometry, resource ownership) was
 already computed once, immediately after capture, by sample_analysis.py.
-This script only reads JSON and fills in HTML, so it should run in well
-under a second regardless of how many samples are in the file.
+This script only reads JSON and fills in HTML, plus a cheap file-copy step
+to archive the underlying .rms/.aoe2scenario into a git-tracked location -
+it should run in a couple seconds regardless of how many samples are in
+the file.
 
 Usage:
     uv run python automation/build_tuning_report.py
@@ -13,8 +15,11 @@ Usage:
 from __future__ import annotations
 
 import json
+import shutil
+import subprocess
 import sys
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -23,9 +28,60 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from tuning_matrix import WINDOWS, conditions_for  # noqa: E402
 
-RESULTS_PATH = REPO / "out" / "tuning_matrix" / "results.jsonl"
+MATRIX_OUT = REPO / "out" / "tuning_matrix"
+RESULTS_PATH = MATRIX_OUT / "results.jsonl"
+DATA_DIR = REPO / "reports" / "tuning_matrix_data"
 
 RESOURCE_KINDS = ["gold", "stone", "forage", "sheep", "deer", "boar"]
+
+#: the full set of tunable knobs this matrix varies, with their true
+#: cli.py argparse defaults - conditions only specify what differs from
+#: this, so the report needs this to show the COMPLETE resolved settings
+#: per condition, not just the diff.
+PARAM_DEFAULTS = {
+    "resolution": "10m",
+    "overlap": 1.0,
+    "max_radius": 12.0,
+    "clumping_factor": 8,
+    "lands": "auto (700 @ size 240)",
+    "min_island_tiles": 0,
+    "min_water_width": 0,
+    "min_land_width": 0,
+}
+
+#: extra_args flag -> PARAM_DEFAULTS key
+FLAG_TO_KEY = {
+    "--resolution": "resolution",
+    "--overlap": "overlap",
+    "--max-radius": "max_radius",
+    "--clumping-factor": "clumping_factor",
+    "--lands": "lands",
+    "--min-island-tiles": "min_island_tiles",
+    "--min-water-width": "min_water_width",
+    "--min-land-width": "min_land_width",
+}
+
+
+def resolve_params(extra_args: list[str]) -> dict:
+    """The complete parameter set a condition actually runs with - defaults
+    overridden by whatever this condition's extra_args specify."""
+    resolved = dict(PARAM_DEFAULTS)
+    it = iter(extra_args)
+    for flag in it:
+        value = next(it)
+        key = FLAG_TO_KEY.get(flag)
+        if key:
+            resolved[key] = value
+    return resolved
+
+
+def git_commit() -> str:
+    try:
+        r = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO,
+                            capture_output=True, text=True, check=True)
+        return r.stdout.strip()
+    except Exception:
+        return "unknown"
 
 
 def load_records() -> dict:
@@ -37,6 +93,46 @@ def load_records() -> dict:
         rec = json.loads(line)
         by_cell[(rec["window"], rec["condition"])].append(rec)
     return by_cell
+
+
+def archive_cell_files(win_key: str, cond_key: str, sample_indices: list[int]) -> tuple[str | None, dict[int, str]]:
+    """Copy this cell's .rms script and raw .aoe2scenario captures out of
+    gitignored out/ into reports/tuning_matrix_data/, so the report can link
+    to files that actually get checked in - not just embed a rendered PNG.
+
+    ``sample_indices`` are the actual recorded sample_index values (NOT
+    necessarily a contiguous 0..n-1 range - a cell where sample 0 failed
+    and only sample 1 succeeded has records=[1], and archiving by position
+    rather than by this real index would look for the wrong filename).
+
+    Returns (rms_relpath, {sample_index: scenario_relpath}) - paths
+    relative to reports/, or None/{} if nothing was found on disk.
+    """
+    dest_dir = DATA_DIR / win_key / cond_key
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    rms_relpath = None
+    script_root = MATRIX_OUT / "scripts" / win_key / cond_key
+    rms_candidates = sorted(script_root.rglob("*.rms"), key=lambda p: p.stat().st_mtime)
+    if rms_candidates:
+        # Multiple timestamped subdirs can exist if a batch was resumed
+        # after a crash - they're byte-identical (deterministic script),
+        # so the newest is as good as any.
+        newest = rms_candidates[-1]
+        dest = dest_dir / "script.rms"
+        shutil.copyfile(newest, dest)
+        rms_relpath = f"tuning_matrix_data/{win_key}/{cond_key}/script.rms"
+
+    scenario_relpaths = {}
+    raw_dir = MATRIX_OUT / win_key / cond_key / "raw"
+    for i in sample_indices:
+        src = raw_dir / f"sample_{i:03d}.aoe2scenario"
+        if src.exists():
+            dest = dest_dir / f"sample_{i:03d}.aoe2scenario"
+            shutil.copyfile(src, dest)
+            scenario_relpaths[i] = f"tuning_matrix_data/{win_key}/{cond_key}/sample_{i:03d}.aoe2scenario"
+
+    return rms_relpath, scenario_relpaths
 
 
 def resource_table(per_player: dict) -> str:
@@ -54,12 +150,14 @@ def resource_table(per_player: dict) -> str:
     return "\n".join(rows)
 
 
-def sample_card(rec: dict) -> str:
+def sample_card(rec: dict, scenario_relpath: str | None) -> str:
     placement = rec["placement"]
     resources = rec["resources"]
     any_zero = resources["any_player_zero_of_a_kind"]
     flag = (f"<span class='flag bad'>player {', '.join(resources['zero_kinds_by_player'])} "
             f"has zero of a kind</span>" if any_zero else "<span class='flag ok'>no zero-of-a-kind</span>")
+    scenario_link = (f'<a class="filelink" href="{scenario_relpath}">.aoe2scenario</a>'
+                      if scenario_relpath else '<span class="filelink missing-link">.aoe2scenario missing</span>')
     return f'''
     <div class="sample">
         <img src="{rec['preview_png_b64']}" alt="real engine capture" loading="lazy">
@@ -75,8 +173,14 @@ def sample_card(rec: dict) -> str:
             </div>
             {flag}
             {resource_table(resources['per_player'])}
+            <div class="fact-row">{scenario_link}</div>
         </div>
     </div>'''
+
+
+def params_table(resolved: dict) -> str:
+    cells = "".join(f"<td>{k}</td><td>{v}</td>" for k, v in resolved.items())
+    return f"<table class='params'><tr>{cells}</tr></table>"
 
 
 def main():
@@ -86,20 +190,29 @@ def main():
         cond_blocks = []
         for cond_key, extra_args in conditions_for(win_key):
             records = by_cell.get((win_key, cond_key), [])
-            args_str = " ".join(extra_args) if extra_args else "(none)"
+            resolved = resolve_params(extra_args)
+            sample_indices = [r["sample_index"] for r in records]
+            rms_relpath, scenario_relpaths = archive_cell_files(win_key, cond_key, sample_indices)
+            rms_link = (f'<a class="filelink" href="{rms_relpath}">.rms script</a>'
+                        if rms_relpath else '<span class="filelink missing-link">.rms missing</span>')
+
             if not records:
                 cond_blocks.append(f'''
                 <div class="cond">
                     <h3>{cond_key}</h3>
-                    <p class="cond-sub">{args_str}</p>
+                    {params_table(resolved)}
                     <p class="missing">no captures</p>
                 </div>''')
                 continue
-            samples_html = "\n".join(sample_card(r) for r in records)
+            samples_html = "\n".join(
+                sample_card(r, scenario_relpaths.get(r["sample_index"]))
+                for r in records
+            )
             cond_blocks.append(f'''
             <div class="cond">
                 <h3>{cond_key}</h3>
-                <p class="cond-sub">{args_str}</p>
+                {params_table(resolved)}
+                <p class="cond-sub">{rms_link}</p>
                 <div class="samples">{samples_html}</div>
             </div>''')
 
@@ -114,11 +227,18 @@ def main():
             </div>
         </section>''')
 
-    html = HTML_TEMPLATE.format(sections="\n".join(window_sections))
+    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    html = HTML_TEMPLATE.format(
+        sections="\n".join(window_sections),
+        generated_at=generated_at,
+        commit=git_commit(),
+        param_defaults_row="".join(f"<td>{k}</td><td>{v}</td>" for k, v in PARAM_DEFAULTS.items()),
+    )
     out = REPO / "reports" / "tuning_matrix_report.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
     print(f"wrote {out} ({out.stat().st_size / 1024:.0f} KB)")
+    print(f"archived data under {DATA_DIR}")
 
 
 HTML_TEMPLATE = """<title>Puget Sound: parameter tuning matrix (real engine)</title>
@@ -156,7 +276,24 @@ h1 {{
   font-family: Charter, Georgia, serif; font-weight: 600; font-size: 2rem;
   letter-spacing: -0.01em; text-wrap: balance; margin: 0 0 0.3rem;
 }}
-.lede {{ color: var(--ink-dim); max-width: 74ch; line-height: 1.55; font-size: 1rem; margin: 0 0 2.5rem; }}
+.meta {{
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-size: 0.78rem; color: var(--ink-dim); margin: 0 0 1.2rem;
+}}
+.lede {{ color: var(--ink-dim); max-width: 74ch; line-height: 1.55; font-size: 1rem; margin: 0 0 1.2rem; }}
+.defaults {{
+  background: var(--bg-elevated); border: 1px solid var(--rule); border-radius: 8px;
+  padding: 0.8rem 1rem; margin-bottom: 2.5rem; overflow-x: auto;
+}}
+.defaults p {{ margin: 0 0 0.5rem; font-size: 0.85rem; color: var(--ink-dim); }}
+table.params {{
+  border-collapse: collapse; font-size: 0.68rem; margin: 0.5rem 0;
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}}
+table.params td {{ border: 1px solid var(--rule); padding: 2px 6px; }}
+table.params td:nth-child(odd) {{ color: var(--ink-dim); }}
+table.params td:nth-child(even) {{ font-weight: 600; }}
 .window {{ margin-bottom: 3.5rem; }}
 .window-head {{
   border-bottom: 2px solid var(--accent); padding-bottom: 0.6rem; margin-bottom: 1.3rem;
@@ -168,14 +305,14 @@ h1 {{
   font-size: 0.8rem; color: var(--ink-dim); margin: 0;
 }}
 .conditions {{ display: flex; flex-direction: column; gap: 1rem; }}
-.cond {{ background: var(--bg-elevated); border: 1px solid var(--rule); border-radius: 10px; padding: 1rem; }}
+.cond {{ background: var(--bg-elevated); border: 1px solid var(--rule); border-radius: 10px; padding: 1rem; overflow-x: auto; }}
 .cond h3 {{
   font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
-  font-size: 0.95rem; margin: 0 0 0.1rem; color: var(--accent);
+  font-size: 0.95rem; margin: 0 0 0.4rem; color: var(--accent);
 }}
 .cond-sub {{
   font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
-  font-size: 0.72rem; color: var(--ink-dim); margin: 0 0 0.7rem;
+  font-size: 0.72rem; color: var(--ink-dim); margin: 0.4rem 0 0.7rem;
 }}
 .samples {{ display: flex; gap: 1rem; flex-wrap: wrap; }}
 .sample {{ display: flex; gap: 0.7rem; background: var(--card-bg); border-radius: 8px; padding: 0.6rem; }}
@@ -191,11 +328,16 @@ table.res th, table.res td {{ border: 1px solid var(--rule); padding: 1px 4px; t
 table.res th {{ color: var(--ink-dim); font-weight: 500; }}
 table.res td.zero {{ background: var(--bad-bg); color: var(--bad); font-weight: 600; }}
 table.res td.low {{ color: var(--accent); }}
+.filelink {{ color: var(--accent); text-decoration: none; font-size: 0.72rem;
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace; }}
+.filelink:hover {{ text-decoration: underline; }}
+.filelink.missing-link {{ color: var(--ink-dim); font-style: italic; }}
 .missing {{ color: var(--ink-dim); font-style: italic; font-size: 0.85rem; }}
 footer {{ color: var(--ink-dim); font-size: 0.8rem; margin-top: 3rem; line-height: 1.6; }}
 </style>
 <div class="wrap">
   <h1>Puget Sound: parameter tuning matrix</h1>
+  <p class="meta">Generated {generated_at} &middot; repo commit <code>{commit}</code></p>
   <p class="lede">
     Every image is a real AoE2 DE engine capture; every fact next to it
     (Town Centre separation, which landmass each player is on, resource
@@ -207,10 +349,16 @@ footer {{ color: var(--ink-dim); font-size: 0.8rem; margin-top: 3rem; line-heigh
     separate islands by design. The only thing flagged as a problem is a
     player having literally zero of some resource kind.
   </p>
+  <div class="defaults">
+    <p>Defaults every condition starts from (a condition's own table below shows what it actually overrode):</p>
+    <table class="params"><tr>{param_defaults_row}</tr></table>
+  </div>
   {sections}
   <footer>
     Built by build_tuning_report.py from tuning_matrix.py's results.jsonl -
-    no scenario re-parsing happens at report-build time.
+    no scenario re-parsing happens at report-build time. Each condition's
+    .rms script and every sample's .aoe2scenario are archived under
+    reports/tuning_matrix_data/ and linked above.
   </footer>
 </div>
 """
