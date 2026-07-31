@@ -222,7 +222,8 @@ def main():
                 results_fh.write(json.dumps(record) + "\n")
                 results_fh.flush()
                 print(f"  sample {sample_i}: captured+analyzed in {time.time()-t1:.1f}s "
-                      f"(verdict={analysis['fairness']['verdict']}, "
+                      f"(landmasses={analysis['placement']['n_landmasses_with_a_player']}, "
+                      f"reachable={analysis['placement']['pairwise_land_reachable_fraction']}, "
                       f"any_zero={analysis['resources']['any_player_zero_of_a_kind']})")
 
     print(f"\nDONE in {time.time()-t_start:.0f}s -> {RESULTS_PATH}")
