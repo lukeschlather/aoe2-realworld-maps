@@ -78,7 +78,7 @@ if (-not $ok) {{ exit 2 }}
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("name")
-    ap.add_argument("--region", required=True)
+    ap.add_argument("--region")
     ap.add_argument("--size", type=int, default=240)
     ap.add_argument("--players", type=int, default=8)
     ap.add_argument("--n", type=int, default=100)
@@ -94,7 +94,8 @@ def main():
     # session, and swap it into the slot ONCE - every iteration below reuses
     # this exact script, only the engine's own RNG differs per click.
     rms_dir = outdir / "script"
-    gen_cmd = ["uv", "run", "rwmaps", args.name, "--region", args.region,
+    gen_cmd = ["uv", "run", "rwmaps", args.name,
+               *(["--region", args.region] if args.region else []),
                "--size", str(args.size), "--players", str(args.players),
                "--outdir", str(rms_dir), "--no-preview", *extra]
     print(f"[seed_sweep] {' '.join(gen_cmd)}")

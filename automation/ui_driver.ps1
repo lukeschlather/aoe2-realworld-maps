@@ -222,19 +222,21 @@ function Test-MenuOpen {
 # register at all, so this polls the Seed box (via OCR) for a change rather
 # than assuming a single click worked.
 function Click-GenerateMapVerified($genX, $genY, $maxAttempts = 10, $pollMs = 150) {
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
     Move-CursorSmooth $genX $genY
     $before = Read-Seed
+    $tSeed = $sw.ElapsedMilliseconds
     for ($i = 1; $i -le $maxAttempts; $i++) {
         if ($i -gt 1) { Jitter-Cursor $genX $genY }
         Click-Repeat
         Start-Sleep -Milliseconds $pollMs
         $after = Read-Seed
         if ($after -ne $before -and $after -ne "") {
-            Write-Host "GENERATE_OK attempt=$i seed=$after"
+            Write-Host "GENERATE_OK attempt=$i seed=$after elapsed=$($sw.ElapsedMilliseconds)ms first_ocr=${tSeed}ms"
             return $true
         }
     }
-    Write-Host "GENERATE_FAILED after=$maxAttempts (seed stayed '$before')"
+    Write-Host "GENERATE_FAILED after=$maxAttempts (seed stayed '$before') elapsed=$($sw.ElapsedMilliseconds)ms"
     return $false
 }
 
@@ -245,33 +247,46 @@ function Click-GenerateMapVerified($genX, $genY, $maxAttempts = 10, $pollMs = 15
 # not fully understood, possibly a capture/OCR reliability issue under
 # rapid repeated calls). Require BOTH the menu to close AND a newer
 # .aoe2scenario file to appear before declaring success.
-function Click-SaveVerified($saveX, $saveY, $menuX, $menuY, $scenarioDir, $beforeTime, $maxAttempts = 10, $pollMs = 150) {
+function Newest-Scenario($scenarioDir) {
+    Get-ChildItem -Path $scenarioDir -Filter "*.aoe2scenario" |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+}
+
+# The file is the ground-truth signal for a real save (stronger evidence
+# than OCR's Menu-closed read - see the "menu closed but no file" case
+# below), so poll for it FIRST on every attempt instead of gating file-
+# checking behind an OCR read. OCR is only consulted after the file poll
+# budget elapses, purely to decide *why* (still open -> click again; closed
+# without a file -> the known false-close case -> reopen) - it never sits
+# on the fast path, so a normal successful save costs zero OCR calls.
+function Click-SaveVerified($saveX, $saveY, $menuX, $menuY, $scenarioDir, $beforeTime, $maxAttempts = 10, $pollMs = 150, $fileBudgetMs = 1200, $fileStepMs = 150) {
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
     Move-CursorSmooth $saveX $saveY
     for ($i = 1; $i -le $maxAttempts; $i++) {
         if ($i -gt 1) { Jitter-Cursor $saveX $saveY }
         Click-Repeat
         Start-Sleep -Milliseconds $pollMs
-        if (Test-MenuOpen) { continue }
-        # Menu closed - the actual file write can lag behind that by more
-        # than a few hundred ms, so poll rather than checking once.
-        for ($w = 1; $w -le 10; $w++) {
-            Start-Sleep -Milliseconds 200
-            $newest = Get-ChildItem -Path $scenarioDir -Filter "*.aoe2scenario" |
-                Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        $waited = 0
+        while ($waited -lt $fileBudgetMs) {
+            $newest = Newest-Scenario $scenarioDir
             if ($newest -and $newest.LastWriteTime -gt $beforeTime) {
-                Write-Host "SAVE_OK attempt=$i file=$($newest.Name) wait=$($w*200)ms"
+                Write-Host "SAVE_OK attempt=$i file=$($newest.Name) wait=$($waited)ms elapsed=$($sw.ElapsedMilliseconds)ms"
                 return $true
             }
+            Start-Sleep -Milliseconds $fileStepMs
+            $waited += $fileStepMs
         }
-        Write-Host "attempt=$i menu closed but no new file after 2s - reopening and retrying"
-        # Menu closed without a save (likely missed the button entirely and
-        # landed on empty space or grazed Cancel) - reopen it before the next
-        # attempt, since Save only works from inside the Menu overlay.
+        # No file yet - only now pay for an OCR read, to tell an in-progress
+        # click (menu still open, just keep clicking) from the known false-
+        # close case (menu closed but nothing saved - needs a reopen before
+        # Save will respond again).
+        if (Test-MenuOpen) { continue }
+        Write-Host "attempt=$i menu closed but no new file after ${fileBudgetMs}ms - reopening and retrying"
         Click-At $menuX $menuY
         Start-Sleep -Milliseconds 300
         Move-CursorSmooth $saveX $saveY
     }
-    Write-Host "SAVE_FAILED after=$maxAttempts"
+    Write-Host "SAVE_FAILED after=$maxAttempts elapsed=$($sw.ElapsedMilliseconds)ms"
     return $false
 }
 

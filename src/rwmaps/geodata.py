@@ -55,14 +55,29 @@ def ensure_layer(name: str, res: str = "10m") -> Path:
 
 @lru_cache(maxsize=8)
 def load_layer(name: str, res: str = "10m") -> BaseGeometry:
-    """Load a Natural Earth layer as a single (multi)geometry in EPSG:4326."""
+    """Load a Natural Earth layer as a single (multi)geometry in EPSG:4326".
+
+    Parsing the shapefile and unioning it into one multi-geometry is the
+    dominant cost of a single ``rwmaps`` invocation (~8s for 10m land, ~2s
+    for 10m lakes measured directly) - and every invocation pays it fresh,
+    since :func:`functools.lru_cache` only lives for one process, which is
+    fatal for anything that shells out to ``rwmaps`` repeatedly (batch
+    generation, seed sweeps). The underlying shapefiles are static, so the
+    merged geometry is cached to disk as WKB after the first computation and
+    reused directly on every later call, in this process or a new one.
+    """
+    directory = ensure_layer(name, res)
+    cache_path = directory / f"{name}.merged.wkb"
+    if cache_path.exists():
+        return shapely.from_wkb(cache_path.read_bytes())
+
     import shapefile  # pyshp
 
-    directory = ensure_layer(name, res)
     reader = shapefile.Reader(str(directory / name))
     geoms = [shape(s.__geo_interface__) for s in reader.shapes()]
     reader.close()
     merged = shapely.union_all([g for g in geoms if not g.is_empty])
+    cache_path.write_bytes(shapely.to_wkb(merged))
     return merged
 
 
