@@ -138,10 +138,35 @@ def build_parser() -> argparse.ArgumentParser:
     grid.add_argument("--resolution", default="10m", choices=["10m", "50m", "110m"])
     grid.add_argument("--no-elevation", action="store_true")
     grid.add_argument("--ai-map-type", help="override the auto-detected ai_info_map_type")
+    grid.add_argument("--clumping-factor", type=int, default=8,
+                      help="create_land clumping_factor - higher grows a more "
+                           "solid/rounder blob in-engine, lower spreads out "
+                           "raggedly (default 8, matches prior behavior)")
+    grid.add_argument("--overlap", type=float, default=1.0,
+                      help="disc-cover clearing overlap (default 1.0 = no shrink). "
+                           "Lower values shrink the clearing radius so discs overlap "
+                           "more, tightening fit at the cost of eroding small real "
+                           "features - was reverted to 1.0 project-wide for that "
+                           "reason, but may be safe again once narrow features are "
+                           "deliberately consolidated away via --min-water-width")
+    grid.add_argument("--max-radius", type=float, default=12.0,
+                      help="largest disc radius used by the greedy disc-cover "
+                           "(default 12 tiles) - smaller values hug narrow "
+                           "corridors/indentations more tightly at the cost of "
+                           "needing more discs for the same budget")
     grid.add_argument("--min-island-tiles", type=int, default=0,
                       help="drop connected land blobs smaller than this many tiles "
                            "(e.g. 16 for a 4x4-tile floor) - matches the liberty the "
                            "shipped real-world maps take with speckle islands")
+    grid.add_argument("--min-water-width", type=int, default=0,
+                      help="fill water channels narrower than this many tiles with "
+                           "land (morphological closing) - deliberately consolidates "
+                           "straits/inlets too narrow to render reliably instead of "
+                           "leaving their fate to per-generation RNG luck")
+    grid.add_argument("--min-land-width", type=int, default=0,
+                      help="erase land bridges/spits narrower than this many tiles "
+                           "(morphological opening) - guards against a stray sliver "
+                           "of land randomly cutting a wide strait in two")
 
     out = p.add_argument_group("output")
     out.add_argument("--outdir", type=Path, default=Path("out"))
@@ -177,6 +202,11 @@ def generate(args) -> dict:
         min_island_tiles=args.min_island_tiles,
     )
     mask = result.land_mask
+    if args.min_water_width or args.min_land_width:
+        mask = raster.simplify_features(
+            mask, min_water_width=args.min_water_width, min_land_width=args.min_land_width,
+        )
+        result.land_mask = mask
 
     # Scale the working radius with the map: on a 255 grid a 20-tile radius is
     # a much smaller share of the map than it is on a 168.
@@ -193,7 +223,7 @@ def generate(args) -> dict:
     ai_type = args.ai_map_type or choose_ai_map_type(mask, starts)
 
     lands = args.lands or lands_for_size(size)
-    discs = rms_land.cover_mask(mask, lands)
+    discs = rms_land.cover_mask(mask, lands, max_radius=args.max_radius, overlap=args.overlap)
     approx = rms_land.rasterize_discs(discs, size)
     fidelity = rms_land.iou(approx, mask)
 
@@ -204,6 +234,7 @@ def generate(args) -> dict:
     land_section = rms_land.build_land_generation(
         discs, size, starts,
         target_tiles=int(mask.sum()), terrain_type=opts.land,
+        clumping_factor=args.clumping_factor,
     )
     script = rms.build_rms(args.name, args.proj, size, land_section, opts, ai_type)
 

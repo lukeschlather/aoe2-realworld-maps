@@ -65,6 +65,8 @@ def main(argv: list[str] | None = None) -> int:
                 proj=proj, rotate=rotate, size=size, players=players,
                 teams=args.teams, lands=args.lands, biome="temperate",
                 resolution="10m", no_elevation=False, ai_map_type=None,
+                clumping_factor=8, min_island_tiles=0,
+                min_water_width=0, min_land_width=0, overlap=1.0, max_radius=12.0,
                 outdir=outdir, install=args.install, mod_name=args.mod_name,
                 no_preview=False, quiet=True,
             )

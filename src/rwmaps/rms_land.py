@@ -104,6 +104,7 @@ def _land_block(
     land_id: int,
     player: int | None = None,
     tiles: int | None = None,
+    clumping_factor: int = 8,
 ) -> str:
     px, py = to_land_position(d.y, d.x, size)
     if tiles is None:
@@ -120,7 +121,7 @@ def _land_block(
         f"  base_size                     {base}",
         f"  number_of_tiles               {tiles}",
         "  other_zone_avoidance_distance 0",
-        "  clumping_factor                8",
+        f"  clumping_factor                {clumping_factor}",
     ]
     if player is not None:
         lines.append(f"  assign_to_player              {player}")
@@ -148,6 +149,7 @@ def build_land_generation(
     target_tiles: int | None = None,
     terrain_type: str = "GRASS",
     base_terrain: str = "WATER",
+    clumping_factor: int = 8,
 ) -> str:
     """Render the ``<LAND_GENERATION>`` section.
 
@@ -180,7 +182,8 @@ def build_land_generation(
         for i, (y, x) in enumerate(starts, start=1):
             parts.append(
                 _land_block(Disc(y, x, 9.0), size, terrain_type, 0,
-                            player=i, tiles=PLAYER_LAND_TILES)
+                            player=i, tiles=PLAYER_LAND_TILES,
+                            clumping_factor=clumping_factor)
             )
             parts.append("")
 
@@ -191,6 +194,7 @@ def build_land_generation(
     for d, area in zip(discs, areas):
         parts.append(
             _land_block(d, size, terrain_type, land_id=COASTLINE_LAND_ID,
-                        tiles=max(1, int(round(area * scale))))
+                        tiles=max(1, int(round(area * scale))),
+                        clumping_factor=clumping_factor)
         )
     return "\n".join(parts) + "\n"

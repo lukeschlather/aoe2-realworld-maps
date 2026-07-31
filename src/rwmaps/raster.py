@@ -69,6 +69,65 @@ class RasterResult:
         return float(self.land_mask.mean())
 
 
+def _disk(radius: int) -> np.ndarray:
+    """A circular boolean structuring element of the given radius, in tiles."""
+    yy, xx = np.ogrid[-radius : radius + 1, -radius : radius + 1]
+    return (yy**2 + xx**2) <= radius**2
+
+
+def simplify_features(
+    mask: np.ndarray, min_water_width: int = 0, min_land_width: int = 0
+) -> np.ndarray:
+    """Deliberately consolidate narrow coastline features before disc-cover
+    ever sees them, instead of leaving their fate to per-generation RNG luck.
+
+    Real-world coastlines have a long tail of straits, inlets and spits far
+    narrower than the disc-cover approximation (and the engine's own organic
+    ``create_land`` growth on top of it) can reliably reproduce - a real,
+    measured example: an 8-generation sample of one Puget Sound window found
+    a 21-tile-wide Elliott Bay rendered as genuine, dockable water only 1/3
+    of the time, and sub-5-tile features (Rich Passage, Sinclair/Dyes Inlet)
+    essentially never. Rather than hope the RNG is kind, this makes the
+    decision explicit and deterministic:
+
+    - ``min_water_width`` closes (dilate-then-erode) the land mask with a
+      disk of radius ``min_water_width // 2``, filling any water channel
+      narrower than that width with land - the tunable version of "delete
+      Hood Canal" or "delete Rich Passage."
+    - ``min_land_width`` opens (erode-then-dilate) the land mask with a disk
+      of radius ``min_land_width // 2``, erasing any land bridge/spit
+      narrower than that width - guards against a one-tile land sliver
+      randomly cutting a wide strait in two (observed once crossing the
+      Strait of Juan de Fuca near Port Angeles).
+
+    Both default to 0 (no-op, preserves prior behaviour). Order matters:
+    closing runs first so a freshly-filled narrow channel can't immediately
+    be reopened by the land-bridge pass.
+    """
+    # Neither of scipy's border_value choices is correct here: border_value=0
+    # (the default) treats everything just outside the grid as water, which
+    # erodes real land at the map's edge down to nothing (verified: an
+    # 80-100%-land edge came back 0% land after closing) - but border_value=1
+    # over-corrects the other way, painting false land onto genuine open
+    # water that reaches the edge (verified: an all-water array gained land
+    # on part of its border). The actual fix is to not let the operation see
+    # a "border" at all: pad by replicating each edge's own values outward,
+    # run the operation, then crop back - real land-to-edge stays land, real
+    # water-to-edge stays water, regardless of which the true geography is.
+    def _edge_safe(op, arr: np.ndarray, structure: np.ndarray) -> np.ndarray:
+        r = structure.shape[0] // 2
+        padded = np.pad(arr, r, mode="edge")
+        result = op(padded, structure=structure, border_value=1)
+        return result[r:-r, r:-r]
+
+    out = mask
+    if min_water_width > 0:
+        out = _edge_safe(ndimage.binary_closing, out, _disk(max(1, min_water_width // 2)))
+    if min_land_width > 0:
+        out = _edge_safe(ndimage.binary_opening, out, _disk(max(1, min_land_width // 2)))
+    return out
+
+
 def drop_small_islands(mask: np.ndarray, min_tiles: int = 16) -> np.ndarray:
     """Remove connected land components smaller than ``min_tiles``.
 
