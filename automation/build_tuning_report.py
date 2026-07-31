@@ -14,6 +14,7 @@ Usage:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import subprocess
@@ -62,6 +63,22 @@ FLAG_TO_KEY = {
 }
 
 
+def cell_id(win_key: str, cond_key: str, win_geo: dict, resolved: dict) -> str:
+    """Short, deterministic fingerprint of everything that produced this
+    cell's renders - the window's own geo (lon/lat/span/rotate) plus the
+    complete resolved parameter set, not just what the condition overrode.
+
+    Shared by a cell's .rms and every one of its .aoe2scenario samples, so
+    matching IDs across files is a cheap way to confirm they belong
+    together even if moved out of their reports/tuning_matrix_data/
+    directory structure. Not a secret/security hash - just collision
+    avoidance, so 8 hex chars is plenty.
+    """
+    payload = json.dumps({"window": win_key, "geo": win_geo, "condition": cond_key,
+                           "params": resolved}, sort_keys=True)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:8]
+
+
 def resolve_params(extra_args: list[str]) -> dict:
     """The complete parameter set a condition actually runs with - defaults
     overridden by whatever this condition's extra_args specify."""
@@ -95,10 +112,16 @@ def load_records() -> dict:
     return by_cell
 
 
-def archive_cell_files(win_key: str, cond_key: str, sample_indices: list[int]) -> tuple[str | None, dict[int, str]]:
+def archive_cell_files(win_key: str, cond_key: str, sample_indices: list[int],
+                        cid: str) -> tuple[str | None, dict[int, str]]:
     """Copy this cell's .rms script and raw .aoe2scenario captures out of
     gitignored out/ into reports/tuning_matrix_data/, so the report can link
     to files that actually get checked in - not just embed a rendered PNG.
+
+    Filenames bake in window + condition + (for samples) sample index, so
+    the file is self-identifying even pulled out of its directory, plus the
+    shared ``cid`` fingerprint (see cell_id()) so files that belong to the
+    same resolved parameter set are visibly matched to each other.
 
     ``sample_indices`` are the actual recorded sample_index values (NOT
     necessarily a contiguous 0..n-1 range - a cell where sample 0 failed
@@ -119,18 +142,20 @@ def archive_cell_files(win_key: str, cond_key: str, sample_indices: list[int]) -
         # after a crash - they're byte-identical (deterministic script),
         # so the newest is as good as any.
         newest = rms_candidates[-1]
-        dest = dest_dir / "script.rms"
+        rms_filename = f"{win_key}__{cond_key}__{cid}.rms"
+        dest = dest_dir / rms_filename
         shutil.copyfile(newest, dest)
-        rms_relpath = f"tuning_matrix_data/{win_key}/{cond_key}/script.rms"
+        rms_relpath = f"tuning_matrix_data/{win_key}/{cond_key}/{rms_filename}"
 
     scenario_relpaths = {}
     raw_dir = MATRIX_OUT / win_key / cond_key / "raw"
     for i in sample_indices:
         src = raw_dir / f"sample_{i:03d}.aoe2scenario"
         if src.exists():
-            dest = dest_dir / f"sample_{i:03d}.aoe2scenario"
+            scenario_filename = f"{win_key}__{cond_key}__s{i:03d}__{cid}.aoe2scenario"
+            dest = dest_dir / scenario_filename
             shutil.copyfile(src, dest)
-            scenario_relpaths[i] = f"tuning_matrix_data/{win_key}/{cond_key}/sample_{i:03d}.aoe2scenario"
+            scenario_relpaths[i] = f"tuning_matrix_data/{win_key}/{cond_key}/{scenario_filename}"
 
     return rms_relpath, scenario_relpaths
 
@@ -156,11 +181,13 @@ def sample_card(rec: dict, scenario_relpath: str | None) -> str:
     any_zero = resources["any_player_zero_of_a_kind"]
     flag = (f"<span class='flag bad'>player {', '.join(resources['zero_kinds_by_player'])} "
             f"has zero of a kind</span>" if any_zero else "<span class='flag ok'>no zero-of-a-kind</span>")
-    scenario_link = (f'<a class="filelink" href="{scenario_relpath}">.aoe2scenario</a>'
-                      if scenario_relpath else '<span class="filelink missing-link">.aoe2scenario missing</span>')
+    if scenario_relpath:
+        filename = scenario_relpath.rsplit("/", 1)[-1]
+        scenario_link = f'<a class="filelink" href="{scenario_relpath}">{filename}</a>'
+    else:
+        scenario_link = '<span class="filelink missing-link">.aoe2scenario missing</span>'
     return f'''
     <div class="sample">
-        <img src="{rec['preview_png_b64']}" alt="real engine capture" loading="lazy">
         <div class="facts">
             <div class="fact-row">
                 <span>{rec['n_tcs']} TCs</span>
@@ -175,6 +202,7 @@ def sample_card(rec: dict, scenario_relpath: str | None) -> str:
             {resource_table(resources['per_player'])}
             <div class="fact-row">{scenario_link}</div>
         </div>
+        <img src="{rec['preview_png_b64']}" alt="real engine capture" loading="lazy">
     </div>'''
 
 
@@ -188,18 +216,24 @@ def main():
     window_sections = []
     for win_key, win_title, lon, lat, span, rot in WINDOWS:
         cond_blocks = []
+        win_geo = {"lon": lon, "lat": lat, "span": span, "rotate": rot}
         for cond_key, extra_args in conditions_for(win_key):
             records = by_cell.get((win_key, cond_key), [])
             resolved = resolve_params(extra_args)
+            cid = cell_id(win_key, cond_key, win_geo, resolved)
+            id_badge = f'<span class="cond-id" title="fingerprint of this cell\'s full window geo + resolved params">ID <code>{cid}</code></span>'
             sample_indices = [r["sample_index"] for r in records]
-            rms_relpath, scenario_relpaths = archive_cell_files(win_key, cond_key, sample_indices)
-            rms_link = (f'<a class="filelink" href="{rms_relpath}">.rms script</a>'
-                        if rms_relpath else '<span class="filelink missing-link">.rms missing</span>')
+            rms_relpath, scenario_relpaths = archive_cell_files(win_key, cond_key, sample_indices, cid)
+            if rms_relpath:
+                rms_filename = rms_relpath.rsplit("/", 1)[-1]
+                rms_link = f'<a class="filelink" href="{rms_relpath}">{rms_filename}</a>'
+            else:
+                rms_link = '<span class="filelink missing-link">.rms missing</span>'
 
             if not records:
                 cond_blocks.append(f'''
                 <div class="cond">
-                    <h3>{cond_key}</h3>
+                    <div class="cond-head"><h3>{cond_key}</h3>{id_badge}</div>
                     {params_table(resolved)}
                     <p class="missing">no captures</p>
                 </div>''')
@@ -210,7 +244,7 @@ def main():
             )
             cond_blocks.append(f'''
             <div class="cond">
-                <h3>{cond_key}</h3>
+                <div class="cond-head"><h3>{cond_key}</h3>{id_badge}</div>
                 {params_table(resolved)}
                 <p class="cond-sub">{rms_link}</p>
                 <div class="samples">{samples_html}</div>
@@ -306,20 +340,28 @@ table.params td:nth-child(even) {{ font-weight: 600; }}
 }}
 .conditions {{ display: flex; flex-direction: column; gap: 1rem; }}
 .cond {{ background: var(--bg-elevated); border: 1px solid var(--rule); border-radius: 10px; padding: 1rem; overflow-x: auto; }}
+.cond-head {{ display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 0.4rem; }}
 .cond h3 {{
   font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
-  font-size: 0.95rem; margin: 0 0 0.4rem; color: var(--accent);
+  font-size: 0.95rem; margin: 0; color: var(--accent);
 }}
+.cond-id {{
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-size: 0.78rem; color: var(--ink-dim); background: var(--card-bg);
+  border: 1px solid var(--rule); border-radius: 999px; padding: 0.15rem 0.7rem;
+}}
+.cond-id code {{ color: var(--ink); font-weight: 600; }}
 .cond-sub {{
   font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
   font-size: 0.72rem; color: var(--ink-dim); margin: 0.4rem 0 0.7rem;
 }}
 .samples {{ display: flex; gap: 1rem; flex-wrap: wrap; }}
-.sample {{ display: flex; gap: 0.7rem; background: var(--card-bg); border-radius: 8px; padding: 0.6rem; }}
-.sample img {{ width: 200px; height: 200px; border-radius: 5px; flex: none; object-fit: cover; }}
-.facts {{ font-size: 0.78rem; min-width: 210px; }}
-.fact-row {{ display: flex; gap: 0.7rem; margin-bottom: 0.3rem; color: var(--ink-dim);
+.sample {{ display: flex; flex-direction: column; gap: 0.5rem; background: var(--card-bg); border-radius: 8px; padding: 0.6rem; width: 400px; }}
+.sample img {{ width: 400px; height: 400px; border-radius: 5px; flex: none; object-fit: cover; }}
+.facts {{ font-size: 0.78rem; }}
+.fact-row {{ display: flex; flex-wrap: wrap; gap: 0.4rem 0.7rem; margin-bottom: 0.3rem; color: var(--ink-dim);
   font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace; font-variant-numeric: tabular-nums; }}
+.fact-row .filelink {{ overflow-wrap: anywhere; }}
 .flag {{ display: inline-block; font-size: 0.72rem; padding: 0.1rem 0.5rem; border-radius: 999px; margin-bottom: 0.4rem; }}
 .flag.ok {{ background: var(--good-bg); color: var(--good); }}
 .flag.bad {{ background: var(--bad-bg); color: var(--bad); }}
