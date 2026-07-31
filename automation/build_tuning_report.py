@@ -8,12 +8,20 @@ to archive the underlying .rms/.aoe2scenario into a git-tracked location -
 it should run in a couple seconds regardless of how many samples are in
 the file.
 
+Every run of tuning_matrix.py is scoped under a --run-id; pass the same
+--run-id here to build that run's own report + archived-data directory,
+distinct from every other run's. Omitting --run-id builds the original,
+pre-run-id report (reports/tuning_matrix_report.html) for backward
+compatibility with the first matrix this repo ever ran.
+
 Usage:
     uv run python automation/build_tuning_report.py
+    uv run python automation/build_tuning_report.py --run-id my_sweep --resolution-defaults 50m,110m
 """
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import shutil
@@ -32,6 +40,8 @@ from tuning_matrix import WINDOWS, conditions_for  # noqa: E402
 MATRIX_OUT = REPO / "out" / "tuning_matrix"
 RESULTS_PATH = MATRIX_OUT / "results.jsonl"
 DATA_DIR = REPO / "reports" / "tuning_matrix_data"
+REPORT_PATH = REPO / "reports" / "tuning_matrix_report.html"
+REPORT_TITLE = "Puget Sound: parameter tuning matrix"
 
 RESOURCE_KINDS = ["gold", "stone", "forage", "sheep", "deer", "boar"]
 
@@ -211,44 +221,79 @@ def params_table(resolved: dict) -> str:
     return f"<table class='params'><tr>{cells}</tr></table>"
 
 
+def parse_args():
+    p = argparse.ArgumentParser()
+    p.add_argument("--run-id", default=None,
+                    help="build this run's own report/data dir instead of the "
+                         "original default-named ones (out/tuning_matrix/<run-id>/, "
+                         "reports/tuning_matrix_report_<run-id>.html, "
+                         "reports/tuning_matrix_data_<run-id>/)")
+    p.add_argument("--resolution-defaults", default="10m",
+                    help="comma-separated resolution_default values to build "
+                         "sections for, e.g. 50m,110m - passed straight through "
+                         "to conditions_for()")
+    return p.parse_args()
+
+
 def main():
+    global MATRIX_OUT, RESULTS_PATH, DATA_DIR, REPORT_PATH, REPORT_TITLE
+    args = parse_args()
+    resolution_defaults = [r.strip() for r in args.resolution_defaults.split(",") if r.strip()]
+    if args.run_id:
+        MATRIX_OUT = REPO / "out" / "tuning_matrix" / args.run_id
+        RESULTS_PATH = MATRIX_OUT / "results.jsonl"
+        DATA_DIR = REPO / "reports" / f"tuning_matrix_data_{args.run_id}"
+        REPORT_PATH = REPO / "reports" / f"tuning_matrix_report_{args.run_id}.html"
+        REPORT_TITLE = f"Puget Sound: parameter tuning matrix - run {args.run_id}"
+
     by_cell = load_records()
     window_sections = []
     for win_key, win_title, lon, lat, span, rot in WINDOWS:
-        cond_blocks = []
         win_geo = {"lon": lon, "lat": lat, "span": span, "rotate": rot}
-        for cond_key, extra_args in conditions_for(win_key):
-            records = by_cell.get((win_key, cond_key), [])
-            resolved = resolve_params(extra_args)
-            cid = cell_id(win_key, cond_key, win_geo, resolved)
-            id_badge = f'<span class="cond-id" title="fingerprint of this cell\'s full window geo + resolved params">ID <code>{cid}</code></span>'
-            sample_indices = [r["sample_index"] for r in records]
-            rms_relpath, scenario_relpaths = archive_cell_files(win_key, cond_key, sample_indices, cid)
-            if rms_relpath:
-                rms_filename = rms_relpath.rsplit("/", 1)[-1]
-                rms_link = f'<a class="filelink" href="{rms_relpath}">{rms_filename}</a>'
-            else:
-                rms_link = '<span class="filelink missing-link">.rms missing</span>'
+        sweep_blocks = []
+        for resolution_default in resolution_defaults:
+            cond_blocks = []
+            for cond_key, extra_args in conditions_for(win_key, resolution_default):
+                records = by_cell.get((win_key, cond_key), [])
+                resolved = resolve_params(extra_args)
+                cid = cell_id(win_key, cond_key, win_geo, resolved)
+                id_badge = f'<span class="cond-id" title="fingerprint of this cell\'s full window geo + resolved params">ID <code>{cid}</code></span>'
+                sample_indices = [r["sample_index"] for r in records]
+                rms_relpath, scenario_relpaths = archive_cell_files(win_key, cond_key, sample_indices, cid)
+                if rms_relpath:
+                    rms_filename = rms_relpath.rsplit("/", 1)[-1]
+                    rms_link = f'<a class="filelink" href="{rms_relpath}">{rms_filename}</a>'
+                else:
+                    rms_link = '<span class="filelink missing-link">.rms missing</span>'
 
-            if not records:
+                if not records:
+                    cond_blocks.append(f'''
+                    <div class="cond">
+                        <div class="cond-head"><h3>{cond_key}</h3>{id_badge}</div>
+                        {params_table(resolved)}
+                        <p class="missing">no captures</p>
+                    </div>''')
+                    continue
+                samples_html = "\n".join(
+                    sample_card(r, scenario_relpaths.get(r["sample_index"]))
+                    for r in records
+                )
                 cond_blocks.append(f'''
                 <div class="cond">
                     <div class="cond-head"><h3>{cond_key}</h3>{id_badge}</div>
                     {params_table(resolved)}
-                    <p class="missing">no captures</p>
+                    <p class="cond-sub">{rms_link}</p>
+                    <div class="samples">{samples_html}</div>
                 </div>''')
-                continue
-            samples_html = "\n".join(
-                sample_card(r, scenario_relpaths.get(r["sample_index"]))
-                for r in records
-            )
-            cond_blocks.append(f'''
-            <div class="cond">
-                <div class="cond-head"><h3>{cond_key}</h3>{id_badge}</div>
-                {params_table(resolved)}
-                <p class="cond-sub">{rms_link}</p>
-                <div class="samples">{samples_html}</div>
-            </div>''')
+
+            if len(resolution_defaults) > 1:
+                sweep_blocks.append(f'''
+                <div class="sweep">
+                    <h4 class="sweep-head">resolution default: {resolution_default}</h4>
+                    <div class="conditions">{"".join(cond_blocks)}</div>
+                </div>''')
+            else:
+                sweep_blocks.append(f'<div class="conditions">{"".join(cond_blocks)}</div>')
 
         window_sections.append(f'''
         <section class="window">
@@ -256,26 +301,24 @@ def main():
                 <h2>{win_title}</h2>
                 <p class="window-sub">{lon}, {lat} &middot; {span} km span &middot; rotate {rot}</p>
             </div>
-            <div class="conditions">
-                {"".join(cond_blocks)}
-            </div>
+            {"".join(sweep_blocks)}
         </section>''')
 
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     html = HTML_TEMPLATE.format(
+        title=REPORT_TITLE,
         sections="\n".join(window_sections),
         generated_at=generated_at,
         commit=git_commit(),
         param_defaults_row="".join(f"<td>{k}</td><td>{v}</td>" for k, v in PARAM_DEFAULTS.items()),
     )
-    out = REPO / "reports" / "tuning_matrix_report.html"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(html, encoding="utf-8")
-    print(f"wrote {out} ({out.stat().st_size / 1024:.0f} KB)")
+    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    REPORT_PATH.write_text(html, encoding="utf-8")
+    print(f"wrote {REPORT_PATH} ({REPORT_PATH.stat().st_size / 1024:.0f} KB)")
     print(f"archived data under {DATA_DIR}")
 
 
-HTML_TEMPLATE = """<title>Puget Sound: parameter tuning matrix (real engine)</title>
+HTML_TEMPLATE = """<title>{title} (real engine)</title>
 <style>
 :root {{
   --bg: #eef2f0; --bg-elevated: #ffffff; --ink: #16211d; --ink-dim: #4d635c;
@@ -339,6 +382,12 @@ table.params td:nth-child(even) {{ font-weight: 600; }}
   font-size: 0.8rem; color: var(--ink-dim); margin: 0;
 }}
 .conditions {{ display: flex; flex-direction: column; gap: 1rem; }}
+.sweep {{ margin-bottom: 1.6rem; }}
+.sweep-head {{
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-size: 0.85rem; color: var(--accent); margin: 0 0 0.6rem;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}}
 .cond {{ background: var(--bg-elevated); border: 1px solid var(--rule); border-radius: 10px; padding: 1rem; overflow-x: auto; }}
 .cond-head {{ display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 0.4rem; }}
 .cond h3 {{
@@ -378,7 +427,7 @@ table.res td.low {{ color: var(--accent); }}
 footer {{ color: var(--ink-dim); font-size: 0.8rem; margin-top: 3rem; line-height: 1.6; }}
 </style>
 <div class="wrap">
-  <h1>Puget Sound: parameter tuning matrix</h1>
+  <h1>{title}</h1>
   <p class="meta">Generated {generated_at} &middot; repo commit <code>{commit}</code></p>
   <p class="lede">
     Every image is a real AoE2 DE engine capture; every fact next to it

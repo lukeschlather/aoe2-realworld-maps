@@ -6,12 +6,20 @@ as it goes. The report builder then only reads that file; it never touches
 AoE2ScenarioParser itself, so building the report is fast regardless of how
 many samples this collects.
 
+Every run is scoped under a required --run-id so separate sweeps (e.g. one
+run exploring resolution, another re-running the full parameter matrix with
+a different default) never share output directories or a results.jsonl -
+each gets its own out/tuning_matrix/<run-id>/ tree, and build_tuning_report.py
+turns a given run-id into its own report file + archived-data directory.
+
 Usage:
-    uv run python automation/tuning_matrix.py
+    uv run python automation/tuning_matrix.py --run-id my_sweep
+    uv run python automation/tuning_matrix.py --run-id my_sweep --resolution-default 50m
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import shutil
@@ -42,8 +50,6 @@ CANCEL_BTN = (960, 737)
 SIZE = 240
 PLAYERS = 8
 N_SAMPLES = 2
-OUTROOT = REPO / "out" / "tuning_matrix"
-RESULTS_PATH = OUTROOT / "results.jsonl"
 
 #: (window_key, title, lon, lat, span_km, rotate) - all 5 candidates stay in
 #: scope; the point of varying more parameters is to find whether the
@@ -74,7 +80,20 @@ CONSOLIDATE_WIDTH = {
 LANDS_DEFAULT, LANDS_LOW, LANDS_HIGH = 700, 350, 1200
 
 
-def conditions_for(window_name: str) -> list[tuple[str, list[str]]]:
+def conditions_for(window_name: str, resolution_default: str = "10m") -> list[tuple[str, list[str]]]:
+    """The one-parameter-at-a-time matrix for a window.
+
+    ``resolution_default`` picks which Natural Earth coastline resolution
+    every condition in this call assumes as its baseline. At the original
+    "10m" default, this returns the exact original 16 conditions (including
+    the resolution_50m/resolution_110m comparison conditions), unchanged -
+    old runs and the original report stay reproducible. For any other
+    value, those two now-redundant comparison conditions are dropped (you
+    can't usefully compare "resolution 50m" against itself), every
+    remaining condition gets ``--resolution <value>`` prepended, and every
+    condition key gets an ``_r<value>`` suffix so a run sweeping multiple
+    resolution defaults can share one results.jsonl without key collisions.
+    """
     ww, lw = CONSOLIDATE_WIDTH[window_name]["default"]
     ww_light, lw_light = CONSOLIDATE_WIDTH[window_name]["light"]
     ww_heavy, lw_heavy = CONSOLIDATE_WIDTH[window_name]["heavy"]
@@ -90,7 +109,7 @@ def conditions_for(window_name: str) -> list[tuple[str, list[str]]]:
     def from_good_baseline(extra: list[str]) -> list[str]:
         return consolidate((ww, lw), ["--overlap", "0.85"] + extra)
 
-    return [
+    base = [
         ("baseline", []),
         ("consolidate_default_overlap1.0", consolidate((ww, lw))),
         ("consolidate_light_overlap1.0", consolidate((ww_light, lw_light))),
@@ -103,11 +122,19 @@ def conditions_for(window_name: str) -> list[tuple[str, list[str]]]:
         ("max_radius_18", from_good_baseline(["--max-radius", "18"])),
         ("lands_low", from_good_baseline(["--lands", str(LANDS_LOW)])),
         ("lands_high", from_good_baseline(["--lands", str(LANDS_HIGH)])),
-        ("resolution_50m", from_good_baseline(["--resolution", "50m"])),
-        ("resolution_110m", from_good_baseline(["--resolution", "110m"])),
         ("min_island_16", from_good_baseline(["--min-island-tiles", "16"])),
         ("min_island_64", from_good_baseline(["--min-island-tiles", "64"])),
     ]
+
+    if resolution_default == "10m":
+        return base[:12] + [
+            ("resolution_50m", from_good_baseline(["--resolution", "50m"])),
+            ("resolution_110m", from_good_baseline(["--resolution", "110m"])),
+        ] + base[12:]
+
+    suffix = f"_r{resolution_default}"
+    res_prefix = ["--resolution", resolution_default]
+    return [(key + suffix, res_prefix + args) for key, args in base]
 
 
 def newest_scenario():
@@ -137,35 +164,53 @@ if (-not $ok) {{ exit 2 }}
         raise RuntimeError(f"click sequence failed rc={result.returncode}: {result.stderr}")
 
 
-def already_done(window_key: str, cond_key: str) -> int:
-    if not RESULTS_PATH.exists():
+def already_done(results_path: Path, window_key: str, cond_key: str) -> int:
+    if not results_path.exists():
         return 0
     n = 0
-    for line in RESULTS_PATH.open(encoding="utf-8"):
+    for line in results_path.open(encoding="utf-8"):
         rec = json.loads(line)
         if rec["window"] == window_key and rec["condition"] == cond_key:
             n += 1
     return n
 
 
+def parse_args():
+    p = argparse.ArgumentParser()
+    p.add_argument("--run-id", required=True,
+                    help="scopes output under out/tuning_matrix/<run-id>/ - "
+                         "reuse the same run-id across invocations (e.g. one "
+                         "per --resolution-default) to share one results.jsonl")
+    p.add_argument("--resolution-default", default="10m", choices=["10m", "50m", "110m"],
+                    help="baked into every condition's args as --resolution "
+                         "(except at 10m, rwmaps' own default, where this is a no-op "
+                         "and the original resolution_50m/110m comparison conditions "
+                         "are kept instead)")
+    p.add_argument("--n-samples", type=int, default=N_SAMPLES)
+    return p.parse_args()
+
+
 def main():
-    OUTROOT.mkdir(parents=True, exist_ok=True)
+    args = parse_args()
+    outroot = REPO / "out" / "tuning_matrix" / args.run_id
+    results_path = outroot / "results.jsonl"
+    outroot.mkdir(parents=True, exist_ok=True)
     t_start = time.time()
     cells = [(wk, wt, lon, lat, span, rot, ck, extra)
              for wk, wt, lon, lat, span, rot in WINDOWS
-             for ck, extra in conditions_for(wk)]
+             for ck, extra in conditions_for(wk, args.resolution_default)]
     total = len(cells)
 
-    with RESULTS_PATH.open("a", encoding="utf-8") as results_fh:
+    with results_path.open("a", encoding="utf-8") as results_fh:
         for i, (win_key, win_title, lon, lat, span, rot, cond_key, extra_args) in enumerate(cells, 1):
-            done = already_done(win_key, cond_key)
-            if done >= N_SAMPLES:
-                print(f"[{i}/{total}] {win_key}/{cond_key}: already have {done}/{N_SAMPLES}, skipping")
+            done = already_done(results_path, win_key, cond_key)
+            if done >= args.n_samples:
+                print(f"[{i}/{total}] {win_key}/{cond_key}: already have {done}/{args.n_samples}, skipping")
                 continue
 
             print(f"\n[{i}/{total}] {win_key}/{cond_key}  (elapsed {time.time()-t_start:.0f}s)")
-            cell_dir = OUTROOT / win_key / cond_key
-            rms_dir = OUTROOT / "scripts" / win_key / cond_key
+            cell_dir = outroot / win_key / cond_key
+            rms_dir = outroot / "scripts" / win_key / cond_key
             gen_cmd = ["uv", "run", "rwmaps", f"{win_key}_{cond_key}",
                        f"--center={lon},{lat}", "--span-km", str(span), "--rotate", str(rot),
                        "--size", str(SIZE), "--players", str(PLAYERS),
@@ -183,7 +228,7 @@ def main():
                 continue
             shutil.copyfile(rms_files[0], SLOT_PATH)
 
-            for sample_i in range(done, N_SAMPLES):
+            for sample_i in range(done, args.n_samples):
                 t1 = time.time()
                 before = newest_scenario()
                 before_mtime = before.stat().st_mtime if before else 0
@@ -226,7 +271,7 @@ def main():
                       f"reachable={analysis['placement']['pairwise_land_reachable_fraction']}, "
                       f"any_zero={analysis['resources']['any_player_zero_of_a_kind']})")
 
-    print(f"\nDONE in {time.time()-t_start:.0f}s -> {RESULTS_PATH}")
+    print(f"\nDONE in {time.time()-t_start:.0f}s -> {results_path}")
 
 
 if __name__ == "__main__":
