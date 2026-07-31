@@ -9,6 +9,8 @@ the real coastline the engine grew, not an approximation of it.
 
 from __future__ import annotations
 
+import contextlib
+import io
 from pathlib import Path
 
 import numpy as np
@@ -18,13 +20,30 @@ from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 from . import terrain as T
 
 
+def _load_scenario(path: str | Path) -> AoE2DEScenario:
+    """Load a ``.scx``/``.aoe2scenario``, discarding the library's own
+    progress printing.
+
+    ``AoE2DEScenario.from_file`` prints its progress unconditionally (no
+    verbose/quiet flag), including emoji status glyphs - Windows' default
+    console encoding (cp1252) can't represent those and raises
+    ``UnicodeEncodeError`` partway through, which silently kills a script
+    that isn't running in an interactive terminal (e.g. under a redirected/
+    backgrounded stdout), well before the crash is visible anywhere useful.
+    None of this output is ours to show, so redirect it away entirely
+    rather than rely on the caller happening to filter/tolerate it.
+    """
+    with contextlib.redirect_stdout(io.StringIO()):
+        return AoE2DEScenario.from_file(str(path))
+
+
 def read_terrain_grid(path: str | Path) -> np.ndarray:
     """Load a ``.scx`` and return its terrain-id grid as ``[y][x]`` uint8.
 
     Row 0 is the north edge and column 0 the west edge, matching the
     convention used everywhere else in this project.
     """
-    scenario = AoE2DEScenario.from_file(str(path))
+    scenario = _load_scenario(path)
     mm = scenario.map_manager
     grid = np.zeros((mm.map_height, mm.map_width), dtype=np.uint8)
     for tile in mm.terrain:
