@@ -1,9 +1,9 @@
 # Mod status
 
 Read this first when resuming the "Real World Maps" mod-building work.
-Written 2026-08-01 specifically because the conversation building it was
-reset for context - this captures exactly where things stand and what's
-not yet decided, so a fresh session doesn't have to re-derive it.
+Originally written 2026-08-01 after a context reset; updated same-day
+after the N=10-per-region real-engine capture pass actually ran, so this
+now reflects real fairness data, not just a plan.
 
 For the parameter-tuning research history that led here (window search,
 known-good defaults, aesthetic-recognizability metrics), see
@@ -17,26 +17,37 @@ main artifact**, and reports from here on should focus on explaining the
 process behind each map, not just raw stats.
 
 **Done, committed:**
-- `mod/Real World Maps/` - 10 playable `.rms` scripts (just scripts, no
-  fixed scenario - cheap to generate and install, all playable)
+- `mod/Real World Maps/` - 10 playable `.rms` scripts, filenames prefixed
+  `RW ` so they sort together in the in-game "Random Map location" list
+  among 100+ subscribed-mod entries. Four are additionally tagged
+  `(Broken)` - see "N=10 capture pass results" below.
 - `mod/Real World Maps (Debug)/` - the same 10, plus an
   `AA_rw_placeholder_tester.rms` slot so this project's existing tuning
   automation can keep swapping candidate scripts in without hitting the
   Scenario Editor's crash-on-new-list-entry bug
 - `automation/build_mod.py` - regenerates all 10 from source (cheap,
   Python-only, no engine time) - **the source of truth for region
-  definitions**, see `MOD_REGIONS` in that file
+  definitions**, see `MOD_REGIONS` in that file. Does a full
+  `shutil.rmtree` of both mod roots before regenerating, so renames (like
+  the `RW `/`(Broken)` prefixing) never leave stale old filenames behind.
+- `automation/mod_capture.py` + `automation/build_mod_report.py` - the
+  N=10-per-region real-engine capture pass and its report builder, see
+  below.
 - `.gitattributes` now forces `*.rms text eol=lf` - a real bug caught
   before commit: without it, a fresh checkout under Windows'
   `core.autocrlf=true` would silently corrupt every shipped script to CRLF
+- Installed to the local AoE2 DE mods folder (`mods/local/`) under the
+  Steam-id profile folder - re-sync manually after any `build_mod.py`
+  rerun (delete + copy both mod roots; there's no install script for this
+  yet, it's been done by hand each time so far).
 
 **The 10 regions:**
 
 | region | source | verified against real captures? |
 |---|---|---|
 | Salish Sea | `victoria_recenter` window (renamed), consolidate width overridden to 5/3 (cell `0a8509cf`, called good on sight) | **yes** - extensively, see `TUNING_STATUS.md` |
-| Italy | `--region italy`, same window as the old `20260730-161348_italy_240_report.html` | no - new defaults untested on this window |
-| Britain, Greece, Japan, Chesapeake Bay, Black Sea, Scandinavia, Caribbean, New Zealand | `--region <x>`, bare rwmaps defaults, no overrides | no - first cut picked for geographic variety, unverified |
+| Italy | `--region italy`, same window as the old `20260730-161348_italy_240_report.html` | yes, N=10 - see findings below |
+| Britain, Greece, Japan, Chesapeake Bay, Black Sea, Scandinavia, Caribbean, New Zealand | `--region <x>`, bare rwmaps defaults, no overrides | yes, N=10 - see findings below |
 
 Japan additionally passes `--rotate 35` (inherited from a pre-existing
 `batch_240.py` precedent - a geometric/orientation choice, not a
@@ -61,76 +72,76 @@ hasn't been sanity-checked against an actual capture yet. That
 sanity-check is part of "making sure the AI is set up properly," the
 still-open task below.
 
-## What's NOT built yet - the next phase
+## N=10 capture pass results (2026-08-01, run-id `full_pass`)
 
-The user's plan (stated 2026-08-01): for each of the 10 regions, run
-**10 real-engine generations** to finally get fairness metrics with
-enough N to mean something. (Recall
-[[feedback-verification-and-automation]] / the equivalent note in
-`TUNING_STATUS.md`: N=1-2 was deliberately fine for the earlier
-breadth-over-parameters research, but is NOT enough for any fairness
-claim - this phase is specifically about getting real N so fairness
-numbers are trustworthy for once.) After that: tune for fairness, verify
-AI setup - not scoped in detail yet, depends on what the N=10 data shows.
+`automation/mod_capture.py --run-id full_pass` ran all 10 regions x 10
+samples (99/100 - Scandinavia sample 5 hit the documented intermittent
+"Generate Map never registered a seed change" failure, retries exhausted,
+not investigated further since 9/10 is still plenty of N).
+`automation/build_mod_report.py --run-id full_pass` built the report -
+see the newest `reports/*_mod_report_full_pass.html` (filenames are
+timestamp-prefixed now, see below).
 
-**Nothing has been built for this phase yet.** Specifically missing:
+**Zero-of-a-kind rate per region** (fraction of 10 samples with at least
+one player missing a resource kind entirely):
+- Chesapeake Bay, Black Sea, Salish Sea: 0/10 - clean.
+- Greece, Scandinavia: 1/10 (Scandinavia 1/9) - essentially noise-floor.
+- Italy: 4/10 - **root-caused, see below, not a generation defect.**
+- Britain: 8/10, Japan/Caribbean/New Zealand: 10/10 - tagged
+  `RW (Broken) <name>.rms` in the shipped mod pending an actual fix.
 
-1. **A capture-driver script.** `automation/tuning_matrix.py` is shaped
-   for a window x condition cross product across the 5 Puget-Sound-area
-   research windows - it does not fit "10 independent named regions, one
-   condition each, 10 samples each." Needs a new script (suggested name:
-   `automation/mod_capture.py`) that:
-   - Imports `MOD_REGIONS` directly from `build_mod.py` rather than
-     redefining the list - keeps captured/tested settings identical to
-     what's actually shipped, no drift.
-   - Reuses the existing regen -> copy-to-`SLOT_PATH` -> `click_sequence`
-     -> `sample_analysis.analyze_capture()` -> append-to-`results.jsonl`
-     pattern already proven out in `tuning_matrix.py`.
-   - N=10 per region (not 1-2) - the one place in this project so far
-     where a real N for statistics actually matters.
-   - Should be `--run-id`-scoped like `tuning_matrix.py`, e.g.
-     `out/mod_capture/<run-id>/results.jsonl`.
+**Root cause found for Italy (and likely the four "Broken" ones too):**
+`choose_starts()` in `src/rwmaps/analysis.py` is *structurally* able to
+spread players across separate landmasses (`same_component=False` keeps
+every component >=`min_component_tiles` as a candidate pool - see its own
+docstring), but in practice does not. Reproduced directly on Italy's exact
+shipped window/params: 4 components >=200 tiles exist (mainland 26546
+tiles, plus ~1691/~811/~287 - almost certainly Sicily-ish, Sardinia,
+Corsica by size), and **all 8 chosen starts land on the single mainland
+component, none on the other three**. The farthest-point-pack + quality
+floor is satisfied by mainland-only candidates before it ever needs to
+reach for a smaller island, so nothing forces it to use them.
 
-2. **A report builder.** Needs a new script (suggested name:
-   `automation/build_mod_report.py`) building `reports/mod_report.html`
-   with, per region:
-   - The resolved generation settings and reasoning ("what went into this
-     map") - explicitly requested to be the report's focus, not just
-     numbers.
-   - All 10 samples shown side by side (100 images total across 10
-     regions is a lot of content - may want per-region collapsible
-     sections, not decided yet).
-   - min/median/max across the 10 samples for: TC separation,
-     landmasses-with-players, pairwise-reachable-fraction, any-zero-
-     resource rate, and probably per-resource-kind counts - **exact
-     aggregation design for the resource counts (6 kinds x 8 players x 10
-     samples is a lot of numbers) hasn't been worked out yet.**
-   - AI map type per region, explained using the real semantics above,
-     not just a bare category name.
-   - **RESOLVED 2026-08-01**: yes, also show the aesthetic-recognizability
-     metrics (`automation/aesthetic_metrics.py` - IoU vs. 10m truth,
-     boundary ratio, pockmark score, island preserved-fraction) per
-     region, min/median/max across the 10 samples, alongside the fairness
-     stats above. Use `compute_metrics()` from that module directly -
-     don't reimplement.
+This is exactly why the stock AoE2 "Italy" map spreads players across
+Italy/Corsica/Sardinia/Tunisia rather than the mainland alone, and why our
+version instead crowds all 8 onto one landmass - which is *why* two
+players (e.g. Salish-Sea-adjacent P5/P8 in Italy sample 0) end up close
+enough that their resource rings overlap and tie. Traced every Italy
+zero-of-a-kind case in the capture data: each one is a resource at the
+*exact same* walking distance from both the "zero" player and a neighbor
+- `resource_ownership()` breaks that tie by player index (lower wins),
+so the higher-numbered player shows "zero" even though the resource is
+equally reachable to them in principle. That tie-break is a real, minor,
+separate bug worth fixing eventually, but it's a symptom of the crowding,
+not the root cause - the user's own diagnosis (2026-08-01) landed on the
+crowding as "the real problem," and direct reproduction above confirms it.
 
-3. **Time estimate**: 10 regions x 10 samples = 100 captures, each
-   needing 1 regen (cheap) + 10 click-sequences. At the ~36s/sample
-   empirical average from prior sweeps (see `TUNING_STATUS.md`), that's
-   roughly **1 hour of real UI-automation engine time** - similar order
-   to the `res_default_sweep` run. Same caveats apply: this drives actual
-   mouse/keyboard, don't touch the machine while it runs, and it should be
-   launched as a detached background process (a `nohup ... & disown`
-   pattern was used for `res_default_sweep` - reuse that approach).
+**Likely explains Britain/Japan/Caribbean/New Zealand too** (all
+ISLANDS-type, all picked *because* they have real island geography) but
+this has NOT been checked per-region yet - only Italy has been traced in
+detail so far.
+
+**Not yet decided / explicitly deferred by the user (2026-08-01):** how to
+fix `choose_starts()` - e.g. reserve start slots per qualifying landmass
+proportional to size, or some other explicit spreading mechanism - and
+whether to fix the `resource_ownership()` tie-break at the same time.
+Whatever the fix, it should be prototyped and reviewed on Italy alone
+before spending another ~1hr of engine time re-running the full N=10 pass
+across all 10 regions.
 
 ## How to resume
 
 1. Read this file, then `TUNING_STATUS.md` if deeper research history is
-   needed for context. No open questions remain - both the metrics scope
-   and the report shape are decided above; go straight to building.
-2. Build `automation/mod_capture.py`, run it in the background (~1hr,
-   don't touch the machine meanwhile).
-3. Build `automation/build_mod_report.py`, generate `reports/mod_report.html`.
-4. Only after the user reviews fairness/AI results per region: the "final
-   tuning to make them a bit fairer" pass the user mentioned - not scoped
-   yet, will depend on what the report shows.
+   needed for context.
+2. Decide the `choose_starts()` island-spreading fix design (see above) -
+   this is the actual next open question, not a rebuild/rerun task.
+3. Once a fix is picked: prototype it, sanity-check Italy's start
+   placement in Python (cheap, no engine time) before committing to a
+   full engine rerun.
+4. Re-run `automation/mod_capture.py` (new `--run-id`, ~1hr, drives real
+   mouse/keyboard - don't touch the machine meanwhile) and
+   `automation/build_mod_report.py` to confirm the fix actually improves
+   the zero-of-a-kind rates, especially for the four `(Broken)`-tagged
+   regions.
+5. Remove the `(Broken)` tag (and re-sync the installed local mod) for
+   any region the rerun confirms is fixed.
