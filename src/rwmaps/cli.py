@@ -135,20 +135,29 @@ def build_parser() -> argparse.ArgumentParser:
                       help="create_land blocks approximating the coastline "
                            "(default: scaled from --size)")
     grid.add_argument("--biome", default="temperate", choices=sorted(terrain.BIOMES))
-    grid.add_argument("--resolution", default="10m", choices=["10m", "50m", "110m"])
+    # --resolution/--overlap/--min-water-width/--min-land-width defaults below
+    # are KNOWN-GOOD, not arbitrary: chosen 2026-07-31 from real-engine-verified
+    # captures a human judged aesthetically recognizable (report:
+    # reports/aesthetic_comparison_report.html; see TUNING_STATUS.md for the
+    # specific sample IDs behind this call). Don't revert these to "simpler"
+    # values without re-running that verification.
+    grid.add_argument("--resolution", default="50m", choices=["10m", "50m", "110m"])
     grid.add_argument("--no-elevation", action="store_true")
     grid.add_argument("--ai-map-type", help="override the auto-detected ai_info_map_type")
     grid.add_argument("--clumping-factor", type=int, default=8,
                       help="create_land clumping_factor - higher grows a more "
                            "solid/rounder blob in-engine, lower spreads out "
-                           "raggedly (default 8, matches prior behavior)")
-    grid.add_argument("--overlap", type=float, default=1.0,
-                      help="disc-cover clearing overlap (default 1.0 = no shrink). "
-                           "Lower values shrink the clearing radius so discs overlap "
+                           "raggedly (default 8, confirmed known-good, matches "
+                           "prior behavior)")
+    grid.add_argument("--overlap", type=float, default=0.85,
+                      help="disc-cover clearing overlap (default 0.85). Lower "
+                           "values shrink the clearing radius so discs overlap "
                            "more, tightening fit at the cost of eroding small real "
                            "features - was reverted to 1.0 project-wide for that "
-                           "reason, but may be safe again once narrow features are "
-                           "deliberately consolidated away via --min-water-width")
+                           "reason at one point, but is safe again (and confirmed "
+                           "known-good) now that --min-water-width/--min-land-width "
+                           "default on and deliberately consolidate narrow features "
+                           "away instead of leaving their fate to per-generation RNG")
     grid.add_argument("--max-radius", type=float, default=12.0,
                       help="largest disc radius used by the greedy disc-cover "
                            "(default 12 tiles) - smaller values hug narrow "
@@ -158,15 +167,17 @@ def build_parser() -> argparse.ArgumentParser:
                       help="drop connected land blobs smaller than this many tiles "
                            "(e.g. 16 for a 4x4-tile floor) - matches the liberty the "
                            "shipped real-world maps take with speckle islands")
-    grid.add_argument("--min-water-width", type=int, default=0,
+    grid.add_argument("--min-water-width", type=int, default=4,
                       help="fill water channels narrower than this many tiles with "
                            "land (morphological closing) - deliberately consolidates "
                            "straits/inlets too narrow to render reliably instead of "
-                           "leaving their fate to per-generation RNG luck")
-    grid.add_argument("--min-land-width", type=int, default=0,
+                           "leaving their fate to per-generation RNG luck "
+                           "(default 4, confirmed known-good)")
+    grid.add_argument("--min-land-width", type=int, default=3,
                       help="erase land bridges/spits narrower than this many tiles "
                            "(morphological opening) - guards against a stray sliver "
-                           "of land randomly cutting a wide strait in two")
+                           "of land randomly cutting a wide strait in two "
+                           "(default 3, confirmed known-good)")
 
     out = p.add_argument_group("output")
     out.add_argument("--outdir", type=Path, default=Path("out"))
