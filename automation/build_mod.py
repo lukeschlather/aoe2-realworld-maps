@@ -11,11 +11,17 @@ overrides consolidation width to victoria_recenter's own verified value
 (5/3, cell 0a8509cf) since that's a specific already-verified-good data
 point rather than the general-purpose default.
 
-Only Salish Sea has been validated against real engine captures so far.
-The other 9 regions are a first cut, picked for geographic variety
-(archipelago, fjords, enclosed sea, bay, island nations) - the planned
-10-generations-per-region fairness/AI pass is the next step to actually
-verify them, not this script.
+All regions have now been through the N=10-per-region real-engine capture
+pass (see MOD_STATUS.md) - Salish Sea was the original hand-verified data
+point; the rest were a first cut picked for geographic variety (archipelago,
+fjords, enclosed sea, bay, island nations), verified/fixed since.
+
+Italy ships as two variants: "Cramped Italy" (all 8 players crowded onto
+the single connected mainland/France/Balkans landmass - the original,
+unmodified behavior) and "Italy" (`--spread-islands`, spreading players
+across Sardinia/Corsica/Tunisia and the Italian peninsula itself instead of
+just the mainland's far corners - see MOD_STATUS.md for the full
+investigation). Both carry `--tight-resources` too.
 
 Usage:
     uv run python automation/build_mod.py
@@ -51,10 +57,11 @@ SHIPPED_PREFIX = "RW "
 #: gold/stone placement - see MOD_STATUS.md). All four are fixed as of
 #: 2026-08-01 via `--tight-resources` (see MOD_REGIONS below) and re-verified
 #: with a 10-sample real-engine retest each (0-1/10 any-zero, down from
-#: 8-10/10) - so this set is empty for now. Deliberately excludes Italy
-#: (4/10) - under investigation as a possible false positive in
-#: resource_ownership()'s tie-breaking, not a confirmed real fairness
-#: problem (see TUNING_STATUS.md).
+#: 8-10/10) - so this set is empty for now. Italy's own crowding problem
+#: (also root-caused 2026-08-01, see MOD_STATUS.md and the git history of
+#: choose_starts()/`--spread-islands` in src/rwmaps/analysis.py) is handled
+#: differently: two named variants ship side by side below rather than one
+#: region tagged Broken.
 BROKEN_REGIONS = set()
 
 
@@ -67,7 +74,8 @@ def shipped_filename(name: str) -> str:
 MOD_REGIONS = [
     ("Salish Sea", ["--center=-122.9,48.15", "--span-km", "260",
                      "--overlap", "0.85", "--min-water-width", "5", "--min-land-width", "3"]),
-    ("Italy", ["--region", "italy"]),
+    ("Cramped Italy", ["--region", "italy", "--tight-resources"]),
+    ("Italy", ["--region", "italy", "--spread-islands", "--tight-resources"]),
     ("Britain", ["--region", "britain", "--tight-resources"]),
     ("Greece", ["--region", "greece"]),
     ("Japan", ["--region", "japan", "--rotate", "35", "--tight-resources"]),

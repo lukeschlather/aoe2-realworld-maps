@@ -149,6 +149,15 @@ def build_parser() -> argparse.ArgumentParser:
                            "coastlines where the stock include's medium/far tiers "
                            "(18-35 tiles) can't reliably find land at all (see the "
                            "New Zealand investigation in MOD_STATUS.md)")
+    grid.add_argument("--spread-islands", action="store_true",
+                      help="force at least one start per qualifying separate "
+                           "landmass instead of letting farthest-point selection "
+                           "seat everyone on the single biggest one - for a window "
+                           "with real separate islands (e.g. Italy's mainland plus "
+                           "Sardinia/Corsica) where that crowding is the actual "
+                           "fairness problem (see MOD_STATUS.md); off by default so "
+                           "it doesn't change any already-verified region's start "
+                           "placement")
     grid.add_argument("--ai-map-type", help="override the auto-detected ai_info_map_type")
     grid.add_argument("--clumping-factor", type=int, default=8,
                       help="create_land clumping_factor - higher grows a more "
@@ -228,7 +237,7 @@ def generate(args) -> dict:
     # Scale the working radius with the map: on a 255 grid a 20-tile radius is
     # a much smaller share of the map than it is on a 168.
     radius = max(16, round(20 * size / 220))
-    starts = choose_starts(mask, args.players, radius=radius)
+    starts = choose_starts(mask, args.players, radius=radius, spread_islands=args.spread_islands)
     if len(starts) < args.players:
         print(f"[rwmaps] warning: only placed {len(starts)}/{args.players} starts",
               file=sys.stderr)

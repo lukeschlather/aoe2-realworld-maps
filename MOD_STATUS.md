@@ -139,56 +139,106 @@ fixed region have been run so far, not through the permanent
 - worth doing before calling this phase fully closed, so the mod report
 reflects the fix rather than the stale `full_pass` data.
 
-### Italy (4/10) - a different mechanism, NOT yet fixed
+### Italy (4/10) - crowding, ROOT-CAUSED AND FIXED 2026-08-01
 
 `choose_starts()` in `src/rwmaps/analysis.py` is *structurally* able to
 spread players across separate landmasses (`same_component=False` keeps
 every component >=`min_component_tiles` as a candidate pool - see its own
-docstring), but in practice does not. Reproduced directly on Italy's exact
-shipped window/params: 4 components >=200 tiles exist (mainland 26546
-tiles, plus ~1691/~811/~287 - almost certainly Sicily-ish, Sardinia,
-Corsica by size), and **all 8 chosen starts land on the single mainland
-component, none on the other three**. The farthest-point-pack + quality
-floor is satisfied by mainland-only candidates before it ever needs to
-reach for a smaller island, so nothing forces it to use them.
+docstring), but in practice does not by default. Reproduced directly on
+Italy's exact shipped window/params: 4 components >=200 tiles exist
+(mainland 26546 tiles, plus ~1691/~811/~287 - Tunisia, Sardinia, Corsica by
+size and lon/lat centroid, confirmed via `MapWindow.tile_lonlat()`), and
+**all 8 default-mode starts land on the single mainland component, none on
+the other three**. Traced every Italy zero-of-a-kind case in the capture
+data to a resource at the *exact same* walking distance from the "zero"
+player and a neighbor - `resource_ownership()` breaks that tie by player
+index (lower wins) - a real but secondary bug, a symptom of the crowding
+(too-close neighbors on the same overcrowded landmass), not the root cause.
 
-This is exactly why the stock AoE2 "Italy" map spreads players across
-Italy/Corsica/Sardinia/Tunisia rather than the mainland alone, and why our
-version instead crowds all 8 onto one landmass - which is *why* two
-players (e.g. Salish-Sea-adjacent P5/P8 in Italy sample 0) end up close
-enough that their resource rings overlap and tie. Traced every Italy
-zero-of-a-kind case in the capture data: each one is a resource at the
-*exact same* walking distance from both the "zero" player and a neighbor
-- `resource_ownership()` breaks that tie by player index (lower wins),
-so the higher-numbered player shows "zero" even though the resource is
-equally reachable to them in principle. That tie-break is a real, minor,
-separate bug worth fixing eventually, but it's a symptom of the crowding,
-not the root cause - the user's own diagnosis (2026-08-01) landed on the
-crowding as "the real problem," and direct reproduction above confirms it.
+**This is a genuinely different failure mode from the narrow-coastline
+resource starvation above**: Italy's players are NOT resource-starved by
+geometry (the mainland is huge, land-fraction-in-ring is ~1.0 everywhere)
+- the problem is purely that `choose_starts()` never uses the other 3
+landmasses it structurally could, and even among the mainland's own 8
+picks, farthest-point selection can wander into France or the Balkans (a
+window's "mainland" component is a REAL, not raster-artifact, landmass
+that includes them - Italy truly is land-connected there) instead of the
+Italian peninsula itself.
 
-This is a genuinely different failure mode from the narrow-coastline
-resource starvation above (Italy's players are NOT resource-starved by
-geometry - the mainland is huge and land-fraction-in-ring is ~1.0
-everywhere; the problem is purely that `choose_starts()` never uses the
-other 3 landmasses it could). **Not yet decided / explicitly deferred by
-the user (2026-08-01):** how to fix `choose_starts()` - e.g. reserve start
-slots per qualifying landmass proportional to size, or some other
-explicit spreading mechanism - and whether to fix the
-`resource_ownership()` tie-break at the same time. Whatever the fix, it
-should be prototyped and reviewed on Italy alone (cheap, Python-only, no
-engine time) before spending engine time re-verifying.
+**Two rejected fixes** (both left no trace in the shipped code, just
+recorded here so nobody re-tries them): forcing exactly one guaranteed
+seed per qualifying component (wrong once a component barely clears
+`min_component_tiles` but is dwarfed by its neighbors - the user's
+objection); biasing candidate quality by raw distance from the window's
+own geometric center (wrong the other way - a huge component can
+legitimately have great land far from center, e.g. in France, and there's
+no reason to avoid it just for being far from an artifact of how the
+window happens to be centered - also the user's objection, and it
+empirically failed to reach the peninsula anyway).
+
+**What actually worked**: a new `spread_islands: bool = False` parameter on
+`choose_starts()` (`src/rwmaps/analysis.py`) and CLI `--spread-islands`,
+off by default - confirmed byte-identical output on all 10 shipped regions
+with it off, see git history. Three pieces, all necessary (confirmed by
+removing each one individually and watching the result degrade):
+
+1. **Geodesic, not Euclidean, distance** for both farthest-point growth and
+   Lloyd relaxation (`_lloyd_relax`, `_farthest_point_pack_from_seed_geodesic`)
+   - a peninsula is genuinely far by walking distance even though it isn't
+   far in a straight line, the same reasoning that already makes a
+   genuinely separate island register as isolated. This alone was not
+   sufficient (see below).
+2. **One seed forced per qualifying component**, but with the *remaining*
+   seats grown ONLY within the single largest component
+   (`_forced_component_seeds_geodesic`) - geodesic growth alone can still
+   double up on the same modest island (confirmed: it kept re-seating a
+   second pick on Tunisia while Corsica sat empty, since "maximize the
+   minimum pairwise distance" has no notion of "don't reuse a landmass
+   while another sits unused").
+3. **Multi-start selection scored by (duplicate penalty, distinct
+   components used, geodesic separation)** in that priority order, not
+   separation alone (`_lloyd_relax_multistart`) - otherwise a
+   duplicate-island configuration can numerically out-score a properly
+   spread one on raw separation and win anyway.
+
+Result on Italy: 4/4 real landmasses used (mainland, Tunisia, Sardinia,
+Corsica), no duplicates, no landmass skipped, and the Italian peninsula
+itself reliably gets 1-2 of the mainland's picks (confirmed: Po Valley +
+Piedmont in the validated run) rather than zero. Confirmed via a full
+Python-only (no engine time) sweep across all 10 shipped regions with
+`--spread-islands` forced on that nothing crashes or hangs, and via a
+byte-identical-output diff with it off that no other region's placement
+changed at all.
+
+**Shipped as two variants** (both with `--tight-resources` too, since
+Corsica/Sardinia/Tunisia are themselves narrow islands and would likely
+hit the same starvation problem otherwise - not yet re-verified with a
+real engine capture, see below): `RW Cramped Italy.rms` (the original,
+all-8-on-mainland behavior - the user explicitly wants to keep and
+playtest this, "not necessarily bad, it's just different") and
+`RW Italy.rms` (`--spread-islands`, the new spread-across-islands
+behavior). `automation/build_mod.py`'s `MOD_REGIONS` has both.
+
+**Not yet done**: neither Italy variant nor the four narrow-coastline
+fixes have been through a real N=10 engine capture pass since these
+changes - only ad-hoc Python-only geometry checks (Cramped Italy did get
+one earlier N=10 engine spot-check with `--tight-resources` alone, before
+`--spread-islands` existed, at 0/10 any-zero). Worth doing before calling
+this phase fully closed.
 
 ## How to resume
 
 1. Read this file, then `TUNING_STATUS.md` if deeper research history is
    needed for context.
-2. Optionally: run a fresh full N=10 `mod_capture.py` pass (new
-   `--run-id`) to confirm the four narrow-coastline fixes hold up at full
-   N and get the mod report caught up - not urgent, ad-hoc spot-checks
-   already confirm the fix works.
-3. Decide the `choose_starts()` island-spreading fix design for Italy (see
-   above) - this is the real open question, deferred by the user
-   2026-08-01, not yet started.
-4. Once a fix is picked: prototype it, sanity-check Italy's start
-   placement in Python (cheap, no engine time) before committing to a
-   full engine rerun.
+2. Run a fresh full N=10 `mod_capture.py` pass (new `--run-id`) covering
+   all 11 shipped regions (10 + the new Cramped Italy/Italy split) to
+   confirm everything holds up at full N through the real engine, and
+   get `build_mod_report.py`'s report caught up - this is the main
+   remaining task, nothing is conceptually unresolved anymore.
+3. If the "Italy" (spread-islands) variant's mainland-internal spread
+   looks worth tightening further (two of its picks landed close together
+   - Po Valley and Piedmont, both northern Italy - in the validated run),
+   that's a nice-to-have, not a correctness bug: no landmass is skipped or
+   doubled, which was the actual bar the user set ("perfect distribution
+   is not necessarily a goal... provided it's not consistently weighted
+   away from specific areas").
