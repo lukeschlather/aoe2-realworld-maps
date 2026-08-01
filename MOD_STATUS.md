@@ -107,16 +107,12 @@ AI setup - not scoped in detail yet, depends on what the N=10 data shows.
      samples is a lot of numbers) hasn't been worked out yet.**
    - AI map type per region, explained using the real semantics above,
      not just a bare category name.
-   - **Open question, not yet decided with the user**: should the
-     aesthetic-recognizability metrics (`automation/aesthetic_metrics.py`
-     - IoU vs. 10m truth, boundary ratio, pockmark score, island
-     preserved-fraction) also appear per region, min/median/max across
-     the 10 samples? They're cheap to add (the module already exists and
-     is reusable, see `compute_metrics()`), and the report's "process"
-     framing arguably wants them, but this was not confirmed before the
-     conversation building it was reset. **Ask before building the report
-     script** - cheap to decide now, expensive to redo a 100-sample real
-     engine run because the report shape changed after the fact.
+   - **RESOLVED 2026-08-01**: yes, also show the aesthetic-recognizability
+     metrics (`automation/aesthetic_metrics.py` - IoU vs. 10m truth,
+     boundary ratio, pockmark score, island preserved-fraction) per
+     region, min/median/max across the 10 samples, alongside the fairness
+     stats above. Use `compute_metrics()` from that module directly -
+     don't reimplement.
 
 3. **Time estimate**: 10 regions x 10 samples = 100 captures, each
    needing 1 regen (cheap) + 10 click-sequences. At the ~36s/sample
@@ -130,12 +126,11 @@ AI setup - not scoped in detail yet, depends on what the N=10 data shows.
 ## How to resume
 
 1. Read this file, then `TUNING_STATUS.md` if deeper research history is
-   needed for context.
-2. Resolve the open question above (aesthetic metrics in the mod report:
-   yes/no) with the user before writing `build_mod_report.py`.
-3. Build `automation/mod_capture.py`, run it in the background (~1hr,
+   needed for context. No open questions remain - both the metrics scope
+   and the report shape are decided above; go straight to building.
+2. Build `automation/mod_capture.py`, run it in the background (~1hr,
    don't touch the machine meanwhile).
-4. Build `automation/build_mod_report.py`, generate `reports/mod_report.html`.
-5. Only after the user reviews fairness/AI results per region: the "final
+3. Build `automation/build_mod_report.py`, generate `reports/mod_report.html`.
+4. Only after the user reviews fairness/AI results per region: the "final
    tuning to make them a bit fairer" pass the user mentioned - not scoped
    yet, will depend on what the report shows.
