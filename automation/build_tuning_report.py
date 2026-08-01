@@ -35,7 +35,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tuning_matrix import WINDOWS, conditions_for  # noqa: E402
+from tuning_matrix import WINDOWS, conditions_for, PARAM_DEFAULTS, resolve_params  # noqa: E402
 
 MATRIX_OUT = REPO / "out" / "tuning_matrix"
 RESULTS_PATH = MATRIX_OUT / "results.jsonl"
@@ -44,33 +44,6 @@ REPORT_PATH = REPO / "reports" / "tuning_matrix_report.html"
 REPORT_TITLE = "Puget Sound: parameter tuning matrix"
 
 RESOURCE_KINDS = ["gold", "stone", "forage", "sheep", "deer", "boar"]
-
-#: the full set of tunable knobs this matrix varies, with their true
-#: cli.py argparse defaults - conditions only specify what differs from
-#: this, so the report needs this to show the COMPLETE resolved settings
-#: per condition, not just the diff.
-PARAM_DEFAULTS = {
-    "resolution": "10m",
-    "overlap": 1.0,
-    "max_radius": 12.0,
-    "clumping_factor": 8,
-    "lands": "auto (700 @ size 240)",
-    "min_island_tiles": 0,
-    "min_water_width": 0,
-    "min_land_width": 0,
-}
-
-#: extra_args flag -> PARAM_DEFAULTS key
-FLAG_TO_KEY = {
-    "--resolution": "resolution",
-    "--overlap": "overlap",
-    "--max-radius": "max_radius",
-    "--clumping-factor": "clumping_factor",
-    "--lands": "lands",
-    "--min-island-tiles": "min_island_tiles",
-    "--min-water-width": "min_water_width",
-    "--min-land-width": "min_land_width",
-}
 
 
 def cell_id(win_key: str, cond_key: str, win_geo: dict, resolved: dict) -> str:
@@ -87,19 +60,6 @@ def cell_id(win_key: str, cond_key: str, win_geo: dict, resolved: dict) -> str:
     payload = json.dumps({"window": win_key, "geo": win_geo, "condition": cond_key,
                            "params": resolved}, sort_keys=True)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:8]
-
-
-def resolve_params(extra_args: list[str]) -> dict:
-    """The complete parameter set a condition actually runs with - defaults
-    overridden by whatever this condition's extra_args specify."""
-    resolved = dict(PARAM_DEFAULTS)
-    it = iter(extra_args)
-    for flag in it:
-        value = next(it)
-        key = FLAG_TO_KEY.get(flag)
-        if key:
-            resolved[key] = value
-    return resolved
 
 
 def git_commit() -> str:

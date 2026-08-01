@@ -137,6 +137,60 @@ def conditions_for(window_name: str, resolution_default: str = "10m") -> list[tu
     return [(key + suffix, res_prefix + args) for key, args in base]
 
 
+#: The cli.py argparse defaults AS THEY WERE when every condition captured
+#: so far actually ran - conditions_for() only specifies what differs from
+#: this, so resolve_params() below can recover the COMPLETE resolved
+#: settings per condition (for report display), not just the diff.
+#:
+#: DELIBERATELY FROZEN, not synced to cli.py's present-day defaults: as of
+#: 2026-07-31 cli.py's real shipped defaults changed to the known-good
+#: values (resolution=50m, overlap=0.85, min_water_width=4,
+#: min_land_width=3 - see the comment above --resolution in cli.py). Every
+#: condition captured before that change which didn't explicitly pass one
+#: of these flags (e.g. "baseline_r50m", the "consolidate_*_overlap1.0_r50m"
+#: family) actually ran under THESE OLD values, and updating this dict to
+#: match the new cli.py defaults would silently mislabel that historical
+#: data if its report is ever rebuilt. A future sweep that wants its
+#: baseline condition to reflect the new recommended defaults should record
+#: its own resolved params at capture time rather than reconstructing them
+#: from a dict like this one.
+PARAM_DEFAULTS = {
+    "resolution": "10m",
+    "overlap": 1.0,
+    "max_radius": 12.0,
+    "clumping_factor": 8,
+    "lands": "auto (700 @ size 240)",
+    "min_island_tiles": 0,
+    "min_water_width": 0,
+    "min_land_width": 0,
+}
+
+#: extra_args flag -> PARAM_DEFAULTS key
+FLAG_TO_KEY = {
+    "--resolution": "resolution",
+    "--overlap": "overlap",
+    "--max-radius": "max_radius",
+    "--clumping-factor": "clumping_factor",
+    "--lands": "lands",
+    "--min-island-tiles": "min_island_tiles",
+    "--min-water-width": "min_water_width",
+    "--min-land-width": "min_land_width",
+}
+
+
+def resolve_params(extra_args: list[str]) -> dict:
+    """The complete parameter set a condition actually runs with - defaults
+    overridden by whatever this condition's extra_args specify."""
+    resolved = dict(PARAM_DEFAULTS)
+    it = iter(extra_args)
+    for flag in it:
+        value = next(it)
+        key = FLAG_TO_KEY.get(flag)
+        if key:
+            resolved[key] = value
+    return resolved
+
+
 def newest_scenario():
     files = sorted(SCENARIO_DIR.glob("*.aoe2scenario"), key=lambda p: p.stat().st_mtime)
     return files[-1] if files else None
