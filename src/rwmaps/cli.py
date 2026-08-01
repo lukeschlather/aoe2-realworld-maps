@@ -143,6 +143,12 @@ def build_parser() -> argparse.ArgumentParser:
     # values without re-running that verification.
     grid.add_argument("--resolution", default="50m", choices=["10m", "50m", "110m"])
     grid.add_argument("--no-elevation", action="store_true")
+    grid.add_argument("--tight-resources", action="store_true",
+                      help="add a supplemental close-range (8-14 tile) gold/stone "
+                           "placement on top of the stock include - for narrow "
+                           "coastlines where the stock include's medium/far tiers "
+                           "(18-35 tiles) can't reliably find land at all (see the "
+                           "New Zealand investigation in MOD_STATUS.md)")
     grid.add_argument("--ai-map-type", help="override the auto-detected ai_info_map_type")
     grid.add_argument("--clumping-factor", type=int, default=8,
                       help="create_land clumping_factor - higher grows a more "
@@ -241,6 +247,8 @@ def generate(args) -> dict:
     opts = rms.BIOME_RMS[args.biome]
     if args.no_elevation:
         opts = rms.RmsOptions(**{**opts.__dict__, "elevation": False})
+    if args.tight_resources:
+        opts = rms.RmsOptions(**{**opts.__dict__, "tight_resource_backstop": True})
 
     land_section = rms_land.build_land_generation(
         discs, size, starts,

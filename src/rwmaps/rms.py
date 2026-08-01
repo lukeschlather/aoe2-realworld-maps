@@ -168,6 +168,66 @@ create_object MARLIN1
 }}
 """
 
+#: Supplemental gold/stone/deer/boar placed close to the TC, with no
+#: ``max_distance_to_other_zones`` restriction (unlike the stock include's own
+#: gold/stone) - for regions whose coastline is too narrow for
+#: land_and_water_resources.inc's medium/far tiers (18-35 tiles from the
+#: player) to reliably find land at all. Confirmed empirically on the shipped
+#: mod's N=10 capture pass: New Zealand showed zero-stone for 67/80
+#: player-samples and zero-gold for 21/80 - see MOD_STATUS.md. A first version
+#: of this block covering only gold/stone eliminated both in a 10-sample
+#: real-engine retest (0/10, down from ~84%/26%), but left a smaller residual
+#: any-zero rate (7/10) from occasional single-instance boar/deer misses, so
+#: this also backstops those two, more lightly (they were far less broken to
+#: begin with - stock ranges top out at 22/30 tiles, not 35). This doesn't
+#: replace the stock include's own attempts (which still run, and still
+#: succeed on wide coastlines like Italy/Salish Sea) - it's a pure addition,
+#: so it should only be enabled for regions confirmed to need it
+#: (``RmsOptions.tight_resource_backstop``), not applied blanket, or wide
+#: regions would end up with more resources than the stock balance intends.
+_TIGHT_RESOURCE_BACKSTOP = """
+create_object GOLD
+{
+  number_of_objects             6
+  group_placement_radius        2
+  set_tight_grouping
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players       8
+  max_distance_to_players       14
+}
+
+create_object STONE
+{
+  number_of_objects             6
+  group_placement_radius        2
+  set_tight_grouping
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players       8
+  max_distance_to_players       14
+}
+
+create_object DEER
+{
+  number_of_objects             2
+  set_loose_grouping
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players       8
+  max_distance_to_players       16
+}
+
+create_object BOAR
+{
+  number_of_objects             1
+  set_gaia_object_only
+  set_place_for_every_player
+  min_distance_to_players       8
+  max_distance_to_players       14
+}
+"""
+
 
 @dataclass
 class RmsOptions:
@@ -183,6 +243,7 @@ class RmsOptions:
     elevation_clumps: int = 8
     elevation_tiles: int = 600
     elevation: bool = True
+    tight_resource_backstop: bool = False
 
 
 BIOME_RMS: dict[str, RmsOptions] = {
@@ -231,6 +292,8 @@ def build_rms(
             )
         )
     parts.append(_OBJECTS.format(tree=opts.tree))
+    if opts.tight_resource_backstop:
+        parts.append(_TIGHT_RESOURCE_BACKSTOP)
     return "\n".join(parts)
 
 

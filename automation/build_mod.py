@@ -44,16 +44,18 @@ PLACEHOLDER_SLOT = "AA_rw_placeholder_tester.rms"
 #: (see RENDER_PIPELINE.md).
 SHIPPED_PREFIX = "RW "
 
-#: Regions flagged by the N=10 mod_capture.py real-engine pass
+#: Originally flagged by the N=10 mod_capture.py real-engine pass
 #: (out/mod_capture/full_pass/results.jsonl, see reports/*_mod_report_*.html)
-#: as having a high "any player zero-of-a-kind" rate - Britain 8/10, Japan
-#: 10/10, Caribbean 10/10, New Zealand 10/10 (all ISLANDS-type, low pairwise
-#: land-reachability). Marked directly in the shipped filename so a player
-#: sees the caveat before loading it, rather than finding out mid-game.
-#: Deliberately excludes Italy (4/10) - under investigation as a possible
-#: false positive in resource_ownership()'s tie-breaking, not a confirmed
-#: real fairness problem (see TUNING_STATUS.md).
-BROKEN_REGIONS = {"Britain", "Japan", "Caribbean", "New Zealand"}
+#: as having a high "any player zero-of-a-kind" rate - Britain 8/10, Japan/
+#: Caribbean/New Zealand 10/10 (all ISLANDS-type, narrow coastlines starving
+#: gold/stone placement - see MOD_STATUS.md). All four are fixed as of
+#: 2026-08-01 via `--tight-resources` (see MOD_REGIONS below) and re-verified
+#: with a 10-sample real-engine retest each (0-1/10 any-zero, down from
+#: 8-10/10) - so this set is empty for now. Deliberately excludes Italy
+#: (4/10) - under investigation as a possible false positive in
+#: resource_ownership()'s tie-breaking, not a confirmed real fairness
+#: problem (see TUNING_STATUS.md).
+BROKEN_REGIONS = set()
 
 
 def shipped_filename(name: str) -> str:
@@ -66,14 +68,14 @@ MOD_REGIONS = [
     ("Salish Sea", ["--center=-122.9,48.15", "--span-km", "260",
                      "--overlap", "0.85", "--min-water-width", "5", "--min-land-width", "3"]),
     ("Italy", ["--region", "italy"]),
-    ("Britain", ["--region", "britain"]),
+    ("Britain", ["--region", "britain", "--tight-resources"]),
     ("Greece", ["--region", "greece"]),
-    ("Japan", ["--region", "japan", "--rotate", "35"]),
+    ("Japan", ["--region", "japan", "--rotate", "35", "--tight-resources"]),
     ("Chesapeake Bay", ["--region", "chesapeake"]),
     ("Black Sea", ["--region", "blacksea"]),
     ("Scandinavia", ["--region", "scandinavia"]),
-    ("Caribbean", ["--region", "caribbean"]),
-    ("New Zealand", ["--region", "newzealand"]),
+    ("Caribbean", ["--region", "caribbean", "--tight-resources"]),
+    ("New Zealand", ["--region", "newzealand", "--tight-resources"]),
 ]
 
 
