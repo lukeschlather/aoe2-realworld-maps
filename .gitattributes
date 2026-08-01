@@ -1,2 +1,8 @@
 *.aoe2scenario filter=lfs diff=lfs merge=lfs -text
 reports/*.html filter=lfs diff=lfs merge=lfs -text
+
+# The engine's RMS parser requires plain unix line endings (see the
+# comment in src/rwmaps/rms.py's write_rms()) - without this, a fresh
+# checkout on Windows (core.autocrlf=true) would silently convert these
+# to CRLF and could break every shipped map script.
+*.rms text eol=lf
