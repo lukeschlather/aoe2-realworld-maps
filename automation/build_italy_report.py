@@ -10,6 +10,7 @@ Usage:
 import base64
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -183,7 +184,10 @@ def main():
                   "</ul><p><b>Verdict:</b> by the \"unplayable = nothing reachable\" bar, this "
                   "region is playable essentially every time.</p></div>")
 
-    out = REPO / "reports" / "italy_240_report.html"
+    # Timestamp leads the filename so every report under reports/ sorts
+    # chronologically regardless of what descriptive text a future run picks.
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    out = REPO / "reports" / f"{stamp}_italy_240_report.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(parts), encoding="utf-8")
     print(f"wrote {out} ({out.stat().st_size / 1024:.0f} KB)")

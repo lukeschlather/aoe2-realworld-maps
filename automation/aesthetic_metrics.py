@@ -137,10 +137,15 @@ def pockmark_score(true_mask: np.ndarray, gen_mask: np.ndarray, block: int = 20,
     return excess / n_smooth if n_smooth else float("nan")
 
 
-def true_mask(win_key: str, resolution: str, min_island_tiles: int,
-              min_water_width: int, min_land_width: int) -> np.ndarray:
-    _, _, lon, lat, span, rot = WINDOW_BY_KEY[win_key]
-    window = MapWindow.from_center(PROJ, lon, lat, span, SIZE, rot)
+def true_mask_geo(lon: float, lat: float, span: float, rot: float, resolution: str,
+                   min_island_tiles: int, min_water_width: int, min_land_width: int,
+                   size: int = SIZE) -> np.ndarray:
+    """Same rasterization true_mask() does, but keyed directly off window
+    geometry rather than a lookup into tuning_matrix.WINDOWS - lets callers
+    outside that frozen 5-window research set (e.g. the mod's 10 named
+    regions in build_mod.py, which use --region/--center, not that dict)
+    reuse this without needing an entry there."""
+    window = MapWindow.from_center(PROJ, lon, lat, span, size, rot)
     result = raster.rasterize(window, terrain.BIOMES[BIOME], resolution=resolution,
                                min_island_tiles=min_island_tiles)
     mask = result.land_mask
@@ -148,6 +153,13 @@ def true_mask(win_key: str, resolution: str, min_island_tiles: int,
         mask = raster.simplify_features(mask, min_water_width=min_water_width,
                                          min_land_width=min_land_width)
     return mask
+
+
+def true_mask(win_key: str, resolution: str, min_island_tiles: int,
+              min_water_width: int, min_land_width: int) -> np.ndarray:
+    _, _, lon, lat, span, rot = WINDOW_BY_KEY[win_key]
+    return true_mask_geo(lon, lat, span, rot, resolution, min_island_tiles,
+                          min_water_width, min_land_width)
 
 
 _TRUE_MASK_CACHE: dict[tuple, np.ndarray] = {}
@@ -166,8 +178,25 @@ def cached_true_mask(win_key: str, resolution: str, min_island_tiles: int,
     return _TRUE_MASK_CACHE[key]
 
 
-def compute_metrics(win_key: str, real_mask: np.ndarray) -> dict:
-    """All aesthetic-recognizability metrics for one real engine capture.
+_TRUE_MASK_GEO_CACHE: dict[tuple, np.ndarray] = {}
+
+
+def cached_true_mask_geo(lon: float, lat: float, span: float, rot: float,
+                          resolution: str = "10m", min_island_tiles: int = 0,
+                          min_water_width: int = 0, min_land_width: int = 0,
+                          size: int = SIZE) -> np.ndarray:
+    key = (lon, lat, span, rot, resolution, min_island_tiles, min_water_width,
+           min_land_width, size)
+    if key not in _TRUE_MASK_GEO_CACHE:
+        _TRUE_MASK_GEO_CACHE[key] = true_mask_geo(
+            lon, lat, span, rot, resolution, min_island_tiles,
+            min_water_width, min_land_width, size)
+    return _TRUE_MASK_GEO_CACHE[key]
+
+
+def compute_metrics_from_truth(truth_10m: np.ndarray, real_mask: np.ndarray) -> dict:
+    """All aesthetic-recognizability metrics for one real engine capture,
+    given an already-resolved 10m truth mask.
 
     Deliberately always compares against the finest (10m, no consolidation/
     island-drop) reference regardless of what resolution this condition
@@ -177,8 +206,6 @@ def compute_metrics(win_key: str, real_mask: np.ndarray) -> dict:
     a low-fidelity target faithfully isn't the same as looking like the
     real place. See automation/aesthetic_metrics.py's module docstring.
     """
-    truth_10m = cached_true_mask(win_key, "10m", 0, 0, 0)
-
     i_10m = iou(real_mask, truth_10m)
     b_real = boundary_cells(real_mask)
     b_10m = boundary_cells(truth_10m)
@@ -199,6 +226,12 @@ def compute_metrics(win_key: str, real_mask: np.ndarray) -> dict:
         "islands_merged": n_merge,
         "preserved_fraction": preserved_fraction,
     }
+
+
+def compute_metrics(win_key: str, real_mask: np.ndarray) -> dict:
+    """All aesthetic-recognizability metrics for one real engine capture,
+    resolving truth from tuning_matrix's window-key registry."""
+    return compute_metrics_from_truth(cached_true_mask(win_key, "10m", 0, 0, 0), real_mask)
 
 
 def scenario_paths(win_key: str, cond_key: str, cid: str) -> list[Path]:

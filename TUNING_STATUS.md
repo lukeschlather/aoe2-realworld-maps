@@ -24,7 +24,7 @@ matrix below (see "Why fairness stats were the wrong tool" further down):
 Evidence: samples with cell IDs `4d8bbf2f`, `a3f19de6`, `f81b9399`,
 `879ad483`, `05a50859` (all called "good" on sight) plus `86b94b33` (a
 favorite, candidate for playtesting) - see
-`reports/aesthetic_comparison_report.html`. `c438f623` (a 110m sample) was
+`reports/20260731-201149_aesthetic_comparison_report.html`. `c438f623` (a 110m sample) was
 called out as bad. None of the good examples used `resolution=110m`, an
 `overlap` other than `1.0`/`0.85`, or pushed any knob to an extreme.
 
@@ -61,10 +61,10 @@ number here as decision-driving.
 Two real-engine matrices exist:
 1. **Original 16-condition matrix**, 5 windows x 16 one-parameter-at-a-time
    conditions at the `10m` (then-)default, 151/160 samples. Report:
-   `reports/tuning_matrix_report.html`.
+   `reports/20260731-014212_tuning_matrix_report.html`.
 2. **`res_default_sweep`**, 5 windows x 14 conditions x 2 resolution
    defaults (50m, 110m), 264/280 samples. Report:
-   `reports/tuning_matrix_report_res_default_sweep.html`.
+   `reports/20260731-201121_tuning_matrix_report_res_default_sweep.html`.
 
 Both reports show, per sample: the real engine render (coastline + actual
 TC placement + every resource dotted by which TC can actually reach it),
@@ -121,7 +121,7 @@ rather than fairness:
   two windows specifically.
 
 `automation/build_aesthetic_comparison_report.py` builds
-`reports/aesthetic_comparison_report.html` - **50m only** (110m already
+`reports/20260731-201149_aesthetic_comparison_report.html` - **50m only** (110m already
 established as uniformly worse for these window spans, so it's excluded
 to cut noise), grouped into direct one-axis-at-a-time comparisons (3 cards
 side by side: e.g. clumping factor 4 vs. 8 vs. 16 for the same window),
@@ -252,7 +252,7 @@ report -> aesthetic metrics -> comparison report.
 
 ## How to resume
 
-1. Read this file. Open `reports/aesthetic_comparison_report.html` for the
+1. Read this file. Open `reports/20260731-201149_aesthetic_comparison_report.html` for the
    current best view (50m only, comparisons + metrics side by side).
 2. Metrics on a new/different sample: `aesthetic_metrics.compute_metrics
    (win_key, real_mask)` where `real_mask = scx_read.read_land_mask(path)`.

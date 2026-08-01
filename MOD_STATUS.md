@@ -35,7 +35,7 @@ process behind each map, not just raw stats.
 | region | source | verified against real captures? |
 |---|---|---|
 | Salish Sea | `victoria_recenter` window (renamed), consolidate width overridden to 5/3 (cell `0a8509cf`, called good on sight) | **yes** - extensively, see `TUNING_STATUS.md` |
-| Italy | `--region italy`, same window as the old `italy_240_report.html` | no - new defaults untested on this window |
+| Italy | `--region italy`, same window as the old `20260730-161348_italy_240_report.html` | no - new defaults untested on this window |
 | Britain, Greece, Japan, Chesapeake Bay, Black Sea, Scandinavia, Caribbean, New Zealand | `--region <x>`, bare rwmaps defaults, no overrides | no - first cut picked for geographic variety, unverified |
 
 Japan additionally passes `--rotate 35` (inherited from a pre-existing

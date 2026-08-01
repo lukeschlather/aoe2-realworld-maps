@@ -14,6 +14,7 @@ from __future__ import annotations
 import base64
 import io
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -108,7 +109,10 @@ def main():
         </section>''')
 
     html = HTML_TEMPLATE.format(sections="\n".join(window_sections))
-    out = REPO / "reports" / "window_matrix_report.html"
+    # Timestamp leads the filename so every report under reports/ sorts
+    # chronologically regardless of what descriptive text a future run picks.
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    out = REPO / "reports" / f"{stamp}_window_matrix_report.html"
     out.write_text(html, encoding="utf-8")
     print(f"wrote {out} ({out.stat().st_size / 1024:.0f} KB)")
 

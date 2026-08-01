@@ -36,6 +36,31 @@ MOD_NAME = "Real World Maps"
 DEBUG_MOD_NAME = "Real World Maps (Debug)"
 PLACEHOLDER_SLOT = "AA_rw_placeholder_tester.rms"
 
+#: prefixed onto every shipped script's filename (the in-game "Random Map
+#: location" list shows the filename verbatim) so all 10 sort together
+#: instead of being scattered alphabetically among 100+ subscribed-mod
+#: entries. Doesn't touch PLACEHOLDER_SLOT, which needs to keep sorting
+#: near the very front for the tuning automation's list-crash workaround
+#: (see RENDER_PIPELINE.md).
+SHIPPED_PREFIX = "RW "
+
+#: Regions flagged by the N=10 mod_capture.py real-engine pass
+#: (out/mod_capture/full_pass/results.jsonl, see reports/*_mod_report_*.html)
+#: as having a high "any player zero-of-a-kind" rate - Britain 8/10, Japan
+#: 10/10, Caribbean 10/10, New Zealand 10/10 (all ISLANDS-type, low pairwise
+#: land-reachability). Marked directly in the shipped filename so a player
+#: sees the caveat before loading it, rather than finding out mid-game.
+#: Deliberately excludes Italy (4/10) - under investigation as a possible
+#: false positive in resource_ownership()'s tie-breaking, not a confirmed
+#: real fairness problem (see TUNING_STATUS.md).
+BROKEN_REGIONS = {"Britain", "Japan", "Caribbean", "New Zealand"}
+
+
+def shipped_filename(name: str) -> str:
+    tag = "(Broken) " if name in BROKEN_REGIONS else ""
+    return f"{SHIPPED_PREFIX}{tag}{name}.rms"
+
+
 #: (display name, extra rwmaps CLI args beyond the name itself).
 MOD_REGIONS = [
     ("Salish Sea", ["--center=-122.9,48.15", "--span-km", "260",
@@ -70,6 +95,13 @@ def main():
 
     main_root = REPO / "mod" / MOD_NAME
     debug_root = REPO / "mod" / DEBUG_MOD_NAME
+    # Full rebuild each time - mod/ is regenerated from MOD_REGIONS, not
+    # hand-edited, so stale filenames (e.g. from before SHIPPED_PREFIX was
+    # added) must not linger alongside the newly-prefixed ones.
+    if main_root.exists():
+        shutil.rmtree(main_root)
+    if debug_root.exists():
+        shutil.rmtree(debug_root)
     main_scripts = main_root / "resources" / "_common" / "random-map-scripts"
     debug_scripts = debug_root / "resources" / "_common" / "random-map-scripts"
     main_scripts.mkdir(parents=True, exist_ok=True)
@@ -98,9 +130,9 @@ def main():
             print(f"  SKIP: expected 1 .rms, found {len(rms_files)}")
             failures.append(name)
             continue
-        dest_main = main_scripts / f"{name}.rms"
+        dest_main = main_scripts / shipped_filename(name)
         shutil.copyfile(rms_files[0], dest_main)
-        shutil.copyfile(rms_files[0], debug_scripts / f"{name}.rms")
+        shutil.copyfile(rms_files[0], debug_scripts / shipped_filename(name))
         if first_rms is None:
             first_rms = rms_files[0]
         print(f"  -> {dest_main}")

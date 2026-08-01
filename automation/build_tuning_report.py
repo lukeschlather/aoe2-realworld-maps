@@ -199,12 +199,18 @@ def main():
     global MATRIX_OUT, RESULTS_PATH, DATA_DIR, REPORT_PATH, REPORT_TITLE
     args = parse_args()
     resolution_defaults = [r.strip() for r in args.resolution_defaults.split(",") if r.strip()]
+    # Timestamp leads the filename (not a suffix after a descriptive name) so
+    # every report under reports/ sorts chronologically regardless of what
+    # descriptive text a given run picks.
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     if args.run_id:
         MATRIX_OUT = REPO / "out" / "tuning_matrix" / args.run_id
         RESULTS_PATH = MATRIX_OUT / "results.jsonl"
         DATA_DIR = REPO / "reports" / f"tuning_matrix_data_{args.run_id}"
-        REPORT_PATH = REPO / "reports" / f"tuning_matrix_report_{args.run_id}.html"
+        REPORT_PATH = REPO / "reports" / f"{stamp}_tuning_matrix_report_{args.run_id}.html"
         REPORT_TITLE = f"Puget Sound: parameter tuning matrix - run {args.run_id}"
+    else:
+        REPORT_PATH = REPO / "reports" / f"{stamp}_tuning_matrix_report.html"
 
     by_cell = load_records()
     window_sections = []

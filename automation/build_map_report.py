@@ -22,6 +22,7 @@ import argparse
 import base64
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -197,7 +198,11 @@ def main():
                       f"resource kind at least once.</div>")
 
     parts.append("</body></html>")
-    out = args.out or (REPO / "reports" / f"{args.name}_report.html")
+    # Timestamp leads the default filename so every report under reports/
+    # sorts chronologically regardless of what descriptive name is picked -
+    # doesn't apply to an explicit --out, which is taken verbatim.
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    out = args.out or (REPO / "reports" / f"{stamp}_{args.name}_report.html")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(parts), encoding="utf-8")
     print(f"wrote {out} ({out.stat().st_size / 1024:.0f} KB)")

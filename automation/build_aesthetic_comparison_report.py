@@ -41,7 +41,6 @@ from aesthetic_metrics import compute_metrics  # noqa: E402
 RUN_ID = "res_default_sweep"
 RESULTS_PATH = REPO / "out" / "tuning_matrix" / RUN_ID / "results.jsonl"
 DATA_DIR = REPO / "reports" / "tuning_matrix_data_res_default_sweep"
-OUT_PATH = REPO / "reports" / "aesthetic_comparison_report.html"
 
 #: (group title, [condition keys in display order]) - all "_r50m" since this
 #: report is 110m-free. Every group but the last holds every OTHER resolved
@@ -203,8 +202,13 @@ def main():
 
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     html = HTML_TEMPLATE.format(sections="\n".join(window_sections), generated_at=generated_at)
-    OUT_PATH.write_text(html, encoding="utf-8")
-    print(f"wrote {OUT_PATH} ({OUT_PATH.stat().st_size / 1024:.0f} KB)")
+    # Timestamp leads the filename (not a suffix after a descriptive name) so
+    # every report under reports/ sorts chronologically regardless of what
+    # descriptive text a future run picks.
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    out_path = REPO / "reports" / f"{stamp}_aesthetic_comparison_report.html"
+    out_path.write_text(html, encoding="utf-8")
+    print(f"wrote {out_path} ({out_path.stat().st_size / 1024:.0f} KB)")
 
 
 HTML_TEMPLATE = """<title>Puget Sound: 50m parameter comparisons + aesthetic metrics</title>
