@@ -23,7 +23,7 @@ sys.path.insert(0, str(REPO / "src"))
 from rwmaps import real_preview, scx_read  # noqa: E402
 from rwmaps.analysis import resource_ownership  # noqa: E402
 
-KINDS = ["gold", "stone", "forage", "sheep", "deer", "boar"]
+KINDS = ["gold", "stone", "forage", "sheep", "deer", "boar", "wood"]
 
 HEAD = """<!doctype html>
 <html><head><meta charset="utf-8"><title>rwmaps resource reachability report</title>
@@ -69,8 +69,13 @@ def main():
     for f in files:
         mask = scx_read.read_land_mask(f)
         tcs = scx_read.read_town_centers(f)
+        # Trees number in the thousands per map - counted for the wood
+        # column below, but kept out of the dot-per-resource PNG (drawn from
+        # `resources` only), which would otherwise be an unreadable, slow-to-
+        # render wall of overlapping dots.
         resources = scx_read.read_resources(f)
-        per_player, unclaimed = resource_ownership(mask, tcs, resources)
+        trees = scx_read.read_trees(f)
+        per_player, unclaimed = resource_ownership(mask, tcs, resources + trees)
 
         png = f.with_suffix(".resources.png")
         real_preview.save_resource_map(

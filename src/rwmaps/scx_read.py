@@ -120,3 +120,47 @@ def read_resources(path: str | Path) -> list[tuple[str, float, float]]:
             if kind:
                 out.append((kind, unit.x, unit.y))
     return out
+
+
+def _tree_unit_ids() -> frozenset[int]:
+    """Every individually-choppable tree object id the parser knows about.
+
+    Unlike gold/stone/forage/sheep/deer/boar, wood isn't placed by the RMS
+    script as a fixed, curated set of reskin ids (see ``RESOURCE_UNITS``) -
+    it comes from whatever the engine scatters onto ``FOREST``-family terrain
+    at generation time, which draws from a long, biome-dependent tree object
+    list (oak, pine, jungle, palm, birch, ...) that ``AoE2ScenarioParser``
+    exposes under ``datasets.other.OtherInfo`` rather than ``datasets.units``.
+    Scanned by name prefix instead of hand-curated because there's no single
+    themes.inc-style table to read it from, and missing a biome-specific tree
+    id would silently undercount wood on exactly the maps that use it.
+    """
+    from AoE2ScenarioParser.datasets.other import OtherInfo
+
+    ids = set()
+    for name in dir(OtherInfo):
+        if not name.startswith("TREE_"):
+            continue
+        info = getattr(OtherInfo, name)
+        ids.add(int(info.ID))
+    return frozenset(ids)
+
+
+WOOD_UNITS: frozenset[int] = _tree_unit_ids()
+
+
+def read_trees(path: str | Path) -> list[tuple[str, float, float]]:
+    """Load a ``.scx`` and return each standing, choppable tree as ``("wood", x, y)``.
+
+    Kept separate from ``read_resources`` (rather than folded into
+    ``RESOURCE_UNITS``) since trees number in the thousands per map and come
+    from a different id space (``WOOD_UNITS``, scanned dynamically - see
+    ``_tree_unit_ids``) than the hand-curated economy-resource reskins.
+    """
+    scenario = _load_scenario(path)
+    out = []
+    for player_units in scenario.unit_manager.units:
+        for unit in player_units:
+            if unit.unit_const in WOOD_UNITS:
+                out.append(("wood", unit.x, unit.y))
+    return out
