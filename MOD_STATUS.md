@@ -219,12 +219,9 @@ playtest this, "not necessarily bad, it's just different") and
 `RW Italy.rms` (`--spread-islands`, the new spread-across-islands
 behavior). `automation/build_mod.py`'s `MOD_REGIONS` has both.
 
-**Not yet done**: neither Italy variant nor the four narrow-coastline
-fixes have been through a real N=10 engine capture pass since these
-changes - only ad-hoc Python-only geometry checks (Cramped Italy did get
-one earlier N=10 engine spot-check with `--tight-resources` alone, before
-`--spread-islands` existed, at 0/10 any-zero). Worth doing before calling
-this phase fully closed.
+**Done**: see "`full_pass_v2` N=10 re-verification" below - all six
+changed regions now have a real N=10 pass through the permanent
+`mod_capture.py`/`build_mod_report.py` pipeline (not ad-hoc spot-checks).
 
 ### Italy `spread_islands` regression, corrected 2026-08-01 (same day, later)
 
@@ -296,25 +293,65 @@ suite (`uv run pytest`, 34 tests) still passes. Mod rebuilt
 (`automation/build_mod.py`) and re-synced to the local install
 (`automation/install_mod.py --all`).
 
-**Not yet done**: still no real N=10 engine capture pass on the new
-`RW Italy.rms` (only Python-only geometry checks) - worth doing before
-trusting this in a real game, especially since annealing is randomized
-(seeded, so deterministic per-run, but worth confirming the result holds up
-against actual placement/resource generation, not just the geometry model).
+**Not yet done** (superseded, see below): a single real-engine sample
+(`out/mod_capture/spread_islands_fix_verify/`) confirmed the fix holds up
+beyond the geometry model - `min_tc_separation` 46.5 tiles, all 4
+landmasses used, no resource zero-of-a-kind - but N=1 doesn't rule out bad
+luck on a different seed. Superseded by the full N=10 pass below.
+
+### `full_pass_v2` N=10 re-verification, 2026-08-02
+
+A single sample isn't enough to trust in a real game, and the *other* five
+regions touched since the original `full_pass` (Britain/Japan/Caribbean/
+New Zealand's `--tight-resources` backstop, plus Italy's split into
+`Cramped Italy`/`Italy`) had likewise only ever been spot-checked ad-hoc,
+never run through the permanent `mod_capture.py`/`build_mod_report.py`
+pipeline the project settled on. Re-ran N=10 for exactly the six regions
+whose `MOD_REGIONS` args differ from `full_pass`'s (`--regions "Cramped
+Italy,Italy,Britain,Japan,Caribbean,New Zealand"`) - Salish Sea/Greece/
+Chesapeake Bay/Black Sea/Scandinavia are byte-identical to `full_pass` and
+weren't re-run. Report: `reports/20260802-025351_mod_report_full_pass_v2.html`,
+raw data `out/mod_capture/full_pass_v2/results.jsonl`.
+
+| region | N | any-zero rate | min TC separation | landmasses used (across samples) | IoU (min/med) |
+|---|---|---|---|---|---|
+| Cramped Italy | 9/10 (1 flaky "seed change" capture, not retried - same documented intermittent failure as `full_pass`) | 0/9 | 43.1 (constant - fixed `land_position`, only terrain shape is per-seed) | {1} | 0.89/0.90 |
+| Italy | 10/10 | 0/10 | 46.5 | {2, 3} | 0.88/0.90 |
+| Britain | 10/10 | 0/10 | 43.9 | {1, 2, 3} | 0.82/0.83 |
+| Japan | 10/10 | 0/10 | 44.3 | {2, 3, 4} | 0.71/0.74 |
+| Caribbean | 10/10 | 0/10 | 48.6 | {4, 5} | 0.76/0.77 |
+| New Zealand | 10/10 | **1/10** (sample 5: player 3 missing `deer` only - one resource kind, not gold/stone, i.e. not the failure mode `--tight-resources` targets) | 33.0 | {1, 2} | 0.69/0.71 |
+
+`min_tc_separation` is constant across all samples of a region, not a bug:
+`land_position` assigns each TC a fixed tile regardless of seed, so only
+the surrounding terrain (and therefore which landmass that fixed tile ends
+up connected to) varies sample-to-sample - which is exactly why
+"landmasses used" *does* vary within a region (e.g. Japan's fixed TC tiles
+land on anywhere from 2 to 4 distinct components depending on how the
+coastline happens to grow that seed).
+
+58/59 captured samples clean. New Zealand's one miss is a single
+non-backstopped resource kind on one player - the same magnitude and
+character as the noise floor this project already accepted for Greece
+(1/10) and Scandinavia (1/9) in the original `full_pass`, not a
+reappearance of the systemic narrow-coastline starvation
+`--tight-resources` was built to fix (that failure mode hit gold/stone on
+nearly every player, not a single deer on one). Not chasing further.
+
+This closes out the last open item from both the narrow-coastline fix and
+the Italy `spread_islands` fix: every region touched since the original
+`full_pass` now has a real N=10 engine-verified result, not just an
+ad-hoc spot-check or a Python-only geometry model.
 
 ## How to resume
 
 1. Read this file, then `TUNING_STATUS.md` if deeper research history is
    needed for context.
-2. Run a fresh full N=10 `mod_capture.py` pass (new `--run-id`) covering
-   all 11 shipped regions (10 + the new Cramped Italy/Italy split) to
-   confirm everything holds up at full N through the real engine, and
-   get `build_mod_report.py`'s report caught up - this is the main
-   remaining task, nothing is conceptually unresolved anymore.
-3. If the "Italy" (spread-islands) variant's mainland-internal spread
-   looks worth tightening further (two of its picks landed close together
-   - Po Valley and Piedmont, both northern Italy - in the validated run),
-   that's a nice-to-have, not a correctness bug: no landmass is skipped or
-   doubled, which was the actual bar the user set ("perfect distribution
-   is not necessarily a goal... provided it's not consistently weighted
-   away from specific areas").
+2. All 11 shipped regions now have a real N=10 engine-verified result
+   (5 unchanged since `full_pass`, 6 re-verified in `full_pass_v2` - see
+   above) - nothing conceptually unresolved, no re-run needed unless a
+   region's args change again.
+3. The Italy `spread_islands` fix (the annealing/coverage rewrite in
+   `src/rwmaps/analysis.py`) is a general mechanism, not Italy-specific -
+   worth keeping in mind if another region ever wants `--spread-islands`
+   (none currently ship with it besides Italy).
