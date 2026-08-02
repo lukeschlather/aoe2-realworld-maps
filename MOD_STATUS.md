@@ -226,6 +226,82 @@ one earlier N=10 engine spot-check with `--tight-resources` alone, before
 `--spread-islands` existed, at 0/10 any-zero). Worth doing before calling
 this phase fully closed.
 
+### Italy `spread_islands` regression, corrected 2026-08-01 (same day, later)
+
+The "Po Valley + Rome" result claimed above was **wrong** - the user caught
+it by eye in-game: `RW Italy.rms` still seated zero TCs anywhere in the
+peninsula, and additionally placed two TCs ~16 tiles apart near the Alps
+(well inside `min_separation`'s 56-tile floor, which should have been a
+hard signal something was broken). Re-diagnosed directly (not by re-reading
+the old writeup) via a standalone script reproducing the exact shipped
+window/params and dumping every pick's lon/lat, component, and pairwise
+geodesic distance, plus a "land tiles walking-distance >40 from every pick"
+coverage scan. Confirmed both complaints exactly: min pairwise separation
+16 tiles, and a single ~5250-tile uncovered pocket centered on the
+peninsula/Calabria - by far the largest uncovered patch on the map, bigger
+than Tunisia's entire landmass.
+
+**Two distinct root causes, both in `src/rwmaps/analysis.py`:**
+
+1. **The old scoring never actually optimized for the four things that
+   matter.** `_lloyd_relax`'s quality-weighted centroid recentring pulls
+   every cluster toward whichever sub-region has the highest raw land
+   quality (the Po valley/France/Balkans plains) regardless of where that
+   cluster's candidates actually started, so two picks can converge on
+   nearly the same spot even from far-apart initializations. And
+   `_lloyd_relax_multistart`'s duplicate penalty only counted duplicate
+   seats on a *non-largest* component - two picks 16 tiles apart on the
+   (largest) mainland scored as fine, not penalized at all.
+2. **The candidate pool never contained a peninsula tile to begin with**,
+   independent of (1) - found by inspecting the raw candidate arrays
+   directly, not by trusting the algorithm's output. Two compounding
+   filters, both computed *within* the mainland component (which genuinely
+   spans the Po valley/France/Balkans plains **and** the hillier,
+   coastal-on-both-sides Apennine peninsula, since it's one real landmass):
+   the per-component quality-percentile floor (60th percentile) landed at
+   0.96 because thousands of plains tiles tie at quality 1.0, while every
+   peninsula tile tops out at 0.89 - excluded before candidate selection
+   even ran; and, separately, the `max_candidates` per-component down-sample
+   picked its top-1500-by-quality tiles, which (once the floor didn't
+   already remove them) were *also* all tied-at-1.0 plains tiles. No amount
+   of downstream search can place a start somewhere that was never a
+   candidate.
+
+**Fix, both pieces required:**
+
+- Replaced `_lloyd_relax`/`_lloyd_relax_multistart` with `_score_starts`
+  (a real scalar loss combining coverage, a per-*pair* separation floor,
+  pairwise-separation uniformity, and mean distance-to-water) plus
+  `_anneal_starts`/`_multistart_anneal` (simulated annealing that proposes
+  candidate swaps, biased toward the currently-worst-covered tile, and
+  hillclimbs `_score_starts` directly instead of a geometric proxy for it).
+- Replaced the per-component `max_candidates` quality-only top-K with
+  `_spatial_stratified_top`, which bins each component's bounding box into
+  a grid and keeps the best candidate *per occupied cell* before topping up
+  by quality - guaranteeing a hilly, lower-quality sub-region gets
+  candidates even when a flatter part of the same component could fill the
+  entire budget on quality alone. Also forced the per-component quality
+  floor itself to 0 under `spread_islands` (the floor is what `same_component
+  =False`'s archipelago case needs; a *within-component* sub-region like a
+  peninsula needs stratification, not a floor, to survive).
+
+**Re-verified** (same standalone diagnostic script, both variants): min
+pairwise separation 16 -> 59 tiles (now above the 56-tile floor); largest
+uncovered pocket 5250 -> 1511 tiles, with no single pocket anywhere close
+to the old peninsula-sized miss; a TC now sits at lon/lat (15.29, 41.17) -
+inside the peninsula itself. `RW Cramped Italy.rms` and all other 10
+regions confirmed byte-identical (sha256) after the rebuild, since none of
+this touches anything outside the `spread_islands=True` path. Full test
+suite (`uv run pytest`, 34 tests) still passes. Mod rebuilt
+(`automation/build_mod.py`) and re-synced to the local install
+(`automation/install_mod.py --all`).
+
+**Not yet done**: still no real N=10 engine capture pass on the new
+`RW Italy.rms` (only Python-only geometry checks) - worth doing before
+trusting this in a real game, especially since annealing is randomized
+(seeded, so deterministic per-run, but worth confirming the result holds up
+against actual placement/resource generation, not just the geometry model).
+
 ## How to resume
 
 1. Read this file, then `TUNING_STATUS.md` if deeper research history is

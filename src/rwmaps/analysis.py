@@ -7,6 +7,7 @@ land mask alone, so a projection can be judged before the game ever runs.
 
 from __future__ import annotations
 
+import math
 from collections import deque
 from dataclasses import dataclass, field
 
@@ -79,6 +80,60 @@ def start_quality(mask: np.ndarray, radius: int = 20) -> np.ndarray:
     return ndimage.convolve(mask.astype(np.float64), disc, mode="constant", cval=0.0)
 
 
+def _spatial_stratified_top(ys: np.ndarray, xs: np.ndarray, q: np.ndarray, budget: int) -> np.ndarray:
+    """Downsample to at most ``budget`` candidates while preserving
+    geographic spread, unlike a pure top-``budget``-by-quality cut.
+
+    Confirmed as the actual root cause of Italy's "no picks anywhere in the
+    peninsula" failure (previously misattributed to Lloyd relaxation/the
+    scoring in ``choose_starts``' ``spread_islands`` path): the mainland
+    component's per-component candidate budget was being filled entirely by
+    tiles tied at the maximum quality score (the flat Po valley/France/Balkans
+    plains, thousands of tiles at quality==1.0), leaving the Apennine
+    peninsula - real, qualifying land, just hillier and coastal on both sides
+    so its quality tops out around 0.89 - with literally zero candidates in
+    the pool. No downstream selection algorithm can place a start somewhere
+    that was never a candidate to begin with.
+
+    Bins the candidates' bounding box into a roughly-square grid sized so the
+    number of cells is close to ``budget``, keeps the single best-quality
+    candidate per occupied cell first (guaranteeing every populated region
+    gets at least one shot), then tops up with the next-best remaining
+    candidates (regardless of cell) if occupied cells fall short of budget.
+    """
+    n = len(ys)
+    if n <= budget:
+        return np.arange(n)
+    y0, y1, x0, x1 = int(ys.min()), int(ys.max()), int(xs.min()), int(xs.max())
+    n_bins_side = max(1, int(np.ceil(np.sqrt(budget))))
+    bh = max(1.0, (y1 - y0 + 1) / n_bins_side)
+    bw = max(1.0, (x1 - x0 + 1) / n_bins_side)
+    by = np.clip(((ys - y0) / bh).astype(int), 0, n_bins_side - 1)
+    bx = np.clip(((xs - x0) / bw).astype(int), 0, n_bins_side - 1)
+    cell = by * n_bins_side + bx
+
+    order = np.argsort(-q)
+    keep: list[int] = []
+    seen_cells: set[int] = set()
+    for idx in order:
+        c = int(cell[idx])
+        if c not in seen_cells:
+            seen_cells.add(c)
+            keep.append(int(idx))
+            if len(keep) >= budget:
+                break
+    if len(keep) < budget:
+        kept = set(keep)
+        for idx in order:
+            i = int(idx)
+            if i not in kept:
+                keep.append(i)
+                kept.add(i)
+                if len(keep) >= budget:
+                    break
+    return np.array(keep, dtype=int)
+
+
 def _farthest_point_pack_from_seed(
     coords: np.ndarray, players: int, seed: int
 ) -> list[int]:
@@ -101,15 +156,16 @@ def _farthest_point_pack_from_seed_geodesic(
     """Geodesic version of ``_farthest_point_pack_from_seed`` - grows by
     land-path (``land_path_distance``), not straight-line, distance.
 
-    Matters as the SEEDING step for ``_lloyd_relax``: Lloyd relaxation only
-    ever reassigns candidates to an already-existing pick, it can never move
-    a pick from one region to a completely different, disconnected one - so
-    if the initial seed set already put two picks near the same small
-    landmass (a real risk with Euclidean seeding, which has no notion that
-    two Euclidean-distant points can still be geodesically close, e.g. both
-    on the same small island reached from different angles), relaxation
-    cannot undo that; the result stays a wasted duplicate no matter how many
-    iterations run. Seeding by geodesic distance instead means a second
+    Matters as the SEEDING step for ``_anneal_starts``: a good initialization
+    still helps annealing converge faster and more reliably even though it
+    hillclimbs a real objective now (see ``_score_starts``) rather than only
+    reassigning candidates to their nearest existing pick the way the
+    previous Lloyd-relaxation approach did. If the initial seed set already
+    puts two picks near the same small landmass (a real risk with Euclidean
+    seeding, which has no notion that two Euclidean-distant points can still
+    be geodesically close, e.g. both on the same small island reached from
+    different angles), that's a worse starting point for the search to climb
+    out of. Seeding by geodesic distance instead means a second
     point already assigned to some island reads as "not particularly far"
     from a first point already there, so the growth naturally reaches for a
     genuinely different, still-unclaimed landmass or peninsula next.
@@ -148,7 +204,8 @@ def _forced_component_seeds_geodesic(
       sometimes seats two picks on the same modest island (Tunisia) while a
       genuinely separate one (Corsica) sits untouched, because "maximize the
       minimum pairwise distance" has no notion of "don't reuse a landmass
-      while another sits unused" (see ``_lloyd_relax_multistart``).
+      while another sits unused" (see ``_multistart_anneal``, which now uses
+      this as one of several starting points for its own search).
     - Forcing one seed per component fixes that at the SEED stage (no island
       can be skipped or doubled there) - but growing the *remaining* seats
       by unrestricted farthest-point selection across the WHOLE candidate
@@ -191,133 +248,139 @@ def _forced_component_seeds_geodesic(
     return picked[:players]
 
 
-def _lloyd_relax(mask: np.ndarray, coords: np.ndarray, quality: np.ndarray,
-                  init_pick: list[int], n_iter: int = 8) -> list[int]:
-    """Weighted Lloyd relaxation (k-means-style) using GEODESIC (land-path,
-    not straight-line) distance, starting from an initial farthest-point
-    pack.
+#: TC-to-TC walking distance (tiles) beyond which a patch of land no longer
+#: counts as "reachable" by some player for the coverage term in
+#: ``_score_starts`` - roughly a resource ring's width past ``min_separation``
+#: / 2, matching this project's own DEER ``max_distance_to_players`` and
+#: ``resource_ownership``'s default.
+_COVERAGE_RADIUS = 40.0
 
-    Farthest-point selection alone tends to push every pick toward an
-    extremity - the far edge of a component, a corner of a huge one - since
-    it always grows toward whatever's most isolated from what's already
-    chosen. That's a real problem on a window with one huge, possibly
-    oversized component next to much smaller separate ones (e.g. Italy's
-    mainland component, which really is land-connected to France and the
-    Balkans - not a raster artifact - so it extends well past the region a
-    window was built to depict): a farthest-point pick can end up anywhere
-    in that whole component, with no reason to prefer the actual place of
-    interest (the Italian peninsula) over its far end.
 
-    Two other fixes were tried and rejected before this one: forcing a seed
-    per landmass component hands every qualifying component an equal
-    guaranteed seat regardless of how large it actually is, which is wrong
-    once a component is barely above the size floor but dwarfed by its
-    neighbors; biasing by distance from the window's own geometric center is
-    wrong in the other direction, since a huge component can legitimately
-    have plenty of good land far from center (e.g. France) with no reason to
-    avoid it just for being far from a point that's an artifact of how the
-    window happens to be centered. Both also failed empirically to reliably
-    seat anyone on the Italian peninsula itself.
+def _score_starts(
+    valid: np.ndarray, depth: np.ndarray, picks_yx: list[tuple[int, int]],
+    paths: list[np.ndarray], min_separation: float, coverage_radius: float,
+) -> float:
+    """Single scalar loss (lower is better) directly combining the four
+    things that actually make a multi-landmass start layout good or bad,
+    replacing the previous quality-weighted-Lloyd-relaxation approach, which
+    optimized proxies for these (raw pairwise separation; a quality-weighted
+    centroid) that empirically diverged from them on Italy: relaxation kept
+    re-centering picks toward the Po valley (the single highest-quality
+    region) even from initializations that started elsewhere, silently
+    erasing the Italian peninsula's own pick, and its duplicate-seat penalty
+    only counted duplicates on a non-largest component, so two picks landing
+    16 tiles apart on the (largest) mainland scored as fine.
 
-    Using GEODESIC distance for both cluster assignment and relaxation is
-    what actually fixes it, and generalizes cleanly: a peninsula is
-    genuinely far, by the distance that matters (how far a villager actually
-    has to walk), from the rest of a landmass it's attached to, even though
-    it isn't far in a straight line - the same reasoning that already makes
-    a genuinely separate island register as isolated under plain Euclidean
-    distance. Confirmed empirically: switching this from Euclidean to
-    geodesic distance is what took Italy from zero peninsula picks to two
-    (Po Valley and Rome), with no change to the underlying logic otherwise -
-    everything else about the algorithm (quality-weighted centroid, snap to
-    the cluster's own best candidate) is unchanged.
-
-    The true geodesic centroid of a cluster isn't a simple average (geodesic
-    space isn't linear), so this approximates it: take the quality-weighted
-    arithmetic-mean POSITION of each cluster's assigned candidates as a rough
-    center of mass, then re-derive that cluster's actual "center" as its own
-    nearest assigned candidate to that mean position (by ordinary Euclidean
-    distance, cheap) - only the CLUSTER ASSIGNMENT step (which existing pick
-    is each candidate closest to) uses real geodesic distance, which is the
-    part that actually needs it.
+    - **coverage**: fraction of ``valid`` land farther than ``coverage_radius``
+      walking tiles from EVERY pick. This is what a duplicate pick on an
+      already-covered landmass wastes, and what a skipped landmass shows up
+      as directly - no per-region bookkeeping needed, it falls out of the
+      same land mask ``choose_starts`` already restricted to qualifying
+      components.
+    - **separation floor**: penalizes any pair closer than ``min_separation``,
+      applied to every pair, not just ones on different components.
+    - **spread uniformity**: ``(max - min) / mean`` pairwise separation, so a
+      single badly-clustered pair can't hide behind good separation
+      elsewhere.
+    - **water distance**: mean per-pick distance-to-water, rewarding room to
+      build over a pick planted right on a coastal tip.
     """
-    k = len(init_pick)
-    centers_yx = [(int(coords[i][0]), int(coords[i][1])) for i in init_pick]
+    min_dist = np.min(np.stack(paths), axis=0)
+    total = float(valid.sum())
+    uncovered = float((valid & (min_dist > coverage_radius)).sum()) / total if total else 0.0
+
+    k = len(picks_yx)
+    seps = []
+    for i in range(k):
+        for j in range(i + 1, k):
+            y, x = picks_yx[j]
+            d = paths[i][y, x]
+            seps.append(d if np.isfinite(d) else 1e6)
+    min_sep, max_sep, mean_sep = min(seps), max(seps), float(np.mean(seps))
+    sep_penalty = max(0.0, (min_separation - min_sep) / min_separation)
+    spread_penalty = (max_sep - min_sep) / mean_sep if mean_sep > 0 else 0.0
+    water = float(np.mean([depth[y, x] for y, x in picks_yx]))
+    water_bonus = min(water / 20.0, 1.0)
+
+    return 2.0 * uncovered + 1.5 * sep_penalty + 0.5 * spread_penalty - 0.4 * water_bonus
+
+
+def _anneal_starts(
+    mask: np.ndarray, valid: np.ndarray, depth: np.ndarray, coords: np.ndarray,
+    players: int, init_pick: list[int], min_separation: float, coverage_radius: float,
+    iters: int, rng: np.random.Generator,
+) -> tuple[list[int], float]:
+    """Simulated annealing over which candidate each of the ``players`` picks
+    occupies, directly minimizing ``_score_starts``.
+
+    Needed because the four objectives it balances can't be reached by any
+    single greedy pass or geometric proxy - farthest-point growth and Lloyd
+    relaxation each optimize something that isn't quite the goal (see
+    ``_score_starts``). Proposing a random candidate swap and scoring it
+    against the real objective lets the search escape a local optimum that a
+    proxy-based method gets stuck in: annealing accepts an occasional
+    worse-scoring move early on (``temp`` starts high, cools linearly)
+    specifically so a swap that looks locally bad but opens up an unclaimed
+    landmass isn't rejected before its benefit shows up in later moves.
+    Proposals are weighted toward whichever tile is currently worst-covered
+    (see ``w`` below) so the search actively hunts for unclaimed land rather
+    than only stumbling onto it by chance, with a random fallback so it can
+    still explore elsewhere.
+    """
     n = len(coords)
-    ys, xs = coords[:, 0].astype(int), coords[:, 1].astype(int)
+    picks = list(init_pick)
+    picks_yx = [(int(coords[i][0]), int(coords[i][1])) for i in picks]
+    paths = [land_path_distance(mask, p) for p in picks_yx]
+    cur_loss = _score_starts(valid, depth, picks_yx, paths, min_separation, coverage_radius)
+    best_picks, best_loss = list(picks), cur_loss
 
-    for _ in range(n_iter):
-        d_at_coords = np.empty((k, n))
-        for c, center in enumerate(centers_yx):
-            dist = land_path_distance(mask, center)
-            d_at_coords[c] = dist[ys, xs]
-        d_at_coords[~np.isfinite(d_at_coords)] = 1e9
-        assign = np.argmin(d_at_coords, axis=0)
-
-        new_centers_yx = list(centers_yx)
-        moved = 0.0
-        for c in range(k):
-            m = assign == c
-            if not m.any():
-                continue
-            w = quality[m]
-            mean_y = (coords[m, 0] * w).sum() / w.sum()
-            mean_x = (coords[m, 1] * w).sum() / w.sum()
-            d_to_mean = np.hypot(coords[m, 0] - mean_y, coords[m, 1] - mean_x)
-            nearest = np.nonzero(m)[0][np.argmin(d_to_mean)]
-            new_center = (int(coords[nearest][0]), int(coords[nearest][1]))
-            moved = max(moved, abs(new_center[0] - centers_yx[c][0])
-                        + abs(new_center[1] - centers_yx[c][1]))
-            new_centers_yx[c] = new_center
-        centers_yx = new_centers_yx
-        if moved == 0:
-            break
-
-    d_at_coords = np.empty((k, n))
-    for c, center in enumerate(centers_yx):
-        dist = land_path_distance(mask, center)
-        d_at_coords[c] = dist[ys, xs]
-    d_at_coords[~np.isfinite(d_at_coords)] = 1e9
-    assign = np.argmin(d_at_coords, axis=0)
-    picks = []
-    for c in range(k):
-        m = np.nonzero(assign == c)[0]
-        if len(m) == 0:
+    cxs, cys = coords[:, 1].astype(int), coords[:, 0].astype(int)
+    for step in range(iters):
+        temp = max(1e-6, 0.3 * (1.0 - step / iters))
+        slot = int(rng.integers(0, players))
+        if rng.random() < 0.6:
+            min_dist = np.min(np.stack(paths), axis=0)
+            cand_dist = min_dist[cys, cxs]
+            cand_dist = np.where(np.isfinite(cand_dist), cand_dist, 0.0)
+            w = cand_dist ** 2 + 1e-6
+            new_idx = int(rng.choice(n, p=w / w.sum()))
+        else:
+            new_idx = int(rng.integers(0, n))
+        if new_idx == picks[slot]:
             continue
-        picks.append(int(m[np.argmax(quality[m])]))
-    return picks
+
+        trial_yx = list(picks_yx)
+        trial_yx[slot] = (int(coords[new_idx][0]), int(coords[new_idx][1]))
+        trial_paths = list(paths)
+        trial_paths[slot] = land_path_distance(mask, trial_yx[slot])
+        loss = _score_starts(valid, depth, trial_yx, trial_paths, min_separation, coverage_radius)
+
+        if loss < cur_loss or rng.random() < math.exp(-(loss - cur_loss) / temp):
+            picks[slot] = new_idx
+            picks_yx, paths, cur_loss = trial_yx, trial_paths, loss
+            if loss < best_loss:
+                best_loss, best_picks = loss, list(picks)
+
+    return best_picks, best_loss
 
 
-def _lloyd_relax_multistart(
-    mask: np.ndarray, coords: np.ndarray, quality: np.ndarray, players: int,
-    labels: np.ndarray, n_seeds: int = 6, n_iter: int = 8,
+def _multistart_anneal(
+    mask: np.ndarray, valid: np.ndarray, depth: np.ndarray, coords: np.ndarray,
+    quality: np.ndarray, players: int, labels: np.ndarray,
+    min_separation: float, coverage_radius: float = _COVERAGE_RADIUS,
+    n_seeds: int = 4, iters: int = 400, seed: int = 12345,
 ) -> list[int]:
-    """``_lloyd_relax``, tried from several different farthest-point
-    initializations (the top ``n_seeds`` candidates by quality, same idea
-    ``_farthest_point_pack`` itself uses), keeping whichever converges to the
-    most distinct landmass components used, breaking ties by minimum
-    pairwise geodesic separation.
+    """Run ``_anneal_starts`` from several different initializations - the
+    same quality-ranked geodesic farthest-point packs and forced-per-
+    component seed used previously - and keep whichever converges to the
+    lowest ``_score_starts`` loss.
 
-    Lloyd relaxation is a *local* optimization - which cluster each
-    candidate ends up in, and whether a genuinely separate landmass (or
-    peninsula - see ``_lloyd_relax``'s use of geodesic distance) keeps its
-    own cluster at all, depends on where relaxation started. A single
-    farthest-point pack that happens to seat most picks on one huge
-    component can converge to two clusters collapsing onto the same small
-    island instead of spreading properly, purely as an accident of that one
-    initialization - confirmed empirically on Italy, and NOT fixed by
-    geodesic seeding alone: "maximize the minimum pairwise separation" has
-    no notion of "don't reuse a landmass while another sits untouched" - two
-    picks stuck on the same modest island can score just as well, or
-    better, than reaching a farther but smaller peninsula, since the
-    objective only ever looks at the single worst pairwise distance, not how
-    many distinct areas got used. Preferring more distinct components first
-    (falling back to separation only to break a tie) directly targets what
-    actually matters here - not leaving a large, viable area completely
-    unused while another gets doubled up - without hard-coding a per-
-    component quota or any named-region logic.
-    ``n_seeds``/``n_iter`` are lower than ``_farthest_point_pack``'s
-    defaults since each attempt here costs ``players`` real BFS passes
-    (``land_path_distance``) per iteration, not a cheap Euclidean distance.
+    Multiple starts still matter even with a real objective to hillclimb:
+    annealing isn't guaranteed to escape every local optimum in a fixed
+    iteration budget, so starting from a few structurally different layouts
+    (already-spread-out vs. one-guaranteed-seed-per-island) makes it far less
+    likely every attempt lands in the same one. Uses a fixed RNG seed so
+    ``build_mod.py`` reruns produce the same script byte-for-byte.
     """
     if len(coords) == 0:
         return []
@@ -327,46 +390,26 @@ def _lloyd_relax_multistart(
     ys, xs = coords[:, 0].astype(int), coords[:, 1].astype(int)
     comp_ids = labels[ys, xs]
 
-    inits = [_farthest_point_pack_from_seed_geodesic(mask, coords, players, int(seed))
-             for seed in np.argsort(-quality)[:n_seeds]]
+    rng = np.random.default_rng(seed)
+    inits = [_farthest_point_pack_from_seed_geodesic(mask, coords, players, int(s))
+             for s in np.argsort(-quality)[:n_seeds]]
     if len(np.unique(comp_ids)) > 1:
-        # Also try forcing one seed per qualifying component up front (see
-        # _forced_component_seeds_geodesic) - the quality-ranked seeds above
-        # can converge to a duplicate-island local optimum no matter which
-        # one starts the search, so this gives the multi-start comparison a
-        # genuinely different starting basin to consider, not just more
-        # samples from the same one.
         inits.append(_forced_component_seeds_geodesic(mask, coords, quality, players, comp_ids))
 
-    # The single largest component legitimately deserves more than one pick
-    # (that's where most players end up on any single-landmass region) - but
-    # a SMALLER component getting picked twice while another sits at zero is
-    # exactly the failure this whole mechanism exists to prevent, so it's
-    # scored ahead of (and separately from) raw separation: minimize
-    # duplicate seats on any non-largest component first, maximize distinct
-    # components used second, raw geodesic separation only breaks a tie
-    # between two candidates that are already equally good on both counts.
-    largest_comp = int(max(np.unique(comp_ids), key=lambda c: int((comp_ids == c).sum())))
-
-    best_pick, best_score = None, (float("-inf"), -1, -1.0)
+    best_pick, best_loss = None, float("inf")
     for init in inits:
-        relaxed = _lloyd_relax(mask, coords, quality, init, n_iter=n_iter)
-        if len(relaxed) < players:
+        if len(init) < players:
             continue
-        comps_used = [int(labels[int(coords[p][0]), int(coords[p][1])]) for p in relaxed]
-        dup_penalty = sum(max(0, comps_used.count(c) - 1)
-                           for c in set(comps_used) if c != largest_comp)
-        n_comps = len(set(comps_used))
-        sep = _min_pairwise_dist_geodesic(mask, coords, relaxed)
-        score = (-dup_penalty, n_comps, sep)
-        if score > best_score:
-            best_score, best_pick = score, relaxed
+        picks, loss = _anneal_starts(
+            mask, valid, depth, coords, players, init, min_separation, coverage_radius,
+            iters, rng,
+        )
+        if loss < best_loss:
+            best_loss, best_pick = loss, picks
     if best_pick is None:
-        # Every start lost a cluster to an empty Voronoi cell (rare) - fall
-        # back to the plain farthest-point pack, relaxed once, even if that
-        # means fewer than `players` distinct picks.
-        init = _farthest_point_pack(coords, quality, players, n_seeds=n_seeds)
-        best_pick = _lloyd_relax(mask, coords, quality, init, n_iter=n_iter)
+        # Every seed init came up short of `players` distinct picks (rare) -
+        # fall back to the plain farthest-point pack, unrelaxed.
+        best_pick = _farthest_point_pack(coords, quality, players)
     return best_pick
 
 
@@ -376,24 +419,6 @@ def _min_pairwise_dist(coords: np.ndarray, picked: list[int]) -> float:
         for j in range(i + 1, len(picked)):
             a, b = coords[picked[i]], coords[picked[j]]
             best = min(best, float(np.hypot(a[0] - b[0], a[1] - b[1])))
-    return best
-
-
-def _min_pairwise_dist_geodesic(mask: np.ndarray, coords: np.ndarray, picked: list[int]) -> float:
-    """Geodesic (land-path) version of ``_min_pairwise_dist`` - two picks on
-    genuinely separate landmasses register as infinitely separated (correct:
-    there's no resource-ring contest possible between them), so this only
-    ever comes out small when two picks are close by actual walking
-    distance, which is what determines whether their resource rings
-    overlap - unlike raw Euclidean distance, which can rank two picks
-    stuck on the same small island as "far apart" while missing that a
-    pick elsewhere is walking-close to a neighbor."""
-    best = float("inf")
-    dists = [land_path_distance(mask, (int(coords[p][0]), int(coords[p][1]))) for p in picked]
-    for i in range(len(picked)):
-        for j in range(i + 1, len(picked)):
-            y, x = int(coords[picked[j]][0]), int(coords[picked[j]][1])
-            best = min(best, float(dists[i][y, x]))
     return best
 
 
@@ -413,7 +438,7 @@ def _farthest_point_pack(
     grows toward whatever candidate is most isolated from what's already
     picked, which is what actually forces reach into a landmass's far ends -
     or its other islands, if the candidate pool spans more than one. (It can
-    also push too FAR toward an extremity - see ``_lloyd_relax``, which
+    also push too FAR toward an extremity - see ``_multistart_anneal``, which
     ``choose_starts`` optionally runs afterward to pull an over-extreme pack
     back toward genuinely representative positions.)
 
@@ -485,25 +510,28 @@ def choose_starts(
     has no reason to prefer the actual Italian peninsula over French or
     Balkan territory within that same component).
 
-    ``spread_islands=True`` addresses both by running ``_lloyd_relax`` after
-    the ordinary farthest-point pack below: iteratively reassigning every
-    candidate to its nearest current pick and re-centering each pick at the
-    quality-weighted centroid of its own assigned candidates. This pulls
-    farthest-point's often-too-extreme picks toward genuinely representative,
-    area-proportional positions - a big landmass keeps however many picks its
-    own share of total candidate mass earns it, a small-but-qualifying island
-    keeps its own pick only if it has enough mass of its own to hold a
-    centroid there, and a sliver just above ``min_component_tiles`` but
-    dwarfed by its neighbors can lose its pick to a neighboring cluster
-    instead of getting an equal guaranteed seat. No named regions, window
-    centers, or per-component bookkeeping involved - two schemes along those
-    lines (forcing a seed per qualifying component; biasing by distance from
-    the window's own center) were tried and rejected for exactly that reason,
-    see git history. Left off by default so this doesn't silently change
-    already-verified start placements on every existing region that happens
-    to have more than one qualifying landmass (Salish Sea, Britain, Japan,
-    Caribbean, New Zealand, Greece all do) - it's meant to be opted into
-    per-region, e.g. for an uncrowded "Italy" variant, not applied blanket.
+    ``spread_islands=True`` addresses both by handing the ordinary
+    farthest-point pack below to ``_multistart_anneal``, which runs simulated
+    annealing directly against ``_score_starts`` - a real scalar objective
+    combining coverage (how much qualifying land sits farther than
+    ``_COVERAGE_RADIUS`` tiles from every pick), a hard-ish floor on every
+    pairwise separation (not just the worst one), spread uniformity, and
+    distance-to-water. An earlier version of this used Lloyd relaxation
+    (iteratively reassigning candidates to their nearest pick and
+    re-centering each pick at the quality-weighted centroid of its own
+    cluster) instead - rejected after it kept re-centering multiple picks
+    toward the same high-quality region (Italy's Po valley) even from
+    initializations that started elsewhere, silently leaving the Italian
+    peninsula with zero picks while seating two others 16 tiles apart on the
+    mainland; its duplicate-seat scoring only penalized duplicates on a
+    non-largest component, so that mainland pair scored as fine. Optimizing
+    the real objective directly (not a geometric proxy for it) is what fixes
+    both failures at once - see ``_score_starts``. Left off by default so
+    this doesn't silently change already-verified start placements on every
+    existing region that happens to have more than one qualifying landmass
+    (Salish Sea, Britain, Japan, Caribbean, New Zealand, Greece all do) -
+    it's meant to be opted into per-region, e.g. for an uncrowded "Italy"
+    variant, not applied blanket.
 
     ``min_separation`` is a soft floor (tiles) on TC-to-TC distance, passed to
     ``_farthest_point_pack``. The stock resource include places each player's
@@ -547,10 +575,28 @@ def choose_starts(
         # is biggest) can filter out every candidate on an otherwise
         # perfectly playable smaller island - which silently defeats
         # same_component=False for archipelagos.
+        #
+        # Under spread_islands the floor is forced to 0 (i.e. skipped, modulo
+        # the min_inland/edge_margin/min_component_tiles filters already baked
+        # into `valid`) regardless of the requested percentile: confirmed on
+        # Italy that even a *per-landmass* floor can wash out a genuinely
+        # distant, lower-quality sub-region of an oversized multi-region
+        # component. The mainland component here spans the Po valley/France/
+        # Balkans plains (quality saturates near 1.0 over thousands of tiles)
+        # *and* the Apennine peninsula (real, playable land, but coastal on
+        # both sides so quality tops out around 0.89) - a 60th-percentile
+        # floor computed over that whole component lands above 0.95, at which
+        # point every peninsula tile is already gone before the candidate
+        # pool is even built, let alone downsampled. spread_islands exists
+        # specifically to admit real-but-lower-quality sub-regions, so it
+        # relies on _spatial_stratified_top's per-cell selection (using
+        # quality only as an in-cell tie-break) to keep the candidate count
+        # bounded instead.
+        floor_percentile = 0.0 if spread_islands else percentile
         cand = np.zeros_like(valid)
         for lbl in np.unique(labels[valid]):
             comp = valid & (labels == lbl)
-            floor = float(np.percentile(quality[comp], percentile))
+            floor = float(np.percentile(quality[comp], floor_percentile))
             cand |= comp & (quality >= floor)
         if cand.sum() < players:
             cand = valid
@@ -578,7 +624,15 @@ def choose_starts(
                 for c in comps_present:
                     idx = np.nonzero(comp_ids == c)[0]
                     if len(idx) > per_comp_budget:
-                        idx = idx[np.argpartition(-q[idx], per_comp_budget)[:per_comp_budget]]
+                        # Spatially stratified, not pure top-K-by-quality: a
+                        # component spanning a huge, quality-saturated plain
+                        # next to a smaller, hillier sub-region (e.g. Italy's
+                        # mainland, whose Po valley/France/Balkans plains tie
+                        # at quality==1.0 in numbers far exceeding the budget)
+                        # would otherwise fill the whole budget from the
+                        # plain alone, leaving the sub-region with zero
+                        # candidates - see _spatial_stratified_top.
+                        idx = idx[_spatial_stratified_top(ys[idx], xs[idx], q[idx], per_comp_budget)]
                     keep_parts.append(idx)
                 keep = np.concatenate(keep_parts)
             else:
@@ -615,7 +669,9 @@ def choose_starts(
                 break
 
     if spread_islands:
-        best_pick = _lloyd_relax_multistart(mask, best_coords, best_q, players, labels)
+        best_pick = _multistart_anneal(
+            mask, valid, depth, best_coords, best_q, players, labels, min_separation,
+        )
 
     return [(int(best_coords[i][0]), int(best_coords[i][1])) for i in best_pick]
 
