@@ -37,9 +37,9 @@ process behind each map, not just raw stats.
   before commit: without it, a fresh checkout under Windows'
   `core.autocrlf=true` would silently corrupt every shipped script to CRLF
 - Installed to the local AoE2 DE mods folder (`mods/local/`) under the
-  Steam-id profile folder - re-sync manually after any `build_mod.py`
-  rerun (delete + copy both mod roots; there's no install script for this
-  yet, it's been done by hand each time so far).
+  Steam-id profile folder. `automation/install_mod.py` now automates the
+  re-sync (delete + copy) after any `build_mod.py` rerun - defaults to the
+  debug variant, `--mod "Real World Maps"` or `--all` for the rest.
 
 **The 10 regions:**
 
