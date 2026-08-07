@@ -416,19 +416,115 @@ This is also the answer to why our early fairness metrics could not tell
 Arabia and Black Forest apart: their largest difference is tree generation,
 and we measure neither forest coverage nor straggler placement.
 
+## Water: the axis Arabia cannot speak to
+
+**Arabia has no water at all.** Every map we generate is a coastline. So for
+anything water-touching, Arabia is not a baseline, it is silent - and
+"Arabia default" quietly stops being a meaningful reference point.
+
+### Competitive water is parametrically regular
+
+Reading the `<LAND_GENERATION>` of every stock water map confirms it. The
+water is never freeform; it is one of a few regular constructions:
+
+| map | construction |
+|---|---|
+| Coastal | `base_terrain WATER_SHALLOW` (whole map is sea), land is a ring of `create_player_lands` at `circle_radius 27-33` - a uniform-width water surround |
+| Paradise Island | all-water base, one centred `SHALLOWS` blob with symmetric `top/left/right/bottom_border 44`, players at `circle_radius 27-33` |
+| Baltic | one centred `WATER_SHALLOW` `create_land` at `land_percent 85` with symmetric `border 12`, one central island, players at `circle_radius 38 1` + `set_zone_by_team` |
+| Four Lakes | land base, exactly four explicitly-placed lakes, players at `circle_radius 32 0` |
+| Isthmus | `zone 1` / `zone 2` split plus `circle_radius` |
+
+The shared vocabulary is `circle_radius`, `set_circular_base`, symmetric
+`*_border`, `set_zone_by_team`, `other_zone_avoidance_distance`. Every one
+of these is **rotationally symmetric about the map centre**, and that
+symmetry is where the fairness comes from - not from any resource-placement
+cleverness.
+
+There is direct evidence of the retreat from irregular water:
+`Team_Islands.rms` still contains four corner-island `create_land` blocks,
+**commented out**. Someone removed them deliberately.
+
+This is why System A's resource constraints behave well on stock maps and
+badly on ours. `max_distance_to_other_zones`, `min_distance_to_players` and
+`avoid_other_land_zones` are all tuned against maps where "distance from a
+player" and "distance from water" are near-constant functions of radius. On
+a real coastline neither is. Our narrow-coastline starvation is that
+mismatch, not a bug in the include.
+
+### The right donors are Thames and Loch Ness, not Great Wall
+
+Of the 52 System A maps, only 8 use `direct_placement` (39 use
+`random_placement`). Two of those 8 are water maps with **irregular** water,
+and they are structurally the closest thing in the game to what we build:
+
+| | Thames | Loch Ness |
+|---|---|---|
+| placement | `direct_placement` | `direct_placement` |
+| land | explicit `create_land` with hardcoded `land_position 50 50`, `25 75`, plus `zone` / `land_id` | explicit, size-scaled `LOCH_TILES` / `LOCH_BASE` |
+| water | a river - irregular, not radial | a lake - irregular, not radial |
+| water mood | `#define WATER_POND` (calm, `enable_waves 0`) | `#define WATER_POND` |
+| resource tuning | stock spacing 10/18 | **`*_ZONE_DISTANCE 14`** on all four primary tiers |
+| `ai_info_map_type` | `ARABIA` | `ARABIA` |
+
+Thames' `<LAND_GENERATION>` - `direct_placement`, explicit `create_land`
+blocks at hardcoded positions carrying `zone` and `land_id` - is exactly the
+shape `rms_land.py` emits. Loch Ness independently demonstrates the
+`*_ZONE_DISTANCE` lever for water-constrained land.
+
+Also worth noting: **both declare `ai_info_map_type ARABIA`** despite
+significant water. The AI map type does not have to match the water
+topology, which loosens a constraint `choose_ai_map_type()` currently
+assumes.
+
+### Great Wall, reconsidered again
+
+Great Wall is a genuinely unusual map - very large, effectively a Mongolia
+region in the north and a coastal region in the south. It is also the only
+donor in the table with **no land-generation topology at all** (no
+`create_player_lands`, no `circle_radius`, no `land_position`): its land is
+supplied wholly by the paired `.scx`. That makes it a poor guide to
+land/water construction, on top of being a poor guide to resource budget
+(no stragglers, PRIMARY-only). Its useful contribution is narrowed to one
+thing: it demonstrates that lowering `RESOURCE_SPACING_DEFAULT` and the
+`*_PRIMARY_DISTANCE` consts is a legitimate response to constrained usable
+land.
+
+### Modern water machinery we do not use
+
+- `water_definition WATER_PRESET` + `includes/water_preset.inc` - universal
+  across System A, even on Arabia. Picks wave state and one of 18 water
+  appearance presets from `WATER_POND` / `WATER_DEFAULT` / `WATER_OCEAN`.
+  Purely visual, but it is why stock water reads as intentional.
+- `includes/coastal_blending.inc` and `includes/water_blending.inc` - used
+  by exactly the genuinely coastal maps (Coastal, Baltic, Team Islands).
+  `coastal_blending.inc` drives `BEACH_TERRAIN`, which is **not** cosmetic:
+  `oysters.inc` places food on it.
+
+We hand-roll `MED_WATER`/`DEEP_WATER` depth bands instead and set no water
+definition at all.
+
 ## Suggested port shape (not yet implemented)
 
-Take the **mechanism** from System A generally, the **tightening
-technique** from Great Wall, and the **resource budget** from whichever
-donor matches the flavor we want - explicitly chosen per region, not
-inherited by accident.
+Take the **mechanism** from System A generally, the **land/water
+construction** from Thames, the **water-constrained resource tuning** from
+Loch Ness, the **tightening technique** from Great Wall, and the **resource
+budget** from whichever donor matches the flavor we want - explicitly
+chosen per region, not inherited by accident.
 
 1. Pin every theme role with explicit `#const`s and keep `RESOURCE_UNITS`
    exact; do not pull in `themes.inc`'s biome randomisation.
 2. `#const RESOURCE_SPACING_DEFAULT` / `_FAR` / `RESOURCE_RESTRICTION`,
    then `object_setup.inc`.
 3. `town_centres.inc`, `villagers.inc`, `scouts.inc`, and
-   **`stragglers.inc`** - include it, unlike Great Wall.
+   **`stragglers.inc`** - include it, unlike Great Wall. Note the 1999
+   include we currently use places `TOWN_CENTER` and `VILLAGER` itself, so
+   dropping it means these become mandatory, not optional (see
+   `STOCK_MAP_INVENTORY.md`).
+3b. Add `water_definition WATER_PRESET` via `water_preset.inc`, and
+   `coastal_blending.inc` for `BEACH_TERRAIN` (which `oysters.inc` needs).
+   Try `*_ZONE_DISTANCE` around 14 per Loch Ness before reaching for
+   spacing cuts - it is the lever aimed at water-constrained land.
 4. Choose tiers per region as an explicit flavor decision. Great Wall's
    PRIMARY-only is the austere end; Arabia's six-plus-two is the generous
    end. This replaces the `--tight-resources` flag rather than stacking
