@@ -70,6 +70,50 @@ are unreferenced:
 So there are two resource systems, not three. Dead includes on disk are not
 evidence of a live code path - check the reference count first.
 
+## The include our own template is built on is 1999 orphaned dead code
+
+Hypothesis under test (user, 2026-08-07): *the original rwmaps template took
+its resource include from an older version of Arabia.* **That is false**, and
+the truth is worse.
+
+`src/rwmaps/rms.py` generates `#include_drs land_and_water_resources.inc`.
+Established by direct read:
+
+| question | answer |
+|---|---|
+| Where is it? | `resources\_common\drs\gamedata_x2\land_and_water_resources.inc` |
+| Is there a second, distinct copy? | No. `gamedata_x2.backup.20201109\land_and_water_resources.inc` is **byte-identical** (`diff -q` clean, both 13504 bytes, both dated May 12 2020) |
+| Did old Arabia use it? | **No.** `gamedata_x2.backup.20201109\Arabia.rms` includes `F_seasons.inc`, `thebr_setup.inc`, `F_ColorCorrection.inc`, `GeneratingObjects.inc`, `GeneratingElevation.inc` - i.e. System B. It never references `land_and_water_resources.inc` |
+| Which stock maps use it? | **Zero**, in either tree |
+| Any reference anywhere in the install? | Exactly one: `resources\_common\random-map-scripts\LJFS_real_world_spain.rms` - a third-party Workshop mod, not stock content |
+| How old is it? | Its own header says **`/* 24 JUNE 99 */`** - original Age of Kings era |
+
+The header in full:
+
+```
+/* ******* LAND AND WATER RESOURCES ************ */
+/* 24 JUNE 99 */
+/* EXACTLY THE SAME AS LAND RESOURCES -- GO FIGURE */
+```
+
+It also places `TOWN_CENTER` and `VILLAGER` itself, which is why our scripts
+never needed `town_centres.inc` / `villagers.inc`.
+
+Two sibling orphans sit next to it, same May 2020 timestamp, also referenced
+by nothing: `land_resources.inc` and `std_resources.inc`. Contrast the live
+includes (`includes/starting_resources.inc`, `GeneratingObjects.inc`), which
+carry a current May 27 timestamp.
+
+So our entire resource layer rests on a 1999 file that no shipping map has
+used for at least five years. That - not any subtlety of modern placement -
+is the root explanation for the silent-placement-failure class of bugs
+(`MOD_STATUS.md`): the file predates `find_closest`, `require_path`,
+`enable_tile_shuffling` and the actor-area system entirely.
+
+**Lesson for future passes:** presence on disk is not evidence of a live
+code path. Check the reference count first (see the dead `F_*.inc` family
+below for the same trap).
+
 ## Real World maps: script name -> UI name
 
 This is the table that would have prevented the Manchuria mistake. Sources:
