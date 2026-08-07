@@ -42,15 +42,23 @@ STOCK = Path(
 
 #: Donor candidates, keyed by the name the game's UI shows (script names and
 #: UI names diverge - real_world_manchuria ships as "Great Wall").
+#:
+#: Ordered roughly from "least like us" to "most like us". Arabia is the
+#: usual mental baseline but it has *no water at all*, and every map we
+#: generate is a coastline - so Arabia is the wrong reference for anything
+#: water-touching. Thames and Loch Ness are the closest structural analogs:
+#: System A + direct_placement + explicit create_land + irregular water.
 DONORS: dict[str, str] = {
     "Arabia": "Arabia.rms",
     "Black Forest": "Black_Forest.rms",
+    "Scandinavia": "Scandanavia.rms",
+    "Great Wall (manchuria)": "real_world_manchuria.rms",
     "Coastal": "Coastal.rms",
     "Baltic": "Baltic.rms",
-    "Scandinavia": "Scandanavia.rms",
     "Team Islands": "Team_Islands.rms",
+    "Paradise Island": "Paradise Island.rms",
     "Loch Ness": "Loch Ness.rms",
-    "Great Wall (real_world_manchuria)": "real_world_manchuria.rms",
+    "Thames": "Thames.rms",
 }
 
 #: Parameters worth comparing, grouped for readable output. The include that
@@ -137,6 +145,28 @@ FEATURE_INCLUDES = [
     "whales.inc", "aquatic_freshwater.inc", "aquatic_saltwater.inc",
     "stragglers_neutral.inc", "stragglers_coastal.inc", "reeds.inc",
     "relics.inc", "remote_resources.inc", "forest.inc", "cliffs.inc",
+    "water_preset.inc", "coastal_blending.inc", "water_blending.inc",
+]
+
+#: How the map lays out land and water. This is the axis Arabia cannot speak
+#: to (it has no water) and the one our real-coastline maps differ on most.
+#: Every competitive stock water map is rotationally regular about the map
+#: centre; ours are real coastlines and are not regular in any way.
+TOPOLOGY_MARKERS = [
+    ("direct_placement", r"\bdirect_placement\b"),
+    ("random_placement", r"\brandom_placement\b"),
+    ("grouped_by_team", r"\bgrouped_by_team\b"),
+    ("create_player_lands", r"\bcreate_player_lands\b"),
+    ("circle_radius", r"\bcircle_radius\b"),
+    ("set_circular_base", r"\bset_circular_base\b"),
+    ("explicit land_position", r"\bland_position\b"),
+    ("symmetric *_border", r"\b(top|bottom|left|right)_border\b"),
+    ("set_zone_by_team", r"\bset_zone_by_team\b"),
+    ("zone / land_id", r"\b(zone|land_id)\s+\d"),
+    ("water base_terrain", r"base_terrain\s+(WATER\w*|SHALLOWS)"),
+    ("WATER_POND", r"#define\s+WATER_POND"),
+    ("WATER_OCEAN", r"#define\s+WATER_OCEAN"),
+    ("WATER_DEFAULT", r"#define\s+WATER_DEFAULT"),
 ]
 
 _CONST = re.compile(r"^\s*#const\s+([A-Z_][A-Z0-9_]*)\s+(.+?)\s*$", re.M)
@@ -168,11 +198,21 @@ def scan(path: Path) -> dict:
         random_names |= set(n for n, _ in _CONST.findall(block))
         random_names |= set(_DEFINE.findall(block))
 
+    topology = {
+        label: bool(re.search(pat, text))
+        for label, pat in TOPOLOGY_MARKERS
+    }
+    # ai_info_map_type is worth seeing next to the water topology - several
+    # water maps declare ARABIA regardless of how wet they are.
+    m = re.search(r"ai_info_map_type\s+([A-Z_]+)", text)
+    topology["ai_info_map_type"] = m.group(1) if m else "-"
+
     return {
         "consts": consts,
         "defines": defines,
         "includes": includes,
         "random": random_names,
+        "topology": topology,
     }
 
 
@@ -244,6 +284,17 @@ def render(donors: dict[str, str], stock: Path) -> str:
             f"{('yes' if inc in scans[l]['includes'] else '-'):>17}" for l in labels
         )
         lines.append(f"{inc:<34} {'':>10}  {marks}")
+
+    lines.append("")
+    lines.append("## land/water topology  (the axis Arabia cannot speak to)")
+    lines.append(f"{'ai_info_map_type':<34} {'':>10}  " + "  ".join(
+        f"{scans[l]['topology']['ai_info_map_type'][:17]:>17}" for l in labels
+    ))
+    for label, _pat in TOPOLOGY_MARKERS:
+        marks = "  ".join(
+            f"{('yes' if scans[l]['topology'][label] else '-'):>17}" for l in labels
+        )
+        lines.append(f"{label:<34} {'':>10}  {marks}")
 
     return "\n".join(lines)
 
