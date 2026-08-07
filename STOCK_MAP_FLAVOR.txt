@@ -1,0 +1,108 @@
+System A resource/forest flavor - resolved parameters
+
+Legend:  .  = uses include default (shown in the default column)
+         *  = script sets this in more than one branch; all values shown
+       rnd: = chosen inside a start_random block, varies per generation
+
+parameter                             default             Arabia       Black Forest            Coastal             Baltic        Scandinavia       Team Islands          Loch Ness  Great Wall (real_
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## spacing (global)
+RESOURCE_SPACING_DEFAULT                    -                 12                  6                 10                 10                 10                 10                 10                  6
+RESOURCE_SPACING_FAR                        -                 18                 10                 18                 18                 16                 18                 18                 14
+RESOURCE_RESTRICTION                        -                  1                  1                  2                  2                  2                  2                  2                  1
+
+## forage
+FORAGE_BUSH_PRIMARY_SIZE                    6                  .                  .                  .                  .                  .                  .                  .                  .
+FORAGE_BUSH_PRIMARY_DISTANCE               12                  .                  .                  .                  .                  .                  .                  .                 10
+FORAGE_BUSH_PRIMARY_ZONE_DISTANCE           4                  .                  .                  .                  .                  .                  .                 14                  .
+FORAGE_BUSH_SECONDARY_DISTANCE             16                  .                  .                  .                  .                  .                  .                  .                  .
+FORAGE_BUSH_TERTIARY_DISTANCE              28                  .                  .                  .                  .                  .                  .                  .                  .
+FORAGE_BUSH_ADDITIONAL_DISTANCE            46                  .                  .                  .                  .                  .                 40                  .                  .
+
+## gold
+GOLD_PRIMARY_SIZE                           7                  .                  .                  .                  .                  .                  .                  .                  .
+GOLD_PRIMARY_DISTANCE                      12                  .                  .                  .                  .                  .                  .                  .                 10
+GOLD_PRIMARY_ZONE_DISTANCE                  4                  .                  .                  .                  .                  .                  .                 14                  .
+GOLD_SECONDARY_DISTANCE                    22                  .                 16                  .                  .                  .                  .                  .                  .
+GOLD_TERTIARY_DISTANCE                     28                  .                 22                  .                  .                  .                  .                  .                  .
+GOLD_ADDITIONAL_DISTANCE                   46                  .                 36                 36                 38                  .                 40                  .                  .
+GOLD_ADDITIONAL_EDGE_DISTANCE               4                 10                  .                  .                  .                  .                  .                  .                  .
+
+## stone
+STONE_PRIMARY_SIZE                          5                  .                  .                  .                  .                  .                  .                  .                  .
+STONE_PRIMARY_DISTANCE                     16                  .                 14                  .                  .                  .                  .                  .                 10
+STONE_PRIMARY_ZONE_DISTANCE                 4                  .                  .                  .                  .                  .                  .                 14                  .
+STONE_SECONDARY_DISTANCE                   22                  .                 20                  .                  .                  .                  .                  .                  .
+STONE_ADDITIONAL_DISTANCE                  46                  .                 36                 36                 38                  .                 40                  .                  .
+
+## food animals
+HERDABLE_STARTING_DISTANCE                  8                  .                  .                  .                  .                  .                  .                  .                  .
+HERDABLE_STARTING_ZONE_DISTANCE             2                  .                  .                  .                  .                  .                  .                  .                  .
+HERDABLE_DISTANCE                          22                  .                  .                  .                  .                  .                  .                  .                 16
+HUNTABLE_COUNT                              3         rnd:*2|3|4           rnd:*3|4           rnd:*3|4         rnd:*2|3|4                  4                  4                  .                  .
+HUNTABLE_DISTANCE                          20         rnd(20,28)                  .                 14                  .                  .                  .                  .                  .
+HUNTABLE_SMALL_COUNT                        7         rnd:*6|7|8         rnd:*6|7|8         rnd:*6|7|8         rnd:*6|7|8                  8                  .                  6                  8
+HUNTABLE_SMALL_GROUPS                       0                  1                  1                  1                  1                  1                  .                  1                  1
+HUNTABLE_SMALL_DISTANCE                    14                 18                  .                  .                  .                  .                  .                  .                  .
+LUREABLE_COUNT                              1                  .                  .                  .                  .                  .                  .                  .                  .
+LUREABLE_GROUPS                             2                  .                  .                  .                  .                  3                  .                  .                  .
+LUREABLE_DISTANCE                          18                  .                  .                  .                  .                  .                  .                  .                 12
+
+## trees / wood
+STRAGGLER_SPAWN_COUNT                       5                  .                  .                  .                  .                  .                  .                  .                  .
+PLAYER_FOREST_BASE_COUNT                    -   *55|65|75|85|100                  .                  .                  .                  .                  .                  .                  .
+PLAYER_FOREST_CLUMPS                        -           *2|3|4|5                  .                  .                  .                  .  (4 * MAPSCALE_ARE                  .                  .
+PLAYER_FOREST_TILES                         -  (PLAYER_FOREST_BA                  .                  .                  .                  .  (368 * MAPSCALE_A                  .                  .
+PLAYER_FOREST_AVOIDANCE                     -           *6|7|8|9                  .                  .                  .                  .                512                  .                  .
+PLAYER_FOREST_TEAM_DEDUCTION                -               0.72                  .                  .                  .                  .               0.72                  .                  .
+
+## water food
+NERITIC_SPACING                            26                  .                  .                  .                  .                  .                  .                  .                  .
+SALTWATER_COUNT                          8192                  .                  .               1024               1024                  .               1024                  0               1024
+SALTWATER_SPACING                          10                  .                  .                  .                  .                  .                 12                  .                  .
+SALTWATER_ZONE_DISTANCE                     5                  .                  .                  .                  4                  .                  .                  .                  .
+WHALE_COUNT                                 0                  .                  .               1024               1024                  .                128                  .                  .
+WHALE_ZONE_DISTANCE                        12                  .                  .                  6                  .                  .               *8|6                  .                  .
+OYSTER_COUNT                                2                  .                  .                  .                  .                  .                  .                  .                  .
+
+## remote fill
+REMOTE_DISTANCE                           100                  .                  .                  .                  .                  .                  .                  .                  .
+REMOTE_SPACING                             48                  .                  .                  .                  .                  .                  .                  .                  .
+
+## resource tiers requested (#define)
+FORAGE_BUSH_PRIMARY                                          yes                yes                yes                yes                  -                yes                yes                yes
+FORAGE_BUSH_SECONDARY                                          -                  -                  -                  -                  -                  -                  -                  -
+FORAGE_BUSH_TERTIARY                                           -                  -                  -                  -                  -                  -                  -                  -
+FORAGE_BUSH_ADDITIONAL                                         -                  -                  -                  -                  -                yes                  -                  -
+GOLD_PRIMARY                                                 yes                yes                yes                yes                yes                yes                yes                yes
+GOLD_SECONDARY                                               yes                yes                yes                yes                yes                yes                yes                  -
+GOLD_TERTIARY                                                yes                yes                yes                yes                yes                yes                  -                  -
+GOLD_ADDITIONAL                                              yes                yes                yes                yes                yes                yes                  -                  -
+STONE_PRIMARY                                                yes                yes                yes                yes                yes                yes                yes                yes
+STONE_SECONDARY                                              yes                yes                yes                yes                yes                yes                  -                  -
+STONE_TERTIARY                                                 -                  -                  -                  -                  -                  -                  -                  -
+STONE_ADDITIONAL                                             yes                yes                yes                yes                yes                yes                  -                  -
+
+## feature includes present
+stragglers.inc                                               yes                yes                yes                yes                yes                yes                yes                  -
+starting_resources.inc                                       yes                yes                yes                yes                yes                yes                yes                yes
+herdable_starting.inc                                        yes                yes                yes                yes                yes                yes                yes                yes
+herdable.inc                                                 yes                yes                yes                yes                yes                yes                yes                yes
+huntable.inc                                                 yes                yes                yes                yes                yes                yes                yes                yes
+lureable.inc                                                 yes                yes                yes                yes                yes                yes                yes                yes
+furbearers.inc                                               yes                yes                yes                yes                yes                yes                yes                yes
+predators.inc                                                yes                yes                yes                yes                yes                yes                yes                  -
+riparian.inc                                                 yes                yes                yes                yes                yes                yes                yes                yes
+neritic.inc                                                  yes                  -                yes                yes                yes                yes                yes                yes
+oysters.inc                                                  yes                  -                yes                yes                yes                yes                yes                yes
+whales.inc                                                   yes                  -                yes                yes                  -                yes                  -                  -
+aquatic_freshwater.inc                                       yes                  -                yes                yes                yes                yes                yes                yes
+aquatic_saltwater.inc                                        yes                  -                yes                yes                yes                yes                yes                yes
+stragglers_neutral.inc                                       yes                  -                yes                yes                yes                yes                yes                  -
+stragglers_coastal.inc                                       yes                  -                yes                yes                yes                yes                yes                yes
+reeds.inc                                                    yes                yes                yes                yes                yes                yes                yes                yes
+relics.inc                                                   yes                yes                yes                yes                yes                yes                  -                yes
+remote_resources.inc                                         yes                yes                yes                yes                yes                  -                yes                yes
+forest.inc                                                   yes                  -                  -                  -                  -                yes                  -                  -
+cliffs.inc                                                   yes                yes                yes                yes                yes                yes                yes                yes
