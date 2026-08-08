@@ -144,11 +144,18 @@ def build_parser() -> argparse.ArgumentParser:
     grid.add_argument("--resolution", default="50m", choices=["10m", "50m", "110m"])
     grid.add_argument("--no-elevation", action="store_true")
     grid.add_argument("--tight-resources", action="store_true",
-                      help="add a supplemental close-range (8-14 tile) gold/stone "
-                           "placement on top of the stock include - for narrow "
-                           "coastlines where the stock include's medium/far tiers "
-                           "(18-35 tiles) can't reliably find land at all (see the "
-                           "New Zealand investigation in MOD_STATUS.md)")
+                      help="LEGACY (--legacy-resources only): adds a supplemental "
+                           "close-range gold/stone/deer/boar placement on top of the "
+                           "1999 include, to backstop its silent placement failures "
+                           "on narrow coastlines. System A needs no backstop - it "
+                           "retries placements instead of dropping them - so this is "
+                           "a no-op unless --legacy-resources is also passed")
+    grid.add_argument("--legacy-resources", action="store_true",
+                      help="generate resources with the pre-2026-08 layer "
+                           "(land_and_water_resources.inc, a 1999 orphan no shipping "
+                           "map has used in five years) instead of System A. Kept so "
+                           "the two can be captured back-to-back in the engine and "
+                           "compared; not intended to ship")
     grid.add_argument("--spread-islands", action="store_true",
                       help="force at least one start per qualifying separate "
                            "landmass instead of letting farthest-point selection "
@@ -264,7 +271,8 @@ def generate(args) -> dict:
         target_tiles=int(mask.sum()), terrain_type=opts.land,
         clumping_factor=args.clumping_factor,
     )
-    script = rms.build_rms(args.name, args.proj, size, land_section, opts, ai_type)
+    script = rms.build_rms(args.name, args.proj, size, land_section, opts, ai_type,
+                           system_a=not args.legacy_resources)
 
     # The grid size is baked into the land areas, so it belongs in the name -
     # picking the wrong lobby size is the one way to get a broken map.

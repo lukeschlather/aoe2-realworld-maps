@@ -117,14 +117,42 @@ def test_script_declares_an_ai_map_type():
 
 
 def test_fish_have_water_to_spawn_in():
-    """base_terrain is WATER, so the script must create the deeper bands itself."""
+    """base_terrain is WATER, so the script must create the deeper bands itself.
+
+    Under System A the fish themselves come from the role includes rather
+    than from hand-written create_object blocks, but the reason this test
+    exists is unchanged: chaining the depth bands off DEEP_WATER (which the
+    shipped real-world scripts do, because their .scx already supplies deep
+    ocean) leaves deep-water fish nowhere legal to spawn.
+    """
     mask = _island()
     land = build_land_generation(cover_mask(mask, 20), mask.shape[0], [(40, 40)])
     text = build_rms("T", "laea", mask.shape[0], land)
     # depth bands must be created from WATER upward, not assumed to exist
     assert re.search(r"create_terrain MED_WATER\s*\{[^}]*base_terrain\s+WATER", text)
     assert re.search(r"create_terrain DEEP_WATER\s*\{[^}]*base_terrain\s+MED_WATER", text)
+    for include in ("neritic.inc", "aquatic_saltwater.inc"):
+        assert f"#include_drs includes/{include}" in text
+
+
+def test_legacy_path_still_hand_places_fish():
+    """The pre-System-A layer stays reachable for engine A/B comparison."""
+    mask = _island()
+    land = build_land_generation(cover_mask(mask, 20), mask.shape[0], [(40, 40)])
+    text = build_rms("T", "laea", mask.shape[0], land, system_a=False)
+    assert "land_and_water_resources.inc" in text
     for fish in ("SHORE_FISH", "SALMON", "MARLIN1"):
         assert f"create_object {fish}" in text
-    # deep-water fish must be pinned to terrain that now exists
     assert re.search(r"MARLIN1\s*\{[^}]*terrain_to_place_on\s+DEEP_WATER", text)
+
+
+def test_system_a_replaces_the_1999_include():
+    """The orphaned 1999 include must not survive into a System A script."""
+    mask = _island()
+    land = build_land_generation(cover_mask(mask, 20), mask.shape[0], [(40, 40)])
+    text = build_rms("T", "laea", mask.shape[0], land)
+    assert "land_and_water_resources.inc" not in text
+    # the things it used to place itself now have to be asked for explicitly
+    for include in ("town_centres.inc", "villagers.inc", "stragglers.inc",
+                    "starting_resources.inc"):
+        assert f"#include_drs includes/{include}" in text
