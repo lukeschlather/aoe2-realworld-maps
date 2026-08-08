@@ -81,6 +81,46 @@ def is_walkable(terrain_id: int) -> bool:
     return terrain_id not in DEEP_WATER_IDS
 
 
+#: Forest terrain, from the engine's ``FOREST_*`` constants.
+#:
+#: Forest terrain is not decoration: it is what carries wood, and wood
+#: supply is a balance quantity the stock scripts budget explicitly
+#: (``PLAYER_FOREST_TILES``, ``PLAYER_FOREST_TEAM_DEDUCTION``). This
+#: project had no way to measure it at all, which is why its early metrics
+#: could not tell Arabia and Black Forest apart - their single largest
+#: difference is trees.
+#:
+#: ``FOREST_PLACEHOLDER`` (99) is included because a script that leaves it
+#: unconverted still has it sitting on the map.
+FOREST_IDS = frozenset({
+    10,   # FOREST_OAK
+    13,   # FOREST_PALM
+    17,   # FOREST_JUNGLE
+    18,   # FOREST_BAMBOO
+    19,   # FOREST_PINE
+    20,   # FOREST_OAK_BUSH
+    21,   # FOREST_PINE_SNOW
+    48,   # FOREST_DRAGON
+    49,   # FOREST_BAOBAB
+    50,   # FOREST_ACACIA
+    55,   # FOREST_MANGROVE
+    56,   # FOREST_RAIN
+    88,   # FOREST_MEDITERRANEAN
+    89,   # FOREST_BUSH
+    90,   # FOREST_REEDS_SHALLOWS
+    91,   # FOREST_REEDS_BEACH
+    92,   # FOREST_REEDS
+    99,   # FOREST_PLACEHOLDER
+    104,  # FOREST_AUTUMN
+    105,  # FOREST_AUTUMN_SNOW
+    106,  # FOREST_DEAD
+    110,  # FOREST_BIRCH
+    112,  # FOREST_PALM_GRASS
+    113,  # FOREST_BAMBOO_LUSH
+    128,  # FOREST_SOUTH_AMERICA
+})
+
+
 class Palette:
     """Terrain ids the rasteriser paints for each class of tile.
 

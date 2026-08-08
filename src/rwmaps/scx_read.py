@@ -170,6 +170,56 @@ def read_resources(path: str | Path) -> list[tuple[str, float, float]]:
     return out
 
 
+#: Individual tree *objects* (the engine's ``TREE_*`` constants), as
+#: opposed to forest terrain. These are what ``stragglers.inc`` scatters
+#: around the town centre - the wood a player chops in the opening minutes,
+#: and per RESOURCE_TEMPLATES.md the single biggest gap in what this
+#: project generates. Read off ``includes/constants.inc``.
+TREE_UNITS: frozenset[int] = frozenset({
+    348,   # TREE_BAMBOO
+    349,   # TREE_OAK
+    350,   # TREE_PINE
+    351,   # TREE_PALM
+    411,   # TREE_OAK_FOREST
+    413,   # TREE_PINE_SNOW
+    414,   # TREE_JUNGLE
+    1051,  # TREE_DRAGON
+    1052,  # TREE_BAOBAB
+    1063,  # TREE_ACACIA
+    1144,  # TREE_MANGROVE
+    1146,  # TREE_RAINFOREST
+    1248,  # TREE_AUTUMN
+    1249,  # TREE_AUTUMN_SNOW
+    1250,  # TREE_DEAD
+    1347,  # TREE_CYPRESS
+    1348,  # TREE_PINE_ITALIAN
+    1349,  # TREE_OLIVE
+    1350,  # TREE_REEDS
+    1717,  # TREE_BIRCH
+    1984,  # TREE_BAMBOO_LUSH
+    2016,  # TREE_PINE_ASIAN
+    2017,  # TREE_PEACH_BLOSSOM
+    2025,  # TREE_WILLOW
+    2027,  # TREE_MAPLE
+    2028,  # TREE_MAPLE_AUTUMN
+    2567,  # TREE_OAK_GREEN
+    2570,  # TREE_MONKEY_PUZZLE
+    2580,  # TREE_BRAZILWOOD
+    2583,  # TREE_WAX_PALM
+})
+
+
+def read_trees(path: str | Path) -> list[tuple[str, float, float]]:
+    """Load a ``.scx`` and return each tree object as ``("tree", x, y)``."""
+    scenario = AoE2DEScenario.from_file(str(path))
+    out = []
+    for player_units in scenario.unit_manager.units:
+        for unit in player_units:
+            if unit.unit_const in TREE_UNITS:
+                out.append(("tree", unit.x, unit.y))
+    return out
+
+
 def read_water_resources(path: str | Path) -> list[tuple[str, float, float]]:
     """Load a ``.scx`` and return each water-economy resource as ``(kind, x, y)``."""
     scenario = AoE2DEScenario.from_file(str(path))
