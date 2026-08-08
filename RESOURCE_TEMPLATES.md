@@ -535,15 +535,83 @@ chosen per region, not inherited by accident.
    `PLACEHOLDER_WATER_TILE`.
 7. `relics.inc`, then `remote_resources.inc`.
 
-Open, and needing a real render to settle: whether `#include_drs
-includes/<name>.inc` resolves from a script installed in a **mod**
-directory. Our current script only uses flat-namespace
-`land_and_water_resources.inc`, so the `includes/` subpath is untested from
-`resources\_common\random-map-scripts\`. If it does not resolve, System A
-has to be inlined - which is exactly what the community maps
-(`Acclivity.rms` et al., ~7k lines, zero includes) do, so there is a proven
-precedent either way.
-
 Per `CLAUDE.md`, the per-region tier and tightening choices need real-engine
 captures to judge, not a synthetic preview - and the zero-of-a-kind check is
 the only pass/fail metric here; everything else is a fact to surface.
+
+---
+
+# RESOLVED: `includes/` does resolve from a mod directory (2026-08-08)
+
+The open question above - whether `#include_drs includes/<name>.inc` works
+from `resources\_common\random-map-scripts\` - is settled **yes**. System A
+does **not** have to be inlined.
+
+Settled with a control, not by inference. Two minimal scripts, identical
+land generation, run from the mod slot:
+
+| probe | objects placed by hand | TCs | result |
+|---|---|---|---|
+| `probe_ctl` | TC, villagers, gold, stone | 8 | gold 48, stone 48 |
+| `probe_inc` | **none** | 8 | **forage 48**, gold 56, stone 40 |
+
+`probe_inc` declares no `create_object` at all. Its town centres came from
+`includes/town_centres.inc` and its forage/gold/stone from
+`includes/starting_resources.inc`, at exactly the include's default group
+sizes (6 forage / 7 gold / 5 stone per player) with zero placement
+failures. Forage is the decisive one: nothing in the control produces it.
+
+## Two automation traps that produced wrong answers first
+
+Both are worth knowing because both *looked* like script-level facts:
+
+1. **A stock script was recorded as "cannot generate from a mod
+   directory".** It generates fine. Stock maps are far slower than ours -
+   Arabia takes **~82s** at 240x240 against ~3s for one of our scripts -
+   and the driver's Generate budget was ~1.5s. Worse, the old driver
+   re-clicked Generate on every poll, and each extra click restarted
+   generation, so it was racing itself.
+2. **A capture failed because the game lost focus.** Clicks go wherever
+   focus is; the user alt-tabbing mid-run sent them into another window.
+
+Both are fixed in `automation/ui_driver.ps1` (click once then wait; gate
+every click on `Test-GameFocused`/`Wait-ForGameFocus`). The lesson is the
+one `CLAUDE.md` already states: a failed UI action is evidence about the UI
+automation until proven otherwise, never evidence about the `.rms`.
+
+## Measured stock budgets (`out/stock_capture/benchmarks`, N=3 each)
+
+Per player, as *placed* - not as requested. Read with
+`automation/compare_starts.py`.
+
+| map | forage | gold | stone | sheep | deer | boar |
+|---|---|---|---|---|---|---|
+| Arabia | 6 | 15 | 9 | 8 | 0-5 | 2 |
+| Thames | 6 | 11 | 9 | 7-8 | 2-3 | 2-3 |
+| Yucatan | 12 | 21-33 | 15-22 | 15 | 8 | 6 |
+| City of Lakes | 6 | 15 | 9 | 8 | 3-4 | 2 |
+| Loch Ness | 6 | 14-19 | 7-11 | 0-6 | 0 | 2-3 |
+
+**Yucatan is roughly twice Arabia on every axis** - a reminder that there is
+no single stock "correct" budget, and that picking one is a flavor decision.
+
+## The zero-of-a-kind metric flags things stock maps do routinely
+
+The most consequential finding here. This project treats "a player with
+zero of some resource kind" as its one unambiguous problem. Measured
+against the stock maps, that metric fires on the game's own reference maps:
+**Arabia** shows a player with zero owned deer in 2 of 3 samples, and
+**Loch Ness** shows a player with neither sheep nor deer.
+
+That does not mean those maps are broken. It means the metric, as
+implemented, is partly measuring its own definition: `resource_ownership`
+assigns a resource to the single nearest town centre within a 30-tile
+walking radius, so a resource one tile past that radius, or a tile closer
+to a neighbour, counts as owned by nobody or by someone else. On a map
+where huntables are deliberately sparse, some player will lose the
+tie-break.
+
+So a zero-of-a-kind rate should be compared *against the stock rate on a
+comparable map*, not against zero. Distance-to-nearest (see
+`rwmaps/fairness.py`) does not have this failure mode and is the better
+primary signal.

@@ -71,19 +71,30 @@ def shipped_filename(name: str) -> str:
 
 
 #: (display name, extra rwmaps CLI args beyond the name itself).
+#:
+#: `--tight-resources` was dropped from all six regions that carried it
+#: (2026-08-08). It existed to backstop `land_and_water_resources.inc`'s
+#: silent placement failures by adding a second, closer set of gold/stone/
+#: deer/boar on top of the ones that vanished. Resources now come from
+#: System A (see `src/rwmaps/rms_objects.py`), which retries a placement
+#: that does not fit rather than dropping it, so the backstop has nothing
+#: left to back up - it would simply double-place. RESOURCE_TEMPLATES.md is
+#: explicit that the modern tuning *replaces* this rather than stacking
+#: with it. Per-region resource flavor is now a `ResourceFlavor` choice, not
+#: a CLI flag.
 MOD_REGIONS = [
     ("Salish Sea", ["--center=-122.9,48.15", "--span-km", "260",
                      "--overlap", "0.85", "--min-water-width", "5", "--min-land-width", "3"]),
-    ("Cramped Italy", ["--region", "italy", "--tight-resources"]),
-    ("Italy", ["--region", "italy", "--spread-islands", "--tight-resources"]),
-    ("Britain", ["--region", "britain", "--tight-resources"]),
+    ("Cramped Italy", ["--region", "italy"]),
+    ("Italy", ["--region", "italy", "--spread-islands"]),
+    ("Britain", ["--region", "britain"]),
     ("Greece", ["--region", "greece"]),
-    ("Japan", ["--region", "japan", "--rotate", "35", "--tight-resources"]),
+    ("Japan", ["--region", "japan", "--rotate", "35"]),
     ("Chesapeake Bay", ["--region", "chesapeake"]),
     ("Black Sea", ["--region", "blacksea"]),
     ("Scandinavia", ["--region", "scandinavia"]),
-    ("Caribbean", ["--region", "caribbean", "--tight-resources"]),
-    ("New Zealand", ["--region", "newzealand", "--tight-resources"]),
+    ("Caribbean", ["--region", "caribbean"]),
+    ("New Zealand", ["--region", "newzealand"]),
 ]
 
 
