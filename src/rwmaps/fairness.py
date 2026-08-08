@@ -98,16 +98,15 @@ def _euclid_nearest(items: list[tuple[str, float, float]], kind: str,
 
 def profile_capture(path: str | Path) -> dict:
     """Measure every player's start from one captured ``.aoe2scenario``."""
-    grid = scx_read.read_terrain_grid(path)
-    walk = scx_read.read_walkable_mask(path)
-    tcs = scx_read.read_town_centers(path)
-    land_res = scx_read.read_resources(path)
-    water_res = scx_read.read_water_resources(path)
-    trees = scx_read.read_trees(path)
+    cap = scx_read.read_capture(path)
+    grid = cap.terrain
+    walk = cap.walkable_mask
+    tcs = cap.town_centers
+    land_res = cap.resources
+    water_res = cap.water_resources
+    trees = cap.trees
 
-    forest = np.zeros(grid.shape, dtype=bool)
-    for fid in T.FOREST_IDS:
-        forest |= grid == fid
+    forest = np.isin(grid, list(T.FOREST_IDS))
 
     all_kinds = LAND_KINDS + EXTRA_LAND_KINDS
 

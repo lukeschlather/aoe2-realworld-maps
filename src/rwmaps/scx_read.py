@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -35,6 +36,69 @@ def _load_scenario(path: str | Path) -> AoE2DEScenario:
     """
     with contextlib.redirect_stdout(io.StringIO()):
         return AoE2DEScenario.from_file(str(path))
+
+
+@dataclass(frozen=True)
+class Capture:
+    """Everything this project reads out of one scenario, parsed once.
+
+    ``AoE2DEScenario.from_file`` re-parses the entire file on every call,
+    and the natural way to write an analysis is to call one reader per
+    thing it needs - which meant a single start-quality profile parsed the
+    same capture six times over, dominating its runtime. Load once, ask
+    many times.
+    """
+
+    terrain: np.ndarray
+    town_centers: list[tuple[int, float, float]]
+    resources: list[tuple[str, float, float]]
+    water_resources: list[tuple[str, float, float]]
+    trees: list[tuple[str, float, float]]
+
+    @property
+    def land_mask(self) -> np.ndarray:
+        """Coastline mask - shallows read as sea. See :func:`read_land_mask`."""
+        return ~np.isin(self.terrain, list(T.WATER_IDS))
+
+    @property
+    def walkable_mask(self) -> np.ndarray:
+        """Where a land unit can go - shallows are fords, not walls."""
+        return ~np.isin(self.terrain, list(T.DEEP_WATER_IDS))
+
+
+def read_capture(path: str | Path) -> Capture:
+    """Parse a ``.scx``/``.aoe2scenario`` once into a :class:`Capture`."""
+    scenario = _load_scenario(path)
+    mm = scenario.map_manager
+    grid = np.zeros((mm.map_height, mm.map_width), dtype=np.uint8)
+    for tile in mm.terrain:
+        grid[tile.y, tile.x] = tile.terrain_id
+
+    tcs: list[tuple[int, float, float]] = []
+    resources: list[tuple[str, float, float]] = []
+    water: list[tuple[str, float, float]] = []
+    trees: list[tuple[str, float, float]] = []
+    for player_units in scenario.unit_manager.units:
+        for unit in player_units:
+            const = unit.unit_const
+            if const == BuildingInfo.TOWN_CENTER.ID:
+                tcs.append((int(unit.player), unit.x, unit.y))
+            kind = RESOURCE_UNITS.get(const)
+            if kind:
+                resources.append((kind, unit.x, unit.y))
+            wkind = WATER_UNITS.get(const)
+            if wkind:
+                water.append((wkind, unit.x, unit.y))
+            if const in TREE_UNITS:
+                trees.append(("tree", unit.x, unit.y))
+
+    return Capture(
+        terrain=grid,
+        town_centers=sorted(tcs, key=lambda t: t[0]),
+        resources=resources,
+        water_resources=water,
+        trees=trees,
+    )
 
 
 def read_terrain_grid(path: str | Path) -> np.ndarray:

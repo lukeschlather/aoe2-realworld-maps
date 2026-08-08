@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 from scipy import ndimage
+from scipy.ndimage import binary_dilation
 
 from . import terrain as T
 
@@ -41,29 +42,43 @@ def distance_to_water(mask: np.ndarray) -> np.ndarray:
     return ndimage.distance_transform_edt(mask)
 
 
+#: 8-connected neighbourhood, as a structuring element.
+_NEIGHBOURHOOD = np.ones((3, 3), dtype=bool)
+
+
 def land_path_distance(mask: np.ndarray, start: tuple[int, int]) -> np.ndarray:
     """Shortest walking distance over land from ``start`` to every tile.
 
     Breadth-first over 8-connected land, with diagonal steps costing the same as
     orthogonal ones - close enough for judging whether two starts are on the
     same landmass and roughly how far apart they are.
+
+    Implemented as a wavefront: because every step costs exactly 1, the set of
+    tiles at distance d is one binary dilation of the set at distance d-1,
+    intersected with the unvisited land. That is the same traversal an explicit
+    queue does, but it advances a whole distance ring per numpy operation
+    instead of one tile per Python loop iteration - roughly a thousand array ops
+    for a 240x240 map rather than millions of scalar ones. This function is the
+    inner loop of every fairness comparison (eight sources per capture, and the
+    project's stated goal is ~1000 captures), so the constant factor is not
+    incidental.
     """
-    h, w = mask.shape
     dist = np.full(mask.shape, np.inf)
     sy, sx = start
     if not mask[sy, sx]:
         return dist
+
+    frontier = np.zeros(mask.shape, dtype=bool)
+    frontier[sy, sx] = True
+    visited = frontier.copy()
     dist[sy, sx] = 0.0
-    queue = deque([(sy, sx)])
-    while queue:
-        y, x = queue.popleft()
-        d = dist[y, x] + 1.0
-        for dy in (-1, 0, 1):
-            for dx in (-1, 0, 1):
-                ny, nx = y + dy, x + dx
-                if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and dist[ny, nx] > d:
-                    dist[ny, nx] = d
-                    queue.append((ny, nx))
+
+    d = 0.0
+    while frontier.any():
+        d += 1.0
+        frontier = binary_dilation(frontier, _NEIGHBOURHOOD) & mask & ~visited
+        dist[frontier] = d
+        visited |= frontier
     return dist
 
 

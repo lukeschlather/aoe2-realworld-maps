@@ -124,3 +124,47 @@ def test_cramped_map_is_warned_about():
     report = analyze(mask, players=4, radius=10)
     assert any("cramped" in w for w in report.warnings)
     assert report.verdict == "unfair"
+
+
+def test_land_path_distance_matches_reference_bfs():
+    """The wavefront implementation must be exactly the old queue BFS.
+
+    land_path_distance was rewritten from a per-tile Python queue to a
+    binary-dilation wavefront for speed. Every fairness number in the
+    project is downstream of it, so "equivalent" has to mean identical
+    output, not merely similar - checked here against a literal
+    transcription of the original algorithm on random masks (including
+    disconnected regions and an unwalkable start).
+    """
+    from collections import deque
+
+    import numpy as np
+
+    from rwmaps.analysis import land_path_distance
+
+    def reference(mask, start):
+        h, w = mask.shape
+        dist = np.full(mask.shape, np.inf)
+        sy, sx = start
+        if not mask[sy, sx]:
+            return dist
+        dist[sy, sx] = 0.0
+        queue = deque([(sy, sx)])
+        while queue:
+            y, x = queue.popleft()
+            d = dist[y, x] + 1.0
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    ny, nx = y + dy, x + dx
+                    if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and dist[ny, nx] > d:
+                        dist[ny, nx] = d
+                        queue.append((ny, nx))
+        return dist
+
+    rng = np.random.default_rng(7)
+    for trial in range(6):
+        mask = rng.random((40, 40)) > (0.2 + 0.05 * trial)
+        for start in [(0, 0), (20, 20), (39, 39)]:
+            np.testing.assert_array_equal(
+                land_path_distance(mask, start), reference(mask, start)
+            )
