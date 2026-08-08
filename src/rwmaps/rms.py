@@ -76,7 +76,7 @@ create_terrain {forest}
   base_terrain                   {land}
   spacing_to_other_terrain_types 5
   land_percent                   {forest_percent}
-  number_of_clumps               12
+  number_of_clumps               {forest_clumps}
   set_avoid_player_start_areas
   set_scale_by_groups
 }}
@@ -251,6 +251,32 @@ class RmsOptions:
     forest: str = "FOREST"
     tree: str = "OAKTREE"
     forest_percent: int = 10
+    #: How many separate clumps the map-wide forest is broken into.
+    #: Exposed as a knob (it was hardcoded at 12); the default is unchanged.
+    #:
+    #: NEGATIVE RESULT, recorded so it is not re-tried: raising this does
+    #: **not** even out wood between players. Britain shows a large spread
+    #: in "share of my nearby land that is forest" - and it barely moves
+    #: with clump count (one sample each, Britain, everything else fixed):
+    #:
+    #: | clumps | forest share across the 8 players |
+    #: |--------|-----------------------------------|
+    #: | 12     | 0.07 - 0.53                       |
+    #: | 30     | 0.01 - 0.43                       |
+    #: | 60     | 0.06 - 0.52                       |
+    #:
+    #: The cause is upstream: ``land_percent`` is a share of the *whole
+    #: map's* land, and on a fragmented region players have very different
+    #: amounts of land near them, so a single clump dominates the share of
+    #: whoever is on a small island. Granularity cannot fix a denominator
+    #: problem.
+    #:
+    #: The stock answer is ``includes/forest.inc``, which budgets a forest
+    #: per player (``PLAYER_FOREST_TILES``, ``PLAYER_FOREST_AVOIDANCE``,
+    #: ``PLAYER_FOREST_TEAM_DEDUCTION``). It builds off a per-player
+    #: ``SPAWN_PLACEHOLDER`` terrain that ``rms_land`` does not paint, so
+    #: adopting it is a land-generation change rather than a resource one.
+    forest_clumps: int = 12
     max_elevation: int = 7
     elevation_clumps: int = 8
     elevation_tiles: int = 600
@@ -352,6 +378,7 @@ def build_rms(
             land_alt2=opts.land_alt2,
             forest=opts.forest,
             forest_percent=opts.forest_percent,
+            forest_clumps=opts.forest_clumps,
         ),
     ]
     if opts.elevation:
@@ -395,6 +422,7 @@ def _build_rms_system_a(
             land_alt2=opts.land_alt2,
             forest=opts.forest,
             forest_percent=opts.forest_percent,
+            forest_clumps=opts.forest_clumps,
         ),
     ]
     if opts.elevation:

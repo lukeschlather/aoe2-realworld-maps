@@ -78,7 +78,7 @@ WATER_IDS = DEEP_WATER_IDS | SHALLOW_IDS
 #: Everything a land unit can stand on or cross. The complement of
 #: DEEP_WATER_IDS, not of WATER_IDS - shallows are walkable.
 def is_walkable(terrain_id: int) -> bool:
-    return terrain_id not in DEEP_WATER_IDS
+    return terrain_id not in IMPASSABLE_IDS
 
 
 #: Forest terrain, from the engine's ``FOREST_*`` constants.
@@ -154,3 +154,14 @@ BIOMES: dict[str, Palette] = {
     "tropical": Palette(land=GRASS2),
     "arctic": Palette(land=SNOW, beach=ICE),
 }
+
+
+#: Terrain a land unit cannot cross at all.
+#:
+#: Forest belongs here and its omission was a real error: forest terrain
+#: carries trees, and trees are *solid*. Treating forest as walkable made
+#: "can this player reach that resource" answer yes through the middle of a
+#: wood, and made "is this player walled in by trees" unanswerable - which
+#: is precisely the complaint that motivated measuring wood at all (a
+#: player enclosed in forest with no way out).
+IMPASSABLE_IDS = DEEP_WATER_IDS | FOREST_IDS

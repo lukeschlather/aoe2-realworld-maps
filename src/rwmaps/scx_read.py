@@ -62,7 +62,21 @@ class Capture:
 
     @property
     def walkable_mask(self) -> np.ndarray:
-        """Where a land unit can go - shallows are fords, not walls."""
+        """Where a land unit can actually go.
+
+        Shallows are fords, so they are walkable; forest is solid, so it is
+        not. Forest was previously missing from this, which let reachability
+        answer "yes" through the middle of a wood.
+        """
+        return ~np.isin(self.terrain, list(T.IMPASSABLE_IDS))
+
+    @property
+    def forest_mask(self) -> np.ndarray:
+        return np.isin(self.terrain, list(T.FOREST_IDS))
+
+    @property
+    def dry_land_mask(self) -> np.ndarray:
+        """Land, forested or not - the denominator for "how wooded is this"."""
         return ~np.isin(self.terrain, list(T.DEEP_WATER_IDS))
 
 

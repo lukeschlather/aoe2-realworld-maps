@@ -79,8 +79,16 @@ class ResourceFlavor:
     poor default for a coastline.
     """
 
-    spacing_default: int = 6
-    spacing_far: int = 14
+    #: Actor-area radius around each resource pile. Stock values run 6
+    #: (Black Forest, Great Wall) to 12 (Arabia, the loosest map in the
+    #: game). 4 is below the whole stock range, chosen from measurement
+    #: rather than taste: on a real coastline the ring a resource is asked
+    #: to place in is often mostly water, and spacing is what decides
+    #: whether a second pile still fits on the land that is left. On
+    #: Britain, dropping 6 -> 4 (everything else held) took the number of
+    #: players missing at least one resource kind from 6 of 8 to 1 of 8.
+    spacing_default: int = 4
+    spacing_far: int = 10
     restriction: int = 1
 
     #: ``max_distance_to_other_zones`` for every requested tier.
@@ -112,14 +120,36 @@ class ResourceFlavor:
 
     #: Per-tier ``min_distance_to_players`` overrides; leave a tier out to
     #: take the include's own default (forage 12, gold 12/22/28, stone 12).
-    distances: dict[str, int] = field(default_factory=dict)
+    #:
+    #: The defaults below pull every ring in toward the town centre. The
+    #: stock rings assume land in every direction at that radius; on a
+    #: coastline the far ones frequently land in open water and the
+    #: placement is simply lost. Measured on Britain, pulling gold/stone
+    #: primary 12 -> 9 and secondary 22 -> 16 roughly doubled placed stone.
+    distances: dict[str, int] = field(default_factory=lambda: {
+        "FORAGE_BUSH_PRIMARY": 10,
+        "GOLD_PRIMARY": 9,
+        "STONE_PRIMARY": 9,
+        "GOLD_SECONDARY": 16,
+        "STONE_SECONDARY": 16,
+    })
 
     herdable_starting_count: str = "FOUR"
     huntable_count: int = 4
     huntable_groups: int = 1
+    huntable_distance: int | None = None
     huntable_small_count: int = 0
     huntable_small_groups: int = 1
     lureable: bool = True
+    #: ``LUREABLE_DISTANCE`` - how far out boar are placed (include default
+    #: 18). Boar are the biggest single early food source and the one a
+    #: player most notices missing, so on a fragmented coastline this wants
+    #: pulling in toward land that actually exists. Great Wall uses 12.
+    #: Measured on Britain: 18 -> 12 removed the last remaining
+    #: zero-of-a-kind (one player with no boar) and cut mean walking
+    #: distance to the nearest boar from 18.0 tiles to 11.2.
+    lureable_distance: int | None = 12
+    lureable_groups: int | None = 2
 
     #: Shore fish spacing - lower packs more in. Every map here is a
     #: coastline, so this is a real part of the food budget, not garnish.
@@ -255,6 +285,8 @@ def build_objects(flavor: ResourceFlavor) -> str:
         f"  #const HUNTABLE_COUNT  {flavor.huntable_count}",
         f"  #const HUNTABLE_GROUPS {flavor.huntable_groups}",
     ]
+    if flavor.huntable_distance is not None:
+        lines.append(f"  #const HUNTABLE_DISTANCE {flavor.huntable_distance}")
     # huntable.inc covers BOTH the normal and the small huntable role, so
     # the small consts have to be set before it is included, not after -
     # there is no separate huntable_small.inc. HUNTABLE_SMALL_GROUPS
@@ -266,7 +298,12 @@ def build_objects(flavor: ResourceFlavor) -> str:
         ]
     lines.append("  #include_drs includes/huntable.inc")
     if flavor.lureable:
-        lines += ["", "  #include_drs includes/lureable.inc"]
+        lines.append("")
+        if flavor.lureable_distance is not None:
+            lines.append(f"  #const LUREABLE_DISTANCE {flavor.lureable_distance}")
+        if flavor.lureable_groups is not None:
+            lines.append(f"  #const LUREABLE_GROUPS {flavor.lureable_groups}")
+        lines.append("  #include_drs includes/lureable.inc")
 
     lines += [
         "",

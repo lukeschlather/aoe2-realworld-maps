@@ -99,14 +99,14 @@ def _euclid_nearest(items: list[tuple[str, float, float]], kind: str,
 def profile_capture(path: str | Path) -> dict:
     """Measure every player's start from one captured ``.aoe2scenario``."""
     cap = scx_read.read_capture(path)
-    grid = cap.terrain
     walk = cap.walkable_mask
     tcs = cap.town_centers
     land_res = cap.resources
     water_res = cap.water_resources
     trees = cap.trees
 
-    forest = np.isin(grid, list(T.FOREST_IDS))
+    forest = cap.forest_mask
+    dry_land = cap.dry_land_mask
 
     all_kinds = LAND_KINDS + EXTRA_LAND_KINDS
 
@@ -135,10 +135,34 @@ def profile_capture(path: str | Path) -> dict:
         dist = dists[player]
         yi, xi = int(ty), int(tx)
 
+        # Wood is measured as a *proportion* and as *openness*, not as an
+        # absolute count. A region like Britain will legitimately carry less
+        # wood than Arabia simply because it has less land, and that is
+        # flavor rather than a defect. The two things that do matter are
+        # whether a player has a reasonable share of what land they have,
+        # and whether they are walled in by it.
+        #
+        # Forest is impassable, so `dist` (a walk over walkable tiles) stops
+        # at the tree line - which is exactly what makes "walled in"
+        # measurable: open_tiles_within_N counts the tiles this player can
+        # actually reach on foot, and it collapses when a TC is enclosed.
+        # Forest tiles are counted by straight-line radius instead, since by
+        # construction they are never reachable.
         wood = {}
+        yy, xx = np.ogrid[:forest.shape[0], :forest.shape[1]]
+        radius2 = (xx - tx) ** 2 + (yy - ty) ** 2
         for r in WOOD_RADII:
-            within = np.isfinite(dist) & (dist <= r)
-            wood[f"forest_tiles_within_{r}"] = int((forest & within).sum())
+            disc = radius2 <= r * r
+            n_forest = int((forest & disc).sum())
+            n_land = int((dry_land & disc).sum())
+            open_reachable = int((np.isfinite(dist) & (dist <= r)).sum())
+            wood[f"forest_tiles_within_{r}"] = n_forest
+            wood[f"open_tiles_within_{r}"] = open_reachable
+            # Share of this player's nearby dry land that is wood. None when
+            # there is no dry land at all nearby to take a share of.
+            wood[f"forest_fraction_within_{r}"] = (
+                round(n_forest / n_land, 2) if n_land else None
+            )
         wood["stragglers_within_6"] = sum(
             1 for _, x, y in trees if math.hypot(x - tx, y - ty) <= 6.0
         )
