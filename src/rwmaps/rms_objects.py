@@ -79,16 +79,30 @@ class ResourceFlavor:
     poor default for a coastline.
     """
 
-    spacing_default: int = 10
-    spacing_far: int = 16
+    spacing_default: int = 6
+    spacing_far: int = 14
     restriction: int = 1
 
-    #: ``max_distance_to_other_zones`` for every requested tier. This is the
-    #: Loch Ness lever and the single most important knob here: the stock
-    #: default of 4 is tuned against maps where distance-to-water is a
-    #: near-constant function of radius, which is exactly what a real
-    #: coastline is not. Try this before touching spacing.
-    zone_distance: int = 14
+    #: ``max_distance_to_other_zones`` for every requested tier.
+    #:
+    #: **Leave this at the stock 4.** RESOURCE_TEMPLATES.md recommends
+    #: raising it to 14 "per Loch Ness ... the lever aimed at
+    #: water-constrained land", reasoning from a static read of the include
+    #: files. A real-engine sweep on one fixed coastline says that is
+    #: backwards - raising it does not loosen placement, it destroys it:
+    #:
+    #: | value | forage | gold | stone |
+    #: |-------|--------|------|-------|
+    #: | 4     | 42     | 25   | 5     |
+    #: | 14    | 6      | 0    | 0     |
+    #: | 40    | 0      | 0    | 0     |
+    #: | 99    | 0      | 0    | 0     |
+    #:
+    #: (totals across 8 players, one sample each.) Whatever the engine
+    #: actually does with this value, "bigger is more permissive" is not it.
+    #: This is exactly the case CLAUDE.md is about: the include files are
+    #: not a substitute for a render.
+    zone_distance: int = 4
 
     #: Which tiers to request. More tiers = a richer map. Great Wall asks
     #: for PRIMARY only; Arabia asks for six plus two additional.
