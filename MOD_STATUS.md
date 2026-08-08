@@ -1,5 +1,34 @@
 # Mod status
 
+> **SUPERSEDED IN PART - read `RESOURCE_TEMPLATES.md` and
+> `STOCK_MAP_INVENTORY.md` first.** This document is from 2026-08-01. Later
+> work (2026-08-07/08) established facts that invalidate several of its
+> conclusions, and it is kept for history, not as guidance. Specifically:
+>
+> * **Its entire resource analysis rests on a file no shipping map uses.**
+>   Everything below about "the stock include" refers to
+>   `land_and_water_resources.inc`, which `STOCK_MAP_INVENTORY.md` traced to
+>   a **1999 orphan** - header `24 JUNE 99`, referenced by zero stock maps,
+>   predating `find_closest`/`require_path`/tile shuffling. The
+>   "narrow-coastline resource starvation" root cause below is real as an
+>   observation but wrong as a diagnosis: the include fails silently on
+>   *every* map shape, and coastlines merely expose it. Resources now come
+>   from System A (`src/rwmaps/rms_objects.py`).
+> * **`--tight-resources` is gone** (2026-08-08). It backstopped that
+>   include's silent failures; System A retries placements instead of
+>   dropping them, so the backstop would only double-place.
+> * **The zero-of-a-kind rates quoted below are not comparable to zero.**
+>   Measured 2026-08-08, stock Arabia itself shows a player with zero owned
+>   deer in 2 of 3 samples. The metric is partly measuring its own
+>   nearest-TC-within-30-tiles definition. See the end of
+>   `RESOURCE_TEMPLATES.md`.
+> * **`ai_info_map_type` claims below are shakier than stated.** Both
+>   Thames and Loch Ness declare `ARABIA` despite significant water, so the
+>   AI map type does not have to track water topology at all.
+>
+> The `--spread-islands` / `choose_starts` work below is unaffected and
+> still current.
+
 Read this first when resuming the "Real World Maps" mod-building work.
 Originally written 2026-08-01 after a context reset; updated same-day
 after the N=10-per-region real-engine capture pass actually ran, so this
