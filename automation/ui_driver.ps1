@@ -76,6 +76,53 @@ function Focus-GameWindow($processName = "AoE2DE_s") {
     return $result
 }
 
+# Is the game the foreground window RIGHT NOW? Cheap (no OCR, no capture),
+# so it is safe to call inside a poll loop.
+#
+# This exists because every click this driver sends goes to whatever window
+# happens to be focused. If the user alt-tabs away mid-run - to type a
+# message, to check something - the clicks land somewhere else entirely and
+# the run reports the map "failed to generate". That is an automation bug
+# wearing the costume of a script bug, and it has already cost this project
+# a wrong conclusion (2026-08-08: a stock map was recorded as
+# unable-to-generate-from-a-mod-directory when in fact the window had simply
+# lost focus mid-capture). Never treat a failed action as evidence about the
+# .rms without first ruling this out.
+function Test-GameFocused($processName = "AoE2DE_s") {
+    $proc = Get-Process -Name $processName -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $proc -or $proc.MainWindowHandle -eq [IntPtr]::Zero) { return $false }
+    return ([Win32]::GetForegroundWindow() -eq $proc.MainWindowHandle)
+}
+
+# Block until the game is foreground. Tries to take focus itself first (the
+# normal case: nothing else wants it), but if that is refused it WAITS
+# rather than clicking into another window or fighting the user for focus -
+# the user may deliberately be doing something else, and a stalled batch is
+# far cheaper than a batch full of bogus failures.
+function Wait-ForGameFocus($timeoutMs = 600000, $pollMs = 1000, $refocusEveryMs = 15000) {
+    if (Test-GameFocused) { return $true }
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $lastTry = -$refocusEveryMs
+    while ($sw.ElapsedMilliseconds -lt $timeoutMs) {
+        if ($sw.ElapsedMilliseconds - $lastTry -ge $refocusEveryMs) {
+            $lastTry = $sw.ElapsedMilliseconds
+            Focus-GameWindow | Out-Null
+            if (Test-GameFocused) {
+                Write-Host "FOCUS_REGAINED after $($sw.ElapsedMilliseconds)ms"
+                return $true
+            }
+            Write-Host "WAITING_FOR_FOCUS game is not foreground ($($sw.ElapsedMilliseconds)ms) - pausing"
+        }
+        Start-Sleep -Milliseconds $pollMs
+        if (Test-GameFocused) {
+            Write-Host "FOCUS_REGAINED after $($sw.ElapsedMilliseconds)ms"
+            return $true
+        }
+    }
+    Write-Host "FOCUS_TIMEOUT game never became foreground within ${timeoutMs}ms"
+    return $false
+}
+
 function Move-CursorSmooth($x, $y, $steps = 15, $delayMs = 8) {
     $start = [System.Windows.Forms.Cursor]::Position
     for ($i = 1; $i -le $steps; $i++) {
@@ -216,27 +263,63 @@ function Test-MenuOpen {
     return $text -match "Main Menu"
 }
 
-# Moves the cursor onto the button ONCE, then fires clicks in a tight loop
-# without re-moving - clicking Generate Map repeatedly is harmless (just
-# re-rolls the seed), and Generate Map's click is known to sometimes not
-# register at all, so this polls the Seed box (via OCR) for a change rather
-# than assuming a single click worked.
-function Click-GenerateMapVerified($genX, $genY, $maxAttempts = 10, $pollMs = 150) {
+# Clicks Generate Map and waits for the Seed box (via OCR) to prove the map
+# actually regenerated, rather than assuming a single click worked.
+#
+# CLICK ONCE, THEN WAIT. An earlier version fired a click on every poll
+# iteration, on the theory that Generate's click "sometimes doesn't register"
+# and that re-clicking is harmless. Measured directly (2026-08-08): a single
+# click always registers, but the Seed box does not update until generation
+# FINISHES, which takes ~3.2s for a 240x240 map - the UI is blocked
+# throughout. So the old loop's extra clicks were not free: each one landed
+# mid-generation and re-triggered generation from the top, pushing the seed
+# update further away every time it polled. That is why it would report
+# GENERATE_FAILED on scripts that generate perfectly well by hand, and why
+# it "succeeded on attempt 6" when it did - it was racing itself. Being
+# patient between clicks is both more reliable AND faster.
+#
+# $clickBudgetMs is wall-clock per click (measured on a stopwatch, not by
+# summing sleeps - each Read-Seed OCR costs a few hundred ms of its own).
+# $clickBudgetMs defaults generously because STOCK maps are far slower to
+# generate than this project's own scripts - ours finish in ~3s, a stock
+# script with the full System A include chain can take much longer. Waiting
+# costs nothing when generation is fast (the poll exits as soon as the seed
+# moves); guessing too low silently reports a working map as broken.
+function Click-GenerateMapVerified($genX, $genY, $maxClicks = 3, $pollMs = 250, $clickBudgetMs = 90000) {
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    if (-not (Wait-ForGameFocus)) { return $false }
     Move-CursorSmooth $genX $genY
     $before = Read-Seed
-    $tSeed = $sw.ElapsedMilliseconds
-    for ($i = 1; $i -le $maxAttempts; $i++) {
+    for ($i = 1; $i -le $maxClicks; $i++) {
         if ($i -gt 1) { Jitter-Cursor $genX $genY }
         Click-Repeat
-        Start-Sleep -Milliseconds $pollMs
-        $after = Read-Seed
-        if ($after -ne $before -and $after -ne "") {
-            Write-Host "GENERATE_OK attempt=$i seed=$after elapsed=$($sw.ElapsedMilliseconds)ms first_ocr=${tSeed}ms"
-            return $true
+        $deadline = $sw.ElapsedMilliseconds + $clickBudgetMs
+        $lostFocus = $false
+        while ($sw.ElapsedMilliseconds -lt $deadline) {
+            Start-Sleep -Milliseconds $pollMs
+            # Focus loss invalidates this attempt: the click may never have
+            # reached the game, and the screenshot OCR below may be reading
+            # a window that is not even the game. Recover focus, then retry
+            # the click rather than recording a bogus failure.
+            if (-not (Test-GameFocused)) {
+                Write-Host "click=$i FOCUS LOST mid-wait - attempt is void, will re-click"
+                if (-not (Wait-ForGameFocus)) { return $false }
+                Move-CursorSmooth $genX $genY
+                $before = Read-Seed   # re-baseline: the map may have generated
+                $lostFocus = $true
+                break
+            }
+            $after = Read-Seed
+            if ($after -ne $before -and $after -ne "") {
+                Write-Host "GENERATE_OK click=$i seed=$after elapsed=$($sw.ElapsedMilliseconds)ms"
+                return $true
+            }
+        }
+        if (-not $lostFocus) {
+            Write-Host "click=$i no seed change after ${clickBudgetMs}ms - reclicking"
         }
     }
-    Write-Host "GENERATE_FAILED after=$maxAttempts (seed stayed '$before') elapsed=$($sw.ElapsedMilliseconds)ms"
+    Write-Host "GENERATE_FAILED after=$maxClicks clicks (seed stayed '$before') elapsed=$($sw.ElapsedMilliseconds)ms"
     return $false
 }
 
@@ -261,8 +344,13 @@ function Newest-Scenario($scenarioDir) {
 # on the fast path, so a normal successful save costs zero OCR calls.
 function Click-SaveVerified($saveX, $saveY, $menuX, $menuY, $scenarioDir, $beforeTime, $maxAttempts = 10, $pollMs = 150, $fileBudgetMs = 1200, $fileStepMs = 150) {
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    if (-not (Wait-ForGameFocus)) { return $false }
     Move-CursorSmooth $saveX $saveY
     for ($i = 1; $i -le $maxAttempts; $i++) {
+        if (-not (Test-GameFocused)) {
+            if (-not (Wait-ForGameFocus)) { return $false }
+            Move-CursorSmooth $saveX $saveY
+        }
         if ($i -gt 1) { Jitter-Cursor $saveX $saveY }
         Click-Repeat
         Start-Sleep -Milliseconds $pollMs
