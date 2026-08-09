@@ -266,10 +266,15 @@ def generate(args) -> dict:
     if args.tight_resources:
         opts = rms.RmsOptions(**{**opts.__dict__, "tight_resource_backstop": True})
 
+    use_per_player_forest = opts.per_player_forest and not args.legacy_resources
     land_section = rms_land.build_land_generation(
         discs, size, starts,
         target_tiles=int(mask.sum()), terrain_type=opts.land,
         clumping_factor=args.clumping_factor,
+        # Painting the player lands with a placeholder is what makes the
+        # per-player forest addressable; without that pass they must stay
+        # ordinary land or the placeholder would never be cleaned up.
+        player_terrain=(rms.PLAYER_SPAWN_PLACEHOLDER if use_per_player_forest else None),
     )
     script = rms.build_rms(args.name, args.proj, size, land_section, opts, ai_type,
                            system_a=not args.legacy_resources)

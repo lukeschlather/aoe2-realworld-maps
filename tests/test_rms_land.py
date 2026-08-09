@@ -156,3 +156,47 @@ def test_system_a_replaces_the_1999_include():
     for include in ("town_centres.inc", "villagers.inc", "stragglers.inc",
                     "starting_resources.inc"):
         assert f"#include_drs includes/{include}" in text
+
+
+def test_per_player_forest_splits_before_budgeting():
+    """The split pass is load-bearing and must come before the grow pass.
+
+    Each `create_terrain ... number_of_clumps 1` off SPAWN_PLACEHOLDER
+    consumes exactly one player region, giving it its own terrain id.
+    Without that, a single budgeted forest block is free to spend the whole
+    budget on one player - which is the very failure the per-player forest
+    exists to fix.
+    """
+    from rwmaps.rms import build_per_player_forest
+
+    text = build_per_player_forest(forest="FOREST", land="GRASS",
+                                   tiles=100, clumps=3, n_players=8)
+    split = text.index("PLACEHOLDER_TERRAIN_A")
+    grow = text.index("number_of_tiles                100")
+    assert split < grow, "regions must be split before any forest is budgeted"
+
+    # every region addressed exactly once in each of the three passes
+    for letter in "ABCDEFGH":
+        assert text.count(f"PLACEHOLDER_TERRAIN_{letter}") == 3
+
+    # and nothing may be left painted as a placeholder
+    assert text.rindex("SPAWN_PLACEHOLDER") > grow
+
+
+def test_per_player_forest_needs_placeholder_player_lands():
+    """The forest is addressable only because the player lands carry a
+    placeholder terrain - the two have to be switched on together."""
+    import numpy as np
+
+    from rwmaps.rms import PLAYER_SPAWN_PLACEHOLDER, RmsOptions, build_rms
+    from rwmaps.rms_land import build_land_generation, cover_mask
+
+    mask = np.zeros((80, 80), bool)
+    mask[20:60, 20:60] = True
+    land = build_land_generation(cover_mask(mask, 20), 80, [(40, 40)],
+                                 player_terrain=PLAYER_SPAWN_PLACEHOLDER)
+    assert f"terrain_type                  {PLAYER_SPAWN_PLACEHOLDER}" in land
+    text = build_rms("T", "laea", 80, land, RmsOptions(per_player_forest=True))
+    assert "per-player forest" in text
+    # the coastline itself must NOT be painted with the placeholder
+    assert land.count(PLAYER_SPAWN_PLACEHOLDER) == 1

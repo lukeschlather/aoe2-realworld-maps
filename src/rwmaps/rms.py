@@ -102,6 +102,103 @@ create_terrain {land_alt2}
 #: Emitted into the forest block when ``RmsOptions.forest_avoid_starts``.
 _FOREST_AVOIDANCE = "  set_avoid_player_start_areas\n"
 
+#: The terrain each player's own land is painted with, so that a per-player
+#: forest can be grown inside it. Engine constant ``SPAWN_PLACEHOLDER``.
+PLAYER_SPAWN_PLACEHOLDER = "SPAWN_PLACEHOLDER"
+
+#: One addressable placeholder terrain per player, from the engine's
+#: ``constants.inc``. Eight, which is the map's player cap.
+_PLACEHOLDER_TERRAINS = [f"PLACEHOLDER_TERRAIN_{c}" for c in "ABCDEFGH"]
+
+
+def build_per_player_forest(
+    forest: str,
+    land: str,
+    tiles: int,
+    clumps: int,
+    n_players: int = 8,
+) -> str:
+    """Give every player their own budgeted forest near their start.
+
+    The map-wide ``create_terrain FOREST`` block cannot do this. Its
+    ``land_percent`` is a share of the *whole map's* land, so on a
+    fragmented region the wood lands wherever there happens to be room -
+    which is why Britain ends up with 3361 forest tiles in France that no
+    player can reach while one player has 37 within reach. Raising the
+    clump count does not help (it is a denominator problem, not a
+    granularity one) and dropping ``set_avoid_player_start_areas`` is
+    catastrophic (forest spawns on the starts and entombs players). Both
+    were measured; see ``RmsOptions``.
+
+    This is the mechanism the stock ``includes/forest.inc`` uses, written
+    out for our own land shape rather than included wholesale - the include
+    wants roughly twenty ``#const``s and a set of lobby-driven
+    ``RND_SPAWN_*`` branches we would only be pinning to fixed values
+    anyway. Taking the mechanism and not the flavor is the same call this
+    project already made about Great Wall's resource budget.
+
+    Three passes, and the first is the load-bearing one:
+
+    1. **Split.** Each ``create_terrain`` with ``number_of_clumps 1``
+       consumes exactly one of the eight disjoint player regions, giving
+       each its own terrain id. Without this a single budgeted forest
+       block would be free to spend the entire budget on one player.
+    2. **Grow.** One forest per region, with its own tile budget, kept off
+       the town centre by ``set_avoid_player_start_areas``.
+    3. **Clean up.** Whatever placeholder is left becomes ordinary land -
+       otherwise the unused part of every player's region renders as a
+       placeholder terrain.
+    """
+    out: list[str] = [
+        "",
+        "/* --- per-player forest ------------------------------------------",
+        " * Each player's own land was painted SPAWN_PLACEHOLDER, so it can be",
+        " * split into eight individually addressable regions and given its own",
+        " * wood budget. A map-wide forest block spends its budget wherever",
+        " * there is room, which is how a region like Britain ends up with most",
+        " * of its wood in France where nobody can reach it.",
+        " */",
+        "",
+    ]
+    used = _PLACEHOLDER_TERRAINS[:n_players]
+
+    out.append("/* 1. split: one clump each consumes exactly one player region */")
+    for name in used:
+        out.append(
+            f"create_terrain {name}\n"
+            "{\n"
+            f"  base_terrain                   {PLAYER_SPAWN_PLACEHOLDER}\n"
+            "  land_percent                   100\n"
+            "  number_of_clumps               1\n"
+            "}\n"
+        )
+
+    out.append("/* 2. grow: one budgeted forest per player, kept off the TC */")
+    for name in used:
+        out.append(
+            f"create_terrain {forest}\n"
+            "{\n"
+            f"  base_terrain                   {name}\n"
+            f"  number_of_tiles                {tiles}\n"
+            f"  number_of_clumps               {clumps}\n"
+            "  clumping_factor                15\n"
+            "  set_avoid_player_start_areas\n"
+            "}\n"
+        )
+
+    out.append("/* 3. clean up: unused placeholder becomes ordinary land */")
+    for name in used + [PLAYER_SPAWN_PLACEHOLDER]:
+        out.append(
+            f"create_terrain {land}\n"
+            "{{\n".replace("{{", "{")
+            + f"  base_terrain                   {name}\n"
+            "  land_percent                   100\n"
+            "  number_of_clumps               512\n"
+            "  set_scale_by_groups\n"
+            "}\n"
+        )
+    return "\n".join(out)
+
 _ELEVATION = """
 <ELEVATION_GENERATION>
 
@@ -332,6 +429,17 @@ class RmsOptions:
     #: modern equivalent *replaces* this rather than stacking with it.
     tight_resource_backstop: bool = False
 
+    #: Give each player their own budgeted forest next to their start, on
+    #: top of the map-wide one. See ``build_per_player_forest`` - this is
+    #: the only lever found that raises the WORST player's reachable wood
+    #: rather than just moving the average around.
+    per_player_forest: bool = True
+    #: Tiles and clumps for that forest, per player. The player's own land
+    #: is PLAYER_LAND_TILES (240), so the budget has to fit inside it with
+    #: room left for the town centre and its resources.
+    player_forest_tiles: int = 100
+    player_forest_clumps: int = 3
+
     #: System A configuration. Ignored on the legacy path.
     pins: ThemePins = field(default_factory=ThemePins)
     flavor: ResourceFlavor = field(default_factory=ResourceFlavor)
@@ -469,6 +577,15 @@ def _build_rms_system_a(
             forest_avoidance=_FOREST_AVOIDANCE if opts.forest_avoid_starts else "",
         ),
     ]
+    if opts.per_player_forest:
+        parts.append(
+            build_per_player_forest(
+                forest=opts.forest,
+                land=opts.land,
+                tiles=opts.player_forest_tiles,
+                clumps=opts.player_forest_clumps,
+            )
+        )
     if opts.elevation:
         parts.append(
             _ELEVATION.format(

@@ -150,6 +150,7 @@ def build_land_generation(
     terrain_type: str = "GRASS",
     base_terrain: str = "WATER",
     clumping_factor: int = 8,
+    player_terrain: str | None = None,
 ) -> str:
     """Render the ``<LAND_GENERATION>`` section.
 
@@ -161,6 +162,14 @@ def build_land_generation(
     ``starts`` are tile positions for players; each becomes its own land with
     ``assign_to_player``, which is what stops the engine dropping a Town Centre
     in the sea.
+
+    ``player_terrain`` paints those player lands - and only those - with a
+    different terrain than the coastline. Passing a placeholder terrain here
+    is what makes a per-player forest possible: it leaves eight disjoint,
+    individually addressable regions, one per start, which
+    ``rms.build_per_player_forest`` then splits and budgets separately. Only
+    the terrain *label* changes; the land's shape and size are untouched, so
+    the coastline is unaffected.
     """
     parts = [
         "<LAND_GENERATION>",
@@ -181,7 +190,8 @@ def build_land_generation(
         parts.append("/* deliberate, fairness-checked start positions */")
         for i, (y, x) in enumerate(starts, start=1):
             parts.append(
-                _land_block(Disc(y, x, 9.0), size, terrain_type, 0,
+                _land_block(Disc(y, x, 9.0), size,
+                            player_terrain or terrain_type, 0,
                             player=i, tiles=PLAYER_LAND_TILES,
                             clumping_factor=clumping_factor)
             )
