@@ -46,7 +46,9 @@ def distance_to_water(mask: np.ndarray) -> np.ndarray:
 _NEIGHBOURHOOD = np.ones((3, 3), dtype=bool)
 
 
-def land_path_distance(mask: np.ndarray, start: tuple[int, int]) -> np.ndarray:
+def land_path_distance(
+    mask: np.ndarray, start: tuple[int, int], max_distance: float | None = None
+) -> np.ndarray:
     """Shortest walking distance over land from ``start`` to every tile.
 
     Breadth-first over 8-connected land, with diagonal steps costing the same as
@@ -62,6 +64,13 @@ def land_path_distance(mask: np.ndarray, start: tuple[int, int]) -> np.ndarray:
     inner loop of every fairness comparison (eight sources per capture, and the
     project's stated goal is ~1000 captures), so the constant factor is not
     incidental.
+
+    ``max_distance`` stops the wavefront early, leaving everything beyond it
+    at ``inf``. One full-map call costs ~110ms, and the start-placement
+    annealer makes one per proposal - so an uncapped search costs minutes per
+    region. Callers that only care about distances up to some bound (the
+    annealer's score saturates past twice the separation floor) should pass
+    it; the returned values within the bound are identical either way.
     """
     dist = np.full(mask.shape, np.inf)
     sy, sx = start
@@ -75,6 +84,8 @@ def land_path_distance(mask: np.ndarray, start: tuple[int, int]) -> np.ndarray:
 
     d = 0.0
     while frontier.any():
+        if max_distance is not None and d >= max_distance:
+            break
         d += 1.0
         frontier = binary_dilation(frontier, _NEIGHBOURHOOD) & mask & ~visited
         dist[frontier] = d
@@ -271,58 +282,109 @@ def _forced_component_seeds_geodesic(
 _COVERAGE_RADIUS = 40.0
 
 
+#: Radius, in walking tiles, over which a start's "available land" is
+#: counted. Matches ``start_quality``'s radius and the band every resource
+#: tier places into.
+_LAND_RADIUS = 20.0
+
+#: Reachable land (tiles within ``_LAND_RADIUS``) a start needs before extra
+#: land stops mattering. Taken from the N=10 capture pass over 880 real
+#: starts, which measured how often a start could reach *none* of some
+#: resource kind against how much open ground it had:
+#:
+#: | reachable tiles | starts | missing something |
+#: |-----------------|--------|-------------------|
+#: | 200-399         | 15     | 100%              |
+#: | 400-599         | 111    | 68%               |
+#: | 600-799         | 86     | 22%               |
+#: | 800-999         | 114    | 4%                |
+#: | 1000+           | 554    | ~0%               |
+#:
+#: 1000 is where the failure rate reaches zero. This is measured on the
+#: land mask before forest exists, so it reads slightly higher than the
+#: capture-time figure for the same spot.
+_LAND_TARGET = 1000.0
+
+
 def _score_starts(
-    valid: np.ndarray, depth: np.ndarray, picks_yx: list[tuple[int, int]],
-    paths: list[np.ndarray], min_separation: float, coverage_radius: float,
+    picks_yx: list[tuple[int, int]],
+    paths: list[np.ndarray], min_separation: float,
 ) -> float:
-    """Single scalar loss (lower is better) directly combining the four
-    things that actually make a multi-landmass start layout good or bad,
-    replacing the previous quality-weighted-Lloyd-relaxation approach, which
-    optimized proxies for these (raw pairwise separation; a quality-weighted
-    centroid) that empirically diverged from them on Italy: relaxation kept
-    re-centering picks toward the Po valley (the single highest-quality
-    region) even from initializations that started elsewhere, silently
-    erasing the Italian peninsula's own pick, and its duplicate-seat penalty
-    only counted duplicates on a non-largest component, so two picks landing
-    16 tiles apart on the (largest) mainland scored as fine.
+    """Single scalar loss (lower is better) over the two things that decide
+    whether a start layout is any good: **how far apart the players are**
+    and **how much land each one actually has**.
 
-    - **coverage**: fraction of ``valid`` land farther than ``coverage_radius``
-      walking tiles from EVERY pick. This is what a duplicate pick on an
-      already-covered landmass wastes, and what a skipped landmass shows up
-      as directly - no per-region bookkeeping needed, it falls out of the
-      same land mask ``choose_starts`` already restricted to qualifying
-      components.
-    - **separation floor**: penalizes any pair closer than ``min_separation``,
-      applied to every pair, not just ones on different components.
-    - **spread uniformity**: ``(max - min) / mean`` pairwise separation, so a
-      single badly-clustered pair can't hide behind good separation
-      elsewhere.
-    - **water distance**: mean per-pick distance-to-water, rewarding room to
-      build over a pick planted right on a coastal tip.
+    This replaces a four-term loss whose dominant component (weight 2.0 of
+    4.4) was *coverage* - the fraction of the map's land more than 40
+    walking tiles from every pick. Coverage is a property of the map, not of
+    any player: it rewards spreading picks out to blanket the landmass, and
+    it is indifferent to whether the spot a pick lands on can support a
+    start. On Italy that is the difference between seating players where the
+    geography is interesting and seating them wherever the remaining
+    uncovered land happens to be. Coverage and distance-to-water are both
+    gone; nothing here is a proxy for anything.
+
+    - **available land**: reachable land within ``_LAND_RADIUS`` walking
+      tiles of each pick, scored mostly on the WORST-off pick. Reachable,
+      not a straight-line disc, so land across a channel does not count.
+      This is the term with direct evidence behind it - see
+      ``_LAND_TARGET``, measured over 880 real starts.
+    - **separation**: the *minimum* pairwise walking distance between picks,
+      rewarded up to twice ``min_separation`` and penalised hard below it.
+      Maximising the minimum is what stops one cramped pair hiding behind
+      good separation elsewhere, which is what the old spread-uniformity
+      term was approximating.
+
+    The two pull against each other on purpose, and that tension is the
+    point: separation alone drives every start onto a coastal tip or a
+    peninsula's end, which is exactly where a player has least room to play.
     """
-    min_dist = np.min(np.stack(paths), axis=0)
-    total = float(valid.sum())
-    uncovered = float((valid & (min_dist > coverage_radius)).sum()) / total if total else 0.0
+    lands = [float((p <= _LAND_RADIUS).sum()) for p in paths]
+    worst_land = min(lands)
+    mean_land = float(np.mean(lands))
+    # Weighted toward the worst-off player: a layout is as fair as its most
+    # cramped start, and averaging lets seven good starts hide one unplayable
+    # one. Both terms saturate at _LAND_TARGET so that beyond "enough", extra
+    # land stops competing with separation.
+    land_score = (0.75 * min(worst_land / _LAND_TARGET, 1.0)
+                  + 0.25 * min(mean_land / _LAND_TARGET, 1.0))
 
+    # Separation is measured two ways because they mean different things,
+    # and using only one of them is a real bug either way.
+    #
+    # The FLOOR is straight-line. An earlier version scored a geodesically
+    # unreachable pair as "on another island, therefore maximally far",
+    # which let the search put two town centres NINE tiles apart across a
+    # strait and call it perfect separation - measured on Japan, where min
+    # separation collapsed 46 -> 9. Water is not distance: those two players
+    # are in each other's laps the moment either builds a dock.
+    #
+    # The REWARD is walking distance, which is what makes a peninsula
+    # genuinely far even when it is close as the crow flies - the reason
+    # this project moved to geodesic distances in the first place.
     k = len(picks_yx)
-    seps = []
+    walk_seps, line_seps = [], []
     for i in range(k):
         for j in range(i + 1, k):
             y, x = picks_yx[j]
             d = paths[i][y, x]
-            seps.append(d if np.isfinite(d) else 1e6)
-    min_sep, max_sep, mean_sep = min(seps), max(seps), float(np.mean(seps))
-    sep_penalty = max(0.0, (min_separation - min_sep) / min_separation)
-    spread_penalty = (max_sep - min_sep) / mean_sep if mean_sep > 0 else 0.0
-    water = float(np.mean([depth[y, x] for y, x in picks_yx]))
-    water_bonus = min(water / 20.0, 1.0)
+            line = math.hypot(picks_yx[i][0] - y, picks_yx[i][1] - x)
+            line_seps.append(line)
+            # Unreachable (or past the search cap) falls back to the
+            # straight-line distance rather than to "infinitely far".
+            walk_seps.append(d if np.isfinite(d) else line)
+    min_walk, min_line = min(walk_seps), min(line_seps)
+    sep_score = min(min_walk / (2.0 * min_separation), 1.0)
+    sep_penalty = max(0.0, (min_separation - min_line) / min_separation)
 
-    return 2.0 * uncovered + 1.5 * sep_penalty + 0.5 * spread_penalty - 0.4 * water_bonus
+    # The floor is weighted well above the land term on purpose: no amount
+    # of elbow room compensates for spawning next to a neighbour.
+    return -(1.0 * land_score + 0.8 * sep_score) + 3.0 * sep_penalty
 
 
 def _anneal_starts(
-    mask: np.ndarray, valid: np.ndarray, depth: np.ndarray, coords: np.ndarray,
-    players: int, init_pick: list[int], min_separation: float, coverage_radius: float,
+    mask: np.ndarray, coords: np.ndarray,
+    players: int, init_pick: list[int], min_separation: float,
     iters: int, rng: np.random.Generator,
 ) -> tuple[list[int], float]:
     """Simulated annealing over which candidate each of the ``players`` picks
@@ -337,22 +399,34 @@ def _anneal_starts(
     worse-scoring move early on (``temp`` starts high, cools linearly)
     specifically so a swap that looks locally bad but opens up an unclaimed
     landmass isn't rejected before its benefit shows up in later moves.
-    Proposals are weighted toward whichever tile is currently worst-covered
-    (see ``w`` below) so the search actively hunts for unclaimed land rather
-    than only stumbling onto it by chance, with a random fallback so it can
-    still explore elsewhere.
+    Proposals target the objective on both ends: the pick chosen for a move
+    is usually the one with the LEAST available land (the term the loss
+    weights most heavily), and the destination is usually a tile far from
+    every current pick. A random fallback on each keeps the search from
+    tunnelling on one player.
     """
     n = len(coords)
+    # Distances past twice the separation floor cannot change the score:
+    # sep_score saturates there and the floor penalty only looks below
+    # min_separation. Capping the wavefront there makes each proposal ~3x
+    # cheaper with identical results - and this loop runs thousands of times
+    # per region.
+    cap = 2.0 * min_separation
     picks = list(init_pick)
     picks_yx = [(int(coords[i][0]), int(coords[i][1])) for i in picks]
-    paths = [land_path_distance(mask, p) for p in picks_yx]
-    cur_loss = _score_starts(valid, depth, picks_yx, paths, min_separation, coverage_radius)
+    paths = [land_path_distance(mask, p, cap) for p in picks_yx]
+    cur_loss = _score_starts(picks_yx, paths, min_separation)
     best_picks, best_loss = list(picks), cur_loss
 
     cxs, cys = coords[:, 1].astype(int), coords[:, 0].astype(int)
     for step in range(iters):
         temp = max(1e-6, 0.3 * (1.0 - step / iters))
-        slot = int(rng.integers(0, players))
+        if rng.random() < 0.6:
+            # Move the most cramped player - the loss is dominated by the
+            # worst-off pick, so that is where an improvement can come from.
+            slot = int(np.argmin([float((p <= _LAND_RADIUS).sum()) for p in paths]))
+        else:
+            slot = int(rng.integers(0, players))
         if rng.random() < 0.6:
             min_dist = np.min(np.stack(paths), axis=0)
             cand_dist = min_dist[cys, cxs]
@@ -367,8 +441,8 @@ def _anneal_starts(
         trial_yx = list(picks_yx)
         trial_yx[slot] = (int(coords[new_idx][0]), int(coords[new_idx][1]))
         trial_paths = list(paths)
-        trial_paths[slot] = land_path_distance(mask, trial_yx[slot])
-        loss = _score_starts(valid, depth, trial_yx, trial_paths, min_separation, coverage_radius)
+        trial_paths[slot] = land_path_distance(mask, trial_yx[slot], cap)
+        loss = _score_starts(trial_yx, trial_paths, min_separation)
 
         if loss < cur_loss or rng.random() < math.exp(-(loss - cur_loss) / temp):
             picks[slot] = new_idx
@@ -380,10 +454,10 @@ def _anneal_starts(
 
 
 def _multistart_anneal(
-    mask: np.ndarray, valid: np.ndarray, depth: np.ndarray, coords: np.ndarray,
+    mask: np.ndarray, coords: np.ndarray,
     quality: np.ndarray, players: int, labels: np.ndarray,
-    min_separation: float, coverage_radius: float = _COVERAGE_RADIUS,
-    n_seeds: int = 4, iters: int = 400, seed: int = 12345,
+    min_separation: float,
+    n_seeds: int = 3, iters: int = 150, seed: int = 12345,
 ) -> list[int]:
     """Run ``_anneal_starts`` from several different initializations - the
     same quality-ranked geodesic farthest-point packs and forced-per-
@@ -416,8 +490,7 @@ def _multistart_anneal(
         if len(init) < players:
             continue
         picks, loss = _anneal_starts(
-            mask, valid, depth, coords, players, init, min_separation, coverage_radius,
-            iters, rng,
+            mask, coords, players, init, min_separation, iters, rng,
         )
         if loss < best_loss:
             best_loss, best_pick = loss, picks
@@ -496,6 +569,7 @@ def choose_starts(
     max_candidates: int = 6000,
     min_separation: float = 56.0,
     spread_islands: bool = False,
+    anneal: bool = True,
 ) -> list[tuple[int, int]]:
     """Pick start tiles that are both *good* and *far apart*.
 
@@ -683,9 +757,19 @@ def choose_starts(
             if best_sep >= min_separation:
                 break
 
-    if spread_islands:
+    # Anneal on every region, not only under spread_islands. The objective
+    # (separation + available land, see _score_starts) is what makes a start
+    # layout good on ANY coastline; farthest-point packing above is now only
+    # an initialization for it. Previously this ran only for spread_islands,
+    # which left every other region on raw farthest-point selection - and
+    # that is what seats a player on a scrap of land, measured at N=10 as
+    # the single strongest predictor of a broken start.
+    # ``anneal=False`` leaves the raw farthest-point pack, which is what every
+    # region except spread_islands used before. Kept so old and new placement
+    # can be measured against each other on the same mask.
+    if anneal:
         best_pick = _multistart_anneal(
-            mask, valid, depth, best_coords, best_q, players, labels, min_separation,
+            mask, best_coords, best_q, players, labels, min_separation,
         )
 
     return [(int(best_coords[i][0]), int(best_coords[i][1])) for i in best_pick]
