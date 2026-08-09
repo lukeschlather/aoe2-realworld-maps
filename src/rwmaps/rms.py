@@ -77,8 +77,7 @@ create_terrain {forest}
   spacing_to_other_terrain_types 5
   land_percent                   {forest_percent}
   number_of_clumps               {forest_clumps}
-  set_avoid_player_start_areas
-  set_scale_by_groups
+{forest_avoidance}  set_scale_by_groups
 }}
 
 create_terrain {land_alt}
@@ -99,6 +98,9 @@ create_terrain {land_alt2}
   set_scale_by_size
 }}
 """
+
+#: Emitted into the forest block when ``RmsOptions.forest_avoid_starts``.
+_FOREST_AVOIDANCE = "  set_avoid_player_start_areas\n"
 
 _ELEVATION = """
 <ELEVATION_GENERATION>
@@ -277,6 +279,46 @@ class RmsOptions:
     #: ``SPAWN_PLACEHOLDER`` terrain that ``rms_land`` does not paint, so
     #: adopting it is a land-generation change rather than a resource one.
     forest_clumps: int = 12
+    #: Whether the map-wide forest avoids player start areas.
+    #:
+    #: This pushes wood AWAY from players and into whatever land nobody
+    #: starts on. On a region like Britain that land is France and the
+    #: Scandinavian corner, and the result is a map that is simultaneously
+    #: the most densely wooded one measured (0.256 forest share of land,
+    #: same as jungle-map Yucatan) and the most wood-POOR per player
+    #: (mean 127 reachable forest tiles, below every stock map measured,
+    #: with one player on 37). 3361 of its forest tiles sit where no player
+    #: can reach them at all.
+    #:
+    #: Density and adequacy are different questions. This knob looked like
+    #: the one that separates them - move wood toward players without
+    #: changing how much of it there is.
+    #:
+    #: NEGATIVE RESULT, recorded so it is not re-tried: turning it off is
+    #: catastrophic. ``set_avoid_player_start_areas`` is not a nicety, it is
+    #: what stops forest spawning *on top of* a start. Measured, one sample
+    #: each, everything else held constant:
+    #:
+    #: | condition          | wood/player      | open tiles | players w/ nothing |
+    #: |--------------------|------------------|------------|--------------------|
+    #: | Britain avoid=on   | 37-247 (mean127) | 707-1111   | 0 of 8             |
+    #: | Britain avoid=OFF  | 0-108 (mean 23)  | 0-474      | 7 of 8             |
+    #: | Greece  avoid=on   | 151-236 (mean180)| 741-1217   | 0 of 8             |
+    #: | Greece  avoid=OFF  | 0-224 (mean 145) | 0-1075     | 2 of 8             |
+    #:
+    #: Players are entombed in trees - the "walled in by wood" failure this
+    #: project has seen reported in the wild, reproduced on demand. Note it
+    #: also made wood *worse*, not better: unclaimed forest went UP (3361 ->
+    #: 5605 on Britain), because forest that lands on a start blocks the
+    #: player off from the rest of their own wood.
+    #:
+    #: The stock mechanism is different in a way that matters: forest.inc
+    #: budgets a forest per player and keeps it ``PLAYER_FOREST_AVOIDANCE``
+    #: (6-9) tiles off the town centre - "cluster near the start but not on
+    #: it", where this flag only offers "near" or "avoid the start area
+    #: entirely". Getting that behaviour needs the per-player
+    #: SPAWN_PLACEHOLDER terrain rms_land does not paint yet.
+    forest_avoid_starts: bool = True
     max_elevation: int = 7
     elevation_clumps: int = 8
     elevation_tiles: int = 600
@@ -379,6 +421,7 @@ def build_rms(
             forest=opts.forest,
             forest_percent=opts.forest_percent,
             forest_clumps=opts.forest_clumps,
+            forest_avoidance=_FOREST_AVOIDANCE if opts.forest_avoid_starts else "",
         ),
     ]
     if opts.elevation:
@@ -423,6 +466,7 @@ def _build_rms_system_a(
             forest=opts.forest,
             forest_percent=opts.forest_percent,
             forest_clumps=opts.forest_clumps,
+            forest_avoidance=_FOREST_AVOIDANCE if opts.forest_avoid_starts else "",
         ),
     ]
     if opts.elevation:

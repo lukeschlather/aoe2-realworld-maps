@@ -89,11 +89,19 @@ def _agg(profiles: list[dict]) -> dict:
             "n_starts": len(counts),
         }
 
-    wood_10, wood_20, strag, shore = [], [], [], []
+    # Wood is reported as tiles this player can actually reach - absolute,
+    # not as a share of nearby land. A share says how *wooded* a region is;
+    # it does not say whether there is *enough*, and those come apart badly.
+    # Britain is the densest-wooded map measured (0.256 of its land, same as
+    # jungle-map Yucatan) and simultaneously the most wood-poor per player
+    # (mean 127 reachable tiles, below every stock map), because it has so
+    # little land. Judging it by share alone would say "thin the forest" -
+    # which would starve it.
+    wood_reach, strag, shore, openness = [], [], [], []
     for prof in profiles:
         for p in prof["per_player"].values():
-            wood_10.append(p["wood"]["forest_tiles_within_10"])
-            wood_20.append(p["wood"]["forest_tiles_within_20"])
+            wood_reach.append(p["wood"]["forest_exclusive"] + p["wood"]["forest_contested"])
+            openness.append(p["wood"]["open_tiles_within_20"])
             strag.append(p["wood"]["stragglers_within_6"])
             shore.append(p["water"]["shore_fish_within_20"])
 
@@ -102,8 +110,9 @@ def _agg(profiles: list[dict]) -> dict:
         "n_samples": len(profiles),
         "kinds": rows,
         "wood": {
-            "forest_within_10_mean": round(statistics.fmean(wood_10), 1) if wood_10 else None,
-            "forest_within_20_mean": round(statistics.fmean(wood_20), 1) if wood_20 else None,
+            "reachable_tiles_mean": round(statistics.fmean(wood_reach), 1) if wood_reach else None,
+            "reachable_tiles_min": min(wood_reach) if wood_reach else None,
+            "open_tiles_min": min(openness) if openness else None,
             "stragglers_within_6_mean": round(statistics.fmean(strag), 1) if strag else None,
         },
         "shore_fish_within_20_mean": round(statistics.fmean(shore), 1) if shore else None,
@@ -132,15 +141,20 @@ def _print_table(groups: dict[str, dict]) -> None:
         print(f"{name:<16}{agg['n_samples']:>3}  {cells}")
 
     print()
-    head2 = (f"{'map':<16}{'forest<=10':>12}{'forest<=20':>12}"
+    print("Wood is REACHABLE tiles per player (absolute). 'open' is the smallest")
+    print("number of tiles any player can walk to within 20 - it collapses toward 0")
+    print("when a start is walled in by trees.")
+    print()
+    head2 = (f"{'map':<16}{'wood/player':>13}{'worst':>8}{'open worst':>12}"
              f"{'stragglers<=6':>15}{'shorefish<=20':>15}{'samples w/ a zero':>19}")
     print(head2)
     print("-" * len(head2))
     for name in names:
         agg = groups[name]
         w = agg["wood"]
-        print(f"{name:<16}{str(w['forest_within_10_mean']):>12}"
-              f"{str(w['forest_within_20_mean']):>12}"
+        print(f"{name:<16}{str(w['reachable_tiles_mean']):>13}"
+              f"{str(w['reachable_tiles_min']):>8}"
+              f"{str(w['open_tiles_min']):>12}"
               f"{str(w['stragglers_within_6_mean']):>15}"
               f"{str(agg['shore_fish_within_20_mean']):>15}"
               f"{str(agg['samples_with_a_zero']) + '/' + str(agg['n_samples']):>19}")
