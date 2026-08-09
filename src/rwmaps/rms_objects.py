@@ -158,6 +158,24 @@ class ResourceFlavor:
     freshwater_count: int = 0
     whale_count: int = 0
 
+    #: Neutral resources: gold/stone/forage/huntables out on the map, far
+    #: enough from every start that nobody owns them.
+    #:
+    #: This was missing entirely, and the analysis could not see it - our
+    #: maps measured as perfectly fair while having literally nothing to
+    #: fight over. Measured neutral supply (resources no player can reach
+    #: from home): stock Thames 40 gold / 126 forage / 99 deer, Yucatan 114
+    #: gold / 141 stone, Arabia 24 gold / 29 stone - against 0 of everything
+    #: on our Salish Sea and Black Sea.
+    #:
+    #: ``includes/resources_neutral.inc`` is referenced by no stock map,
+    #: which is the same signal that made ``land_and_water_resources.inc``
+    #: a trap - but unlike that file it carries the current May-27 timestamp
+    #: shared by the live includes (the orphan was May 2020 with a 1999
+    #: header) and uses the modern actor-area system throughout. It is
+    #: self-contained: no consts to configure, no map-specific land ids.
+    neutral_resources: bool = True
+
     relics: bool = True
     #: The "fill the leftover space" pass. Great Wall runs it
     #: unconditionally because it is land-starved; Arabia gates it behind
@@ -392,6 +410,20 @@ def build_objects(flavor: ResourceFlavor) -> str:
             "",
             f"  #const WHALE_COUNT {flavor.whale_count}",
             "  #include_drs includes/whales.inc",
+        ]
+    if flavor.neutral_resources:
+        lines += [
+            "",
+            "/* --- neutral supply ------------------------------------------------",
+            " * Gold/stone/forage/huntables out on the map, min_distance_to_players",
+            " * 26, belonging to nobody. Everything above this point is placed",
+            " * per-player, so without this pass there is nothing on the map worth",
+            " * leaving base for - measured: our maps had 0 neutral resources of",
+            " * every kind, where stock Thames carries more neutral forage and deer",
+            " * than it gives all eight players combined.",
+            " */",
+            "",
+            "  #include_drs includes/resources_neutral.inc",
         ]
     if flavor.relics:
         lines += ["", "/* --- relics ------------------------------------------------------- */",

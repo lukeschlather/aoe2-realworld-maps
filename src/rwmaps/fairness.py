@@ -214,7 +214,14 @@ def profile_capture(path: str | Path) -> dict:
     return {
         "n_players": len(tcs),
         "per_player": {str(p): v for p, v in per_player.items()},
+        # Resources no player can reach. Despite the name this is mostly a
+        # GOOD thing and was being read as waste: it is the neutral, out-on-
+        # the-map supply players have to leave home and fight over. Stock
+        # maps carry a lot of it - Thames places more neutral forage (126)
+        # and deer (99) than it gives every player put together - and a map
+        # with none has nothing to contest.
         "unclaimed": unclaimed,
+        "neutral_total": sum(unclaimed.values()),
         "forest": forest_stats["totals"],
         "spread": _spread(per_player, all_kinds),
         "zero_kinds_by_player": {

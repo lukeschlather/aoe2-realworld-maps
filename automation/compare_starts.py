@@ -105,6 +105,12 @@ def _agg(profiles: list[dict]) -> dict:
             strag.append(p["wood"]["stragglers_within_6"])
             shore.append(p["water"]["shore_fish_within_20"])
 
+    # Neutral supply: resources out on the map that no player can reach from
+    # home, i.e. what there is to leave base and fight over. Reported because
+    # it was invisible, and a map can look perfectly fair while having none.
+    neutral = {k: statistics.fmean([p["unclaimed"].get(k, 0) for p in profiles])
+               for k in LAND_KINDS}
+
     zero_samples = sum(1 for prof in profiles if prof["zero_kinds_by_player"])
     return {
         "n_samples": len(profiles),
@@ -116,6 +122,8 @@ def _agg(profiles: list[dict]) -> dict:
             "stragglers_within_6_mean": round(statistics.fmean(strag), 1) if strag else None,
         },
         "shore_fish_within_20_mean": round(statistics.fmean(shore), 1) if shore else None,
+        "neutral": {k: round(v, 1) for k, v in neutral.items()},
+        "neutral_total": round(sum(neutral.values()), 1),
         "samples_with_a_zero": zero_samples,
     }
 
@@ -141,6 +149,18 @@ def _print_table(groups: dict[str, dict]) -> None:
         print(f"{name:<16}{agg['n_samples']:>3}  {cells}")
 
     print()
+    print("NEUTRAL supply - resources on the map no player can reach from home,")
+    print("i.e. what there is to contest. A map with none has nothing to fight over.")
+    print()
+    head3 = f"{'map':<16}" + "".join(f"{k:>9}" for k in LAND_KINDS) + f"{'total':>9}"
+    print(head3)
+    print("-" * len(head3))
+    for name in names:
+        n = groups[name]["neutral"]
+        print(f"{name:<16}" + "".join(f"{n[k]:>9.1f}" for k in LAND_KINDS)
+              + f"{groups[name]['neutral_total']:>9.1f}")
+    print()
+
     print("Wood is REACHABLE tiles per player (absolute). 'open' is the smallest")
     print("number of tiles any player can walk to within 20 - it collapses toward 0")
     print("when a start is walled in by trees.")
