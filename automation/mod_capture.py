@@ -44,6 +44,7 @@ from rwmaps import scx_read  # noqa: E402
 from rwmaps.cli import REGIONS  # noqa: E402
 from aesthetic_metrics import cached_true_mask_geo, compute_metrics_from_truth  # noqa: E402
 from build_mod import MOD_REGIONS  # noqa: E402
+from rwmaps.fairness import profile_capture  # noqa: E402
 from sample_analysis import analyze_capture  # noqa: E402
 from tuning_matrix import (  # noqa: E402
     CANCEL_BTN,
@@ -187,7 +188,18 @@ def main():
             if len(rms_files) != 1:
                 print(f"  SKIP: expected 1 .rms, found {len(rms_files)}")
                 continue
-            shutil.copyfile(rms_files[0], SLOT_PATH)
+            # The game holds the slot file open while generating, so a swap
+            # issued too soon after the previous sample dies with EACCES.
+            # A multi-hour pass must not fall over on that.
+            for attempt in range(40):
+                try:
+                    shutil.copyfile(rms_files[0], SLOT_PATH)
+                    break
+                except PermissionError:
+                    time.sleep(0.5)
+            else:
+                print(f"  SKIP: slot stayed locked by the game")
+                continue
 
             ai_type = None
             for line in rms_files[0].read_text(encoding="ascii").splitlines():
@@ -225,6 +237,13 @@ def main():
                     real_mask = scx_read.read_land_mask(dest)
                     truth_10m = cached_true_mask_geo(lon, lat, span, rot, size=SIZE)
                     aesthetic = compute_metrics_from_truth(truth_10m, real_mask)
+                    # Recorded alongside, not instead of, analyze_capture's
+                    # numbers: that function's nearest-TC ownership is what
+                    # every previously captured run used, so replacing it
+                    # would make this run incomparable to them. The fairness
+                    # profile is the current model (exclusive / contested /
+                    # unclaimed, walkable-mask distances, wood and openness).
+                    fairness = profile_capture(dest)
                 except Exception as e:
                     print(f"  sample {sample_i}: ANALYSIS FAILED ({e})")
                     continue
@@ -233,7 +252,7 @@ def main():
                     "region": name, "extra_args": extra_args, "ai_map_type": ai_type,
                     "lon": lon, "lat": lat, "span_km": span, "rotate": rot,
                     "sample_index": sample_i,
-                    **analysis, "aesthetic": aesthetic,
+                    **analysis, "aesthetic": aesthetic, "fairness": fairness,
                 }
                 results_fh.write(json.dumps(record) + "\n")
                 results_fh.flush()
