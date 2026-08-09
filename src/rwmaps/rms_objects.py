@@ -177,6 +177,21 @@ class ResourceFlavor:
     neutral_resources: bool = True
 
     relics: bool = True
+    #: ``relics.inc`` places nothing unless one of RELIC_TYPE_UNRESTRICTED /
+    #: _BALANCED / _PLAYER / _SCATTER is defined - the whole include is one
+    #: big if/elseif on those. We defined none, so every map this project
+    #: has ever shipped had **zero relics**, measured: stock Arabia 10,
+    #: Thames 7, Yucatan 10, City of Lakes 14, ours 0.
+    #:
+    #: BALANCED is Arabia's choice and the fairness-oriented one. Thames
+    #: uses UNRESTRICTED with RELIC_DISTANCE 0 / RELIC_SPACING 12. Which
+    #: suits a real coastline - and in particular which one actually puts
+    #: relics out on the empty islands - is an open question needing a
+    #: render.
+    relic_type: str = "BALANCED"
+    #: Include default is 2. Stock maps land between 7 and 14.
+    relic_count: int = 10
+    relic_spacing: int | None = None
     #: The "fill the leftover space" pass. Great Wall runs it
     #: unconditionally because it is land-starved; Arabia gates it behind
     #: SPACIOUS_SETUP. Our narrow regions are closer to Great Wall.
@@ -426,8 +441,20 @@ def build_objects(flavor: ResourceFlavor) -> str:
             "  #include_drs includes/resources_neutral.inc",
         ]
     if flavor.relics:
-        lines += ["", "/* --- relics ------------------------------------------------------- */",
-                  "", "  #include_drs includes/relics.inc"]
+        lines += [
+            "",
+            "/* --- relics ------------------------------------------------------- */",
+            "",
+            f"  #const RELIC_COUNT {flavor.relic_count}",
+        ]
+        if flavor.relic_spacing is not None:
+            lines.append(f"  #const RELIC_SPACING {flavor.relic_spacing}")
+        lines += [
+            "  /* Without a RELIC_TYPE_* define the whole include is inert - which",
+            "   * is why every map this project shipped had zero relics. */",
+            f"  #define RELIC_TYPE_{flavor.relic_type}",
+            "  #include_drs includes/relics.inc",
+        ]
     if flavor.remote_resources:
         lines += [
             "",
