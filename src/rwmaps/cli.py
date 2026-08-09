@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import install as install_mod
-from . import raster, rms, rms_land, terrain
+from . import raster, rms, rms_land, rms_objects, terrain
 from .analysis import (
     assign_teams,
     choose_ai_map_type,
@@ -150,6 +150,12 @@ def build_parser() -> argparse.ArgumentParser:
                            "on narrow coastlines. System A needs no backstop - it "
                            "retries placements instead of dropping them - so this is "
                            "a no-op unless --legacy-resources is also passed")
+    grid.add_argument("--resource-flavor", default="default",
+                      choices=sorted(rms_objects.FLAVORS),
+                      help="named per-region resource budget (see FLAVORS in "
+                           "rms_objects.py). 'fragmented' tightens every "
+                           "placement ring for archipelago regions whose land "
+                           "is too broken up for the normal rings to land on")
     grid.add_argument("--legacy-resources", action="store_true",
                       help="generate resources with the pre-2026-08 layer "
                            "(land_and_water_resources.inc, a 1999 orphan no shipping "
@@ -265,6 +271,9 @@ def generate(args) -> dict:
         opts = rms.RmsOptions(**{**opts.__dict__, "elevation": False})
     if args.tight_resources:
         opts = rms.RmsOptions(**{**opts.__dict__, "tight_resource_backstop": True})
+    if args.resource_flavor != "default":
+        opts = rms.RmsOptions(**{**opts.__dict__,
+                                 "flavor": rms_objects.FLAVORS[args.resource_flavor]})
 
     use_per_player_forest = opts.per_player_forest and not args.legacy_resources
     land_section = rms_land.build_land_generation(

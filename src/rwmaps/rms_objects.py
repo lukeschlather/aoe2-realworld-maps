@@ -165,6 +165,72 @@ class ResourceFlavor:
     remote_resources: bool = True
 
 
+#: Named per-region resource budgets. Choosing one is an explicit flavor
+#: decision, per RESOURCE_TEMPLATES.md - not something to inherit by
+#: accident, and not something to apply blanket.
+FLAVORS: dict[str, ResourceFlavor] = {
+    #: Regions with a continuous coastline and room to breathe. Verified on
+    #: Puget Sound, Black Sea, Chesapeake Bay, Scandinavia, Greece and
+    #: Britain: every player gets every resource kind.
+    "default": ResourceFlavor(),
+
+    #: Archipelago regions - Japan, Caribbean, New Zealand - where players
+    #: sit on separate, sometimes tiny islands and the ring a resource is
+    #: asked to place in is mostly open water.
+    #:
+    #: Chosen by measurement on New Zealand, the worst case. Two candidate
+    #: causes were tested separately; only one was real:
+    #:
+    #: | condition                  | players missing a kind | wood/player |
+    #: |----------------------------|------------------------|-------------|
+    #: | default                    | 4 of 8                 | 25-99       |
+    #: | smaller per-player forest  | 6 of 8                 | 3-64        |
+    #: | tighter rings (this)       | 2 of 8                 | 36-102      |
+    #: | both                       | 3 of 8                 | 18-46       |
+    #:
+    #: Note the per-player forest is NOT the problem: shrinking it made both
+    #: wood AND resources worse. It is load-bearing on exactly the maps that
+    #: look like it should be in the way.
+    #:
+    #: **NOT SHIPPED, and not validated.** Re-run against all three hard
+    #: regions it was meant for, one sample each, it helped New Zealand
+    #: (4 players missing a kind -> 3) and hurt Japan (4 -> 4, but 6 missing
+    #: kinds -> 7) and Caribbean (1 -> 2). Those differences are inside RNG
+    #: variance at one sample - the same New Zealand config measured 2 and
+    #: then 3 on two different generations - so nothing here is settled.
+    #: `build_mod.py` therefore ships every region on "default"; this waits
+    #: on an N=10 pass to decide.
+    #:
+    #: The more likely real cause is upstream of resources entirely. Across
+    #: every condition tried, the SAME players fail, and they are the ones
+    #: with the least reachable open ground:
+    #:
+    #: | player       | open tiles within 20 | kinds missing |
+    #: |--------------|----------------------|---------------|
+    #: | NZ p8        | 364                  | 5             |
+    #: | Japan p1     | 458                  | 1             |
+    #: | Japan p6     | 488                  | 3             |
+    #: | Caribbean p1 | 517                  | 3             |
+    #: | anyone >~700 | -                    | 0             |
+    #:
+    #: That is choose_starts() seating a player on a scrap of land too small
+    #: to hold a start, which no resource setting can fix - there is nowhere
+    #: for the resources to go. A minimum-reachable-land floor on candidate
+    #: starts is the lever that would actually address it.
+    "fragmented": ResourceFlavor(
+        spacing_default=2,
+        spacing_far=8,
+        distances={
+            "FORAGE_BUSH_PRIMARY": 8,
+            "GOLD_PRIMARY": 6,
+            "STONE_PRIMARY": 6,
+            "GOLD_SECONDARY": 13,
+            "STONE_SECONDARY": 13,
+        },
+    ),
+}
+
+
 def build_prelude(pins: ThemePins) -> str:
     """Everything above ``<PLAYER_SETUP>``: role pins, then the theme and
     constant includes. Order matters - ``#const`` is first-definition-wins,
