@@ -95,6 +95,23 @@ def resolve_geo(extra_args: list[str]) -> tuple[float, float, float, float]:
     return lon, lat, span, rotate
 
 
+def game_is_running() -> bool:
+    """Is the game process alive at all?
+
+    Cheap, and it separates two failures that look identical from inside the
+    click loop: a script the engine will not generate, and no engine. A pass
+    once spent 1.9 hours reporting "Generate Map never registered a seed
+    change" for ten regions in a row because the game had exited after the
+    first one - three clicks x a 90s budget each, per region, into an empty
+    desktop. Nothing about those runs said anything about the scripts.
+    """
+    r = subprocess.run(
+        ["powershell.exe", "-NoProfile", "-Command",
+         "if (Get-Process -Name AoE2DE_s -ErrorAction SilentlyContinue) { 'yes' } else { 'no' }"],
+        capture_output=True, text=True)
+    return "yes" in r.stdout
+
+
 def newest_scenario():
     files = sorted(SCENARIO_DIR.glob("*.aoe2scenario"), key=lambda p: p.stat().st_mtime)
     return files[-1] if files else None
@@ -215,6 +232,16 @@ def main():
                 try:
                     click_sequence(before_mtime)
                 except Exception as e:
+                    # Distinguish "the engine rejected this" from "there is no
+                    # engine" before burning the rest of the pass on retries.
+                    if not game_is_running():
+                        raise SystemExit(
+                            "\nABORTING: the game is not running. Every remaining "
+                            "capture would fail the same way and tell us nothing "
+                            "about the scripts. Relaunch AoE2, open the Scenario "
+                            "Editor on the AA_rw_placeholder_tester map, and rerun "
+                            "with the same --run-id to resume."
+                        ) from e
                     print(f"  sample {sample_i}: capture FAILED ({e})")
                     continue
                 after = newest_scenario()
