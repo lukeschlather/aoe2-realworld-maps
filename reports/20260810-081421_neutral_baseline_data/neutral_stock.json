@@ -1,0 +1,4287 @@
+{
+  "Arabia": [
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Arabia\\raw\\sample_000.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 144,
+        "stone": 96,
+        "forage": 48,
+        "sheep": 64,
+        "deer": 40,
+        "boar": 16,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 24,
+        "stone": 29,
+        "forage": 0,
+        "sheep": 0,
+        "deer": 9,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 62,
+      "resource_total": 408,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 45104,
+        "20": 36389,
+        "26": 30440,
+        "30": 25391,
+        "40": 14759,
+        "50": 8170,
+        "60": 3923,
+        "80": 205,
+        "100": 0
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 57510,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 144,
+            "stone": 96,
+            "forage": 48,
+            "sheep": 64,
+            "deer": 40,
+            "boar": 16,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 24,
+            "stone": 29,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 9,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 408,
+          "neutral_total": 62
+        }
+      ]
+    },
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Arabia\\raw\\sample_001.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 144,
+        "stone": 96,
+        "forage": 48,
+        "sheep": 64,
+        "deer": 0,
+        "boar": 16,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 24,
+        "stone": 28,
+        "forage": 0,
+        "sheep": 0,
+        "deer": 0,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 52,
+      "resource_total": 368,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 45892,
+        "20": 37184,
+        "26": 31388,
+        "30": 26418,
+        "40": 15001,
+        "50": 8528,
+        "60": 4144,
+        "80": 294,
+        "100": 0
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 57506,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 144,
+            "stone": 96,
+            "forage": 48,
+            "sheep": 64,
+            "deer": 0,
+            "boar": 16,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 24,
+            "stone": 28,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 368,
+          "neutral_total": 52
+        }
+      ]
+    },
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Arabia\\raw\\sample_002.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 144,
+        "stone": 96,
+        "forage": 48,
+        "sheep": 64,
+        "deer": 0,
+        "boar": 16,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 24,
+        "stone": 25,
+        "forage": 0,
+        "sheep": 0,
+        "deer": 0,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 49,
+      "resource_total": 368,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 46371,
+        "20": 37842,
+        "26": 31346,
+        "30": 26165,
+        "40": 14881,
+        "50": 7948,
+        "60": 3586,
+        "80": 188,
+        "100": 0
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 57506,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 144,
+            "stone": 96,
+            "forage": 48,
+            "sheep": 64,
+            "deer": 0,
+            "boar": 16,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 24,
+            "stone": 25,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 368,
+          "neutral_total": 49
+        }
+      ]
+    }
+  ],
+  "City of Lakes": [
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\City of Lakes\\raw\\sample_000.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 39,
+      "n_landmasses_big": 2,
+      "resources": {
+        "gold": 154,
+        "stone": 96,
+        "forage": 48,
+        "sheep": 64,
+        "deer": 32,
+        "boar": 16,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 34,
+        "stone": 24,
+        "forage": 0,
+        "sheep": 0,
+        "deer": 0,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 58,
+      "resource_total": 410,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 1,
+      "gate_land": {
+        "0": 29188,
+        "20": 21114,
+        "26": 16474,
+        "30": 14320,
+        "40": 9155,
+        "50": 4856,
+        "60": 2379,
+        "80": 137,
+        "100": 0
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 37357,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 144,
+            "stone": 92,
+            "forage": 48,
+            "sheep": 64,
+            "deer": 32,
+            "boar": 16,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 24,
+            "stone": 20,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 396,
+          "neutral_total": 44
+        },
+        {
+          "label": 15,
+          "tiles": 321,
+          "players": [],
+          "resources": {
+            "gold": 6,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 6,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 6,
+          "neutral_total": 6
+        },
+        {
+          "label": 21,
+          "tiles": 57,
+          "players": [],
+          "resources": {
+            "gold": 4,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 4,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 4,
+          "neutral_total": 4
+        },
+        {
+          "label": 31,
+          "tiles": 44,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 4,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 4,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 4,
+          "neutral_total": 4
+        },
+        {
+          "label": 12,
+          "tiles": 39,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 7,
+          "tiles": 27,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 22,
+          "tiles": 27,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 19,
+          "tiles": 13,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 8,
+          "tiles": 12,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 20,
+          "tiles": 8,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 34,
+          "tiles": 8,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 3,
+          "tiles": 7,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 32,
+          "tiles": 7,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 10,
+          "tiles": 6,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 33,
+          "tiles": 6,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 11,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 13,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 17,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 18,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 24,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 25,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 27,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 28,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 29,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 30,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 16,
+          "tiles": 3,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 35,
+          "tiles": 3,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 37,
+          "tiles": 3,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 2,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 4,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 5,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 6,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 9,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 14,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 23,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 26,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 36,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 38,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 39,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        }
+      ]
+    },
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\City of Lakes\\raw\\sample_001.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 32,
+      "n_landmasses_big": 2,
+      "resources": {
+        "gold": 156,
+        "stone": 96,
+        "forage": 48,
+        "sheep": 64,
+        "deer": 32,
+        "boar": 16,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 36,
+        "stone": 24,
+        "forage": 0,
+        "sheep": 0,
+        "deer": 0,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 60,
+      "resource_total": 412,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 1,
+      "unowned_masses": 1,
+      "gate_land": {
+        "0": 29141,
+        "20": 21163,
+        "26": 16478,
+        "30": 14437,
+        "40": 9723,
+        "50": 5501,
+        "60": 2628,
+        "80": 240,
+        "100": 0
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 37577,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 156,
+            "stone": 96,
+            "forage": 48,
+            "sheep": 64,
+            "deer": 32,
+            "boar": 16,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 36,
+            "stone": 24,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 412,
+          "neutral_total": 60
+        },
+        {
+          "label": 22,
+          "tiles": 102,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 2,
+          "tiles": 50,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 32,
+          "tiles": 46,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 20,
+          "tiles": 45,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 30,
+          "tiles": 43,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 23,
+          "tiles": 29,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 24,
+          "tiles": 28,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 21,
+          "tiles": 16,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 9,
+          "tiles": 12,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 13,
+          "tiles": 11,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 7,
+          "tiles": 6,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 16,
+          "tiles": 6,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 29,
+          "tiles": 6,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 8,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 10,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 12,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 14,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 18,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 25,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 26,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 27,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 31,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 3,
+          "tiles": 3,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 4,
+          "tiles": 3,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 5,
+          "tiles": 3,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 15,
+          "tiles": 3,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 17,
+          "tiles": 3,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 28,
+          "tiles": 3,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 6,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 11,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 19,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        }
+      ]
+    },
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\City of Lakes\\raw\\sample_002.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 47,
+      "n_landmasses_big": 8,
+      "resources": {
+        "gold": 156,
+        "stone": 96,
+        "forage": 48,
+        "sheep": 64,
+        "deer": 24,
+        "boar": 16,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 36,
+        "stone": 24,
+        "forage": 0,
+        "sheep": 0,
+        "deer": 0,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 60,
+      "resource_total": 404,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 4,
+      "unowned_masses": 7,
+      "gate_land": {
+        "0": 29147,
+        "20": 20968,
+        "26": 15845,
+        "30": 13509,
+        "40": 8247,
+        "50": 4247,
+        "60": 1661,
+        "80": 0,
+        "100": 0
+      },
+      "masses": [
+        {
+          "label": 2,
+          "tiles": 32931,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 150,
+            "stone": 84,
+            "forage": 48,
+            "sheep": 64,
+            "deer": 24,
+            "boar": 16,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 30,
+            "stone": 12,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 386,
+          "neutral_total": 42
+        },
+        {
+          "label": 5,
+          "tiles": 2616,
+          "players": [],
+          "resources": {
+            "gold": 6,
+            "stone": 4,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 6,
+            "stone": 4,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 10,
+          "neutral_total": 10
+        },
+        {
+          "label": 1,
+          "tiles": 774,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 31,
+          "tiles": 725,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 4,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 4,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 4,
+          "neutral_total": 4
+        },
+        {
+          "label": 40,
+          "tiles": 161,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 13,
+          "tiles": 133,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 4,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 4,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 4,
+          "neutral_total": 4
+        },
+        {
+          "label": 34,
+          "tiles": 113,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 32,
+          "tiles": 61,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 16,
+          "tiles": 58,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 36,
+          "tiles": 51,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 18,
+          "tiles": 38,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 11,
+          "tiles": 37,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 27,
+          "tiles": 29,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 15,
+          "tiles": 28,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 38,
+          "tiles": 25,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 20,
+          "tiles": 21,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 6,
+          "tiles": 19,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 24,
+          "tiles": 19,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 42,
+          "tiles": 15,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 39,
+          "tiles": 14,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 7,
+          "tiles": 13,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 30,
+          "tiles": 12,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 19,
+          "tiles": 10,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 22,
+          "tiles": 9,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 44,
+          "tiles": 9,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 43,
+          "tiles": 7,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 8,
+          "tiles": 6,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 9,
+          "tiles": 6,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 35,
+          "tiles": 6,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 17,
+          "tiles": 5,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 45,
+          "tiles": 5,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 10,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 12,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 14,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 21,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 23,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 25,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 26,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 28,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 29,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 33,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 37,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 41,
+          "tiles": 4,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 3,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 4,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 46,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        },
+        {
+          "label": 47,
+          "tiles": 2,
+          "players": [],
+          "resources": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 0,
+            "stone": 0,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 0,
+          "neutral_total": 0
+        }
+      ]
+    }
+  ],
+  "Loch Ness": [
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Loch Ness\\raw\\sample_000.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 167,
+        "stone": 80,
+        "forage": 54,
+        "sheep": 64,
+        "deer": 12,
+        "boar": 16,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 43,
+        "stone": 19,
+        "forage": 6,
+        "sheep": 0,
+        "deer": 12,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 80,
+      "resource_total": 393,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 41098,
+        "20": 32401,
+        "26": 29525,
+        "30": 27535,
+        "40": 22684,
+        "50": 17731,
+        "60": 12940,
+        "80": 6037,
+        "100": 1633
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 50644,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 167,
+            "stone": 80,
+            "forage": 54,
+            "sheep": 64,
+            "deer": 12,
+            "boar": 16,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 43,
+            "stone": 19,
+            "forage": 6,
+            "sheep": 0,
+            "deer": 12,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 393,
+          "neutral_total": 80
+        }
+      ]
+    },
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Loch Ness\\raw\\sample_001.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 164,
+        "stone": 82,
+        "forage": 48,
+        "sheep": 64,
+        "deer": 12,
+        "boar": 16,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 40,
+        "stone": 20,
+        "forage": 0,
+        "sheep": 0,
+        "deer": 12,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 72,
+      "resource_total": 386,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 41101,
+        "20": 32490,
+        "26": 29389,
+        "30": 27447,
+        "40": 22713,
+        "50": 17671,
+        "60": 12862,
+        "80": 5990,
+        "100": 1647
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 50516,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 164,
+            "stone": 82,
+            "forage": 48,
+            "sheep": 64,
+            "deer": 12,
+            "boar": 16,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 40,
+            "stone": 20,
+            "forage": 0,
+            "sheep": 0,
+            "deer": 12,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 386,
+          "neutral_total": 72
+        }
+      ]
+    },
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Loch Ness\\raw\\sample_002.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 164,
+        "stone": 80,
+        "forage": 54,
+        "sheep": 0,
+        "deer": 11,
+        "boar": 16,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 40,
+        "stone": 18,
+        "forage": 6,
+        "sheep": 0,
+        "deer": 11,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 75,
+      "resource_total": 325,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 41093,
+        "20": 32463,
+        "26": 29477,
+        "30": 27603,
+        "40": 22686,
+        "50": 17733,
+        "60": 12896,
+        "80": 5984,
+        "100": 1699
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 50588,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 164,
+            "stone": 80,
+            "forage": 54,
+            "sheep": 0,
+            "deer": 11,
+            "boar": 16,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 40,
+            "stone": 18,
+            "forage": 6,
+            "sheep": 0,
+            "deer": 11,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 325,
+          "neutral_total": 75
+        }
+      ]
+    }
+  ],
+  "Team Islands": [
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Team Islands\\raw\\sample_000.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 8,
+      "n_landmasses_big": 8,
+      "resources": {
+        "gold": 144,
+        "stone": 93,
+        "forage": 96,
+        "sheep": 64,
+        "deer": 32,
+        "boar": 16,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 24,
+        "stone": 20,
+        "forage": 47,
+        "sheep": 0,
+        "deer": 0,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 91,
+      "resource_total": 445,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 33011,
+        "20": 24807,
+        "26": 20316,
+        "30": 17204,
+        "40": 10136,
+        "50": 5666,
+        "60": 2951,
+        "80": 641,
+        "100": 0
+      },
+      "masses": [
+        {
+          "label": 4,
+          "tiles": 5531,
+          "players": [
+            4
+          ],
+          "resources": {
+            "gold": 18,
+            "stone": 12,
+            "forage": 12,
+            "sheep": 8,
+            "deer": 4,
+            "boar": 2,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 3,
+            "stone": 3,
+            "forage": 6,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 56,
+          "neutral_total": 12
+        },
+        {
+          "label": 2,
+          "tiles": 5400,
+          "players": [
+            6
+          ],
+          "resources": {
+            "gold": 18,
+            "stone": 12,
+            "forage": 12,
+            "sheep": 8,
+            "deer": 4,
+            "boar": 2,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 3,
+            "stone": 3,
+            "forage": 6,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 56,
+          "neutral_total": 12
+        },
+        {
+          "label": 7,
+          "tiles": 5157,
+          "players": [
+            5
+          ],
+          "resources": {
+            "gold": 18,
+            "stone": 12,
+            "forage": 12,
+            "sheep": 8,
+            "deer": 4,
+            "boar": 2,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 3,
+            "stone": 0,
+            "forage": 6,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 56,
+          "neutral_total": 9
+        },
+        {
+          "label": 1,
+          "tiles": 4923,
+          "players": [
+            3
+          ],
+          "resources": {
+            "gold": 18,
+            "stone": 12,
+            "forage": 12,
+            "sheep": 8,
+            "deer": 4,
+            "boar": 2,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 3,
+            "stone": 3,
+            "forage": 5,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 56,
+          "neutral_total": 11
+        },
+        {
+          "label": 5,
+          "tiles": 4910,
+          "players": [
+            2
+          ],
+          "resources": {
+            "gold": 18,
+            "stone": 12,
+            "forage": 12,
+            "sheep": 8,
+            "deer": 4,
+            "boar": 2,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 3,
+            "stone": 3,
+            "forage": 6,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 56,
+          "neutral_total": 12
+        },
+        {
+          "label": 8,
+          "tiles": 4385,
+          "players": [
+            8
+          ],
+          "resources": {
+            "gold": 18,
+            "stone": 12,
+            "forage": 12,
+            "sheep": 8,
+            "deer": 4,
+            "boar": 2,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 3,
+            "stone": 3,
+            "forage": 6,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 56,
+          "neutral_total": 12
+        },
+        {
+          "label": 3,
+          "tiles": 4066,
+          "players": [
+            7
+          ],
+          "resources": {
+            "gold": 18,
+            "stone": 12,
+            "forage": 12,
+            "sheep": 8,
+            "deer": 4,
+            "boar": 2,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 3,
+            "stone": 5,
+            "forage": 6,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 56,
+          "neutral_total": 14
+        },
+        {
+          "label": 6,
+          "tiles": 3884,
+          "players": [
+            1
+          ],
+          "resources": {
+            "gold": 18,
+            "stone": 9,
+            "forage": 12,
+            "sheep": 8,
+            "deer": 4,
+            "boar": 2,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 3,
+            "stone": 0,
+            "forage": 6,
+            "sheep": 0,
+            "deer": 0,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 53,
+          "neutral_total": 9
+        }
+      ]
+    }
+  ],
+  "Thames": [
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Thames\\raw\\sample_000.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 128,
+        "stone": 80,
+        "forage": 174,
+        "sheep": 102,
+        "deer": 123,
+        "boar": 26,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 40,
+        "stone": 8,
+        "forage": 126,
+        "sheep": 38,
+        "deer": 99,
+        "boar": 10,
+        "small_game": 0
+      },
+      "neutral_total": 321,
+      "resource_total": 633,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 47662,
+        "20": 38237,
+        "26": 32925,
+        "30": 30060,
+        "40": 23644,
+        "50": 18850,
+        "60": 15332,
+        "80": 9645,
+        "100": 5703
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 56210,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 128,
+            "stone": 80,
+            "forage": 174,
+            "sheep": 102,
+            "deer": 123,
+            "boar": 26,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 40,
+            "stone": 8,
+            "forage": 126,
+            "sheep": 38,
+            "deer": 99,
+            "boar": 10,
+            "small_game": 0
+          },
+          "resource_total": 633,
+          "neutral_total": 321
+        }
+      ]
+    },
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Thames\\raw\\sample_001.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 120,
+        "stone": 84,
+        "forage": 162,
+        "sheep": 100,
+        "deer": 123,
+        "boar": 28,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 32,
+        "stone": 12,
+        "forage": 114,
+        "sheep": 36,
+        "deer": 99,
+        "boar": 12,
+        "small_game": 0
+      },
+      "neutral_total": 305,
+      "resource_total": 617,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 47772,
+        "20": 38255,
+        "26": 32861,
+        "30": 29976,
+        "40": 23739,
+        "50": 18796,
+        "60": 14996,
+        "80": 9715,
+        "100": 5629
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 56450,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 120,
+            "stone": 84,
+            "forage": 162,
+            "sheep": 100,
+            "deer": 123,
+            "boar": 28,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 32,
+            "stone": 12,
+            "forage": 114,
+            "sheep": 36,
+            "deer": 99,
+            "boar": 12,
+            "small_game": 0
+          },
+          "resource_total": 617,
+          "neutral_total": 305
+        }
+      ]
+    },
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Thames\\raw\\sample_002.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 124,
+        "stone": 82,
+        "forage": 162,
+        "sheep": 98,
+        "deer": 124,
+        "boar": 29,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 36,
+        "stone": 10,
+        "forage": 114,
+        "sheep": 34,
+        "deer": 100,
+        "boar": 13,
+        "small_game": 0
+      },
+      "neutral_total": 307,
+      "resource_total": 619,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 47887,
+        "20": 38363,
+        "26": 33063,
+        "30": 30172,
+        "40": 23797,
+        "50": 18795,
+        "60": 15024,
+        "80": 9699,
+        "100": 5685
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 56504,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 124,
+            "stone": 82,
+            "forage": 162,
+            "sheep": 98,
+            "deer": 124,
+            "boar": 29,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 36,
+            "stone": 10,
+            "forage": 114,
+            "sheep": 34,
+            "deer": 100,
+            "boar": 13,
+            "small_game": 0
+          },
+          "resource_total": 619,
+          "neutral_total": 307
+        }
+      ]
+    }
+  ],
+  "Yucatan": [
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Yucatan\\raw\\sample_000.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 336,
+        "stone": 246,
+        "forage": 174,
+        "sheep": 118,
+        "deer": 121,
+        "boar": 48,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 114,
+        "stone": 141,
+        "forage": 78,
+        "sheep": 0,
+        "deer": 57,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 390,
+      "resource_total": 1043,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 37871,
+        "20": 29134,
+        "26": 24495,
+        "30": 20717,
+        "40": 11911,
+        "50": 5712,
+        "60": 2274,
+        "80": 0,
+        "100": 0
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 55300,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 336,
+            "stone": 246,
+            "forage": 174,
+            "sheep": 118,
+            "deer": 121,
+            "boar": 48,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 114,
+            "stone": 141,
+            "forage": 78,
+            "sheep": 0,
+            "deer": 57,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 1043,
+          "neutral_total": 390
+        }
+      ]
+    },
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Yucatan\\raw\\sample_001.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 324,
+        "stone": 246,
+        "forage": 174,
+        "sheep": 120,
+        "deer": 122,
+        "boar": 48,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 134,
+        "stone": 111,
+        "forage": 78,
+        "sheep": 3,
+        "deer": 60,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 386,
+      "resource_total": 1034,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 36762,
+        "20": 28230,
+        "26": 23617,
+        "30": 20175,
+        "40": 11785,
+        "50": 6298,
+        "60": 2766,
+        "80": 4,
+        "100": 0
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 54606,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 324,
+            "stone": 246,
+            "forage": 174,
+            "sheep": 120,
+            "deer": 122,
+            "boar": 48,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 134,
+            "stone": 111,
+            "forage": 78,
+            "sheep": 3,
+            "deer": 60,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 1034,
+          "neutral_total": 386
+        }
+      ]
+    },
+    {
+      "capture": "C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\stock_capture\\benchmarks\\Yucatan\\raw\\sample_002.aoe2scenario",
+      "n_players": 8,
+      "n_landmasses": 1,
+      "n_landmasses_big": 1,
+      "resources": {
+        "gold": 353,
+        "stone": 292,
+        "forage": 168,
+        "sheep": 120,
+        "deer": 121,
+        "boar": 48,
+        "small_game": 0
+      },
+      "neutral": {
+        "gold": 130,
+        "stone": 111,
+        "forage": 72,
+        "sheep": 0,
+        "deer": 57,
+        "boar": 0,
+        "small_game": 0
+      },
+      "neutral_total": 370,
+      "resource_total": 1102,
+      "off_land_resources": 0,
+      "empty_unowned_masses": 0,
+      "unowned_masses": 0,
+      "gate_land": {
+        "0": 37556,
+        "20": 28986,
+        "26": 24567,
+        "30": 20698,
+        "40": 11350,
+        "50": 6409,
+        "60": 3363,
+        "80": 183,
+        "100": 0
+      },
+      "masses": [
+        {
+          "label": 1,
+          "tiles": 55335,
+          "players": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "resources": {
+            "gold": 353,
+            "stone": 292,
+            "forage": 168,
+            "sheep": 120,
+            "deer": 121,
+            "boar": 48,
+            "small_game": 0
+          },
+          "neutral": {
+            "gold": 130,
+            "stone": 111,
+            "forage": 72,
+            "sheep": 0,
+            "deer": 57,
+            "boar": 0,
+            "small_game": 0
+          },
+          "resource_total": 1102,
+          "neutral_total": 370
+        }
+      ]
+    }
+  ]
+}

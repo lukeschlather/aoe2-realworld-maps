@@ -233,7 +233,7 @@ def main() -> int:
         for name, paths in collect(REPO / "out" / "stock_capture" / args.stock).items():
             groups[name] += paths
     for c in args.capture:
-        groups[Path(c).stem] .append(Path(c))
+        groups[Path(c).stem].append(Path(c))
 
     if args.map:
         groups = {k: v for k, v in groups.items() if args.map.lower() in k.lower()}
