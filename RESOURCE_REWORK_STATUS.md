@@ -161,7 +161,51 @@ stone, a 66-tile island took gold. A clause measuring distance to a
 *different* zone excludes anything across water, which is exactly the
 mainland-yes/island-no pattern observed.
 
-### What is left: calibration, not mechanism
+### SHIPPED 2026-08-10: gold/stone island pass, include dropped
+
+The include is **off** and `--island-resources` is **on by default**.
+Rationale: the include takes no consts, so it cannot be tuned down off its
+37% share, and it leaves islands empty regardless. Our own pass is
+parameterised and does both jobs.
+
+**Gold and stone only, no food.** Neutral food is a weak prize - players
+switch to farms late, so wood converts to food with minimal micro, making a
+neutral deer herd worth much less than a neutral gold pile. The stock band
+independently agrees: Arabia's neutral supply is 24 gold and 27 stone
+against 0 forage and 3 deer.
+
+Measured, `out/mod_capture/neutral_v3`, one capture per region, against the
+N=10 baseline:
+
+| region | | neutral gold | neutral stone | neutral food | share | unowned islands | empty |
+|---|---|---|---|---|---|---|---|
+| Britain | before | 2.8 | 0.5 | 0 | 2% | 2.2 | 1.2 |
+| Britain | **after** | **28** | **23** | 3 | **13%** | 1 | **0** |
+| Italy | before | 0.0 | 0.8 | 0 | 1% | 2.9 | **2.9 - all** |
+| Italy | **after** | **50** | **61** | 5 | 24% | 5 | **0** |
+| stock Arabia | | 24 | 27 | 3 | 14% | - | - |
+
+Britain lands on Arabia almost exactly. Italy runs a little rich at 24%
+because it genuinely has more unclaimed land to put piles on (935 placeable
+tiles even at distance 100, against Britain's 582). Volume knobs if it
+needs pulling in: `island_gold_spacing` / `island_stone_spacing` (40) and
+`island_group_size` (5).
+
+Britain's 1285-tile unclaimed island - previously 4 gold, 0 stone, 100%
+neutral wood - now carries 9 gold and 5 stone alongside its 527 wood tiles.
+Italy's Sardinia/Corsica/Sicily all carry gold and stone.
+
+**Open:** some stocked islands have no wood at all (Italy's 217- and
+127-tile islands are 0 forest; its 714-tile island has 2 tiles). Gold on an
+island you cannot build on is a weaker prize than it looks. Forest
+placement is a separate lever from the resource pass.
+
+**Not measured:** the other 9 regions, and any region at N>1. Japan,
+Caribbean and New Zealand have much tighter gates (463-1979 placeable tiles
+at 26 vs Britain's 3458), and per the user New Zealand has no unclaimed
+islands to stock in the first place, so it is not the right target.
+
+### Superseded: the calibration problem this solved
 
 Both passes overshoot badly. Neutral share is **37% with the include alone
 and 46% with both**, against a stock band of **14-21%**, and total

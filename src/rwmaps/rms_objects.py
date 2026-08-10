@@ -174,7 +174,12 @@ class ResourceFlavor:
     #: shared by the live includes (the orphan was May 2020 with a 1999
     #: header) and uses the modern actor-area system throughout. It is
     #: self-contained: no consts to configure, no map-specific land ids.
-    neutral_resources: bool = True
+    #: **Off.** The include works - it lifted Salish Sea's neutral supply
+    #: from 0 to 333 - but it takes no consts, so it is all-or-nothing, and
+    #: 333 objects is a 37% neutral share against a stock band of 14-21%.
+    #: It also leaves every island empty. ``island_resources`` below is the
+    #: tunable replacement and hits the band; see RESOURCE_REWORK_STATUS.md.
+    neutral_resources: bool = False
 
     #: Hand-rolled neutral blocks for the islands, on top of
     #: ``resources_neutral.inc``.
@@ -194,11 +199,28 @@ class ResourceFlavor:
     #: exactly the observed pattern. These blocks are the include's own,
     #: with that one clause dropped, so the capture that follows is a
     #: controlled test of it rather than an argument about it.
-    island_resources: bool = False
-    #: Objects per group for the island pass, gold/stone/forage.
-    island_group_size: int = 4
+    #: **Gold and stone only, deliberately - no food.** Neutral food is a
+    #: weak prize: players switch to farms late, so a small amount of wood
+    #: converts to food with minimal micro, and a neutral deer herd is worth
+    #: much less than a neutral gold pile. The stock band agrees - Arabia's
+    #: neutral supply is 24 gold and 27 stone against 0 forage and 3 deer.
+    #:
+    #: Measured at these settings, one capture each: Britain 28 gold / 23
+    #: stone / 3 food neutral, a 13% share, against stock Arabia's 24 / 27
+    #: / 3 and 14%. Italy 50 / 61 / 5, 24% - a little rich, because Italy
+    #: genuinely has more unclaimed land to put piles on. Every unowned
+    #: island on both maps came back stocked, where before every one was
+    #: empty.
+    island_resources: bool = True
+    #: Objects per pile.
+    island_group_size: int = 5
     #: Distance from any player. Same gate as the include.
     island_min_distance: int = 26
+    #: Spacing between piles. This is the volume knob: larger spacing means
+    #: fewer piles fit, and the target is Arabia's ~25 gold + ~27 stone
+    #: rather than the 136/134 the first uncalibrated capture produced.
+    island_gold_spacing: int = 40
+    island_stone_spacing: int = 40
 
     relics: bool = True
     #: ``relics.inc`` places nothing unless one of RELIC_TYPE_UNRESTRICTED /
@@ -360,7 +382,7 @@ def _tier_block(kind: str, tiers: tuple[str, ...], flavor: ResourceFlavor) -> li
 #: The actor areas the island blocks claim and avoid. Deliberately distinct
 #: from ``resources_neutral.inc``'s 1000/1010/1020 so the two passes space
 #: against each other instead of stacking on the same tile.
-_ISLAND_AREAS = {"GOLD": 1210, "STONE": 1220, "FORAGE_BUSH": 1200}
+_ISLAND_AREAS = {"GOLD": 1210, "STONE": 1220}
 
 
 def _island_block(obj: str, flavor: ResourceFlavor, spacing: int) -> list[str]:
@@ -409,15 +431,19 @@ def _island_blocks(flavor: ResourceFlavor) -> list[str]:
         " * inside every checkable constraint - got nothing.",
         " *",
         " * These are that include's own blocks with a single clause removed,",
-        " * max_distance_to_other_zones 8, on the theory that it measures",
-        " * distance to a DIFFERENT zone and so excludes anything across water.",
-        " * If islands come back stocked, that was the cause.",
+        " * max_distance_to_other_zones 8 - confirmed by capture to be the",
+        " * cause, since it measures distance to a DIFFERENT zone and every",
+        " * island sits across water from one.",
+        " *",
+        " * Gold and stone only. Neutral food is a weak prize - players switch",
+        " * to farms late, so wood converts to food with minimal micro - and",
+        " * the stock band agrees: Arabia places 24 neutral gold and 27",
+        " * neutral stone against 0 forage and 3 deer.",
         " */",
         "",
     ]
-    lines += _island_block("GOLD", flavor, 24)
-    lines += _island_block("STONE", flavor, 24)
-    lines += _island_block("FORAGE_BUSH", flavor, 28)
+    lines += _island_block("GOLD", flavor, flavor.island_gold_spacing)
+    lines += _island_block("STONE", flavor, flavor.island_stone_spacing)
     return lines
 
 

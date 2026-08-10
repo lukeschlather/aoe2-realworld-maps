@@ -150,12 +150,27 @@ the stock includes, in this order:
 | `starting_resources.inc` | per-player gold / stone / forage | per player |
 | `herdable_starting.inc`, `herdable.inc`, `huntable.inc`, `lureable.inc` | per-player sheep, deer, boar | per player |
 | `neritic.inc`, `aquatic_saltwater.inc`, `aquatic_freshwater.inc` | fish | water |
-| `resources_neutral.inc` | gold/stone/forage + `_B` huntables belonging to nobody | `min_distance_to_players 26` |
+| `resources_neutral.inc` | gold/stone/forage + `_B` huntables belonging to nobody | **off** - see below |
+| island pass (ours, `_island_blocks`) | neutral gold and stone, islands included | `min_distance_to_players 26` |
 | `relics.inc` | relics | needs a `RELIC_TYPE_*` define |
 | `remote_resources.inc` | leftover-space gold/stone/forage/deer | `min_distance_to_players 100` |
 
-Two traps live in this table, both instances of the same one - **an include
-can be present and place nothing**:
+**The neutral supply is ours, not the stock include's.** Measured, the
+include works (Salish Sea 0 -> 333 neutral) but it takes no consts, so it
+is all-or-nothing at a 37% neutral share against a stock band of 14-21%,
+and every block in it carries `max_distance_to_other_zones 8` - a clause
+measuring distance to a *different* zone, which excludes every island,
+since an island sits across water from one. It left all five of Salish
+Sea's unowned islands empty.
+
+`_island_blocks` in `rms_objects.py` is that include's own gold and stone
+blocks with only that clause dropped. **Gold and stone, no food** - neutral
+food is a weak prize because players switch to farms late, and stock
+agrees (Arabia: 24 neutral gold, 27 stone, 0 forage, 3 deer). Britain
+measures 28/23/3 at a 13% share with every island stocked.
+
+Three traps live in this table, all instances of the same one - **an
+include can be present and place nothing**:
 
 - `relics.inc` is one big `if RELIC_TYPE_UNRESTRICTED / elseif _BALANCED /
   elseif _PLAYER / elseif _SCATTER`. This project defined none of them, so
@@ -166,6 +181,11 @@ can be present and place nothing**:
   everyone. Measured on Salish Sea: **0 placeable tiles at 100**, 1 tile at
   80, against 20,469 at 26. It is dead code as included. Overriding the
   const before the include would revive it, since first-`#const`-wins.
+
+- `max_distance_to_other_zones` is the third: present, satisfied on the
+  mainland, and unsatisfiable on every island, so the include placed
+  hundreds of objects while looking like it had simply skipped the islands
+  for want of room. They measured 100% open and 100% legal.
 
 Check a gate before tuning anything behind it:
 

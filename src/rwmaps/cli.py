@@ -158,6 +158,12 @@ def build_parser() -> argparse.ArgumentParser:
                            "these are its own blocks minus "
                            "max_distance_to_other_zones, the one clause that "
                            "would exclude land across water")
+    grid.add_argument("--no-neutral-resources", action="store_true",
+                      help="drop includes/resources_neutral.inc. It works, but "
+                           "it takes no consts, so it is all-or-nothing at ~333 "
+                           "objects - well past the 14-21%% neutral share stock "
+                           "maps carry. Pair with --island-resources, which is "
+                           "tunable, to hit the band instead")
     grid.add_argument("--resource-flavor", default="default",
                       choices=sorted(rms_objects.FLAVORS),
                       help="named per-region resource budget (see FLAVORS in "
@@ -282,9 +288,14 @@ def generate(args) -> dict:
     if args.resource_flavor != "default":
         opts = rms.RmsOptions(**{**opts.__dict__,
                                  "flavor": rms_objects.FLAVORS[args.resource_flavor]})
+    flavor_overrides = {}
     if args.island_resources:
+        flavor_overrides["island_resources"] = True
+    if args.no_neutral_resources:
+        flavor_overrides["neutral_resources"] = False
+    if flavor_overrides:
         opts = rms.RmsOptions(**{**opts.__dict__,
-                                 "flavor": replace(opts.flavor, island_resources=True)})
+                                 "flavor": replace(opts.flavor, **flavor_overrides)})
 
     use_per_player_forest = opts.per_player_forest and not args.legacy_resources
     land_section = rms_land.build_land_generation(
