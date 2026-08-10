@@ -41,48 +41,149 @@ starts go 3 -> 0 and Italy's 2 -> 0, and it puts two starts on the Italian
 peninsula rather than one. Only Salish Sea was captured before the game
 exited, and it looked healthy (worst open ground 1079, TC separation 62).
 
+## The baseline (2026-08-10, no engine time needed)
+
+Report: `reports/20260810-081421_neutral_baseline.html`, data alongside it.
+Tool: `automation/neutral_supply.py`, validated against stock Thames, whose
+published numbers it reproduces exactly. All figures are means over the
+archived captures (stock `benchmarks`, ours `sysa_n10` = 110 captures).
+
+**Neutral = `fairness.py`'s `unclaimed`: no town centre within
+`OWNERSHIP_RADIUS` (30) tiles of *walking* distance.**
+
+### Thames is the outlier; the reference band is 14-21%
+
+| stock map | all res | neutral | share | the neutral supply is |
+|---|---|---|---|---|
+| Arabia | 381 | 54 | **14%** | 24 gold, 27 stone, 3 deer |
+| City of Lakes | 409 | 59 | **15%** | 35 gold, 24 stone |
+| Team Islands | 445 | 91 | **20%** | 24 gold, 20 stone, 47 forage |
+| Loch Ness | 368 | 76 | **21%** | 41 gold, 19 stone, 12 deer |
+| Yucatan | 1060 | 382 | 36% | 126 gold, 121 stone, 76 forage |
+| Thames | 623 | 311 | **50%** | 118 forage, 99 deer |
+
+Neutral supply in the band is **overwhelmingly gold and stone**, not the
+food-heavy profile Thames suggested. Aim at Arabia's shape, not Thames's.
+
+### Ours, all 11 regions
+
+| region | all res | neutral | share | unowned masses | of which empty |
+|---|---|---|---|---|---|
+| Black Sea | 317 | 0 | 0% | 2.6 | 2.6 |
+| Salish Sea | 319 | 0 | 0% | 3.6 | 3.6 |
+| Scandinavia | 317 | 0 | 0% | 0.6 | 0.6 |
+| Chesapeake Bay | 318 | 1 | 0% | 2.0 | 2.0 |
+| Greece | 318 | 2 | 1% | 5.5 | 5.5 |
+| Italy | 273 | 2 | 1% | 2.9 | 2.9 |
+| Caribbean | 272 | 3 | 1% | 4.6 | 4.6 |
+| New Zealand | 231 | 3 | 1% | 0.2 | 0.2 |
+| Britain | 322 | 7 | 2% | 2.2 | 1.2 |
+| Japan | 235 | 9 | 4% | 5.0 | 5.0 |
+| Cramped Italy | 332 | 14 | 4% | 6.0 | 4.1 |
+
+Not literally zero everywhere, as previously recorded, but 0-4% against a
+14-21% band. And "unowned masses" is item 2 measured directly: Greece
+carries 5.5 unowned landmasses of 60+ tiles per generation and **every one
+of them is empty**; Japan 5.0 of 5.0; Caribbean 4.6 of 4.6.
+
+### Stock does not use a neutral pass at all
+
+**No stock script - 0 of 196 - references `resources_neutral.inc`.** Arabia
+still has 54 neutral resources. So stock maps get their neutral supply as
+*spill-over*: per-player rings that happen to land more than 30 walking
+tiles from every town centre. Ours produce no spill-over because placement
+keeps everything close to home and narrow coastlines clip the rings that
+would otherwise reach.
+
+That reframes the choice. The include currently wired up
+(`resources_neutral.inc`) is the one with **zero** stock consumers; the one
+with 42 stock consumers (`remote_resources.inc`) is already included and
+mis-gated. Test both in the same pass rather than committing to either.
+
+### The gates, measured
+
+Placeable land in tiles (dry land minus forest minus the 6-tile edge
+margin - a permissive upper bound, so a 0 is conclusive):
+
+| map | at 26 (`resources_neutral`) | at 100 (`remote_resources`) |
+|---|---|---|
+| Salish Sea | 20540 | **0** |
+| Black Sea | 20220 | **0** |
+| Chesapeake Bay | 14654 | **0** |
+| Scandinavia | 10606 | 13 |
+| Italy | 10942 | **0** |
+| Cramped Italy | 8601 | 1962 |
+| Greece | 5289 | 396 |
+| Britain | 2761 | 487 |
+| Caribbean | 1979 | **0** |
+| Japan | 1930 | **0** |
+| **New Zealand** | **463** | **0** |
+| stock Arabia | 31058 | **0** |
+| stock Thames | 32950 | 5672 |
+
+Two conclusions:
+
+1. **`remote_resources.inc` is dead as configured, on stock maps too.** It
+   self-defines `REMOTE_DISTANCE 100`; no stock map overrides it; Arabia
+   includes it (behind `SPACIOUS_SETUP`, which *is* defined at 8p/Huge) and
+   gets nothing from it. One `#const REMOTE_DISTANCE` pinned before the
+   include revives it, first-definition-wins, the same mechanism
+   `MAP_CONSTANTS` already relies on.
+2. **The 26-tile gate is itself marginal on the hard regions.** New Zealand
+   admits 463 tiles, Japan 1930, Caribbean 1979 - against 20000+ on Salish
+   Sea and Black Sea. So `resources_neutral.inc`, even if it fires
+   perfectly, will under-deliver on exactly the archipelago regions whose
+   islands are emptiest. A single fixed distance cannot serve both ends of
+   this range; it wants to be a per-region `ResourceFlavor` value, which is
+   already the mechanism for this kind of split.
+
 ## Open, roughly in order of expected payoff
 
 ### 1. Verify `resources_neutral.inc` actually fires
 
-**Our maps have no neutral resources at all.** Everything System A places
-is per-player, so every resource belongs to somebody and there is nothing
-on the map worth leaving base for. Measured, resources no player can reach
-from home:
+Still the blocker: it needs one capture and a count, and the game was
+unavailable when the baseline above was measured. The mod **has** been
+rebuilt and installed with the include (and the relic fix) as of
+2026-08-10 - it was previously stale by a whole rework, so any capture
+before this date was testing neither.
 
-| map | gold | stone | forage | deer |
-|---|---|---|---|---|
-| stock Thames | 40 | 8 | **126** | **99** |
-| stock Yucatan | 114 | **141** | 78 | 57 |
-| stock Arabia | 24 | 29 | 0 | 9 |
-| ours (Salish Sea, Black Sea) | **0** | **0** | **0** | **0** |
+```sh
+uv run python automation/mod_capture.py --run-id neutral_v1 --n-samples 1 --regions "Salish Sea"
+uv run python automation/neutral_supply.py --mod neutral_v1 --detail
+```
 
-Thames places more neutral forage and deer than it gives all eight players
-combined. `ResourceFlavor.neutral_resources` now includes
-`includes/resources_neutral.inc`, which places gold/stone/forage plus the
-`_B` huntable/herdable/lureable roles at `min_distance_to_players 26`.
+Salish Sea is the right first target: 20540 tiles at the gate, so if it
+places nothing there the include is dead rather than merely squeezed.
 
-**Unverified, and it carries a warning sign:** no stock map references that
-include - the same signal that made the 1999 file a trap. It was included
-anyway because the signal that actually mattered there was *staleness* (May
-2020 file, `24 JUNE 99` header, predates actor areas) and this file carries
-the current May-27 timestamp shared by `starting_resources.inc` and
-`forest.inc` and uses actor areas throughout. **Capture one map and count.**
-If it is dead, hand-roll the blocks the way `Thames.rms` does (it uses
-`place_on_specific_land_id` against lands it creates itself, so the
-positioning needs adapting, but the block structure is directly reusable).
+**The warning sign stands and is now sharper:** no stock map references it,
+where 42 reference `remote_resources.inc`. It was included anyway because
+the signal that mattered for the 1999 trap was *staleness* (May 2020 file,
+`24 JUNE 99` header, predates actor areas) and this file carries the
+current May-27 timestamp and uses actor areas throughout. If it is dead,
+the cheaper fallback is now known: pin `REMOTE_DISTANCE` down to ~40 and
+use the include stock actually uses, rather than hand-rolling Thames's
+blocks.
+
+Note also that `resources_neutral.inc` places the **`_B` roles**, which
+`MAP_CONSTANTS` does not pin - it pins only `_A`. `themes.inc` re-rolls
+`HUNTABLE_B` (Deer/Mouflon) and `HERDABLE_B` (Goose/Pig/Sheep/Cow) per
+generation, so neutral huntables will vary in skin between generations
+where per-player ones do not. Pinning them is not obviously safe:
+`HERDABLE_SMALL_B`/`HUNTABLE_SMALL_B` are `create_object_group`s from
+`object_groups.inc`, not `#const`s, and `HERDABLE_B` is a group in 3 of
+its 12 theme branches. Do not bundle this into the verification capture -
+if the pin breaks the script, the neutral signal is lost with it.
 
 ### 2. Islands are devoid of resources
 
-Consequence of two things compounding: the rescored placement will not seat
-a player on a small island (correctly - a 454-tile Corsica start is a bad
-start), and there are no neutral resources. So the islands end up empty
-rather than being a contested prize.
+Measured above rather than assumed: Greece 5.5 unowned 60+ tile landmasses
+per generation, all empty; Japan 5.0/5.0; Caribbean 4.6/4.6; Cramped Italy
+4.1 of 6.0.
 
-Item 1 may fix this for free - neutral resources are placed 26+ tiles from
-any player, which on these maps *is* the islands. Measure it before
-designing anything more elaborate: capture, then check the neutral counts
-per landmass rather than per player.
+Item 1 may still fix this for free, but the gate table says not evenly -
+the regions with the most empty islands (Japan, Caribbean, New Zealand) are
+the ones whose 26-tile gate admits the least land. Capture, then read the
+per-landmass table (`neutral_supply.py --detail`), not just the total.
 
 ### 3. Relics - fixed but unverified
 
