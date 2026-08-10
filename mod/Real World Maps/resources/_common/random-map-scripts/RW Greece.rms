@@ -7491,16 +7491,90 @@ create_elevation        7
   #const FRESHWATER_COUNT 0
   #include_drs includes/aquatic_freshwater.inc
 
-/* --- neutral supply ------------------------------------------------
- * Gold/stone/forage/huntables out on the map, min_distance_to_players
- * 26, belonging to nobody. Everything above this point is placed
- * per-player, so without this pass there is nothing on the map worth
- * leaving base for - measured: our maps had 0 neutral resources of
- * every kind, where stock Thames carries more neutral forage and deer
- * than it gives all eight players combined.
+/* --- islands ------------------------------------------------------
+ * resources_neutral.inc leaves the islands empty. Measured on Salish
+ * Sea: it lifted neutral supply 0 -> 333, and all 333 landed on the
+ * two landmasses that already had players, while five unowned islands
+ * of 73-161 tiles - every one of them 100% open, unforested and
+ * inside every checkable constraint - got nothing.
+ *
+ * These are that include's own blocks with a single clause removed,
+ * max_distance_to_other_zones 8 - confirmed by capture to be the
+ * cause, since it measures distance to a DIFFERENT zone and every
+ * island sits across water from one.
+ *
+ * Gold and stone only. Neutral food is a weak prize - players switch
+ * to farms late, so wood converts to food with minimal micro - and
+ * the stock band agrees: Arabia places 24 neutral gold and 27
+ * neutral stone against 0 forage and 3 deer.
  */
 
-  #include_drs includes/resources_neutral.inc
+  create_object GOLD
+  {
+    number_of_objects 5
+    number_of_groups 1024
+    set_tight_grouping
+    group_placement_radius 1
+    min_distance_to_players 26
+    set_circular_placement
+    temp_min_distance_group_placement 40
+    min_distance_group_placement 1
+    avoid_forest_zone 2
+    avoid_cliff_zone 2
+    min_distance_to_map_edge 6
+    actor_area 1210
+    actor_area_radius 3
+    avoid_actor_area 1000
+    avoid_actor_area 1010
+    avoid_actor_area 1020
+    avoid_actor_area 1030
+    avoid_actor_area 1035
+    avoid_actor_area 1040
+    avoid_actor_area 1045
+    avoid_actor_area 1050
+    avoid_actor_area 11000
+    avoid_actor_area 11010
+    avoid_actor_area 11020
+    avoid_actor_area 1210
+    avoid_actor_area 1220
+    avoid_actor_area 20 /* Villagers */
+    avoid_actor_area 30 /* Scout */
+    avoid_actor_area 60 /* Straggler, Spawn */
+  }
+
+  create_object STONE
+  {
+    number_of_objects 5
+    number_of_groups 1024
+    set_tight_grouping
+    group_placement_radius 1
+    min_distance_to_players 26
+    set_circular_placement
+    temp_min_distance_group_placement 40
+    min_distance_group_placement 1
+    avoid_forest_zone 2
+    avoid_cliff_zone 2
+    min_distance_to_map_edge 6
+    actor_area 1220
+    actor_area_radius 3
+    avoid_actor_area 1000
+    avoid_actor_area 1010
+    avoid_actor_area 1020
+    avoid_actor_area 1030
+    avoid_actor_area 1035
+    avoid_actor_area 1040
+    avoid_actor_area 1045
+    avoid_actor_area 1050
+    avoid_actor_area 11000
+    avoid_actor_area 11010
+    avoid_actor_area 11020
+    avoid_actor_area 1210
+    avoid_actor_area 1220
+    avoid_actor_area 20 /* Villagers */
+    avoid_actor_area 30 /* Scout */
+    avoid_actor_area 60 /* Straggler, Spawn */
+  }
+
 
 /* --- relics ------------------------------------------------------- */
 
