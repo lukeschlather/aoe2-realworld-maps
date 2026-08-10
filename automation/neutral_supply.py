@@ -290,6 +290,35 @@ def print_capture(prof: dict, detail: bool) -> None:
         print(f"  {small_tiles:>7} {'(< min, all)':<12} {small_res:>4}")
 
 
+def print_summary(rows: dict[str, list[dict]]) -> None:
+    """One row per region: is every unowned island stocked, every time?
+
+    ``bare`` is the number that matters - unowned islands with a 2x2 camp
+    spot and no gold or stone on them. Islands with no camp spot are broken
+    out separately because no resource pass can fix those.
+    """
+    print(f"\n{'region':<16} {'n':>2} {'islands':>8} {'stocked':>8} {'BARE':>6} "
+          f"{'no 2x2':>7} | {'gold':>5} {'stone':>6} {'food':>5} {'share':>6} "
+          f"| {'worst capture':>13}")
+    grand_bare = 0
+    for name in sorted(rows):
+        ps = rows[name]
+        f = lambda g: sum(g(p) for p in ps) / len(ps)  # noqa: E731
+        bare = sum(p["unowned_bare"] for p in ps)
+        grand_bare += bare
+        tot = f(lambda p: p["resource_total"])
+        neu = f(lambda p: p["neutral_total"])
+        worst = max(p["unowned_bare"] for p in ps)
+        print(f"{name:<16} {len(ps):>2} {f(lambda p: p['unowned_masses']):>8.1f} "
+              f"{f(lambda p: p['unowned_stocked']):>8.1f} {bare:>6} "
+              f"{sum(p['unowned_no_camp_spot'] for p in ps):>7} | "
+              f"{f(lambda p: p['neutral_by_class']['gold']):>5.0f} "
+              f"{f(lambda p: p['neutral_by_class']['stone']):>6.0f} "
+              f"{f(lambda p: p['neutral_by_class']['food']):>5.0f} "
+              f"{neu/tot if tot else 0:>6.0%} | {worst:>13}")
+    print(f"\nbare unowned islands across every capture: {grand_bare}")
+
+
 def collect(root: Path) -> dict[str, list[Path]]:
     out: dict[str, list[Path]] = defaultdict(list)
     if not root.exists():
@@ -309,6 +338,9 @@ def main() -> int:
     ap.add_argument("--map", help="only this map name")
     ap.add_argument("--detail", action="store_true",
                     help="per-landmass table, not just the totals")
+    ap.add_argument("--summary", action="store_true",
+                    help="one row per region instead of per capture - the "
+                         "'do we consistently have resources on islands' view")
     ap.add_argument("--json", help="write the full profiles here")
     args = ap.parse_args()
 
@@ -330,12 +362,16 @@ def main() -> int:
 
     out: dict[str, list[dict]] = {}
     for name in sorted(groups):
-        print(f"\n=== {name} ===")
+        if not args.summary:
+            print(f"\n=== {name} ===")
         out[name] = []
         for path in groups[name]:
             prof = landmass_profile(path)
             out[name].append(prof)
-            print_capture(prof, args.detail)
+            if not args.summary:
+                print_capture(prof, args.detail)
+    if args.summary:
+        print_summary(out)
 
     if args.json:
         Path(args.json).parent.mkdir(parents=True, exist_ok=True)
