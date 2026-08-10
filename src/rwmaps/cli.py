@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -150,6 +151,13 @@ def build_parser() -> argparse.ArgumentParser:
                            "on narrow coastlines. System A needs no backstop - it "
                            "retries placements instead of dropping them - so this is "
                            "a no-op unless --legacy-resources is also passed")
+    grid.add_argument("--island-resources", action="store_true",
+                      help="add a hand-rolled neutral gold/stone/forage pass "
+                           "for the islands. resources_neutral.inc leaves them "
+                           "empty even though they measure fully placeable; "
+                           "these are its own blocks minus "
+                           "max_distance_to_other_zones, the one clause that "
+                           "would exclude land across water")
     grid.add_argument("--resource-flavor", default="default",
                       choices=sorted(rms_objects.FLAVORS),
                       help="named per-region resource budget (see FLAVORS in "
@@ -274,6 +282,9 @@ def generate(args) -> dict:
     if args.resource_flavor != "default":
         opts = rms.RmsOptions(**{**opts.__dict__,
                                  "flavor": rms_objects.FLAVORS[args.resource_flavor]})
+    if args.island_resources:
+        opts = rms.RmsOptions(**{**opts.__dict__,
+                                 "flavor": replace(opts.flavor, island_resources=True)})
 
     use_per_player_forest = opts.per_player_forest and not args.legacy_resources
     land_section = rms_land.build_land_generation(

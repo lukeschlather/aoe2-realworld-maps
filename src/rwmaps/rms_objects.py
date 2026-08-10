@@ -176,6 +176,30 @@ class ResourceFlavor:
     #: self-contained: no consts to configure, no map-specific land ids.
     neutral_resources: bool = True
 
+    #: Hand-rolled neutral blocks for the islands, on top of
+    #: ``resources_neutral.inc``.
+    #:
+    #: Measured 2026-08-10 (``out/mod_capture/neutral_v1``): the include
+    #: works - Salish Sea's neutral supply went 0 -> 333 - but **every one
+    #: of the five unowned islands stayed empty anyway**, and not for want
+    #: of anywhere to put things: those islands measured 100% open (no
+    #: forest) and 100% legal on every constraint that can be checked from
+    #: outside the engine, at 73-161 tiles each.
+    #:
+    #: The one constraint that cannot be checked from outside is
+    #: ``max_distance_to_other_zones 8``, which every block in the include
+    #: carries. A small island sits across water from every other land, so
+    #: if that clause measures distance to a *different* zone it excludes
+    #: islands entirely while leaving the mainland untouched - which is
+    #: exactly the observed pattern. These blocks are the include's own,
+    #: with that one clause dropped, so the capture that follows is a
+    #: controlled test of it rather than an argument about it.
+    island_resources: bool = False
+    #: Objects per group for the island pass, gold/stone/forage.
+    island_group_size: int = 4
+    #: Distance from any player. Same gate as the include.
+    island_min_distance: int = 26
+
     relics: bool = True
     #: ``relics.inc`` places nothing unless one of RELIC_TYPE_UNRESTRICTED /
     #: _BALANCED / _PLAYER / _SCATTER is defined - the whole include is one
@@ -333,6 +357,70 @@ def _tier_block(kind: str, tiers: tuple[str, ...], flavor: ResourceFlavor) -> li
     return out
 
 
+#: The actor areas the island blocks claim and avoid. Deliberately distinct
+#: from ``resources_neutral.inc``'s 1000/1010/1020 so the two passes space
+#: against each other instead of stacking on the same tile.
+_ISLAND_AREAS = {"GOLD": 1210, "STONE": 1220, "FORAGE_BUSH": 1200}
+
+
+def _island_block(obj: str, flavor: ResourceFlavor, spacing: int) -> list[str]:
+    """One neutral block, minus ``max_distance_to_other_zones``."""
+    area = _ISLAND_AREAS[obj]
+    avoid = "\n".join(
+        f"    avoid_actor_area {a}" for a in
+        # the include's own neutral areas and spacers, so the two passes do
+        # not put a gold pile inside each other's
+        (1000, 1010, 1020, 1030, 1035, 1040, 1045, 1050,
+         11000, 11010, 11020, *sorted(_ISLAND_AREAS.values()))
+    )
+    return [
+        f"  create_object {obj}",
+        "  {",
+        f"    number_of_objects {flavor.island_group_size}",
+        "    number_of_groups 1024",
+        "    set_tight_grouping",
+        "    group_placement_radius 1",
+        f"    min_distance_to_players {flavor.island_min_distance}",
+        "    set_circular_placement",
+        f"    temp_min_distance_group_placement {spacing}",
+        "    min_distance_group_placement 1",
+        "    avoid_forest_zone 2",
+        "    avoid_cliff_zone 2",
+        "    min_distance_to_map_edge 6",
+        f"    actor_area {area}",
+        "    actor_area_radius 3",
+        avoid,
+        "    avoid_actor_area 20 /* Villagers */",
+        "    avoid_actor_area 30 /* Scout */",
+        "    avoid_actor_area 60 /* Straggler, Spawn */",
+        "  }",
+        "",
+    ]
+
+
+def _island_blocks(flavor: ResourceFlavor) -> list[str]:
+    lines = [
+        "",
+        "/* --- islands ------------------------------------------------------",
+        " * resources_neutral.inc leaves the islands empty. Measured on Salish",
+        " * Sea: it lifted neutral supply 0 -> 333, and all 333 landed on the",
+        " * two landmasses that already had players, while five unowned islands",
+        " * of 73-161 tiles - every one of them 100% open, unforested and",
+        " * inside every checkable constraint - got nothing.",
+        " *",
+        " * These are that include's own blocks with a single clause removed,",
+        " * max_distance_to_other_zones 8, on the theory that it measures",
+        " * distance to a DIFFERENT zone and so excludes anything across water.",
+        " * If islands come back stocked, that was the cause.",
+        " */",
+        "",
+    ]
+    lines += _island_block("GOLD", flavor, 24)
+    lines += _island_block("STONE", flavor, 24)
+    lines += _island_block("FORAGE_BUSH", flavor, 28)
+    return lines
+
+
 def build_objects(flavor: ResourceFlavor) -> str:
     """The ``<OBJECTS_GENERATION>`` body."""
     lines: list[str] = [
@@ -440,6 +528,8 @@ def build_objects(flavor: ResourceFlavor) -> str:
             "",
             "  #include_drs includes/resources_neutral.inc",
         ]
+    if flavor.island_resources:
+        lines += _island_blocks(flavor)
     if flavor.relics:
         lines += [
             "",
