@@ -43,7 +43,7 @@ from rwmaps import install as install_mod  # noqa: E402
 from rwmaps import scx_read  # noqa: E402
 from rwmaps.cli import REGIONS  # noqa: E402
 from aesthetic_metrics import cached_true_mask_geo, compute_metrics_from_truth  # noqa: E402
-from build_mod import MOD_REGIONS  # noqa: E402
+from build_mod import DEBUG_MOD_NAME, MOD_REGIONS  # noqa: E402
 from rwmaps.fairness import profile_capture  # noqa: E402
 from sample_analysis import analyze_capture  # noqa: E402
 from tuning_matrix import (  # noqa: E402
@@ -54,8 +54,23 @@ from tuning_matrix import (  # noqa: E402
     UI_DRIVER,
 )
 
-SLOT_PATH = install_mod.scripts_dir() / "AA_rw_placeholder_tester.rms"
+# The placeholder slot lives in the DEBUG mod - that is the whole reason
+# the debug variant exists, and it is where install_mod.py --all syncs it.
+# install.MOD_NAME is a third, legacy mod ("Real World Projections") from
+# before build_mod existed; writing the slot there silently does nothing,
+# because the Scenario Editor is loading the debug mod's copy. That cost a
+# whole two-region capture pass, which regenerated Britain and Italy
+# correctly, wrote them where nothing reads, and then captured the
+# previously-installed Salish Sea script twice - reporting Salish's
+# geometry under Britain's and Italy's names.
+SLOT_PATH = (install_mod.scripts_dir(DEBUG_MOD_NAME)
+             / "AA_rw_placeholder_tester.rms")
 SCENARIO_DIR = install_mod.find_profile() / "resources" / "_common" / "scenario"
+
+#: Below this, the captured coastline is not the region we asked for. Real
+#: captures across all 11 regions run 0.80-0.90; the two-region pass that
+#: captured Salish Sea under Britain's name scored 0.25.
+IOU_WRONG_MAP = 0.55
 
 SIZE = 240
 PLAYERS = 8
@@ -292,6 +307,20 @@ def main():
                       f"reachable={analysis['placement']['pairwise_land_reachable_fraction']}, "
                       f"any_zero={analysis['resources']['any_player_zero_of_a_kind']}, "
                       f"iou_10m={aesthetic['iou_10m']:.2f})")
+                # IoU against the region's own true coastline is the ground
+                # truth for "the engine generated the map we asked for". A
+                # script swap that silently does not reach the game shows up
+                # here and nowhere else: the pass captures whatever was
+                # installed before, and every downstream table then reports
+                # one region's geometry under another region's name. Our
+                # regions run ~0.85; a real region has never scored this low.
+                if aesthetic["iou_10m"] < IOU_WRONG_MAP:
+                    print(f"  *** WARNING: iou_10m {aesthetic['iou_10m']:.2f} is far "
+                          f"below anything {name} should score. The capture is "
+                          f"probably not {name} at all - check that\n"
+                          f"      {SLOT_PATH}\n"
+                          f"      is the slot the Scenario Editor is actually "
+                          f"loading, then rerun.")
 
     print(f"\nDONE in {time.time()-t_start:.0f}s -> {results_path}")
 
