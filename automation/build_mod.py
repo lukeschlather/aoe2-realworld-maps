@@ -23,12 +23,23 @@ across Sardinia/Corsica/Tunisia and the Italian peninsula itself instead of
 just the mainland's far corners - see MOD_STATUS.md for the full
 investigation). Both carry `--tight-resources` too.
 
+A full build is ~11 regions x ~70s of choose_starts annealing, so roughly
+17 minutes - far too slow to sit inside an edit/generate/capture loop. Pass
+``--regions`` to rebuild just the ones you are working on: that skips the
+wipe and overwrites only those scripts in place, leaving the other regions'
+scripts alone. ``--placeholder`` then drops the region you care about into
+the AA_rw_placeholder_tester slot the capture automation drives, so a
+single-map iteration is one build command and one install.
+
 Usage:
     uv run python automation/build_mod.py
+    uv run python automation/build_mod.py --regions "Salish Sea" --placeholder "Salish Sea"
+    uv run python automation/build_mod.py --list
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import shutil
 import subprocess
@@ -108,7 +119,46 @@ def write_info(mod_root: Path, title: str, description: str) -> None:
     }), encoding="utf-8")
 
 
+def _parse_args():
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--regions", nargs="+", metavar="NAME", default=None,
+                   help="rebuild only these regions, in place, leaving the "
+                        "rest of the mod untouched. Names as in --list.")
+    p.add_argument("--placeholder", metavar="NAME", default=None,
+                   help="region to copy into the AA_rw_placeholder_tester "
+                        "slot. Defaults to whichever region built first.")
+    p.add_argument("--list", action="store_true", help="list region names and exit")
+    return p.parse_args()
+
+
+def _select(names: list[str] | None) -> list[tuple[str, list[str]]]:
+    """MOD_REGIONS entries matching ``names``, case-insensitively."""
+    if not names:
+        return MOD_REGIONS
+    by_lower = {n.lower(): (n, extra) for n, extra in MOD_REGIONS}
+    chosen, unknown = [], []
+    for want in names:
+        hit = by_lower.get(want.lower())
+        if hit is None:
+            unknown.append(want)
+        else:
+            chosen.append(hit)
+    if unknown:
+        known = ", ".join(n for n, _ in MOD_REGIONS)
+        sys.exit(f"unknown region(s): {unknown}\nknown regions: {known}")
+    return chosen
+
+
 def main():
+    args = _parse_args()
+    if args.list:
+        for name, extra in MOD_REGIONS:
+            print(f"{name:<16} {' '.join(extra)}")
+        return
+    regions = _select(args.regions)
+    partial = args.regions is not None
+
     tmp_out = REPO / "out" / "mod_build"
     if tmp_out.exists():
         shutil.rmtree(tmp_out)
@@ -118,11 +168,14 @@ def main():
     debug_root = REPO / "mod" / DEBUG_MOD_NAME
     # Full rebuild each time - mod/ is regenerated from MOD_REGIONS, not
     # hand-edited, so stale filenames (e.g. from before SHIPPED_PREFIX was
-    # added) must not linger alongside the newly-prefixed ones.
-    if main_root.exists():
-        shutil.rmtree(main_root)
-    if debug_root.exists():
-        shutil.rmtree(debug_root)
+    # added) must not linger alongside the newly-prefixed ones. A --regions
+    # build is the deliberate exception: it is an iteration aid, so it
+    # overwrites its own scripts and leaves every other file in place.
+    if not partial:
+        if main_root.exists():
+            shutil.rmtree(main_root)
+        if debug_root.exists():
+            shutil.rmtree(debug_root)
     main_scripts = main_root / "resources" / "_common" / "random-map-scripts"
     debug_scripts = debug_root / "resources" / "_common" / "random-map-scripts"
     main_scripts.mkdir(parents=True, exist_ok=True)
@@ -135,8 +188,9 @@ def main():
                "slot this project's tuning automation swaps candidate scripts into.")
 
     first_rms = None
+    placeholder_rms = None
     failures = []
-    for name, extra in MOD_REGIONS:
+    for name, extra in regions:
         region_out = tmp_out / name
         cmd = ["uv", "run", "rwmaps", name, "--outdir", str(region_out),
                "--no-preview", *extra]
@@ -156,18 +210,26 @@ def main():
         shutil.copyfile(rms_files[0], debug_scripts / shipped_filename(name))
         if first_rms is None:
             first_rms = rms_files[0]
+        if args.placeholder and name.lower() == args.placeholder.lower():
+            placeholder_rms = rms_files[0]
         print(f"  -> {dest_main}")
 
-    if first_rms:
-        shutil.copyfile(first_rms, debug_scripts / PLACEHOLDER_SLOT)
+    if args.placeholder and placeholder_rms is None:
+        sys.exit(f"--placeholder {args.placeholder!r} did not build - it must "
+                 f"be one of the regions this run generated")
+    slot_src = placeholder_rms or first_rms
+    if slot_src:
+        shutil.copyfile(slot_src, debug_scripts / PLACEHOLDER_SLOT)
+        why = "requested" if placeholder_rms else "whatever generated first"
         print(f"  -> {debug_scripts / PLACEHOLDER_SLOT} (placeholder slot, "
-              f"content = whatever generated first, currently {first_rms.parent.name})")
+              f"content = {why}, currently {slot_src.parent.name})")
 
     shutil.rmtree(tmp_out)
     if failures:
         print(f"\nFAILED regions (not in either mod): {failures}")
-    print(f"\ndone - {len(MOD_REGIONS) - len(failures)}/{len(MOD_REGIONS)} regions in "
-          f"mod/{MOD_NAME}/ and mod/{DEBUG_MOD_NAME}/")
+    print(f"\ndone - {len(regions) - len(failures)}/{len(regions)} regions in "
+          f"mod/{MOD_NAME}/ and mod/{DEBUG_MOD_NAME}/"
+          + (" (partial build - other regions left as they were)" if partial else ""))
 
 
 if __name__ == "__main__":
