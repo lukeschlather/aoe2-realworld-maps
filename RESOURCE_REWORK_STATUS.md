@@ -1,14 +1,20 @@
 # Resource rework status - where to pick this up
 
-Written 2026-08-09 at the end of a long session, as a handoff. Reading
-order for anything resource-related:
+Updated 2026-08-10. Reading order for anything resource-related:
 
-1. `STOCK_MAP_INVENTORY.md` - what is on disk, script name vs UI name
+1. `GENERATION.md` - how generation works end to end, including the
+   **Islands** section, which carries the island design rules (buildability,
+   beach, clustering, what wood is worth). Start there.
 2. `RESOURCE_TEMPLATES.md` - the two stock resource systems, and the
-   measured stock budgets. **Authoritative.**
-3. this file - what changed in the rework, and what is still open
+   measured stock budgets. **Authoritative on stock.**
+3. this file - what the rework changed, what is measured, what is open
 4. `MOD_STATUS.md` / `TUNING_STATUS.md` - history only, carry known-bad
    assumptions, `MOD_STATUS.md` has a banner saying so
+
+**Shipped: `37ed72e`.** System A resources, relics fixed,
+`resources_neutral.inc` dropped, map-wide gold/stone neutral pass on.
+Britain measures 28 neutral gold / 23 stone at a 13% share against stock
+Arabia's 24 / 27 at 14%. `mod/` is committed and matches the installed copy.
 
 ## What changed
 
@@ -276,53 +282,78 @@ Japan 1930, Caribbean 1979 - see the gate table above). Salish Sea, at
 
 ## Open, roughly in order of expected payoff
 
-### 1. ~~Verify `resources_neutral.inc` actually fires~~ - done, see above
+Items 1 and 2 of the original list are done: `resources_neutral.inc` fires
+but is dropped as untunable, and the islands question turned out to be
+mostly a measurement error plus a real wood gap. See above, and the
+"Islands" section of `GENERATION.md` for the design rules.
 
-Still the blocker: it needs one capture and a count, and the game was
-unavailable when the baseline above was measured. The mod **has** been
-rebuilt and installed with the include (and the relic fix) as of
-2026-08-10 - it was previously stale by a whole rework, so any capture
-before this date was testing neither.
+### 1. Trees on islands - the one thing actually wrong
 
-```sh
-uv run python automation/mod_capture.py --run-id neutral_v1 --n-samples 1 --regions "Salish Sea"
-uv run python automation/neutral_supply.py --mod neutral_v1 --detail
-```
+The state of play, measured per island cluster (12-tile gap):
 
-Salish Sea is the right first target: 20540 tiles at the gate, so if it
-places nothing there the include is dead rather than merely squeezed.
+| region | cluster tiles | buildable | wood tiles |
+|---|---|---|---|
+| Salish Sea, Black Sea, Greece | 64-353 | 24-193 | **0** |
+| Italy | 772 | 505 | 25 |
+| Italy | **1018** | **632** | **0** |
+| Italy (Sardinia) | 1505 | 785 | 547 |
+| Britain (Ireland) | 1281 | 566 | 582 |
 
-**The warning sign stands and is now sharper:** no stock map references it,
-where 42 reference `remote_resources.inc`. It was included anyway because
-the signal that mattered for the 1999 trap was *staleness* (May 2020 file,
-`24 JUNE 99` header, predates actor areas) and this file carries the
-current May-27 timestamp and uses actor areas throughout. If it is dead,
-the cheaper fallback is now known: pin `REMOTE_DISTANCE` down to ~40 and
-use the include stock actually uses, rather than hand-rolling Thames's
-blocks.
+Zero trees on the small ones is **correct and should stay** - a tree yields
+75 wood and a lumber camp costs 100, so a copse too small to justify a camp
+is clutter. The wrong one is Italy's 1018-tile cluster: 632 buildable tiles
+and not one tree, which is a place a player would genuinely settle.
 
-Note also that `resources_neutral.inc` places the **`_B` roles**, which
-`MAP_CONSTANTS` does not pin - it pins only `_A`. `themes.inc` re-rolls
-`HUNTABLE_B` (Deer/Mouflon) and `HERDABLE_B` (Goose/Pig/Sheep/Cow) per
-generation, so neutral huntables will vary in skin between generations
-where per-player ones do not. Pinning them is not obviously safe:
-`HERDABLE_SMALL_B`/`HUNTABLE_SMALL_B` are `create_object_group`s from
-`object_groups.inc`, not `#const`s, and `HERDABLE_B` is a group in 3 of
-its 12 theme branches. Do not bundle this into the verification capture -
-if the pin breaks the script, the neutral signal is lost with it.
+Target, per the user, and **no analysis needed to start - just build it**:
 
-### 2. Islands are devoid of resources
+- small islands: about **one straggler tree per 6 buildable tiles**, enough
+  to build with, not enough to justify a camp;
+- islands above some size: **at least one small copse**.
 
-Measured above rather than assumed: Greece 5.5 unowned 60+ tile landmasses
-per generation, all empty; Japan 5.0/5.0; Caribbean 4.6/4.6; Cramped Italy
-4.1 of 6.0.
+Straggler trees are objects, so `place_on_specific_land_id` works directly,
+the same way `build_per_island` already places gold and stone. Copses are
+terrain and `create_terrain` has no land-id targeting, so they need the
+placeholder-terrain trick `build_per_player_forest` already uses.
 
-Item 1 may still fix this for free, but the gate table says not evenly -
-the regions with the most empty islands (Japan, Caribbean, New Zealand) are
-the ones whose 26-tile gate admits the least land. Capture, then read the
-per-landmass table (`neutral_supply.py --detail`), not just the total.
+Cause of the gap: the map-wide forest is one `create_terrain FOREST` with
+12 clumps for the entire map, so clumps land on the mainland and mid-size
+islands get none by luck.
 
-### 3. Relics - fixed but unverified
+### 2. Forest generation is too Black Forest-ish overall
+
+Not just on islands. The current forest reads as one large mass with few
+pathways through it - closer to **Black Forest** than to an open map - and
+Black Forest has never been studied here. Worth doing: read what it
+actually does, and what the open maps do differently, rather than tuning
+`forest_percent` and `number_of_clumps` by feel.
+
+Lower priority than item 1: fixing the islands does not depend on it.
+
+### 3. Per-island land ids: committed, unshipped, unmeasured
+
+`rms_land._island_ids` gives every unowned 60+ tile landmass its own
+`land_id`, and `rms_objects.build_per_island` places gold and stone against
+those ids with no distance gate at all. Committed in `92fbfb2`, deliberately
+**not** in the shipped mod (`37ed72e`), and never captured.
+
+It was written to fix "35 bare islands", a number that the beach correction
+has since undercut - most of those islands are marginal by nature and the
+map-wide pass gives them roughly what they warrant. Decide whether it is
+still wanted before spending engine time. If it is, the one risk to check
+is per-player placement: each island id is another zone, and
+`starting_resources.inc` and `huntable.inc` are keyed on zone distance.
+
+### 4. Drop the problem regions; find better windows
+
+Japan, New Zealand and Caribbean are land-starved at 240x240 for 8 players
+(17%, 12%, 21% land). The user's decision is to **stop tuning against them**
+- do not use them to evaluate resource work - and instead go find other
+regions, viewports and projections that spread players across islands
+without cramping anyone. No scoring function conjures land the window
+lacks.
+
+
+### 5. Relics - fixed but unverified
 
 `relics.inc` is one big `if RELIC_TYPE_UNRESTRICTED / elseif _BALANCED /
 elseif _PLAYER / elseif _SCATTER`. We defined none of them, so the include
@@ -335,7 +366,7 @@ relics out on the empty islands. Thames uses `UNRESTRICTED` with
 `RELIC_DISTANCE 0` / `RELIC_SPACING 12`. Target is 5-15, and the upper end
 reads as more flavorful.
 
-### 4. Why does copying Arabia not transfer to a coastline?
+### 6. Why does copying Arabia not transfer to a coastline?
 
 An open question worth actual exploration rather than another knob. Arabia
 was taken as the reference, but it is a strange reference for this project:
@@ -352,16 +383,7 @@ stock map but is itself unusual among System A maps. Worth asking what
 Thames and Salish Sea have in common that Arabia does not, rather than
 continuing to treat Arabia as the target.
 
-### 5. Hard regions need different windows, not better algorithms
-
-Japan (17% land), New Zealand (12%), Caribbean (21%). Across 880 starts,
-reachable open ground below 600 tiles broke a start 68% of the time and
-above 1000 essentially never. These windows do not contain enough land per
-player at 240x240 for eight players. The user's own read: pick different
-projections/orientations that spread players across islands without anyone
-being cramped. No scoring function can conjure land the window lacks.
-
-### 6. `choose_starts` is slow
+### 7. `choose_starts` is slow
 
 ~73s per region, up from near-instant, because annealing now runs
 everywhere. Already capped the BFS and cut the budget 5x400 -> 3x150 (from
@@ -369,7 +391,7 @@ everywhere. Already capped the BFS and cut the budget 5x400 -> 3x150 (from
 full-array `binary_dilation` per wavefront step; cropping to the frontier's
 bounding box is the obvious fix and has not been tried.
 
-### 7. `--spread-islands` is now misnamed
+### 8. `--spread-islands` is now misnamed
 
 Under the new objective it does not spread across islands - small islands
 score badly on available land, so Sardinia/Corsica/Sicily/Tunisia get
@@ -383,22 +405,35 @@ The game must be running, in the Scenario Editor, with
 `AA_rw_placeholder_tester` selected at Huge [240] / 8 players.
 
 ```sh
-# rebuild + install the shipped mod (the installed copy is only as fresh as
-# the last build_mod.py run - it was stale by a whole rework once)
-uv run python automation/build_mod.py
+# ONE region, ~2 min, leaving the other ten alone. A full build is ~17 min
+# and there is rarely a reason to pay it.
+uv run python automation/build_mod.py --regions "Italy" --placeholder "Italy"
 uv run python automation/install_mod.py --all
 
-# resume the interrupted N=1 sanity pass (skips regions already captured)
-uv run python automation/mod_capture.py --run-id place_v1 --n-samples 1
+# capture one region; mod_capture regenerates the script itself, so a
+# build_mod run is NOT a prerequisite for testing
+uv run python automation/mod_capture.py --run-id <id> --n-samples 2 --regions "Italy"
+# --extra passes flags through to the regen, for a parameter not yet in
+# MOD_REGIONS: ... --extra --island-resources
 
-# compare anything captured against the stock benchmarks
-uv run python automation/compare_starts.py --stock benchmarks --mod place_v1
+uv run python automation/neutral_supply.py --mod <id> --summary   # per region
+uv run python automation/neutral_supply.py --mod <id> --detail    # per island
+uv run python automation/compare_starts.py --stock benchmarks --mod <id>
 ```
 
-`mod_capture.py` now aborts immediately if the game is not running, rather
-than spending 90s per retry on an empty desktop - a pass burned 1.9 hours
-that way, reporting "Generate Map never registered a seed change" for ten
-regions in a row when the game had simply exited.
+Test regions **independently and only the ones in question**. There is no
+value in rebuilding or capturing a region with no islands to judge.
+
+`mod_capture.py` aborts immediately if the game is not running, rather than
+spending 90s per retry on an empty desktop - a pass burned 1.9 hours that
+way. It also warns when a capture's coastline IoU is far below what the
+region should score, which is the only signal that distinguishes "the
+script swap never reached the game" from "unlucky seed".
+
+**The shipped mod is `37ed72e`** - System A resources, relics, no
+`resources_neutral.inc`, map-wide gold/stone neutral pass. Britain measures
+28 neutral gold / 23 stone at a 13% share against stock Arabia's 24 / 27 at
+14%. `mod/` is committed, and the installed copy matches it byte for byte.
 
 ## Lessons worth not relearning
 
@@ -418,4 +453,26 @@ regions in a row when the game had simply exited.
   reachable wood per player, because it has so little land.
 - **Watch for gated includes that silently do nothing.** Relics needed a
   `RELIC_TYPE_*` define; `HUNTABLE_SMALL_GROUPS` defaults to 0. Both were
-  included and both placed nothing.
+  included and both placed nothing. A third of the same kind:
+  `max_distance_to_other_zones 8` is satisfiable on a mainland and
+  unsatisfiable on any island, so `resources_neutral.inc` placed hundreds
+  of objects and still left every island empty.
+- **Write the file where the game reads it.** `install.MOD_NAME` pointed at
+  "Real World Projections", a mod nothing loaded. The capture slot-swap
+  wrote there and the game kept regenerating the previously installed
+  script, so a two-region pass reported Salish Sea's geometry under
+  Britain's and Italy's names. Coastline IoU caught it: 0.25 against a
+  normal 0.80-0.90. The mod is deleted and `MOD_NAME` fixed.
+- **Commit the artifact you evaluated.** The mod behind the good
+  measurements was built and installed but never committed, and
+  `build_mod.py` wipes `mod/` before regenerating - so it survived only in
+  the game's directory, and only by luck. Commit `mod/` with the run that
+  judged it.
+- **A metric that includes the wrong tiles will confirm whatever you
+  already think.** Counting BEACH as buildable made every small island look
+  comfortably workable; half of each one is beach. The conclusion happened
+  to survive the correction, on far thinner margins than claimed.
+- **Bigger totals are not better coverage.** The maps carrying the *most*
+  neutral supply had the emptiest islands, because a distance-gated pass
+  saturates on whatever land is most abundant. Coverage is about aim, not
+  volume.

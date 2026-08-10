@@ -194,6 +194,72 @@ uv run python automation/neutral_supply.py --mod <run-id>
 # prints "placeable land at min_distance_to_players: 0=... 26=... 100=..."
 ```
 
+## Islands: what makes one worth sailing to
+
+Real coastlines produce unowned islands, and they are the most distinctive
+thing these maps have that stock maps do not. The design rules below are
+the user's, and they are economic rather than geometric - measure against
+them, not against "does it look stocked".
+
+**Reachability is not the question.** Players build transports. Getting to
+an island is harder than walking and entirely routine; nothing needs to be
+reachable on foot to be contested.
+
+**Buildability is the question, and shore tiles are unbuildable.** A
+villager needs somewhere to stand, so the minimum viable island is roughly
+**6x4 counting shore**: a 2x2 mining camp, a 2x2 gold or stone pile, a
+one-tile gap between them (the placement leaves one), and walkable shore
+around it. Measured, **about half of every small island here is BEACH**, so
+tile count badly overstates what is usable - a 151-tile island on Salish
+Sea has 71 buildable tiles, and a 68-tile one has 18. Any "can this island
+be worked" measure must exclude beach; `neutral_supply.py` does.
+
+**Adjacent tiny islands are one island.** Five rocks in a cluster with real
+combined landmass play as a single objective. At a 12-tile gap Italy's 7
+islands are 3 groups (772 / 1018 / 1505 tiles), Salish Sea's 5 are 4.
+
+**Gold and stone are worth mining; wood mostly is not.** Each unit of gold
+or stone yields 400, and wood is plentiful elsewhere, so a pile on an
+island is worth the trip. A tree yields 75 and a lumber camp costs 100
+wood, so **a tiny island should have zero trees on purpose** - a copse too
+small to justify a camp is clutter, not a prize. Neutral *food* is weak for
+the same class of reason: players switch to farms late, converting wood to
+food with minimal micro.
+
+What follows from that, and is **not yet built** (see
+`RESOURCE_REWORK_STATUS.md`):
+
+- small islands want roughly **one straggler tree per 6 buildable tiles** -
+  enough to build with, not enough to justify a lumber camp;
+- islands above some size want **at least one small copse**.
+
+Straggler trees are objects, so they can be aimed with
+`place_on_specific_land_id` exactly like the gold and stone pass. A copse
+is terrain, and `create_terrain` has **no** land-id targeting - no stock
+map does it - so copses need the placeholder-terrain trick that
+`build_per_player_forest` already uses: paint the island lands with their
+own terrain, grow forest on `base_terrain <placeholder>`, convert back.
+
+### Why islands come out bare today
+
+Both causes are the same shape - a map-wide pass with no reason to prefer
+an island:
+
+- **Resources.** The neutral gold/stone pass places by distance, and on a
+  land-rich map the mainland satisfies the spacing long before an island is
+  needed. Black Sea places 116 neutral objects and stocks none of its
+  islands; land-poor Caribbean stocks all of its with a third of that.
+- **Forest.** The map-wide forest is a single `create_terrain FOREST` with
+  **12 clumps** over the whole map. Twelve clumps land where there is room,
+  which is the mainland. Only the two largest islands measured (Sardinia
+  1505 tiles, Ireland 1281) get forest at all; Italy has a 1018-tile
+  cluster with 632 buildable tiles and **zero** trees.
+
+`rms_land.py` can already give every unowned island its own `land_id`
+(`_island_ids`, `Island`), and `rms_objects.build_per_island` emits gold
+and stone against those ids. That code is committed but **not in the
+shipped mod** - it has never been through a capture.
+
 ## Building and installing the mod
 
 `mod/` is *generated*, not hand-edited - `build_mod.py` regenerates it from

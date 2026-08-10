@@ -44,7 +44,7 @@ Live:
 
 | doc | what it is |
 |---|---|
-| **GENERATION.md** | **how generation works, end to end - start here** |
+| **GENERATION.md** | **how generation works, end to end - start here.** Its *Islands* section holds the island design rules: shore is unbuildable, adjacent rocks are one island, gold/stone are worth a transport trip and a small copse is not |
 | RESOURCE_TEMPLATES.md | the two stock resource systems, and their measured budgets. Authoritative on resources |
 | STOCK_MAP_INVENTORY.md | what stock scripts are on disk; script name vs UI name |
 | RENDER_PIPELINE.md | the UI automation that drives real engine renders |
