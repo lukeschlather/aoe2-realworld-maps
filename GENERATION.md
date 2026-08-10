@@ -231,14 +231,36 @@ What follows from that, and is **not yet built** (see
 
 - small islands want roughly **one straggler tree per 6 buildable tiles** -
   enough to build with, not enough to justify a lumber camp;
-- islands above some size want **at least one small copse**.
+- larger islands want **at least one small tree cluster: a blob of about
+  2-5 tiles across, or bigger**. ("Copse" is not an engine term - it just
+  means a blob this size, as opposed to a real forest.)
 
-Straggler trees are objects, so they can be aimed with
-`place_on_specific_land_id` exactly like the gold and stone pass. A copse
-is terrain, and `create_terrain` has **no** land-id targeting - no stock
-map does it - so copses need the placeholder-terrain trick that
-`build_per_player_forest` already uses: paint the island lands with their
-own terrain, grow forest on `base_terrain <placeholder>`, convert back.
+Both are **tree objects**, not forest terrain, and that makes them one
+mechanism rather than two. `create_object` takes
+`place_on_specific_land_id`, so island trees can be aimed exactly like the
+gold and stone pass, with no distance gate to fight:
+
+| want | `number_of_objects` | `number_of_groups` | grouping |
+|---|---|---|---|
+| scattered singles on a small island | 1 | buildable tiles / 6 | loose |
+| a 2-5 tile blob on a larger one | ~6-12 | 1 per blob | `set_tight_grouping`, `group_placement_radius 2` |
+
+Forest *terrain* is a different thing and is what gives the big islands
+their real woods - Ireland's 582 wood tiles, Sardinia's 547.
+`create_terrain` has **no** land-id targeting (no stock map does it), so
+aiming terrain at an island needs the placeholder-terrain trick
+`build_per_player_forest` uses: paint the island lands with their own
+terrain, grow forest on `base_terrain <placeholder>`, convert back. Only
+reach for that if object blobs turn out to be too small to matter on a
+1000-tile island.
+
+Stock has an include for the map-wide version of this,
+`includes/stragglers_neutral.inc`, used by Arabia, Arena, Baltic, Black
+Forest and many more. **We pin `STRAGGLER_NEUTRAL` and never include it** -
+a pin with no consumer. It is worth adopting for map-wide neutral trees,
+but note it carries `max_distance_to_other_zones STRAGGLER_ZONE_DISTANCE`,
+the very clause that keeps a map-wide pass off the islands, so it does not
+substitute for the per-island blocks above.
 
 ### Why islands come out bare today
 

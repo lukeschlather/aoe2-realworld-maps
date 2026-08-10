@@ -308,12 +308,29 @@ Target, per the user, and **no analysis needed to start - just build it**:
 
 - small islands: about **one straggler tree per 6 buildable tiles**, enough
   to build with, not enough to justify a camp;
-- islands above some size: **at least one small copse**.
+- larger islands: at least one **tree blob of roughly 2-5 tiles across, or
+  bigger**. ("Copse" is not an engine term, just a blob of that size as
+  distinct from a real forest.)
 
-Straggler trees are objects, so `place_on_specific_land_id` works directly,
-the same way `build_per_island` already places gold and stone. Copses are
-terrain and `create_terrain` has no land-id targeting, so they need the
-placeholder-terrain trick `build_per_player_forest` already uses.
+Both are **tree objects**, so this is one mechanism, not two:
+`create_object` takes `place_on_specific_land_id`, exactly as
+`build_per_island` already does for gold and stone. Scattered singles are
+`number_of_objects 1` with `number_of_groups` = buildable/6 and loose
+grouping; a blob is `number_of_objects` ~6-12 in one group with
+`set_tight_grouping` and `group_placement_radius 2`.
+
+No terrain work is needed for blobs this size - an earlier version of this
+note claimed they needed the placeholder-terrain trick, which is only true
+for real forest *terrain*, the thing that gives Ireland its 582 wood tiles.
+Keep that in reserve in case object blobs read as too thin on a 1000-tile
+island.
+
+**Loose end found while checking this:** we pin `STRAGGLER_NEUTRAL 349` and
+never include `includes/stragglers_neutral.inc` - a pin with no consumer.
+That include is well-precedented (Arabia, Arena, Baltic, Black Forest) and
+worth adopting for map-wide neutral trees. It will not fix the islands
+though: it carries `max_distance_to_other_zones STRAGGLER_ZONE_DISTANCE`,
+the same clause that keeps every map-wide pass off them.
 
 Cause of the gap: the map-wide forest is one `create_terrain FOREST` with
 12 clumps for the entire map, so clumps land on the mainland and mid-size
