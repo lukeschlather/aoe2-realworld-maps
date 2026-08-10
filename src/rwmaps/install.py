@@ -11,7 +11,14 @@ import json
 import os
 from pathlib import Path
 
-MOD_NAME = "Real World Projections"
+# The debug mod, because that is the one the Scenario Editor is pointed at
+# and the one carrying the AA_rw_placeholder_tester slot the capture
+# automation drives. This used to read "Real World Projections", a mod that
+# predated build_mod.py; nothing loaded it any more, so `--install` and the
+# capture slot-swap both wrote into a directory the game never read. That
+# cost a two-region capture pass which silently re-captured the previously
+# installed map. The old mod has been deleted; do not resurrect it.
+MOD_NAME = "Real World Maps (Debug)"
 _PROFILE_ROOT = Path(os.environ.get("USERPROFILE", Path.home())) / "Games" / "Age of Empires 2 DE"
 
 

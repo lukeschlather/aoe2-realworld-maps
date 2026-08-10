@@ -127,12 +127,22 @@ def landmass_profile(path: Path) -> dict:
     legal[:6, :] = legal[-6:, :] = False
     legal[:, :6] = legal[:, -6:] = False
 
+    # Can a player actually work this island? Reaching it is not the
+    # question - transports handle that, harder than walking but perfectly
+    # possible. The question is whether there is a **2x2 open square** to
+    # drop a mining or lumber camp on. An island with gold and no 2x2 is a
+    # prize nobody can collect. A 2x2 all-open block, so erode the open
+    # land by a 2x2 and see what survives.
+    buildable = ndimage.binary_erosion(
+        open_land, structure=np.ones((2, 2), dtype=bool))
+
     masses: dict[int, dict] = {
         i: {
             "label": i,
             "tiles": int(areas[i - 1]),
             "open_tiles": int((open_land & (labels == i)).sum()),
             "legal_tiles": int((legal & (labels == i)).sum()),
+            "camp_spots": int((buildable & (labels == i)).sum()),
             "players": [],
             "resources": dict.fromkeys(KINDS, 0),
             "neutral": dict.fromkeys(KINDS, 0),
@@ -202,6 +212,15 @@ def landmass_profile(path: Path) -> dict:
 
     big = [m for m in rows if m["tiles"] >= MIN_ISLAND_TILES]
     unowned_big = [m for m in big if not m["players"]]
+    # The goal, stated plainly: no empty islands. An island counts as
+    # stocked if it carries gold or stone; food does not count, since a
+    # neutral deer herd is a weak prize next to a gold pile. An island with
+    # no 2x2 camp spot is called out separately - it cannot be worked no
+    # matter what is placed on it, so it is a terrain problem, not a
+    # resource-placement one.
+    workable = [m for m in unowned_big if m["camp_spots"]]
+    stocked = [m for m in workable
+               if m["by_class"]["gold"] or m["by_class"]["stone"]]
     return {
         "capture": str(path),
         "n_players": len(tcs),
@@ -220,6 +239,10 @@ def landmass_profile(path: Path) -> dict:
         # to matter that carry nothing at all.
         "empty_unowned_masses": sum(1 for m in unowned_big if not m["resource_total"]),
         "unowned_masses": len(unowned_big),
+        "unowned_workable": len(workable),
+        "unowned_stocked": len(stocked),
+        "unowned_bare": len(workable) - len(stocked),
+        "unowned_no_camp_spot": len(unowned_big) - len(workable),
         "gate_land": gate_land,
         "masses": rows,
     }
@@ -241,14 +264,16 @@ def print_capture(prof: dict, detail: bool) -> None:
     print(f"  all resources     {prof['resource_total']:>5}   {_fmt_kinds(prof['resources'])}")
     print(f"  neutral           {prof['neutral_total']:>5}   "
           f"{_fmt_kinds(prof['neutral'])}")
-    print(f"  unowned landmasses {prof['unowned_masses']}, of which empty "
-          f"{prof['empty_unowned_masses']}")
+    bare = prof["unowned_bare"]
+    print(f"  unowned islands {prof['unowned_masses']}: "
+          f"{prof['unowned_stocked']} stocked with gold/stone, "
+          f"{bare} BARE, {prof['unowned_no_camp_spot']} with no 2x2 camp spot")
     g = prof["gate_land"]
     print("  placeable land at min_distance_to_players: "
           + "  ".join(f"{d}={g[d]}" for d in PLAYER_DISTANCES))
     if not detail:
         return
-    print(f"  {'tiles':>7} {'legal':>6} {'players':<10} "
+    print(f"  {'tiles':>7} {'2x2':>5} {'players':<10} "
           f"{'gold':>5} {'stone':>5} {'food':>5} {'wood':>6}   (neutral of each)")
     small_tiles = small_res = 0
     for m in prof["masses"]:
@@ -259,7 +284,7 @@ def print_capture(prof: dict, detail: bool) -> None:
         who = ",".join(str(p) for p in sorted(m["players"])) or "-"
         cells = " ".join(f"{m['neutral_by_class'][c]:>2}/{m['by_class'][c]:<2}"
                          for c in CLASSES)
-        print(f"  {m['tiles']:>7} {m['legal_tiles']:>6} {who:<10} "
+        print(f"  {m['tiles']:>7} {m['camp_spots']:>5} {who:<10} "
               f"{cells} {m[f'neutral_{WOOD}']:>4}/{m[WOOD]:<5}")
     if small_tiles:
         print(f"  {small_tiles:>7} {'(< min, all)':<12} {small_res:>4}")
