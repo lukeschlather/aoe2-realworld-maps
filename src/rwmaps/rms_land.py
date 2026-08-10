@@ -141,6 +141,72 @@ PLAYER_LAND_TILES = 240
 #: Every coastline blob shares one zone id - see the note in ``_land_block``.
 COASTLINE_LAND_ID = 1
 
+#: Islands get their own ids, counting up from here. Kept clear of
+#: ``COASTLINE_LAND_ID`` and of the player lands, which use none.
+ISLAND_LAND_ID_BASE = 10
+
+#: An island smaller than this is a rock, not a place worth sailing to.
+#: Matches ``neutral_supply.py``'s MIN_ISLAND_TILES so the thing generated
+#: and the thing measured are the same thing.
+MIN_ISLAND_TILES = 60
+
+
+@dataclass(frozen=True)
+class Island:
+    """An unowned landmass that resources can be placed onto by land id."""
+
+    land_id: int
+    tiles: int
+    n_discs: int
+
+
+def _island_ids(discs: list[Disc], mask: np.ndarray,
+                starts: list[tuple[int, int]] | None,
+                ) -> tuple[dict[int, int], list[Island]]:
+    """Assign a land id per unowned island; return (disc index -> id, islands).
+
+    Resources cannot be aimed at an island by distance - measured, a
+    map-wide neutral pass saturates on the mainland long before it needs an
+    island, so Black Sea and Salish Sea came back with every island bare
+    while land-poor Caribbean stocked all of its. ``place_on_specific_land_id``
+    aims directly, and that needs the island to *be* its own land id.
+
+    Only unowned islands get their own id. The mainland and any landmass
+    holding a start stay on ``COASTLINE_LAND_ID``, because every extra id is
+    another zone and ``starting_resources.inc`` and ``huntable.inc`` are
+    keyed on zone distance - the reason the whole coastline shares one id in
+    the first place. This adds a handful of zones, not hundreds.
+    """
+    labels, n = ndimage.label(mask)
+    owned = {int(labels[y, x]) for y, x in (starts or [])}
+    owned.discard(0)
+
+    sizes = ndimage.sum_labels(mask, labels, index=range(1, n + 1))
+    island_of_label: dict[int, int] = {}
+    islands: list[Island] = []
+    for lbl in range(1, n + 1):
+        if lbl in owned or sizes[lbl - 1] < MIN_ISLAND_TILES:
+            continue
+        land_id = ISLAND_LAND_ID_BASE + len(islands)
+        island_of_label[lbl] = land_id
+        islands.append(Island(land_id, int(sizes[lbl - 1]), 0))
+
+    by_disc: dict[int, int] = {}
+    counts: dict[int, int] = {}
+    for i, d in enumerate(discs):
+        lbl = int(labels[int(round(d.y)), int(round(d.x))])
+        land_id = island_of_label.get(lbl)
+        if land_id is not None:
+            by_disc[i] = land_id
+            counts[land_id] = counts.get(land_id, 0) + 1
+
+    # An island whose discs all sit off-centre would get an id nothing is
+    # assigned to, and a create_object aimed at it would place nothing.
+    islands = [Island(i.land_id, i.tiles, counts.get(i.land_id, 0))
+               for i in islands if counts.get(i.land_id)]
+    live = {i.land_id for i in islands}
+    return {k: v for k, v in by_disc.items() if v in live}, islands
+
 def build_land_generation(
     discs: list[Disc],
     size: int,
@@ -151,6 +217,8 @@ def build_land_generation(
     base_terrain: str = "WATER",
     clumping_factor: int = 8,
     player_terrain: str | None = None,
+    mask: np.ndarray | None = None,
+    islands_out: list[Island] | None = None,
 ) -> str:
     """Render the ``<LAND_GENERATION>`` section.
 
@@ -170,6 +238,12 @@ def build_land_generation(
     ``rms.build_per_player_forest`` then splits and budgets separately. Only
     the terrain *label* changes; the land's shape and size are untouched, so
     the coastline is unaffected.
+
+    ``mask`` opts into per-island land ids: every unowned landmass of
+    ``MIN_ISLAND_TILES`` or more gets its own id, and the islands found are
+    appended to ``islands_out`` so the resource layer can aim at them with
+    ``place_on_specific_land_id``. Without it every blob shares
+    ``COASTLINE_LAND_ID`` as before.
     """
     parts = [
         "<LAND_GENERATION>",
@@ -197,13 +271,27 @@ def build_land_generation(
             )
             parts.append("")
 
+    island_ids: dict[int, int] = {}
+    if mask is not None:
+        island_ids, found = _island_ids(discs, mask, starts)
+        if islands_out is not None:
+            islands_out.extend(found)
+        if found:
+            parts.append(
+                f"/* {len(found)} unowned islands carry their own land ids "
+                f"({ISLAND_LAND_ID_BASE}+), so the resource layer can place "
+                f"onto them by id rather than hoping a map-wide pass reaches "
+                f"them - measured, it does not */"
+            )
+
     parts.append(
         f"/* coastline: {len(discs)} lands approximating the real outline "
         f"({int(total * scale)} tiles total) */"
     )
-    for d, area in zip(discs, areas):
+    for i, (d, area) in enumerate(zip(discs, areas)):
         parts.append(
-            _land_block(d, size, terrain_type, land_id=COASTLINE_LAND_ID,
+            _land_block(d, size, terrain_type,
+                        land_id=island_ids.get(i, COASTLINE_LAND_ID),
                         tiles=max(1, int(round(area * scale))),
                         clumping_factor=clumping_factor)
         )

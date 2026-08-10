@@ -222,6 +222,34 @@ class ResourceFlavor:
     island_gold_spacing: int = 40
     island_stone_spacing: int = 40
 
+    #: Per-island placement, aimed by ``place_on_specific_land_id``.
+    #:
+    #: The map-wide pass above cannot stock islands reliably, and no amount
+    #: of tuning fixes that: measured at N=2 over 9 regions, it left 35 bare
+    #: islands, and the *worst* offenders were the maps carrying the MOST
+    #: neutral supply. Black Sea places 116 neutral objects at a 23% share
+    #: and stocks none of its islands, because 20540 tiles of mainland
+    #: satisfy the spacing long before an island is needed. Land-poor
+    #: Caribbean, at 1979 tiles, stocks all of its with a third of the
+    #: supply. Aiming by land id removes the competition entirely.
+    #:
+    #: Large and small islands are separate knobs on purpose - they are
+    #: different design objects. A 1500-tile Ireland or Sardinia is a place
+    #: worth contesting for the whole game; a 70-tile rock is a raid target.
+    per_island: bool = True
+    #: Boundary between the two, in tiles.
+    island_large_tiles: int = 300
+    #: Small islands: one modest pile of each, enough that nobody sails to
+    #: a bare rock.
+    island_small_gold: int = 4
+    island_small_stone: int = 4
+    #: Large islands: scaled by area, one pile per this many tiles...
+    island_large_tiles_per_pile: int = 500
+    #: ...of this many objects, clamped to the range below.
+    island_large_pile: int = 5
+    island_large_min_piles: int = 1
+    island_large_max_piles: int = 4
+
     relics: bool = True
     #: ``relics.inc`` places nothing unless one of RELIC_TYPE_UNRESTRICTED /
     #: _BALANCED / _PLAYER / _SCATTER is defined - the whole include is one
@@ -420,6 +448,69 @@ def _island_block(obj: str, flavor: ResourceFlavor, spacing: int) -> list[str]:
     ]
 
 
+def _per_island_block(obj: str, land_id: int, objects: int, groups: int,
+                      area: int) -> list[str]:
+    """Gold or stone aimed at one island by land id.
+
+    No ``min_distance_to_players`` and no zone-distance clause: the land id
+    already says exactly where this goes, and every distance-based gate is
+    what kept resources off the islands in the first place.
+    """
+    return [
+        f"  create_object {obj}",
+        "  {",
+        f"    number_of_objects {objects}",
+        f"    number_of_groups {groups}",
+        "    set_tight_grouping",
+        "    group_placement_radius 1",
+        f"    place_on_specific_land_id {land_id}   /* {area} tiles */",
+        "    set_circular_placement",
+        "    min_distance_group_placement 4",
+        "    avoid_forest_zone 1",
+        "    avoid_cliff_zone 1",
+        f"    actor_area {_ISLAND_AREAS[obj]}",
+        "    actor_area_radius 3",
+        f"    avoid_actor_area {_ISLAND_AREAS['GOLD']}",
+        f"    avoid_actor_area {_ISLAND_AREAS['STONE']}",
+        "  }",
+        "",
+    ]
+
+
+def build_per_island(flavor: ResourceFlavor, islands) -> str:
+    """Gold and stone onto every unowned island, aimed by land id."""
+    if not flavor.per_island or not islands:
+        return ""
+    lines = [
+        "",
+        "/* --- per-island supply ---------------------------------------------",
+        " * Aimed by land id, because a map-wide pass demonstrably cannot reach",
+        " * these: at N=2 over 9 regions it left 35 bare islands, worst on the",
+        " * maps carrying the MOST neutral supply. Black Sea stocked none of",
+        " * its islands while placing 116 neutral objects, because its 20540",
+        " * tiles of mainland satisfy the spacing long before an island is",
+        " * needed. Land-poor Caribbean stocked all of its with a third of that.",
+        " *",
+        " * Large and small islands are tuned separately - a 1500-tile Ireland",
+        " * is contested all game, a 70-tile rock is a raid target.",
+        " */",
+        "",
+    ]
+    for isl in islands:
+        if isl.tiles >= flavor.island_large_tiles:
+            piles = max(flavor.island_large_min_piles,
+                        min(flavor.island_large_max_piles,
+                            isl.tiles // flavor.island_large_tiles_per_pile))
+            objects = flavor.island_large_pile
+        else:
+            piles, objects = 1, flavor.island_small_gold
+        lines += _per_island_block("GOLD", isl.land_id, objects, piles, isl.tiles)
+        stone = objects if isl.tiles >= flavor.island_large_tiles \
+            else flavor.island_small_stone
+        lines += _per_island_block("STONE", isl.land_id, stone, piles, isl.tiles)
+    return "\n".join(lines)
+
+
 def _island_blocks(flavor: ResourceFlavor) -> list[str]:
     lines = [
         "",
@@ -447,8 +538,13 @@ def _island_blocks(flavor: ResourceFlavor) -> list[str]:
     return lines
 
 
-def build_objects(flavor: ResourceFlavor) -> str:
-    """The ``<OBJECTS_GENERATION>`` body."""
+def build_objects(flavor: ResourceFlavor, islands=()) -> str:
+    """The ``<OBJECTS_GENERATION>`` body.
+
+    ``islands`` are :class:`rwmaps.rms_land.Island` records for the
+    unowned landmasses that were given their own land ids, so gold and
+    stone can be aimed straight at them.
+    """
     lines: list[str] = [
         "<OBJECTS_GENERATION>",
         "",
@@ -556,6 +652,9 @@ def build_objects(flavor: ResourceFlavor) -> str:
         ]
     if flavor.island_resources:
         lines += _island_blocks(flavor)
+    per_island = build_per_island(flavor, islands)
+    if per_island:
+        lines.append(per_island)
     if flavor.relics:
         lines += [
             "",

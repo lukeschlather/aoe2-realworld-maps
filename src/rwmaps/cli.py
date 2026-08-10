@@ -298,17 +298,22 @@ def generate(args) -> dict:
                                  "flavor": replace(opts.flavor, **flavor_overrides)})
 
     use_per_player_forest = opts.per_player_forest and not args.legacy_resources
+    islands: list[rms_land.Island] = []
     land_section = rms_land.build_land_generation(
         discs, size, starts,
         target_tiles=int(mask.sum()), terrain_type=opts.land,
         clumping_factor=args.clumping_factor,
+        # Per-island land ids, so gold and stone can be aimed at the islands
+        # instead of scattered map-wide and never reaching them.
+        mask=mask if not args.legacy_resources else None,
+        islands_out=islands,
         # Painting the player lands with a placeholder is what makes the
         # per-player forest addressable; without that pass they must stay
         # ordinary land or the placeholder would never be cleaned up.
         player_terrain=(rms.PLAYER_SPAWN_PLACEHOLDER if use_per_player_forest else None),
     )
     script = rms.build_rms(args.name, args.proj, size, land_section, opts, ai_type,
-                           system_a=not args.legacy_resources)
+                           system_a=not args.legacy_resources, islands=islands)
 
     # The grid size is baked into the land areas, so it belongs in the name -
     # picking the wrong lobby size is the one way to get a broken map.

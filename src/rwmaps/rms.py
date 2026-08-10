@@ -502,6 +502,7 @@ def build_rms(
     opts: RmsOptions | None = None,
     ai_map_type: str = "COASTAL",
     system_a: bool = True,
+    islands=(),
 ) -> str:
     """Render a complete, self-contained random map script.
 
@@ -515,7 +516,7 @@ def build_rms(
     opts = opts or RmsOptions()
     if system_a:
         return _build_rms_system_a(title, projection, size, land_section,
-                                   opts, ai_map_type)
+                                   opts, ai_map_type, islands)
     parts = [
         _HEADER.format(title=title, projection=projection, size=size,
                        ai_map_type=ai_map_type)
@@ -554,6 +555,7 @@ def _build_rms_system_a(
     land_section: str,
     opts: RmsOptions,
     ai_map_type: str,
+    islands=(),
 ) -> str:
     """Same map, resources built the way the current stock maps build them.
 
@@ -595,7 +597,7 @@ def _build_rms_system_a(
                 elevation_tiles=opts.elevation_tiles,
             )
         )
-    parts.append(build_objects(opts.flavor))
+    parts.append(build_objects(opts.flavor, islands))
     return "\n".join(parts)
 
 
