@@ -16,8 +16,46 @@ Other hypotheses for why it's crashing:
 * there's some sort of a mismatch because my UI scale on my machine is not at 100% (it's like 150% or something) and my resolution has some weird interaction with whatever thing is calculating coordinates between AOE2 and the desktop environment which is processing the UI automation click coordinates.
 
 
-* MOD_STATUS.md - agent notes about building the mod
-* TUNING_STATUS.md - agent notes about tuning done to identify the parameters used to generate good RMS scripts.
-* README-AGENTS.md older agent-written readme
-* RENDER_PIPELINE.md - agent notes about UI automation to test generating maps
+## Operating it
+
+```sh
+uv run python automation/build_mod.py --list      # regions and their flags
+
+# one region, ~2 min (a full rebuild is ~17: 11 regions x ~70s of annealing)
+uv run python automation/build_mod.py --regions "Salish Sea" --placeholder "Salish Sea"
+uv run python automation/install_mod.py --all
+
+# capture needs the game running, Scenario Editor, AA_rw_placeholder_tester,
+# Huge [240], 8 players. It aborts immediately if the game is not up.
+uv run python automation/mod_capture.py --run-id <id> --n-samples 1
+
+uv run python automation/compare_starts.py --stock benchmarks --mod <id>
+uv run python automation/neutral_supply.py --mod <id> --detail
+uv run pytest tests -q
+```
+
+`mod/` is generated, never hand-edited. The lobby Map Size must be `Huge
+[240]` - land areas are absolute tile counts, so the wrong size breaks the
+map rather than shrinking it.
+
+## The docs
+
+Live:
+
+| doc | what it is |
+|---|---|
+| **GENERATION.md** | **how generation works, end to end - start here** |
+| RESOURCE_TEMPLATES.md | the two stock resource systems, and their measured budgets. Authoritative on resources |
+| STOCK_MAP_INVENTORY.md | what stock scripts are on disk; script name vs UI name |
+| RENDER_PIPELINE.md | the UI automation that drives real engine renders |
+| RESOURCE_REWORK_STATUS.md | the resource rework's open items - a work queue, not a reference |
+| CLAUDE.md | working conventions: verify with real renders, no agent quality verdicts, commit incrementally |
+
+History - kept for the record, and carrying known-bad assumptions:
+
+| doc | what it was | why it is stale |
+|---|---|---|
+| MOD_STATUS.md | 2026-08-01 mod state | its resource analysis rests on a 1999 orphan include no shipping map uses; carries a banner saying so |
+| TUNING_STATUS.md | 2026-07-31 window/parameter search | superseded as narrative, but the known-good defaults it settled on are the ones in `cli.py` today |
+| README_AGENTS.md | older agent-written readme | its CLI examples predate the mod build |
 
