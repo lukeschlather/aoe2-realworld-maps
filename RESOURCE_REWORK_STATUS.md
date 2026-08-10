@@ -161,6 +161,52 @@ stone, a 66-tile island took gold. A clause measuring distance to a
 *different* zone excludes anything across water, which is exactly the
 mainland-yes/island-no pattern observed.
 
+### NOT SOLVED: 35 bare islands across 22 captures (`islands_n2`)
+
+All 11 regions, N=2, every capture IoU 0.70-0.91 (no wrong-map captures).
+"BARE" = an unowned 60+ tile island with a 2x2 camp spot and no gold or
+stone on it.
+
+| region | islands | stocked | BARE | gold | stone | share |
+|---|---|---|---|---|---|---|
+| Caribbean | 3.5 | 3.5 | **0** | 36 | 22 | 17% |
+| New Zealand | 0.5 | 0.5 | **0** | 2 | 6 | 2% |
+| Scandinavia | 0.0 | 0.0 | **0** | 38 | 48 | 20% |
+| Britain | 2.0 | 1.5 | 1 | 30 | 20 | 13% |
+| Chesapeake Bay | 2.0 | 0.5 | 3 | 42 | 41 | 18% |
+| Greece | 5.5 | 4.0 | 3 | 36 | 46 | 19% |
+| Italy | 6.5 | 5.0 | 3 | 60 | 54 | 24% |
+| Cramped Italy | 6.5 | 4.5 | 4 | 63 | 56 | 27% |
+| Black Sea | 3.5 | 0.0 | **7** | 60 | 56 | 23% |
+| Japan | 6.0 | 2.5 | **7** | 14 | 11 | 8% |
+| Salish Sea | 4.0 | 0.5 | **7** | 50 | 48 | 20% |
+
+**The maps with the most neutral supply have the emptiest islands.** Black
+Sea places 116 neutral objects at a 23% share and stocks *none* of its 3.5
+islands; Salish Sea 98 objects at 20% and stocks 0.5 of 4. Caribbean stocks
+every island with a third of that supply. So this is not a volume problem
+and turning the knobs will not fix it.
+
+Nor is it island size. Caribbean's 88-, 67- and 65-tile islands are all
+stocked; Salish Sea's 151- and 108-tile islands are bare, as are Black
+Sea's 88 and 82.
+
+What separates them is **how much mainland competes for the same piles**.
+The pass is map-wide, not island-aware: `number_of_groups 1024` with
+spacing 40 places groups until it runs out of legal spots, and on a
+land-rich map the mainland offers thousands of spots that satisfy the
+spacing long before an island is ever needed. Caribbean's gate admits 1979
+placeable tiles, so its mainland saturates and the islands get used; Salish
+Sea's admits 20540 and they never do.
+
+**The fix is to target islands explicitly, not to place more.**
+`place_on_specific_land_id` is the mechanism, and this project generates
+the lands itself, so it can give each island its own land id and emit a
+small dedicated block per island - which is what `Thames.rms` does. That
+needs `rms_land.build_land_generation` to assign per-component land ids and
+report which components are unowned islands, and `rms_objects` to emit one
+block each.
+
 ### SHIPPED 2026-08-10: gold/stone island pass, include dropped
 
 The include is **off** and `--island-resources` is **on by default**.
