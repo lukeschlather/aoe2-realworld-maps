@@ -160,6 +160,10 @@ def parse_args():
                     help="comma-separated subset of region names to run (default: "
                          "all 10) - handy for smoke-testing the pipeline on one "
                          "region/sample before committing to a full pass")
+    p.add_argument("--extra", nargs=argparse.REMAINDER, default=[],
+                    help="extra rwmaps flags appended to every region's regen, "
+                         "for testing a parameter that is not in MOD_REGIONS yet "
+                         "(e.g. --extra --island-resources). Must come last.")
     return p.parse_args()
 
 
@@ -193,7 +197,7 @@ def main():
 
             rms_dir = outroot / "scripts" / name
             gen_cmd = ["uv", "run", "rwmaps", name, "--outdir", str(rms_dir),
-                       "--no-preview", *extra_args]
+                       "--no-preview", *extra_args, *args.extra]
             t0 = time.time()
             r = subprocess.run(gen_cmd, cwd=REPO, capture_output=True, text=True)
             if r.returncode != 0:

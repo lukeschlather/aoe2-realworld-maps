@@ -89,10 +89,24 @@ def landmass_profile(path: Path) -> dict:
     else:
         players, nearest_tc = [], np.full(land.shape, np.inf)
 
+    # Why a landmass is empty matters as much as that it is. The neutral
+    # placement blocks all carry `avoid_forest_zone 2` and
+    # `min_distance_to_map_edge 6`, so an island that is small and wooded
+    # can have no legal tile at all even when the distance gate admits it -
+    # a different problem from the gate being too tight, and with a
+    # different fix.
+    open_land = land & ~cap.forest_mask
+    near_forest = ndimage.binary_dilation(cap.forest_mask, iterations=2)
+    legal = open_land & ~near_forest
+    legal[:6, :] = legal[-6:, :] = False
+    legal[:, :6] = legal[:, -6:] = False
+
     masses: dict[int, dict] = {
         i: {
             "label": i,
             "tiles": int(areas[i - 1]),
+            "open_tiles": int((open_land & (labels == i)).sum()),
+            "legal_tiles": int((legal & (labels == i)).sum()),
             "players": [],
             "resources": dict.fromkeys(KINDS, 0),
             "neutral": dict.fromkeys(KINDS, 0),
@@ -187,7 +201,8 @@ def print_capture(prof: dict, detail: bool) -> None:
           + "  ".join(f"{d}={g[d]}" for d in PLAYER_DISTANCES))
     if not detail:
         return
-    print(f"  {'tiles':>7} {'players':<12} {'res':>4} {'neut':>5}  breakdown")
+    print(f"  {'tiles':>7} {'open':>6} {'legal':>6} {'players':<12} "
+          f"{'res':>4} {'neut':>5}  breakdown")
     small_tiles = small_res = 0
     for m in prof["masses"]:
         if m["tiles"] < MIN_ISLAND_TILES:
@@ -197,7 +212,8 @@ def print_capture(prof: dict, detail: bool) -> None:
         who = ",".join(str(p) for p in sorted(m["players"])) or "-"
         kinds = " ".join(f"{k}={m['resources'][k]}" for k in KINDS
                          if m["resources"][k])
-        print(f"  {m['tiles']:>7} {who:<12} {m['resource_total']:>4} "
+        print(f"  {m['tiles']:>7} {m['open_tiles']:>6} {m['legal_tiles']:>6} "
+              f"{who:<12} {m['resource_total']:>4} "
               f"{m['neutral_total']:>5}  {kinds}")
     if small_tiles:
         print(f"  {small_tiles:>7} {'(< min, all)':<12} {small_res:>4}")
