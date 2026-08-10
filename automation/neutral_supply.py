@@ -40,6 +40,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy import ndimage
+from scipy.ndimage import minimum_filter
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -55,6 +56,25 @@ from rwmaps.fairness import (  # noqa: E402
 )
 
 KINDS = LAND_KINDS + EXTRA_LAND_KINDS
+
+#: The four things a player actually needs, because a single "neutral
+#: resource" total hides the only distinction that matters. Stock neutral
+#: supply in the 14-21% band is overwhelmingly **gold and stone** - Arabia
+#: places 24 gold and 27 stone neutral against 0 forage and 3 deer.
+#:
+#: Neutral *food* is close to worthless late: players switch to farms, so a
+#: small amount of wood converts to food with minimal micro. That makes
+#: wood a food source too, and makes a neutral deer herd a much weaker prize
+#: than a neutral gold pile.
+CLASSES: dict[str, tuple[str, ...]] = {
+    "gold": ("gold",),
+    "stone": ("stone",),
+    "food": ("forage", "sheep", "deer", "boar", "small_game"),
+}
+
+#: Forest tiles, not objects, so wood is counted in its own unit and never
+#: summed into an object total.
+WOOD = "wood_tiles"
 
 #: Landmasses below this are sandbars and rocks, not places anyone plays.
 #: Reported as an aggregate row rather than one line each.
@@ -86,8 +106,14 @@ def landmass_profile(path: Path) -> dict:
         players, stack = _distance_stack(walk, tcs)
         # Walking distance to the *nearest* town centre, over all players.
         nearest_tc = stack.min(axis=0)
+        # Forest is impassable, so no distance field reaches into it. What
+        # matters is standing next to a tree and chopping it, so a forest
+        # tile's distance is the smallest of its 8 neighbours - the same
+        # 3x3 minimum filter fairness.py uses for wood ownership.
+        wood_reach = minimum_filter(nearest_tc, size=3, mode="nearest")
     else:
-        players, nearest_tc = [], np.full(land.shape, np.inf)
+        players = []
+        nearest_tc = wood_reach = np.full(land.shape, np.inf)
 
     # Why a landmass is empty matters as much as that it is. The neutral
     # placement blocks all carry `avoid_forest_zone 2` and
@@ -110,6 +136,9 @@ def landmass_profile(path: Path) -> dict:
             "players": [],
             "resources": dict.fromkeys(KINDS, 0),
             "neutral": dict.fromkeys(KINDS, 0),
+            WOOD: int((cap.forest_mask & (labels == i)).sum()),
+            f"neutral_{WOOD}": int((cap.forest_mask & (labels == i)
+                                    & (wood_reach > OWNERSHIP_RADIUS)).sum()),
         }
         for i in range(1, n_masses + 1)
     }
@@ -154,6 +183,10 @@ def landmass_profile(path: Path) -> dict:
     for m in rows:
         m["resource_total"] = sum(m["resources"].values())
         m["neutral_total"] = sum(m["neutral"].values())
+        m["by_class"] = {c: sum(m["resources"][k] for k in ks)
+                         for c, ks in CLASSES.items()}
+        m["neutral_by_class"] = {c: sum(m["neutral"][k] for k in ks)
+                                 for c, ks in CLASSES.items()}
 
     totals = dict.fromkeys(KINDS, 0)
     neutral_totals = dict.fromkeys(KINDS, 0)
@@ -161,6 +194,11 @@ def landmass_profile(path: Path) -> dict:
         for k in KINDS:
             totals[k] += m["resources"][k]
             neutral_totals[k] += m["neutral"][k]
+    by_class = {c: sum(totals[k] for k in ks) for c, ks in CLASSES.items()}
+    neutral_by_class = {c: sum(neutral_totals[k] for k in ks)
+                        for c, ks in CLASSES.items()}
+    wood_total = sum(m[WOOD] for m in rows)
+    wood_neutral = sum(m[f"neutral_{WOOD}"] for m in rows)
 
     big = [m for m in rows if m["tiles"] >= MIN_ISLAND_TILES]
     unowned_big = [m for m in big if not m["players"]]
@@ -171,6 +209,10 @@ def landmass_profile(path: Path) -> dict:
         "n_landmasses_big": len(big),
         "resources": totals,
         "neutral": neutral_totals,
+        "by_class": by_class,
+        "neutral_by_class": neutral_by_class,
+        WOOD: wood_total,
+        f"neutral_{WOOD}": wood_neutral,
         "neutral_total": sum(neutral_totals.values()),
         "resource_total": sum(totals.values()),
         "off_land_resources": off_land,
@@ -191,8 +233,13 @@ def print_capture(prof: dict, detail: bool) -> None:
     print(f"\n{Path(prof['capture']).name}")
     print(f"  players {prof['n_players']}   landmasses {prof['n_landmasses']} "
           f"({prof['n_landmasses_big']} >= {MIN_ISLAND_TILES} tiles)")
+    cls = "  ".join(
+        f"{c}={prof['neutral_by_class'][c]}/{prof['by_class'][c]}"
+        for c in CLASSES)
+    print(f"  neutral/total by class (>{OWNERSHIP_RADIUS:.0f} walk): {cls}  "
+          f"wood={prof[f'neutral_{WOOD}']}/{prof[WOOD]} tiles")
     print(f"  all resources     {prof['resource_total']:>5}   {_fmt_kinds(prof['resources'])}")
-    print(f"  neutral (>{OWNERSHIP_RADIUS:.0f} walk) {prof['neutral_total']:>5}   "
+    print(f"  neutral           {prof['neutral_total']:>5}   "
           f"{_fmt_kinds(prof['neutral'])}")
     print(f"  unowned landmasses {prof['unowned_masses']}, of which empty "
           f"{prof['empty_unowned_masses']}")
@@ -201,8 +248,8 @@ def print_capture(prof: dict, detail: bool) -> None:
           + "  ".join(f"{d}={g[d]}" for d in PLAYER_DISTANCES))
     if not detail:
         return
-    print(f"  {'tiles':>7} {'open':>6} {'legal':>6} {'players':<12} "
-          f"{'res':>4} {'neut':>5}  breakdown")
+    print(f"  {'tiles':>7} {'legal':>6} {'players':<10} "
+          f"{'gold':>5} {'stone':>5} {'food':>5} {'wood':>6}   (neutral of each)")
     small_tiles = small_res = 0
     for m in prof["masses"]:
         if m["tiles"] < MIN_ISLAND_TILES:
@@ -210,11 +257,10 @@ def print_capture(prof: dict, detail: bool) -> None:
             small_res += m["resource_total"]
             continue
         who = ",".join(str(p) for p in sorted(m["players"])) or "-"
-        kinds = " ".join(f"{k}={m['resources'][k]}" for k in KINDS
-                         if m["resources"][k])
-        print(f"  {m['tiles']:>7} {m['open_tiles']:>6} {m['legal_tiles']:>6} "
-              f"{who:<12} {m['resource_total']:>4} "
-              f"{m['neutral_total']:>5}  {kinds}")
+        cells = " ".join(f"{m['neutral_by_class'][c]:>2}/{m['by_class'][c]:<2}"
+                         for c in CLASSES)
+        print(f"  {m['tiles']:>7} {m['legal_tiles']:>6} {who:<10} "
+              f"{cells} {m[f'neutral_{WOOD}']:>4}/{m[WOOD]:<5}")
     if small_tiles:
         print(f"  {small_tiles:>7} {'(< min, all)':<12} {small_res:>4}")
 
