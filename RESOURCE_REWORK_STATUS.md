@@ -137,9 +137,56 @@ Two conclusions:
    this range; it wants to be a per-region `ResourceFlavor` value, which is
    already the mechanism for this kind of split.
 
+## RESOLVED 2026-08-10: the include fires, and the islands are fixable
+
+Two captures, Salish Sea, one sample each (`out/mod_capture/neutral_v1`,
+`out/mod_capture/island_v1`), against the N=10 baseline above:
+
+| condition | all res | neutral | share | unowned islands | empty |
+|---|---|---|---|---|---|
+| per-player only (N=10) | 320 | 0 | 0% | 3.6 | **3.6 - all** |
+| + `resources_neutral.inc` | 895 | 333 | 37% | 5 | **5 - all** |
+| + island pass | 1159 | 535 | 46% | 3 | **1** |
+
+**`resources_neutral.inc` works** - the warning sign about no stock map
+referencing it did not pan out. Salish Sea's neutral supply went 0 -> 333.
+
+**It leaves every island empty, and the cause is
+`max_distance_to_other_zones 8`.** Every block in the include carries it.
+The islands were not short of anywhere to put things: they measured 100%
+open (unforested) and 100% legal on every constraint checkable from outside
+the engine, at 73-161 tiles each. Emitting the include's own blocks minus
+that one clause (`--island-resources`) stocked them - a 150-tile island took
+stone, a 66-tile island took gold. A clause measuring distance to a
+*different* zone excludes anything across water, which is exactly the
+mainland-yes/island-no pattern observed.
+
+### What is left: calibration, not mechanism
+
+Both passes overshoot badly. Neutral share is **37% with the include alone
+and 46% with both**, against a stock band of **14-21%**, and total
+resources went 320 -> 1159. Salish Sea now carries more resources than
+stock Yucatan, the richest map measured.
+
+`resources_neutral.inc` is **not tunable** - it takes no consts, so it is
+all-or-nothing at 333 objects. Our own pass is fully parameterized. So the
+cleanest route is probably to **drop the include and keep only the
+hand-rolled pass**, tuned to hit the band: holding per-player supply at
+~320, 14-21% wants roughly **65 neutral objects**, against the 200 the
+island pass currently adds and the 333 the include adds. Levers are
+`island_group_size` (4) and the group spacings (24/28).
+
+That also disposes of the residual risk in shipping an include no stock map
+uses.
+
+Not yet measured: whether the same fix stocks islands on the archipelago
+regions, where the 26-tile gate is much tighter (New Zealand 463 tiles,
+Japan 1930, Caribbean 1979 - see the gate table above). Salish Sea, at
+20540, is the easy case.
+
 ## Open, roughly in order of expected payoff
 
-### 1. Verify `resources_neutral.inc` actually fires
+### 1. ~~Verify `resources_neutral.inc` actually fires~~ - done, see above
 
 Still the blocker: it needs one capture and a count, and the game was
 unavailable when the baseline above was measured. The mod **has** been
