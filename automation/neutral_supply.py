@@ -76,6 +76,11 @@ CLASSES: dict[str, tuple[str, ...]] = {
 #: summed into an object total.
 WOOD = "wood_tiles"
 
+#: Beach and ice-shore terrain. **Unbuildable** - a villager can walk on it
+#: but no camp can go there - so it must come out of any "can this island
+#: be worked" measure. Roughly half of every small island here is beach.
+BEACH_IDS = frozenset({2, 26, 51, 52, 53, 54, 55, 56, 57, 58})
+
 #: Landmasses below this are sandbars and rocks, not places anyone plays.
 #: Reported as an aggregate row rather than one line each.
 MIN_ISLAND_TILES = 60
@@ -129,12 +134,16 @@ def landmass_profile(path: Path) -> dict:
 
     # Can a player actually work this island? Reaching it is not the
     # question - transports handle that, harder than walking but perfectly
-    # possible. The question is whether there is a **2x2 open square** to
-    # drop a mining or lumber camp on. An island with gold and no 2x2 is a
-    # prize nobody can collect. A 2x2 all-open block, so erode the open
-    # land by a 2x2 and see what survives.
+    # possible. The question is whether a mining camp fits.
+    #
+    # **Shore tiles are unbuildable**, and counting them was badly
+    # misleading: every bare island on Salish Sea is about half BEACH, so a
+    # 151-tile island with "110 camp spots" really had 71 buildable tiles
+    # and 39 spots. Beach is excluded here, and the camp test is a 2x2 of
+    # buildable land.
+    buildable_land = land & ~cap.forest_mask & ~np.isin(cap.terrain, list(BEACH_IDS))
     buildable = ndimage.binary_erosion(
-        open_land, structure=np.ones((2, 2), dtype=bool))
+        buildable_land, structure=np.ones((2, 2), dtype=bool))
 
     masses: dict[int, dict] = {
         i: {
