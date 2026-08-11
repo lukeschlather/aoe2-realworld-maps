@@ -226,24 +226,42 @@ small to justify a camp is clutter, not a prize. Neutral *food* is weak for
 the same class of reason: players switch to farms late, converting wood to
 food with minimal micro.
 
-What follows from that, and is **not yet built** (see
-`RESOURCE_REWORK_STATUS.md`):
+What follows from that, and is **built** - `_island_trees` in
+`rms_objects.py`, emitted by `build_per_island` after the piles so the
+piles get first pick of the ground:
 
-- small islands want roughly **one straggler tree per 6 buildable tiles** -
+- small islands get roughly **one straggler tree per 6 buildable tiles** -
   enough to build with, not enough to justify a lumber camp;
-- larger islands want **at least one small tree cluster: a blob of about
-  2-5 tiles across, or bigger**. ("Copse" is not an engine term - it just
-  means a blob this size, as opposed to a real forest.)
+- larger islands get **at least one tree cluster: a blob of about 2-5 tiles
+  across, or bigger**. ("Copse" is not an engine term - it just means a blob
+  this size, as opposed to a real forest.)
 
 Both are **tree objects**, not forest terrain, and that makes them one
 mechanism rather than two. `create_object` takes
-`place_on_specific_land_id`, so island trees can be aimed exactly like the
+`place_on_specific_land_id`, so island trees are aimed exactly like the
 gold and stone pass, with no distance gate to fight:
 
 | want | `number_of_objects` | `number_of_groups` | grouping |
 |---|---|---|---|
-| scattered singles on a small island | 1 | buildable tiles / 6 | loose |
-| a 2-5 tile blob on a larger one | ~6-12 | 1 per blob | `set_tight_grouping`, `group_placement_radius 2` |
+| scattered singles on a small island | 1 | buildable tiles / 6 | loose, `min_distance_group_placement 2` |
+| a blob on a larger one | 12 | 1 per 250 buildable tiles, 1-6 | `set_tight_grouping`, `group_placement_radius 2` |
+
+Two things that are easy to get wrong here, both found by building it:
+
+- **The scatter rate is a rule about small islands.** Applied to an
+  811-tile one it asks for 98 loose trees, which is a carpet, not a
+  scatter. Any island big enough to also carry copses uses a much sparser
+  rate (`island_straggler_per_tiles_large`), because there the copses are
+  the wood and the singles are only something to build a house against.
+- **Spacing has to admit the density asked for.** One tree per 6 tiles is
+  a mean spacing of about 2.4, so a `min_distance_group_placement` of 4
+  silently caps the count at a third of the request - the same class of
+  bug as a gate that admits no tiles.
+
+Sizing needs to know how much of an island is *not* shore, so
+`rms_land.Island` carries a `buildable` estimate: the mask eroded by
+`SHORE_RINGS` (2). One ring is far too generous against what captures
+measure - a 151-tile island had 71 buildable tiles and a 68-tile one 18.
 
 Forest *terrain* is a different thing and is what gives the big islands
 their real woods - Ireland's 582 wood tiles, Sardinia's 547.
@@ -254,13 +272,60 @@ terrain, grow forest on `base_terrain <placeholder>`, convert back. Only
 reach for that if object blobs turn out to be too small to matter on a
 1000-tile island.
 
+## Loose trees between the bases
+
 Stock has an include for the map-wide version of this,
 `includes/stragglers_neutral.inc`, used by Arabia, Arena, Baltic, Black
-Forest and many more. **We pin `STRAGGLER_NEUTRAL` and never include it** -
-a pin with no consumer. It is worth adopting for map-wide neutral trees,
-but note it carries `max_distance_to_other_zones STRAGGLER_ZONE_DISTANCE`,
-the very clause that keeps a map-wide pass off the islands, so it does not
-substitute for the per-island blocks above.
+Forest and many more. **We pinned `STRAGGLER_NEUTRAL` from the day System A
+landed and never included the file that reads it** - a pin with no
+consumer, and the cost of it is exact.
+
+The engine emits **one tree unit per forest terrain tile**, so a raw
+tree-object count says nothing: Britain measures 4200 tree objects against
+4160 forest tiles. Only trees standing *off* forest terrain are stragglers,
+and counted that way every one of our eleven regions carried **40** of
+them - 5 per player from `stragglers.inc` and nothing else whatsoever.
+Stock carries 182 (Arabia) to 318 (Team Islands), so 140-280 of stock's
+loose trees are neutral ones we had none of.
+
+The include is now emitted (`neutral_stragglers`), at its stock defaults
+including `STRAGGLER_ZONE_DISTANCE 4`. That clause is the family that has
+silently placed nothing here twice, so it is the first suspect if a capture
+comes back at 40 again - but it is left alone because a sweep already
+showed *raising* a zone distance kills placement rather than freeing it
+(gold 25 -> 0 at 14). It does not substitute for the per-island blocks
+above: the same clause is what keeps every map-wide pass off the islands.
+
+## Forest shape: how Black-Forest-ish is this map
+
+`automation/forest_structure.py` measures the wood's *structure* against
+real stock captures. Three numbers matter, and none of them is share of
+land:
+
+- **largest blob** - what fraction of all the wood sits in one mass. Stock
+  open maps are 1-8%; stock Black Forest is 34%.
+- **blocked perimeter** - the share of the ring at 20 walking tiles from a
+  town centre that the player cannot stand on, with the wood removed from
+  the *denominator* so water is already out of it. Arabia 8% mean / 18%
+  worst; Yucatan (the densest normal stock map) 34/46; Black Forest 34/58.
+- **detour** - open-land walking distance between two players over the same
+  distance with the wood treated as walkable. Stock open maps 1.00-1.04,
+  Black Forest 1.10.
+
+Measured on our own archived captures, several regions sit **past** Black
+Forest on shape: Greece 38% largest blob, 41% mean blocked, detour 1.15;
+Caribbean 52% largest blob; Britain 35% and a player at 69% blocked. The
+cause is granularity - the map-wide forest is one `create_terrain` with
+**12 clumps**, so we produce 16-75 blobs against stock's 100-148.
+
+**Do not read the corridor count on its own.** A wide-open ring is one
+connected component for the same reason a sealed pocket is: stock Arabia
+has 11 of 24 players on "one exit" at an 8% blocked perimeter. Walled-in is
+the conjunction of one corridor *and* a mostly-blocked perimeter, and by
+that test it is rare (3 players in 264) - the common failure is not one
+door, it is most of the perimeter being trees.
+
+`--forest-clumps` and `--forest-clumping-factor` are the knobs.
 
 ### Why islands come out bare today
 
@@ -275,12 +340,12 @@ an island:
   **12 clumps** over the whole map. Twelve clumps land where there is room,
   which is the mainland. Only the two largest islands measured (Sardinia
   1505 tiles, Ireland 1281) get forest at all; Italy has a 1018-tile
-  cluster with 632 buildable tiles and **zero** trees.
+  cluster with 632 buildable tiles and **zero** trees. This is also why the
+  wood comes out as a few big masses - see *Forest shape* above.
 
-`rms_land.py` can already give every unowned island its own `land_id`
-(`_island_ids`, `Island`), and `rms_objects.build_per_island` emits gold
-and stone against those ids. That code is committed but **not in the
-shipped mod** - it has never been through a capture.
+`rms_land.py` gives every unowned island its own `land_id` (`_island_ids`,
+`Island`), and `rms_objects.build_per_island` emits gold, stone and now
+trees against those ids.
 
 ## Building and installing the mod
 
