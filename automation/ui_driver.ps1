@@ -258,6 +258,87 @@ function Read-Seed {
     return (Ocr-Rect $SEED_RECT 3 $true).Trim()
 }
 
+# ---------------------------------------------------------------------------
+# Watching the engine work, instead of watching the screen.
+#
+# Every Read-Seed is a GDI CopyFromScreen against a fullscreen Direct3D
+# application plus a WinRT OCR call, and the generation poll below used to
+# do one every ~250-500ms for as long as generation took - a couple of
+# hundred screen-DC reads into the game while it is busy. That is the most
+# invasive thing this driver does and it is not a click, so it is worth
+# not doing it during the one window where the engine is under load.
+#
+# CPU is a cheaper and more direct signal: the process's own accumulated
+# processor time, which costs a process-table read and touches nothing the
+# game owns. It cannot say WHICH map generated - only the seed can do that
+# - so it is used purely to decide *when to look*, and Read-Seed remains
+# the authority on whether generation actually happened.
+#
+# Thresholds are relative to a baseline measured immediately beforehand,
+# because the editor is not idle at rest: it renders continuously, so there
+# is no absolute "busy" number that is portable across machines or even
+# across window sizes.
+# ---------------------------------------------------------------------------
+
+function Get-GameCpuSeconds($processName = "AoE2DE_s") {
+    $p = Get-Process -Name $processName -ErrorAction SilentlyContinue
+    if (-not $p) { return $null }
+    return [double](($p | Measure-Object -Property CPU -Sum).Sum)
+}
+
+# Cores' worth of CPU the game is using right now, sampled over $ms.
+function Measure-GameCpuLoad($ms = 600, $processName = "AoE2DE_s") {
+    $a = Get-GameCpuSeconds $processName
+    if ($null -eq $a) { return $null }
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    Start-Sleep -Milliseconds $ms
+    $b = Get-GameCpuSeconds $processName
+    if ($null -eq $b) { return $null }
+    $elapsed = $sw.Elapsed.TotalSeconds
+    if ($elapsed -le 0) { return $null }
+    return ($b - $a) / $elapsed
+}
+
+# Wait for a burst of engine work to start and then finish.
+#
+# Returns "quiet" if it saw the load rise above the baseline and come back
+# down, "busy" if it rose and never settled inside $maxBusyMs, and "none"
+# if it never rose at all - which is also what a machine where this signal
+# does not work looks like, so callers must treat "none" as "no
+# information" and fall back rather than as "nothing happened".
+function Wait-ForCpuBurst($baseline, $startTimeoutMs = 8000, $maxBusyMs = 180000,
+                          $pollMs = 250, $quietPolls = 3, $margin = 0.35,
+                          $processName = "AoE2DE_s") {
+    if ($null -eq $baseline) { return "none" }
+    $busyAt = $baseline + $margin
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $started = $false
+    $quiet = 0
+    while ($true) {
+        $load = Measure-GameCpuLoad $pollMs $processName
+        if ($null -eq $load) { return "none" }   # the game went away
+        if (-not $started) {
+            if ($load -ge $busyAt) {
+                $started = $true
+                Write-Host "CPU burst started (load=$([math]::Round($load,2)) baseline=$([math]::Round($baseline,2)))"
+            } elseif ($sw.ElapsedMilliseconds -ge $startTimeoutMs) {
+                return "none"
+            }
+        } else {
+            if ($load -lt $busyAt) {
+                $quiet++
+                if ($quiet -ge $quietPolls) {
+                    Write-Host "CPU burst done after $($sw.ElapsedMilliseconds)ms"
+                    return "quiet"
+                }
+            } else {
+                $quiet = 0
+            }
+            if ($sw.ElapsedMilliseconds -ge $maxBusyMs) { return "busy" }
+        }
+    }
+}
+
 function Test-MenuOpen {
     $text = Ocr-Rect $MENU_TITLE_RECT 1 $false
     return $text -match "Main Menu"
@@ -292,7 +373,30 @@ function Click-GenerateMapVerified($genX, $genY, $maxClicks = 3, $pollMs = 250, 
     $before = Read-Seed
     for ($i = 1; $i -le $maxClicks; $i++) {
         if ($i -gt 1) { Jitter-Cursor $genX $genY }
+        # Baseline the engine's load with the click not yet sent, so the
+        # burst is measured against how busy this machine's editor is right
+        # now rather than against a number baked in somewhere.
+        $idle = Measure-GameCpuLoad 600
         Click-Repeat
+        # Wait for generation by watching the process, not the screen. The
+        # OCR poll below is a screen-DC read plus a WinRT OCR call each
+        # time, and it used to run right through generation - a couple of
+        # hundred of them into a fullscreen D3D application while the engine
+        # is under load, which is the most invasive thing this driver does
+        # and is not a click. This makes the poll below almost always
+        # succeed on its first read instead.
+        #
+        # A "none" result means the signal told us nothing - the process
+        # vanished, or its load never rose above the baseline - so it falls
+        # through to polling exactly as before. This gates the OCR; it never
+        # replaces it, because CPU cannot say WHICH map generated and the
+        # seed can.
+        $burst = Wait-ForCpuBurst $idle 8000 $clickBudgetMs
+        if ($burst -eq "quiet") {
+            Start-Sleep -Milliseconds 250   # let the seed box repaint
+        } elseif ($burst -eq "none") {
+            Write-Host "click=$i no CPU burst seen - falling back to polling"
+        }
         $deadline = $sw.ElapsedMilliseconds + $clickBudgetMs
         $lostFocus = $false
         while ($sw.ElapsedMilliseconds -lt $deadline) {
