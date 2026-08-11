@@ -250,6 +250,82 @@ class ResourceFlavor:
     island_large_min_piles: int = 1
     island_large_max_piles: int = 4
 
+    #: Trees on islands, aimed by the same land ids as the piles above.
+    #:
+    #: Measured before this existed: every island under ~1000 tiles had
+    #: **zero** wood of any kind, because the map-wide forest is one
+    #: ``create_terrain`` with a dozen clumps that land wherever there is
+    #: room - the mainland. Italy carried a 1018-tile cluster with 632
+    #: buildable tiles and not one tree.
+    #:
+    #: The design rule is economic, not decorative (``GENERATION.md``):
+    #: a tree yields 75 wood and a lumber camp costs 100, so a copse too
+    #: small to justify a camp is clutter. Hence two different objects:
+    #:
+    #: * **scattered stragglers** on a small island - enough to repair a
+    #:   transport or put up a house, deliberately not enough to log;
+    #: * **a copse** on an island big enough to settle - one blob a lumber
+    #:   camp can actually sit against.
+    #:
+    #: Both are tree *objects*, so both are ``create_object`` with
+    #: ``place_on_specific_land_id`` and no distance gate, exactly like the
+    #: gold and stone above. Forest *terrain* cannot be aimed at a land id
+    #: at all - no stock map does it - so a real wood on an island would
+    #: need the placeholder-terrain trick ``build_per_player_forest`` uses.
+    island_trees: bool = True
+    #: Scattered singles: one tree per this many estimated buildable tiles.
+    #: The user's rule, stated directly - and stated about *small* islands,
+    #: which is why the copse-bearing ones taper below. At 1-in-6 an
+    #: 811-tile island would ask for 98 loose trees on top of its copses,
+    #: which is a carpet, not a scatter.
+    island_straggler_per_tiles: int = 6
+    #: The same rate on an island big enough to also carry copses, where
+    #: the copses are the wood and the singles are only the thing you build
+    #: a house against.
+    island_straggler_per_tiles_large: int = 25
+    #: An island with less buildable ground than this gets nothing at all -
+    #: it is a rock, and clutter on it is worse than bare stone.
+    island_trees_min_buildable: int = 20
+    #: Copse: this many trees in one tight blob, which is the "2-5 tiles
+    #: across, or bigger" the design rule asks for.
+    island_copse_size: int = 12
+    #: One copse per this many buildable tiles, clamped by the two below.
+    island_copse_per_tiles: int = 250
+    island_copse_min: int = 1
+    island_copse_max: int = 6
+    #: Islands with at least this much buildable ground get copses *and*
+    #: scattered singles; smaller ones only get the singles.
+    island_copse_min_buildable: int = 150
+
+    #: Map-wide neutral trees - ``includes/stragglers_neutral.inc``, used by
+    #: Arabia, Arena, Baltic, Black Forest and many more.
+    #:
+    #: We have pinned ``STRAGGLER_NEUTRAL`` since System A landed and never
+    #: included the file that reads it - a pin with no consumer. Measured
+    #: across the archived captures, the consequence is exact: every one of
+    #: our eleven regions carries **40** tree objects that are not forest
+    #: terrain, which is 5 per player from ``stragglers.inc`` and **nothing
+    #: else at all**. Stock carries 182 (Arabia) to 318 (Team Islands), so
+    #: roughly 140-280 of stock's loose trees are neutral ones we have none
+    #: of.
+    #:
+    #: Note the include carries ``max_distance_to_other_zones
+    #: STRAGGLER_ZONE_DISTANCE`` - the clause family that has silently
+    #: placed nothing here twice. It is left at the stock default of 4 on
+    #: purpose: a sweep already showed that *raising* the zone distance
+    #: kills placement rather than freeing it (gold 25 -> 0 at 14), so the
+    #: default is the only value with evidence behind it. If a capture
+    #: comes back with 40 loose trees again, the clause is the suspect and
+    #: the fix is our own block without it, exactly as for the island gold.
+    neutral_stragglers: bool = True
+    #: Groups of one tree each, before ``set_scaling_to_map_size``. The
+    #: include's own default is 24.
+    straggler_groups: int = 24
+    #: Distance from any player, and spacing between trees. Include
+    #: defaults are 16 and 2.
+    straggler_distance: int = 16
+    straggler_spacing: int = 2
+
     relics: bool = True
     #: ``relics.inc`` places nothing unless one of RELIC_TYPE_UNRESTRICTED /
     #: _BALANCED / _PLAYER / _SCATTER is defined - the whole include is one
@@ -412,6 +488,13 @@ def _tier_block(kind: str, tiers: tuple[str, ...], flavor: ResourceFlavor) -> li
 #: against each other instead of stacking on the same tile.
 _ISLAND_AREAS = {"GOLD": 1210, "STONE": 1220}
 
+#: Island trees claim their own areas so they can be told apart from the
+#: piles and from each other. Scattered singles self-avoid, which is what
+#: keeps them scattered; a copse deliberately does not, or it could not
+#: clump.
+_ISLAND_TREE_SCATTER = 1310
+_ISLAND_TREE_COPSE = 1320
+
 
 def _island_block(obj: str, flavor: ResourceFlavor, spacing: int) -> list[str]:
     """One neutral block, minus ``max_distance_to_other_zones``."""
@@ -477,6 +560,64 @@ def _per_island_block(obj: str, land_id: int, objects: int, groups: int,
     ]
 
 
+def _island_tree_block(land_id: int, objects: int, groups: int, area: int,
+                       *, scatter: bool, tiles: int) -> list[str]:
+    """Tree objects aimed at one island by land id.
+
+    ``scatter`` chooses between the two shapes: loose singles that avoid
+    each other, or one tight blob that does not. Both avoid the gold and
+    stone actor areas, because a pile you cannot walk a villager up to is
+    not a prize - and both are emitted *after* the piles so the piles get
+    first pick of the ground.
+    """
+    self_area = _ISLAND_TREE_SCATTER if scatter else _ISLAND_TREE_COPSE
+    lines = [
+        "  create_object STRAGGLER_NEUTRAL",
+        "  {",
+        f"    number_of_objects {objects}",
+        f"    number_of_groups {groups}",
+        "    set_loose_grouping" if scatter else "    set_tight_grouping",
+        f"    group_placement_radius {1 if scatter else 2}",
+        f"    place_on_specific_land_id {land_id}   /* {tiles} tiles */",
+        # Spacing has to be loose enough to admit the density asked for.
+        # One tree per 6 tiles is a mean spacing of about 2.4, so a
+        # min_distance of 4 would silently cap the count at a third of the
+        # request - the same class of bug as a gate that admits no tiles.
+        f"    min_distance_group_placement {2 if scatter else 10}",
+        "    avoid_forest_zone 1",
+        "    avoid_cliff_zone 1",
+        f"    actor_area {self_area}",
+        "    actor_area_radius 1",
+        f"    avoid_actor_area {_ISLAND_AREAS['GOLD']}",
+        f"    avoid_actor_area {_ISLAND_AREAS['STONE']}",
+    ]
+    if scatter:
+        lines.append(f"    avoid_actor_area {_ISLAND_TREE_SCATTER}")
+    lines += [f"    avoid_actor_area {_ISLAND_TREE_COPSE}", "  }", ""]
+    return lines
+
+
+def _island_trees(flavor: ResourceFlavor, isl) -> list[str]:
+    """Scattered stragglers, and a copse if the island is worth settling."""
+    buildable = getattr(isl, "buildable", 0) or 0
+    if buildable < flavor.island_trees_min_buildable:
+        return []
+    lines: list[str] = []
+    rate = flavor.island_straggler_per_tiles
+    if buildable >= flavor.island_copse_min_buildable:
+        copses = max(flavor.island_copse_min,
+                     min(flavor.island_copse_max,
+                         buildable // flavor.island_copse_per_tiles))
+        lines += _island_tree_block(isl.land_id, flavor.island_copse_size,
+                                    copses, _ISLAND_TREE_COPSE,
+                                    scatter=False, tiles=isl.tiles)
+        rate = flavor.island_straggler_per_tiles_large
+    singles = max(1, buildable // rate)
+    lines += _island_tree_block(isl.land_id, 1, singles, _ISLAND_TREE_SCATTER,
+                                scatter=True, tiles=isl.tiles)
+    return lines
+
+
 def build_per_island(flavor: ResourceFlavor, islands) -> str:
     """Gold and stone onto every unowned island, aimed by land id."""
     if not flavor.per_island or not islands:
@@ -508,6 +649,20 @@ def build_per_island(flavor: ResourceFlavor, islands) -> str:
         stone = objects if isl.tiles >= flavor.island_large_tiles \
             else flavor.island_small_stone
         lines += _per_island_block("STONE", isl.land_id, stone, piles, isl.tiles)
+    if flavor.island_trees:
+        lines += [
+            "/* Wood, on the same land ids. The map-wide forest is one",
+            " * create_terrain with a dozen clumps and they land on the",
+            " * mainland, so every island under about a thousand tiles came",
+            " * back with zero trees - including a 1018-tile one on Italy",
+            " * with 632 buildable tiles. Scattered singles on a small",
+            " * island (enough to build with, not enough to justify a lumber",
+            " * camp); a tight copse as well once it is big enough to settle.",
+            " */",
+            "",
+        ]
+        for isl in islands:
+            lines += _island_trees(flavor, isl)
     return "\n".join(lines)
 
 
@@ -655,6 +810,22 @@ def build_objects(flavor: ResourceFlavor, islands=()) -> str:
     per_island = build_per_island(flavor, islands)
     if per_island:
         lines.append(per_island)
+    if flavor.neutral_stragglers:
+        lines += [
+            "",
+            "/* --- neutral trees -------------------------------------------------",
+            " * The loose wood between bases. We pinned STRAGGLER_NEUTRAL from the",
+            " * day System A landed and never included the file that reads it, so",
+            " * every region measured exactly 40 tree objects off forest terrain -",
+            " * 5 per player from stragglers.inc and nothing else. Stock carries",
+            " * 182 (Arabia) to 318 (Team Islands).",
+            " */",
+            "",
+            f"  #const STRAGGLER_GROUPS   {flavor.straggler_groups}",
+            f"  #const STRAGGLER_DISTANCE {flavor.straggler_distance}",
+            f"  #const STRAGGLER_SPACING  {flavor.straggler_spacing}",
+            "  #include_drs includes/stragglers_neutral.inc",
+        ]
     if flavor.relics:
         lines += [
             "",

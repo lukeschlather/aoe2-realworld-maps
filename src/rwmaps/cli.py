@@ -185,6 +185,31 @@ def build_parser() -> argparse.ArgumentParser:
                            "fairness problem (see MOD_STATUS.md); off by default so "
                            "it doesn't change any already-verified region's start "
                            "placement")
+    grid.add_argument("--forest-clumps", type=int, default=None,
+                      help="how many separate woods the map-wide forest is "
+                           "broken into (biome default 12). This is the "
+                           "structure knob: measured, our regions come out "
+                           "as 16-75 blobs with the largest holding up to "
+                           "52%% of all the wood, against stock Arabia's 126 "
+                           "and 2%% - see automation/forest_structure.py")
+    grid.add_argument("--forest-clumping-factor", type=int, default=None,
+                      help="how ragged each wood is; lower disperses it into "
+                           "fingers and gaps rather than one mass. Omitted "
+                           "from the script entirely when not given, which "
+                           "is what every map so far shipped")
+    grid.add_argument("--forest-percent", type=int, default=None,
+                      help="share of the map's land the map-wide forest "
+                           "covers (biome default 10)")
+    grid.add_argument("--no-neutral-stragglers", action="store_true",
+                      help="drop includes/stragglers_neutral.inc, the "
+                           "map-wide loose trees between bases. On by "
+                           "default: without it every region measured "
+                           "exactly 40 tree objects off forest terrain, all "
+                           "of them per-player, against stock's 182-318")
+    grid.add_argument("--no-island-trees", action="store_true",
+                      help="drop the per-island tree pass - scattered "
+                           "stragglers on small islands, a copse on ones big "
+                           "enough to settle")
     grid.add_argument("--ai-map-type", help="override the auto-detected ai_info_map_type")
     grid.add_argument("--clumping-factor", type=int, default=8,
                       help="create_land clumping_factor - higher grows a more "
@@ -288,11 +313,23 @@ def generate(args) -> dict:
     if args.resource_flavor != "default":
         opts = rms.RmsOptions(**{**opts.__dict__,
                                  "flavor": rms_objects.FLAVORS[args.resource_flavor]})
+    forest_overrides = {k: v for k, v in (
+        ("forest_clumps", args.forest_clumps),
+        ("forest_clumping_factor", args.forest_clumping_factor),
+        ("forest_percent", args.forest_percent),
+    ) if v is not None}
+    if forest_overrides:
+        opts = rms.RmsOptions(**{**opts.__dict__, **forest_overrides})
+
     flavor_overrides = {}
     if args.island_resources:
         flavor_overrides["island_resources"] = True
     if args.no_neutral_resources:
         flavor_overrides["neutral_resources"] = False
+    if args.no_neutral_stragglers:
+        flavor_overrides["neutral_stragglers"] = False
+    if args.no_island_trees:
+        flavor_overrides["island_trees"] = False
     if flavor_overrides:
         opts = rms.RmsOptions(**{**opts.__dict__,
                                  "flavor": replace(opts.flavor, **flavor_overrides)})

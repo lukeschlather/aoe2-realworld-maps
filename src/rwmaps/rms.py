@@ -77,7 +77,7 @@ create_terrain {forest}
   spacing_to_other_terrain_types 5
   land_percent                   {forest_percent}
   number_of_clumps               {forest_clumps}
-{forest_avoidance}  set_scale_by_groups
+{forest_clumping}{forest_avoidance}  set_scale_by_groups
 }}
 
 create_terrain {land_alt}
@@ -101,6 +101,16 @@ create_terrain {land_alt2}
 
 #: Emitted into the forest block when ``RmsOptions.forest_avoid_starts``.
 _FOREST_AVOIDANCE = "  set_avoid_player_start_areas\n"
+
+
+def _forest_clumping(factor: int | None) -> str:
+    """The ``clumping_factor`` line, or nothing at all when it is unset.
+
+    Left out rather than defaulted, so a script generated without the knob
+    stays byte-identical to every script shipped so far - the engine's own
+    default for this clause is not a number we know.
+    """
+    return "" if factor is None else f"  clumping_factor                {factor}\n"
 
 #: The terrain each player's own land is painted with, so that a per-player
 #: forest can be grown inside it. Engine constant ``SPAWN_PLACEHOLDER``.
@@ -375,7 +385,24 @@ class RmsOptions:
     #: ``PLAYER_FOREST_TEAM_DEDUCTION``). It builds off a per-player
     #: ``SPAWN_PLACEHOLDER`` terrain that ``rms_land`` does not paint, so
     #: adopting it is a land-generation change rather than a resource one.
+    #: MEASURED SINCE, against a different question: clump count is exactly
+    #: the knob for forest *structure*, which is what "the map plays like
+    #: Black Forest" is about, and structure was never what the sweep above
+    #: looked at. At 12 clumps the wood comes out as a handful of masses -
+    #: our regions measure 16-75 blobs with the single largest holding
+    #: 20-52% of all the wood on six of eleven, against stock Arabia's 126
+    #: blobs and 2%. Stock Black Forest is the other pole at 44%, so on that
+    #: axis several of our regions sit next to Black Forest rather than next
+    #: to an open map. See ``automation/forest_structure.py``.
     forest_clumps: int = 12
+    #: How ragged each clump is. Lower disperses a clump into fingers and
+    #: gaps rather than one solid mass; the engine default is around 10 and
+    #: the land generator here uses 8 for coastline blobs. This is the
+    #: second half of the structure knob - clump *count* decides how many
+    #: woods there are, this decides whether a wood is walkable through.
+    #: ``None`` leaves the clause out entirely, which is the behaviour every
+    #: map shipped so far.
+    forest_clumping_factor: int | None = None
     #: Whether the map-wide forest avoids player start areas.
     #:
     #: This pushes wood AWAY from players and into whatever land nobody
@@ -530,6 +557,7 @@ def build_rms(
             forest=opts.forest,
             forest_percent=opts.forest_percent,
             forest_clumps=opts.forest_clumps,
+            forest_clumping=_forest_clumping(opts.forest_clumping_factor),
             forest_avoidance=_FOREST_AVOIDANCE if opts.forest_avoid_starts else "",
         ),
     ]
@@ -576,6 +604,7 @@ def _build_rms_system_a(
             forest=opts.forest,
             forest_percent=opts.forest_percent,
             forest_clumps=opts.forest_clumps,
+            forest_clumping=_forest_clumping(opts.forest_clumping_factor),
             forest_avoidance=_FOREST_AVOIDANCE if opts.forest_avoid_starts else "",
         ),
     ]

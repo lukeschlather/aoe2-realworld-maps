@@ -151,6 +151,17 @@ ISLAND_LAND_ID_BASE = 10
 MIN_ISLAND_TILES = 60
 
 
+#: How many rings to peel off an island to estimate the part of it that can
+#: actually be built on. The engine paints BEACH along every shoreline, and
+#: beach is walkable but unbuildable, so raw tile count badly overstates a
+#: small island - measured on real captures, a 151-tile island had 71
+#: buildable tiles and a 68-tile one had 18. One ring is far too generous at
+#: that ratio; two lands close to it. This is an estimate on the *mask*,
+#: which the disc cover only approximates, so treat it as an order of
+#: magnitude for sizing tree counts, not a promise.
+SHORE_RINGS = 2
+
+
 @dataclass(frozen=True)
 class Island:
     """An unowned landmass that resources can be placed onto by land id."""
@@ -158,6 +169,9 @@ class Island:
     land_id: int
     tiles: int
     n_discs: int
+    #: Estimated non-shore tiles - what a camp or a tree can actually go on.
+    #: Drives how many trees the island is asked for; see ``SHORE_RINGS``.
+    buildable: int = 0
 
 
 def _island_ids(discs: list[Disc], mask: np.ndarray,
@@ -182,6 +196,7 @@ def _island_ids(discs: list[Disc], mask: np.ndarray,
     owned.discard(0)
 
     sizes = ndimage.sum_labels(mask, labels, index=range(1, n + 1))
+    inland = ndimage.binary_erosion(mask, iterations=SHORE_RINGS)
     island_of_label: dict[int, int] = {}
     islands: list[Island] = []
     for lbl in range(1, n + 1):
@@ -189,7 +204,8 @@ def _island_ids(discs: list[Disc], mask: np.ndarray,
             continue
         land_id = ISLAND_LAND_ID_BASE + len(islands)
         island_of_label[lbl] = land_id
-        islands.append(Island(land_id, int(sizes[lbl - 1]), 0))
+        islands.append(Island(land_id, int(sizes[lbl - 1]), 0,
+                              int((inland & (labels == lbl)).sum())))
 
     by_disc: dict[int, int] = {}
     counts: dict[int, int] = {}
@@ -202,7 +218,7 @@ def _island_ids(discs: list[Disc], mask: np.ndarray,
 
     # An island whose discs all sit off-centre would get an id nothing is
     # assigned to, and a create_object aimed at it would place nothing.
-    islands = [Island(i.land_id, i.tiles, counts.get(i.land_id, 0))
+    islands = [Island(i.land_id, i.tiles, counts.get(i.land_id, 0), i.buildable)
                for i in islands if counts.get(i.land_id)]
     live = {i.land_id for i in islands}
     return {k: v for k, v in by_disc.items() if v in live}, islands
