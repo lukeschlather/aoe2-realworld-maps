@@ -44,6 +44,7 @@ from rwmaps import scx_read  # noqa: E402
 from rwmaps.cli import REGIONS  # noqa: E402
 from aesthetic_metrics import cached_true_mask_geo, compute_metrics_from_truth  # noqa: E402
 from build_mod import DEBUG_MOD_NAME, MOD_REGIONS  # noqa: E402
+import editor  # noqa: E402
 from frame_server import snapshot_ring  # noqa: E402
 from rwmaps.fairness import profile_capture  # noqa: E402
 from sample_analysis import analyze_capture  # noqa: E402
@@ -75,6 +76,11 @@ IOU_WRONG_MAP = 0.55
 
 SIZE = 240
 PLAYERS = 8
+
+#: How many crashes a single pass will recover from before giving up.
+#: Recovering forever would turn a systematic failure into an all-night
+#: loop that captures nothing and says so nowhere.
+MAX_RECOVERIES = 3
 N_SAMPLES = 10
 
 
@@ -219,6 +225,7 @@ def main():
         if missing:
             raise SystemExit(f"unknown region(s): {missing}")
 
+    recoveries = 0
     started_pid = game_pid()
     if started_pid is None:
         raise SystemExit(
@@ -289,18 +296,43 @@ def main():
                 # - it makes it succeed against the wrong editor state - so
                 # waiting for an exception to ask is waiting for the one
                 # signal this failure does not send.
-                now_pid = game_pid()
-                if now_pid != started_pid:
-                    raise SystemExit(
-                        f"\nABORTING: the game is pid {now_pid}, was "
-                        f"{started_pid}.{_frames_note()} It crashed and came "
-                        f"back at its defaults - Blank Map, Small [144] - so "
-                        f"anything "
-                        f"captured from here would be a different map at a "
-                        f"different size. Put the editor back on "
-                        f"AA_rw_placeholder_tester at Huge [240] with 8 "
-                        f"players and rerun with the same --run-id to resume."
-                    )
+                # A loop, not an if: this runs *before* the sample is
+                # attempted, so recovering leaves sample_i untouched and the
+                # lost sample is simply taken again. An `if ... continue`
+                # here would skip the sample it was trying to save.
+                while (now_pid := game_pid()) != started_pid:
+                    # The editor crashes, the cause is not understood, and
+                    # the working assumption is that it is not something
+                    # this project does - a cache clashing with swapped mod
+                    # files, or an unlucky click. So the pass survives one
+                    # rather than trying to prevent it: recover, rebuild the
+                    # editor state, and retry the sample that was lost.
+                    #
+                    # Recovery is not optional politeness. A crash disables
+                    # every mod on the next launch and brings the editor back
+                    # at Blank Map / Small [144], and land areas here are
+                    # absolute tile counts, so continuing without rebuilding
+                    # the state captures a different map at a size that
+                    # breaks it - silently.
+                    print(f"  the game is pid {now_pid}, was {started_pid} - "
+                          f"it crashed.{_frames_note()}")
+                    if recoveries >= MAX_RECOVERIES:
+                        raise SystemExit(
+                            f"\nABORTING: recovered {recoveries} times "
+                            f"already. Something is wrong beyond one unlucky "
+                            f"crash; rerun with the same --run-id to resume "
+                            f"once it is understood."
+                        )
+                    recoveries += 1
+                    print(f"  recovering ({recoveries}/{MAX_RECOVERIES})")
+                    if not (editor.recover() and editor.setup(PLAYERS)):
+                        raise SystemExit(
+                            "\nABORTING: could not get the editor back to a "
+                            "usable state. Frames and logs above say how far "
+                            "it got."
+                        )
+                    started_pid = game_pid()
+                    print(f"  recovered as pid {started_pid}, retrying sample")
                 before = newest_scenario()
                 before_mtime = before.stat().st_mtime if before else 0
                 try:
