@@ -44,6 +44,7 @@ from rwmaps import scx_read  # noqa: E402
 from rwmaps.cli import REGIONS  # noqa: E402
 from aesthetic_metrics import cached_true_mask_geo, compute_metrics_from_truth  # noqa: E402
 from build_mod import DEBUG_MOD_NAME, MOD_REGIONS  # noqa: E402
+from frame_server import snapshot_ring  # noqa: E402
 from rwmaps.fairness import profile_capture  # noqa: E402
 from sample_analysis import analyze_capture  # noqa: E402
 from tuning_matrix import (  # noqa: E402
@@ -108,6 +109,19 @@ def resolve_geo(extra_args: list[str]) -> tuple[float, float, float, float]:
     if lon is None or lat is None or span is None:
         raise ValueError(f"could not resolve geo from extra_args={extra_args}")
     return lon, lat, span, rotate
+
+
+def _frames_note() -> str:
+    """Freeze the frame viewer's ring, if one is running, and say where.
+
+    The crash that motivated this left nothing behind at all - no picture
+    of the state the editor was in, no record of the click before it. If
+    ``frame_server.py`` is up, the seconds leading to the abort are still
+    in its ring right now and will be overwritten shortly, so grab them
+    here rather than asking someone to remember to.
+    """
+    path = snapshot_ring()
+    return f" Frames leading up to it: {path}." if path else ""
 
 
 def game_pid() -> str | None:
@@ -280,8 +294,9 @@ def main():
                 if now_pid != started_pid:
                     raise SystemExit(
                         f"\nABORTING: the game is pid {now_pid}, was "
-                        f"{started_pid}. It crashed and came back at its "
-                        f"defaults - Blank Map, Small [144] - so anything "
+                        f"{started_pid}.{_frames_note()} It crashed and came "
+                        f"back at its defaults - Blank Map, Small [144] - so "
+                        f"anything "
                         f"captured from here would be a different map at a "
                         f"different size. Put the editor back on "
                         f"AA_rw_placeholder_tester at Huge [240] with 8 "
@@ -300,7 +315,7 @@ def main():
                             "capture would fail the same way and tell us nothing "
                             "about the scripts. Relaunch AoE2, open the Scenario "
                             "Editor on the AA_rw_placeholder_tester map, and rerun "
-                            "with the same --run-id to resume."
+                            f"with the same --run-id to resume.{_frames_note()}"
                         ) from e
                     print(f"  sample {sample_i}: capture FAILED ({e})")
                     continue
