@@ -167,7 +167,6 @@ Reset-IfMenuStuck {CANCEL_BTN[0]} {CANCEL_BTN[1]}
 $ok = Click-GenerateMapVerified {GENERATE_BTN[0]} {GENERATE_BTN[1]}
 if (-not $ok) {{ exit 1 }}
 Click-At {MENU_BTN[0]} {MENU_BTN[1]}
-Start-Sleep -Milliseconds 200
 $beforeTime = [DateTimeOffset]::FromUnixTimeMilliseconds({math.ceil(before_mtime * 1000) + 200}).LocalDateTime
 $ok = Click-SaveVerified {SAVE_BTN[0]} {SAVE_BTN[1]} {MENU_BTN[0]} {MENU_BTN[1]} "{SCENARIO_DIR}" $beforeTime
 if (-not $ok) {{ exit 2 }}

@@ -344,6 +344,38 @@ function Test-MenuOpen {
     return $text -match "Main Menu"
 }
 
+# Block until the Main Menu overlay is actually on screen.
+#
+# This replaces a fixed 200ms sleep between clicking Menu and clicking
+# Save, and the sleep was not merely optimistic - it was aimed at a
+# coordinate that means something else when it is wrong. SAVE_BTN is
+# (960, 436), which with no overlay up is the middle of the MAP, and a
+# click on the map in the Scenario Editor is a brush stroke: it paints
+# terrain or drops a unit. So a menu that had not finished laying out did
+# not produce a harmless missed click, it produced an edit to the scenario
+# and an unknown amount of engine work, silently.
+#
+# The user's observation is what surfaced this: the Save overlay is never
+# actually visible during a run, which is not what 200ms at 60Hz should
+# look like.
+#
+# Costing this is fair: it is an OCR per poll, the same expense the
+# generation loop was just moved off. The difference is when. This runs
+# while the engine is idle between generations, not while it is under
+# load, and it replaces a click that could be landing on the map.
+function Wait-ForMenuOpen($timeoutMs = 6000, $pollMs = 150) {
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    while ($sw.ElapsedMilliseconds -lt $timeoutMs) {
+        if (Test-MenuOpen) {
+            Write-Host "menu open after $($sw.ElapsedMilliseconds)ms"
+            return $true
+        }
+        Start-Sleep -Milliseconds $pollMs
+    }
+    Write-Host "menu did NOT open within ${timeoutMs}ms"
+    return $false
+}
+
 # Clicks Generate Map and waits for the Seed box (via OCR) to prove the map
 # actually regenerated, rather than assuming a single click worked.
 #
@@ -449,6 +481,16 @@ function Newest-Scenario($scenarioDir) {
 function Click-SaveVerified($saveX, $saveY, $menuX, $menuY, $scenarioDir, $beforeTime, $maxAttempts = 10, $pollMs = 150, $fileBudgetMs = 1200, $fileStepMs = 150) {
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     if (-not (Wait-ForGameFocus)) { return $false }
+    # Never click Save on faith. Until the overlay is up, this coordinate
+    # is the map, and clicking the map paints it.
+    if (-not (Wait-ForMenuOpen)) {
+        Write-Host "menu not open - clicking Menu again before trying Save"
+        Click-At $menuX $menuY
+        if (-not (Wait-ForMenuOpen)) {
+            Write-Host "SAVE_ABORTED menu never opened - refusing to click into the map at $saveX,$saveY"
+            return $false
+        }
+    }
     Move-CursorSmooth $saveX $saveY
     for ($i = 1; $i -le $maxAttempts; $i++) {
         if (-not (Test-GameFocused)) {
@@ -475,7 +517,10 @@ function Click-SaveVerified($saveX, $saveY, $menuX, $menuY, $scenarioDir, $befor
         if (Test-MenuOpen) { continue }
         Write-Host "attempt=$i menu closed but no new file after ${fileBudgetMs}ms - reopening and retrying"
         Click-At $menuX $menuY
-        Start-Sleep -Milliseconds 300
+        if (-not (Wait-ForMenuOpen)) {
+            Write-Host "SAVE_FAILED menu would not reopen"
+            return $false
+        }
         Move-CursorSmooth $saveX $saveY
     }
     Write-Host "SAVE_FAILED after=$maxAttempts elapsed=$($sw.ElapsedMilliseconds)ms"
