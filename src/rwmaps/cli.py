@@ -206,6 +206,14 @@ def build_parser() -> argparse.ArgumentParser:
                            "default: without it every region measured "
                            "exactly 40 tree objects off forest terrain, all "
                            "of them per-player, against stock's 182-318")
+    grid.add_argument("--no-island-resources", action="store_true",
+                      help="drop the MAP-WIDE neutral gold/stone pass, "
+                           "leaving only the per-island blocks aimed by land "
+                           "id. This is how to find out whether "
+                           "place_on_specific_land_id does anything: with "
+                           "both passes on, the map-wide one saturates a "
+                           "small island by itself and the per-island "
+                           "contribution cannot be told apart from it")
     grid.add_argument("--no-island-trees", action="store_true",
                       help="drop the per-island tree pass - scattered "
                            "stragglers on small islands, a copse on ones big "
@@ -326,6 +334,8 @@ def generate(args) -> dict:
         flavor_overrides["island_resources"] = True
     if args.no_neutral_resources:
         flavor_overrides["neutral_resources"] = False
+    if args.no_island_resources:
+        flavor_overrides["island_resources"] = False
     if args.no_neutral_stragglers:
         flavor_overrides["neutral_stragglers"] = False
     if args.no_island_trees:

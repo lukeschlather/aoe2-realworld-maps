@@ -110,8 +110,8 @@ def resolve_geo(extra_args: list[str]) -> tuple[float, float, float, float]:
     return lon, lat, span, rotate
 
 
-def game_is_running() -> bool:
-    """Is the game process alive at all?
+def game_pid() -> str | None:
+    """The running game's process id, or None if there is no game.
 
     Cheap, and it separates two failures that look identical from inside the
     click loop: a script the engine will not generate, and no engine. A pass
@@ -119,12 +119,26 @@ def game_is_running() -> bool:
     change" for ten regions in a row because the game had exited after the
     first one - three clicks x a 90s budget each, per region, into an empty
     desktop. Nothing about those runs said anything about the scripts.
+
+    The **id**, not just the presence of a process by that name. The editor
+    crashes, and when it is relaunched it comes back at its defaults - Blank
+    Map, Small [144] - not on the placeholder slot at Huge [240] that every
+    capture assumes. A name check answers "yes, the game is running" to that
+    and the pass keeps clicking into a map size that makes the scripts
+    meaningless, since land areas here are absolute tile counts. A changed
+    pid is proof the process we validated against is gone.
     """
     r = subprocess.run(
         ["powershell.exe", "-NoProfile", "-Command",
-         "if (Get-Process -Name AoE2DE_s -ErrorAction SilentlyContinue) { 'yes' } else { 'no' }"],
+         "(Get-Process -Name AoE2DE_s -ErrorAction SilentlyContinue"
+         " | Select-Object -First 1 -ExpandProperty Id)"],
         capture_output=True, text=True)
-    return "yes" in r.stdout
+    pid = r.stdout.strip()
+    return pid or None
+
+
+def game_is_running() -> bool:
+    return game_pid() is not None
 
 
 def newest_scenario():
@@ -192,6 +206,17 @@ def main():
         if missing:
             raise SystemExit(f"unknown region(s): {missing}")
 
+    started_pid = game_pid()
+    if started_pid is None:
+        raise SystemExit(
+            "ABORTING: the game is not running. Launch AoE2, open the "
+            "Scenario Editor on AA_rw_placeholder_tester at Huge [240] with "
+            "8 players, and rerun."
+        )
+    print(f"game pid {started_pid} - a change means it crashed and came back "
+          f"at its defaults, which no capture after that point can be trusted "
+          f"against")
+
     outroot = REPO / "out" / "mod_capture" / args.run_id
     results_path = outroot / "results.jsonl"
     outroot.mkdir(parents=True, exist_ok=True)
@@ -246,6 +271,22 @@ def main():
             region_dir = outroot / name
             for sample_i in range(done, args.n_samples):
                 t1 = time.time()
+                # Checked before every sample, not only after a click throws.
+                # A crash-and-relaunch does not necessarily make a click fail
+                # - it makes it succeed against the wrong editor state - so
+                # waiting for an exception to ask is waiting for the one
+                # signal this failure does not send.
+                now_pid = game_pid()
+                if now_pid != started_pid:
+                    raise SystemExit(
+                        f"\nABORTING: the game is pid {now_pid}, was "
+                        f"{started_pid}. It crashed and came back at its "
+                        f"defaults - Blank Map, Small [144] - so anything "
+                        f"captured from here would be a different map at a "
+                        f"different size. Put the editor back on "
+                        f"AA_rw_placeholder_tester at Huge [240] with 8 "
+                        f"players and rerun with the same --run-id to resume."
+                    )
                 before = newest_scenario()
                 before_mtime = before.stat().st_mtime if before else 0
                 try:
