@@ -503,8 +503,11 @@ def _island_block(obj: str, flavor: ResourceFlavor, spacing: int) -> list[str]:
         f"    avoid_actor_area {a}" for a in
         # the include's own neutral areas and spacers, so the two passes do
         # not put a gold pile inside each other's
+        # ...and the island trees, which are placed first on purpose so a
+        # map-wide pass cannot bury a copse under gold.
         (1000, 1010, 1020, 1030, 1035, 1040, 1045, 1050,
-         11000, 11010, 11020, *sorted(_ISLAND_AREAS.values()))
+         11000, 11010, 11020, *sorted(_ISLAND_AREAS.values()),
+         _ISLAND_TREE_SCATTER, _ISLAND_TREE_COPSE)
     )
     return [
         f"  create_object {obj}",
@@ -555,6 +558,8 @@ def _per_island_block(obj: str, land_id: int, objects: int, groups: int,
         "    actor_area_radius 3",
         f"    avoid_actor_area {_ISLAND_AREAS['GOLD']}",
         f"    avoid_actor_area {_ISLAND_AREAS['STONE']}",
+        f"    avoid_actor_area {_ISLAND_TREE_SCATTER}",
+        f"    avoid_actor_area {_ISLAND_TREE_COPSE}",
         "  }",
         "",
     ]
@@ -565,10 +570,15 @@ def _island_tree_block(land_id: int, objects: int, groups: int, area: int,
     """Tree objects aimed at one island by land id.
 
     ``scatter`` chooses between the two shapes: loose singles that avoid
-    each other, or one tight blob that does not. Both avoid the gold and
-    stone actor areas, because a pile you cannot walk a villager up to is
-    not a prize - and both are emitted *after* the piles so the piles get
-    first pick of the ground.
+    each other, or one tight blob that does not.
+
+    **These are emitted before every gold and stone pass, and that
+    ordering is load-bearing.** Emitted after, they placed *nothing* -
+    measured on Salish Sea, four of six islands had zero non-beach tiles
+    left more than 3 tiles from a pile, because each pile stamps
+    ``actor_area 1210/1220`` at radius 3 and the map-wide pass saturates a
+    small island (one 225-tile island took 31 gold). Trees claim their much
+    smaller radius-1 areas first, and the piles avoid those in turn.
     """
     self_area = _ISLAND_TREE_SCATTER if scatter else _ISLAND_TREE_COPSE
     lines = [
@@ -618,6 +628,35 @@ def _island_trees(flavor: ResourceFlavor, isl) -> list[str]:
     return lines
 
 
+def build_island_trees(flavor: ResourceFlavor, islands) -> str:
+    """Trees onto every unowned island, aimed by land id.
+
+    Separate from :func:`build_per_island` only so it can be emitted
+    earlier - see ``_island_tree_block`` for why the order matters.
+    """
+    if not flavor.per_island or not flavor.island_trees or not islands:
+        return ""
+    lines = [
+        "",
+        "/* --- island wood ----------------------------------------------------",
+        " * The map-wide forest is one create_terrain with a dozen clumps and",
+        " * they land on the mainland, so every island under about a thousand",
+        " * tiles came back with zero trees - including a 1018-tile one on Italy",
+        " * with 632 buildable tiles. Scattered singles on a small island (enough",
+        " * to build with, not enough to justify a lumber camp); a tight copse as",
+        " * well once it is big enough to settle.",
+        " *",
+        " * FIRST, before any gold or stone. Emitted after them these placed",
+        " * nothing at all: the piles stamp a radius-3 avoid area each and",
+        " * saturate a small island, leaving no legal tile behind.",
+        " */",
+        "",
+    ]
+    for isl in islands:
+        lines += _island_trees(flavor, isl)
+    return "\n".join(lines)
+
+
 def build_per_island(flavor: ResourceFlavor, islands) -> str:
     """Gold and stone onto every unowned island, aimed by land id."""
     if not flavor.per_island or not islands:
@@ -649,20 +688,6 @@ def build_per_island(flavor: ResourceFlavor, islands) -> str:
         stone = objects if isl.tiles >= flavor.island_large_tiles \
             else flavor.island_small_stone
         lines += _per_island_block("STONE", isl.land_id, stone, piles, isl.tiles)
-    if flavor.island_trees:
-        lines += [
-            "/* Wood, on the same land ids. The map-wide forest is one",
-            " * create_terrain with a dozen clumps and they land on the",
-            " * mainland, so every island under about a thousand tiles came",
-            " * back with zero trees - including a 1018-tile one on Italy",
-            " * with 632 buildable tiles. Scattered singles on a small",
-            " * island (enough to build with, not enough to justify a lumber",
-            " * camp); a tight copse as well once it is big enough to settle.",
-            " */",
-            "",
-        ]
-        for isl in islands:
-            lines += _island_trees(flavor, isl)
     return "\n".join(lines)
 
 
@@ -805,6 +830,9 @@ def build_objects(flavor: ResourceFlavor, islands=()) -> str:
             "",
             "  #include_drs includes/resources_neutral.inc",
         ]
+    island_trees = build_island_trees(flavor, islands)
+    if island_trees:
+        lines.append(island_trees)
     if flavor.island_resources:
         lines += _island_blocks(flavor)
     per_island = build_per_island(flavor, islands)
