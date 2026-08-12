@@ -219,5 +219,18 @@
    981
   ],
   "label": "AA_rw_placeholder"
+ },
+ "overwrite_yes": {
+  "box": [
+   660,
+   560,
+   940,
+   612
+  ],
+  "click": [
+   799,
+   585
+  ],
+  "label": "Yes (overwrite)"
  }
 }

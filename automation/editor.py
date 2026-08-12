@@ -499,6 +499,18 @@ def preflight() -> tuple[bool, str]:
                        f"Close the game and run editor.enable_mods().")
     on_slot = selector_is_placeholder()
     if on_slot is False:
+        # Distinguish "wrong script" from "something is covering the
+        # panel". An unanswered overwrite prompt sits over the map panel
+        # and made this report a wrong selector when the selector was
+        # simply hidden - a misleading message costs more than no message.
+        reg = controls.load()
+        if "overwrite_yes" in reg and controls.verify(reg["overwrite_yes"]).ok:
+            return False, ("an unanswered 'overwrite?' prompt is covering "
+                           "the panel - the selector was not readable, not "
+                           "necessarily wrong")
+        if not is_foreground():
+            return False, ("the game is not foreground, so the panel could "
+                           "not be read - somebody may be using the machine")
         return False, ("the Random Map selector is not on "
                        "AA_rw_placeholder_tester - the editor would "
                        "generate whatever it is on instead.")
@@ -562,6 +574,18 @@ def save(scenario_dir: Path, timeout: float = 30.0) -> Path | None:
             type_text(SAVE_NAME)
             time.sleep(0.3)
             controls.click("save_dlg_confirm", reg)
+        except controls.NotThere as e:
+            print(f"  save: {e}")
+            return None
+
+    # "That file already exists. Overwrite it?" - every save after the
+    # first, because the slot name is deliberately fixed. Unanswered it
+    # blocks the save AND covers the map panel, which then makes the next
+    # region's preflight report the selector as wrong when it is merely
+    # hidden. One unanswered modal, two misleading symptoms.
+    if controls.wait_for("overwrite_yes", timeout=4.0, controls=reg):
+        try:
+            controls.click("overwrite_yes", reg)
         except controls.NotThere as e:
             print(f"  save: {e}")
             return None
