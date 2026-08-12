@@ -355,23 +355,39 @@ def main():
                         )
                     recoveries += 1
                     print(f"  recovering ({recoveries}/{MAX_RECOVERIES})")
-                    if not (editor.recover() and editor.setup(PLAYERS)):
+                    # Rebuild, then *ask* whether the rebuild worked, and
+                    # rebuild again if it did not. setup() restores player
+                    # count, Random Map and Huge [240] but not the Random Map
+                    # selector, so post-recovery is when the silent wrong-map
+                    # capture is most likely - and worse, the game disables
+                    # our mods on the launch after a crash and records it
+                    # *later* than recover() can see (measured: a clean
+                    # quit/enable/relaunch holds `off=[]` for 268s, so there
+                    # is no delay to wait out - the write comes only after a
+                    # real crash, minutes in, after recover() has already
+                    # checked and passed). Preflight is the check that
+                    # actually catches it, and it used to abort the pass on
+                    # it, discarding every remaining region over something a
+                    # second recovery fixes: editor.recover() now treats a
+                    # running game with our mods off as recoverable.
+                    for rebuild in range(1, 3):
+                        if not (editor.recover() and editor.setup(PLAYERS)):
+                            raise SystemExit(
+                                "\nABORTING: could not get the editor back to "
+                                "a usable state. Frames and logs above say "
+                                "how far it got."
+                            )
+                        started_pid = game_pid()
+                        ok, why = editor.preflight()
+                        if ok:
+                            break
+                        print(f"  recovered, but the editor would not generate "
+                              f"our script: {why}")
+                        print(f"  rebuilding again ({rebuild}/2)")
+                    else:
                         raise SystemExit(
-                            "\nABORTING: could not get the editor back to a "
-                            "usable state. Frames and logs above say how far "
-                            "it got."
-                        )
-                    started_pid = game_pid()
-                    # setup() rebuilds player count, Random Map and Huge
-                    # [240] - it does NOT put the Random Map selector back
-                    # on our slot, so post-recovery is exactly when the
-                    # silent wrong-map capture preflight exists to catch is
-                    # most likely. Ask before spending a sample, not after.
-                    ok, why = editor.preflight()
-                    if not ok:
-                        raise SystemExit(
-                            f"\nABORTING: recovered, but the editor would not "
-                            f"generate our script: {why}"
+                            f"\nABORTING: recovered twice and the editor still "
+                            f"would not generate our script: {why}"
                         )
                     print(f"  recovered as pid {started_pid} ({why}), "
                           f"retrying sample")
