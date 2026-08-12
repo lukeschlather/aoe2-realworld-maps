@@ -721,58 +721,99 @@ def scroll_combo(arrow: tuple[int, int], times: int, pause: float = 0.6) -> None
         u.mouse_event(0x0004, 0, 0, 0, 0)
 
 
-def recover() -> bool:
-    """Clear crash dialogs, re-enable mods, and get back to the main menu."""
-    if game_pid():
-        print("game already running")
-        return True
-    # BugSplat holds Steam's "game is running" lock, so it has to go first.
-    if "encountered a problem" in "".join(
-            sh("Get-Process | ForEach-Object { $_.MainWindowTitle }").splitlines()):
-        print("dismissing crash reporter")
-        click(*BUGSPLAT_DONT_SEND)
-        time.sleep(3)
-    # Do this before launching: the game reads mod-status.json at start
-    # and rewrites it on exit, so it is only editable with the game down.
-    enable_mods()
-    print("launching")
+def mods_off() -> list[str]:
+    """Which of our mods the game currently has switched off."""
+    return [name for name, on in mods_enabled().items() if not on]
+
+
+def _launch() -> bool:
+    """Start the game and wait for a pid."""
     sh(f"Start-Process '{STEAM_URL}'")
     for _ in range(30):
         time.sleep(3)
         if game_pid():
-            break
-    if not game_pid():
-        print("game did not start")
-        return False
-    # Give the dialog a moment to appear before deciding it is absent.
-    time.sleep(12)
+            return True
+    return False
 
-    # A crash makes the game disable every mod on the next launch and ask
-    # whether to re-enable them. Miss this and the placeholder script is
-    # simply not there - the editor would generate whatever else is
-    # selected and the capture would be of the wrong map entirely.
-    #
-    # Detected by the YES button's colour rather than by clicking where it
-    # usually is: measured 102 redness with the dialog up against 6 on the
-    # bare main menu, which is not a marginal difference.
-    if redness(MODS_DIALOG_BOX) > MODS_DIALOG_RED:
-        print("mods were disabled by the crash - re-enabling")
-        click(*MODS_REENABLE_YES)
-        time.sleep(3)
-        click(*MODS_REENABLED_OK)
-        time.sleep(3)
-        # The game says outright that a restart may be needed for mods to
-        # take effect, and a half-loaded mod is exactly the state that
-        # silently generates the wrong script. Pay the restart.
-        print("restarting so the mod loads from launch")
-        sh(f"Stop-Process -Name {GAME} -Force -ErrorAction SilentlyContinue")
-        time.sleep(8)
-        sh(f"Start-Process '{STEAM_URL}'")
-        for _ in range(30):
+
+def _quit() -> None:
+    sh(f"Stop-Process -Name {GAME} -Force -ErrorAction SilentlyContinue")
+    time.sleep(8)
+
+
+def recover() -> bool:
+    """Clear crash dialogs, re-enable mods, and get back to the main menu."""
+    if game_pid() and not mods_off():
+        print("game already running")
+        return True
+    if game_pid():
+        # Not "nothing to recover", which is what this used to report. A
+        # running game with our mods off is the silent wrong-map state: the
+        # placeholder is absent from the Random Map list, so the editor
+        # generates a stock script and the capture is filed under one of our
+        # region names anyway. Only the loop at the end can help, since
+        # mod-status.json is unwritable while this process lives.
+        print(f"game is running, but {mods_off()} disabled")
+    else:
+        # BugSplat holds Steam's "game is running" lock, so it has to go first.
+        if "encountered a problem" in "".join(
+                sh("Get-Process | ForEach-Object { $_.MainWindowTitle }").splitlines()):
+            print("dismissing crash reporter")
+            click(*BUGSPLAT_DONT_SEND)
             time.sleep(3)
-            if game_pid():
-                break
+        # Do this before launching: the game reads mod-status.json at start
+        # and rewrites it on exit, so it is only editable with the game down.
+        enable_mods()
+        print("launching")
+        if not _launch():
+            print("game did not start")
+            return False
+        # Give the dialog a moment to appear before deciding it is absent.
+        time.sleep(12)
+
+        # A crash makes the game disable every mod on the next launch and ask
+        # whether to re-enable them. Miss this and the placeholder script is
+        # simply not there - the editor would generate whatever else is
+        # selected and the capture would be of the wrong map entirely.
+        #
+        # Detected by the YES button's colour rather than by clicking where it
+        # usually is: measured 102 redness with the dialog up against 6 on the
+        # bare main menu, which is not a marginal difference.
+        if redness(MODS_DIALOG_BOX) > MODS_DIALOG_RED:
+            print("mods were disabled by the crash - re-enabling")
+            click(*MODS_REENABLE_YES)
+            time.sleep(3)
+            click(*MODS_REENABLED_OK)
+            time.sleep(3)
+            # The game says outright that a restart may be needed for mods to
+            # take effect, and a half-loaded mod is exactly the state that
+            # silently generates the wrong script. Pay the restart.
+            print("restarting so the mod loads from launch")
+            _quit()
+            _launch()
+            wait_for_main_menu()
+
+    # Whatever the dialog did or did not do, ask the game's own record before
+    # declaring recovery finished. The colour check above is a heuristic about
+    # a modal that may never appear, and a recovery sailed straight past it
+    # and came back with both mods off - the capture after that would have
+    # been a stock map under Italy's name, and only the preflight in
+    # mod_capture stopped it. mod-status.json is not a heuristic.
+    for attempt in range(1, 3):
+        off = mods_off()
+        if not off:
+            return game_pid() is not None
+        print(f"  the game has {off} disabled - closing to fix its own "
+              f"record, then relaunching ({attempt}/2)")
+        _quit()
+        enable_mods()
+        if not _launch():
+            print("  game did not come back")
+            return False
         wait_for_main_menu()
+    if mods_off():
+        print(f"  {mods_off()} will not stay enabled across a relaunch")
+        return False
     return game_pid() is not None
 
 
