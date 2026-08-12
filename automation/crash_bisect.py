@@ -8,23 +8,42 @@ regenerate with different flags. Regenerating re-rolls start placement and
 the whole land cover with it, which means a variant that does not crash
 has told you nothing: it is a different map.
 
-What the evidence already narrows it to, before running anything:
+ANSWERED, 2026-08-12. It is not any one block. It is the
+``place_on_specific_land_id`` clause itself, whenever it names a land id
+that really exists as a non-player land. Measured on Britain at 240/8,
+alternating against the committed script in one editor session:
 
-* ``stragglers_neutral.inc`` is **not** the suspect. Salish Sea generated
-  twice with it on 2026-08-10 and its output was measured - loose trees
-  went 40 -> 178, the stock band.
-* Salish Sea also carried per-island *scatter* tree blocks
-  (``number_of_objects 1``) and did not crash.
-* Britain and Italy carry something Salish Sea could not: a **copse**
-  block, ``number_of_objects 12`` with ``set_tight_grouping`` aimed at a
-  land id, which only islands above a size threshold get. Both crashed.
+* committed script (no island land ids at all): **5/5 generated**, 52-60s.
+  The same scripts took all 11 regions with no crash and no recovery.
+* current script: **0/5**, dead 65-70s in, every time.
+* every aimed block kept but the ``place_on_specific_land_id`` *line*
+  deleted from each: generated. So the extra ``create_land`` blocks on ids
+  10/11 are harmless on their own - 139 of them, and fine.
+* aimed lines kept but the lands put back on id 1, so the ids they name no
+  longer exist: generated. An id that does not resolve is ignored, not
+  fatal.
+* ``--cut copse``: **still crashed** (64.9s). The prime suspect recorded
+  here previously - 12 objects in 3 tight groups - is exonerated.
+* ``--cut piles`` (only the two straggler blocks left aimed): crashed, 63.6s.
+* ``--cut trees`` (only the four gold/stone blocks left aimed): crashed, 65.5s.
 
-That is three data points pointing at one block, which is what the
-``copse`` cut below removes.
+Cutting either half leaves a crash, and cutting the aiming leaves a
+working map, so no object type is special and no single block is the
+culprit. One partial exception worth knowing: with only the *large*
+island's placements left, generation hung past 300s instead of dying, so
+the failure has two faces.
+
+The engine dies as an access violation reading address 0x9 - a null
+dereference - sometimes into BugSplat and sometimes into Windows' own
+Application Error box.
+
+The cuts below remain useful for narrowing a *different* crash; keep them.
+``--cut land-id`` is the one that describes this one.
 
 Usage:
     uv run python automation/crash_bisect.py --list
-    uv run python automation/crash_bisect.py --cut copse --install
+    uv run python automation/crash_bisect.py --cut land-id --install
+    uv run python automation/crash_bisect.py --cut copse --source some.rms
     uv run python automation/crash_bisect.py --restore
 """
 

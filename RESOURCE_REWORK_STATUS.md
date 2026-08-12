@@ -493,3 +493,60 @@ script swap never reached the game" from "unlucky seed".
   neutral supply had the emptiest islands, because a distance-gated pass
   saturates on whatever land is most abundant. Coverage is about aim, not
   volume.
+
+## The island-resource crash, 2026-08-12
+
+Aiming resources at an island by its own `land_id` **kills the engine
+during generation**, and it is the `place_on_specific_land_id` clause that
+does it - not any object placed through it.
+
+Measured on Britain at 240/8, alternating the current script against the
+one committed in `mod/` inside a single editor session (so nothing that
+drifts over a session can be handed to one side):
+
+| script | result |
+|---|---|
+| committed `mod/` script (no island land ids) | **5/5 generated**, 52-60s |
+| current `src/` output | **0/5**, dead 65-70s in, every time |
+
+The committed scripts also took **all 11 regions in one pass with no crash
+and no recovery**, so this is not the automation and not one unlucky
+region: Cramped Italy, Italy and Britain each died from the current output
+and each generated from the committed one.
+
+Which half is at fault, by cutting blocks out of the *identical* crashing
+file (`automation/crash_bisect.py`):
+
+| variant | aimed blocks left | result |
+|---|---|---|
+| `place_on_specific_land_id` line deleted from every block | 0 | generated |
+| lands moved back to `land_id 1`, aiming lines kept | 6, naming ids that no longer exist | generated |
+| `--cut copse` | 5 | crash 64.9s |
+| `--cut piles` (stragglers only) | 2 | crash 63.6s |
+| `--cut trees` (gold/stone only) | 4 | crash 65.5s |
+| unmodified | 6 | crash, 5/5 |
+
+So: the 139 extra `create_land` blocks on ids 10/11 are harmless by
+themselves, an id that does not resolve is ignored rather than fatal, and
+**any** block that successfully aims at a real non-player land is enough.
+Cutting either half still crashes; cutting the aiming generates a map.
+
+Two details worth carrying forward:
+
+- **It has two faces.** With only the *large* island's placements left,
+  generation hung past 300s rather than dying. A hang leaves the editor
+  alive and busy, so the next Generate click never registers - which looks
+  like a click problem and is not one.
+- **It is a null dereference.** Windows reports an access violation
+  reading address `0x9`, sometimes via BugSplat and sometimes via its own
+  Application Error box. The second form parks an opaque window over the
+  main menu, which reads as "OmniParser cannot find EDITORS".
+
+This supersedes the copse hypothesis that `crash_bisect.py` used to record
+(12 objects in 3 tight groups): cutting that block alone still crashes.
+
+**Not yet known:** whether any formulation of per-island targeting is
+safe - e.g. a tighter `land_percent`/`base_size` on the island lands, or
+avoiding `land_id` targeting altogether in favour of terrain- or
+distance-based placement. Every variant tested here either aims at a real
+non-player land (fails) or does not aim at all (works).
