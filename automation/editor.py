@@ -755,12 +755,26 @@ def recover() -> bool:
         # mod-status.json is unwritable while this process lives.
         print(f"game is running, but {mods_off()} disabled")
     else:
+        titles = "".join(
+            sh("Get-Process | ForEach-Object { $_.MainWindowTitle }").splitlines())
         # BugSplat holds Steam's "game is running" lock, so it has to go first.
-        if "encountered a problem" in "".join(
-                sh("Get-Process | ForEach-Object { $_.MainWindowTitle }").splitlines()):
+        if "encountered a problem" in titles:
             print("dismissing crash reporter")
             click(*BUGSPLAT_DONT_SEND)
             time.sleep(3)
+        # The engine does not always crash into BugSplat. It also faults
+        # straight to Windows' own "Application Error" box - seen reading
+        # address 0x9, i.e. a null dereference - and that box sits on top of
+        # the main menu, where it is not a crash reporter to dismiss but an
+        # opaque window covering the button the walk is looking for. A setup
+        # died exactly that way, reporting "'editors' not found" twice with
+        # EDITORS simply hidden behind it. WerFault owns the box, so ending
+        # WerFault is what clears it; nothing here needs the debug option it
+        # offers.
+        if "Application Error" in titles:
+            print("dismissing Windows' Application Error box (WerFault)")
+            sh("Stop-Process -Name WerFault -Force -ErrorAction SilentlyContinue")
+            time.sleep(2)
         # Do this before launching: the game reads mod-status.json at start
         # and rewrites it on exit, so it is only editable with the game down.
         enable_mods()

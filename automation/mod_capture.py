@@ -42,7 +42,8 @@ from rwmaps import install as install_mod  # noqa: E402
 from rwmaps import scx_read  # noqa: E402
 from rwmaps.cli import REGIONS  # noqa: E402
 from aesthetic_metrics import cached_true_mask_geo, compute_metrics_from_truth  # noqa: E402
-from build_mod import DEBUG_MOD_NAME, MOD_REGIONS  # noqa: E402
+from build_mod import (DEBUG_MOD_NAME, MOD_NAME, MOD_REGIONS,  # noqa: E402
+                       shipped_filename)
 import editor  # noqa: E402
 from frame_server import snapshot_ring  # noqa: E402
 from rwmaps.fairness import profile_capture  # noqa: E402
@@ -212,6 +213,13 @@ def parse_args():
                     help="comma-separated subset of region names to run (default: "
                          "all 10) - handy for smoke-testing the pipeline on one "
                          "region/sample before committing to a full pass")
+    p.add_argument("--from-git", metavar="REF", default=None,
+                    help="capture the script committed at REF (e.g. HEAD) "
+                         "instead of regenerating from src/. The regen path "
+                         "can only ever produce src/ as it stands now, so "
+                         "this is what makes 'did this change break the "
+                         "engine' answerable with the engine rather than by "
+                         "reading the diff. Recorded per sample.")
     p.add_argument("--extra", nargs=argparse.REMAINDER, default=[],
                     help="extra rwmaps flags appended to every region's regen, "
                          "for testing a parameter that is not in MOD_REGIONS yet "
@@ -272,14 +280,35 @@ def main():
             # the copy that matters is archived beside its capture.
             if rms_dir.exists():
                 shutil.rmtree(rms_dir)
-            gen_cmd = ["uv", "run", "rwmaps", name, "--outdir", str(rms_dir),
-                       "--no-preview", *extra_args, *args.extra]
-            t0 = time.time()
-            r = subprocess.run(gen_cmd, cwd=REPO, capture_output=True, text=True)
-            if r.returncode != 0:
-                print(f"  REGEN FAILED: {r.stderr[-800:]}")
-                continue
-            print(f"  regen: {time.time()-t0:.1f}s")
+            if args.from_git:
+                # Capture a committed script instead of regenerating one.
+                # Regeneration always reflects src/ as it stands, so it cannot
+                # be asked for the *previous* behaviour of a region - and when
+                # a change to src/ makes the engine hang or crash, that is
+                # exactly the comparison wanted: same region, same editor, one
+                # script from before and one after. The scripts in mod/ are
+                # committed build outputs, so a ref is all it takes.
+                rms_dir.mkdir(parents=True, exist_ok=True)
+                rel = (f"mod/{MOD_NAME}/resources/_common/random-map-scripts/"
+                       f"{shipped_filename(name)}")
+                dest = rms_dir / shipped_filename(name)
+                r = subprocess.run(["git", "show", f"{args.from_git}:{rel}"],
+                                   cwd=REPO, capture_output=True, text=True)
+                if r.returncode != 0:
+                    print(f"  SKIP: git show {args.from_git}:{rel} failed: "
+                          f"{r.stderr.strip()[:300]}")
+                    continue
+                dest.write_text(r.stdout, encoding="ascii", newline="\n")
+                print(f"  from {args.from_git}: {rel} ({dest.stat().st_size} bytes)")
+            else:
+                gen_cmd = ["uv", "run", "rwmaps", name, "--outdir", str(rms_dir),
+                           "--no-preview", *extra_args, *args.extra]
+                t0 = time.time()
+                r = subprocess.run(gen_cmd, cwd=REPO, capture_output=True, text=True)
+                if r.returncode != 0:
+                    print(f"  REGEN FAILED: {r.stderr[-800:]}")
+                    continue
+                print(f"  regen: {time.time()-t0:.1f}s")
 
             rms_files = list(rms_dir.rglob("*.rms"))
             if len(rms_files) != 1:
@@ -453,6 +482,7 @@ def main():
 
                 record = {
                     "region": name, "extra_args": extra_args, "ai_map_type": ai_type,
+                    "from_git": args.from_git,
                     "lon": lon, "lat": lat, "span_km": span, "rotate": rot,
                     "sample_index": sample_i,
                     **analysis, "aesthetic": aesthetic, "fairness": fairness,
