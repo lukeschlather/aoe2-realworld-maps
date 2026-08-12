@@ -301,7 +301,13 @@ def main():
                 raise SystemExit(f"\nABORTING before {name}: {why}")
 
             region_dir = outroot / name
-            for sample_i in range(done, args.n_samples):
+            # A while loop, not `for sample_i in range(...)`: a sample lost
+            # to a crash must be *retried*, and `continue` in a for loop
+            # advances the counter. Every path out of the body therefore
+            # increments sample_i explicitly, except the crash path, which
+            # deliberately does not - MAX_RECOVERIES is what bounds that one.
+            sample_i = done
+            while sample_i < args.n_samples:
                 t1 = time.time()
                 # Checked before every sample, not only after a click throws.
                 # A crash-and-relaunch does not necessarily make a click fail
@@ -344,27 +350,50 @@ def main():
                             "it got."
                         )
                     started_pid = game_pid()
-                    print(f"  recovered as pid {started_pid}, retrying sample")
+                    # setup() rebuilds player count, Random Map and Huge
+                    # [240] - it does NOT put the Random Map selector back
+                    # on our slot, so post-recovery is exactly when the
+                    # silent wrong-map capture preflight exists to catch is
+                    # most likely. Ask before spending a sample, not after.
+                    ok, why = editor.preflight()
+                    if not ok:
+                        raise SystemExit(
+                            f"\nABORTING: recovered, but the editor would not "
+                            f"generate our script: {why}"
+                        )
+                    print(f"  recovered as pid {started_pid} ({why}), "
+                          f"retrying sample")
                 before = newest_scenario()
                 before_mtime = before.stat().st_mtime if before else 0
                 try:
                     click_sequence(before_mtime)
                 except Exception as e:
-                    # Distinguish "the engine rejected this" from "there is no
-                    # engine" before burning the rest of the pass on retries.
+                    # Distinguish "the engine rejected this" from "the engine
+                    # died". A crash *during* the click sequence used to abort
+                    # the whole pass, even though this script already carries
+                    # the machinery and the budget to come back from one - and
+                    # the crash it aborted on had happened mid-generation, on
+                    # region 2 of 11, discarding nine regions' worth of work
+                    # over one recoverable event. It is the same failure the
+                    # loop above already handles; the only reason it landed
+                    # here instead is that the game happened to die while a
+                    # click was in flight rather than between two samples. So
+                    # fall through to that loop, which recovers, re-preflights,
+                    # and retries this same sample - bounded by MAX_RECOVERIES,
+                    # so a script that reliably kills the engine still stops
+                    # the pass instead of looping on it forever.
                     if not game_is_running():
-                        raise SystemExit(
-                            "\nABORTING: the game is not running. Every remaining "
-                            "capture would fail the same way and tell us nothing "
-                            "about the scripts. Relaunch AoE2, open the Scenario "
-                            "Editor on the AA_rw_placeholder_tester map, and rerun "
-                            f"with the same --run-id to resume.{_frames_note()}"
-                        ) from e
+                        print(f"  sample {sample_i}: the game died mid-capture "
+                              f"({e}) - recovering and retrying this sample"
+                              f"{_frames_note()}")
+                        continue  # sample_i NOT incremented - retry it
                     print(f"  sample {sample_i}: capture FAILED ({e})")
+                    sample_i += 1
                     continue
                 after = newest_scenario()
                 if after is None or after.stat().st_mtime <= before_mtime:
                     print(f"  sample {sample_i}: no new file, skipping")
+                    sample_i += 1
                     continue
 
                 # Archive the raw capture before analyzing - the game
@@ -391,6 +420,7 @@ def main():
                     fairness = profile_capture(dest)
                 except Exception as e:
                     print(f"  sample {sample_i}: ANALYSIS FAILED ({e})")
+                    sample_i += 1
                     continue
 
                 record = {
@@ -420,6 +450,7 @@ def main():
                           f"      {SLOT_PATH}\n"
                           f"      is the slot the Scenario Editor is actually "
                           f"loading, then rerun.")
+                sample_i += 1
 
     print(f"\nDONE in {time.time()-t_start:.0f}s -> {results_path}")
 
