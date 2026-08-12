@@ -47,7 +47,8 @@ Live:
 | **GENERATION.md** | **how generation works, end to end - start here.** Its *Islands* section holds the island design rules: shore is unbuildable, adjacent rocks are one island, gold/stone are worth a transport trip and a small copse is not |
 | RESOURCE_TEMPLATES.md | the two stock resource systems, and their measured budgets. Authoritative on resources |
 | STOCK_MAP_INVENTORY.md | what stock scripts are on disk; script name vs UI name |
-| RENDER_PIPELINE.md | the UI automation that drives real engine renders |
+| **EDITOR_AUTOMATION.md** | **how the capture pipeline drives the Scenario Editor - start here for anything UI.** Verify-before-click, what each check costs, the mods failure that silently captures the wrong map |
+| RENDER_PIPELINE.md | the original PowerShell pipeline. Superseded for `mod_capture` by EDITOR_AUTOMATION.md; `stock_capture` still uses it |
 | RESOURCE_REWORK_STATUS.md | the resource rework's open items - a work queue, not a reference |
 | CLAUDE.md | working conventions: verify with real renders, no agent quality verdicts, commit incrementally |
 
