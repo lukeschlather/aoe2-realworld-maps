@@ -41,6 +41,7 @@ import ctypes
 import subprocess
 import sys
 import time
+import contextlib
 from ctypes import wintypes
 from dataclasses import dataclass
 from pathlib import Path
@@ -131,12 +132,71 @@ def move(x: int, y: int, steps: int = 12, delay: float = 0.008) -> None:
 
 
 def click(x: int, y: int, settle: float = 0.35, hold: float = 0.09) -> None:
+    """Click (x, y), having actually arrived there from somewhere else.
+
+    The nudge is not decoration. Clicking the pixel the cursor is already
+    parked on can fail to register - it behaves like Windows merging the two
+    presses into a double-click - and the old PowerShell driver carried the
+    same jitter for the same reason. It matters here because every retry in
+    this file re-clicks the *same* control after a failed confirmation, so
+    without this the second and third attempts are the ones least likely to
+    work, which is backwards.
+    """
+    _make_dpi_aware()
+    u = ctypes.windll.user32
+    pt = wintypes.POINT()
+    u.GetCursorPos(ctypes.byref(pt))
+    if abs(pt.x - x) <= 2 and abs(pt.y - y) <= 2:
+        move(x - 9, y - 9, steps=4)
+        time.sleep(0.05)
     move(x, y)
     time.sleep(settle)
-    u = ctypes.windll.user32
     u.mouse_event(0x0002, 0, 0, 0, 0)
     time.sleep(hold)
     u.mouse_event(0x0004, 0, 0, 0, 0)
+
+
+#: A parser held open across a menu walk, so re-reading the screen between
+#: clicks costs inference instead of a fresh model load. None means "parse
+#: in a subprocess", which is correct but ~20s slower per call.
+_SERVER = None
+
+
+@contextlib.contextmanager
+def parser_open():
+    """Hold OmniParser's models open for the duration of a menu walk.
+
+    Every click below is followed by a fresh read of the screen, which is
+    the only way to know the click landed. That turns a model load per
+    screen-read into the dominant cost of recovery, and it is exactly the
+    cost ``omni.Server`` exists to remove. Failing to start one is not
+    fatal - the calls fall back to a subprocess parse each.
+    """
+    global _SERVER
+    from omni import Server  # noqa: PLC0415
+
+    if _SERVER is not None:      # already inside one
+        yield
+        return
+    try:
+        _SERVER = Server()
+    except Exception as e:       # noqa: BLE001 - a slow path is still a path
+        print(f"  (no parser server: {e} - parsing per call instead)", flush=True)
+        yield
+        return
+    try:
+        yield
+    finally:
+        srv, _SERVER = _SERVER, None
+        srv.close()
+
+
+def _parse(shot: Path) -> list[dict]:
+    if _SERVER is not None:
+        return _SERVER.parse(shot)
+    from omni import parse_image  # noqa: PLC0415
+
+    return parse_image(shot)
 
 
 def locate(label: str, retries: int = 2) -> tuple[int, int] | None:
@@ -149,18 +209,26 @@ def locate(label: str, retries: int = 2) -> tuple[int, int] | None:
     the whole class of bug this project has been calling "the agent was
     not clicking the actual button".
 
-    Costs a model load per call (tens of seconds), which is why the editor
-    panel below still uses measured constants: those have been stable
-    across every launch observed, and they are re-checkable with
-    ``omni.py --check-editor`` before anything is generated.
+    "Right now" is load-bearing and the answer goes stale: see
+    :func:`click_label`, which re-reads rather than reusing a coordinate.
     """
-    from omni import find, grab_screen, parse_image  # noqa: PLC0415
+    from omni import find, grab_screen  # noqa: PLC0415
 
+    # Read where the game actually is rather than assuming the primary
+    # monitor. This box was hardcoded to (0,0,1920,1080), which is right
+    # only while the window happens to sit at the desktop origin - on this
+    # machine's two-monitor layout it need not, and a parse of the wrong
+    # half of the desktop finds nothing and reports it as "the button is
+    # missing". Coordinates come back relative to the crop, so the crop's
+    # own origin has to be added before anything is clicked.
+    box = find_window_rect("Age of Empires") or (0, 0, 1920, 1080)
+    ox, oy = box[0], box[1]
     for attempt in range(retries):
-        shot = grab_screen(REPO / "out" / "omni" / "locate.png", (0, 0, 1920, 1080))
-        hits = find(parse_image(shot), label)
+        shot = grab_screen(REPO / "out" / "omni" / "locate.png", box)
+        hits = find(_parse(shot), label)
         if hits:
             x, y = hits[0]["center"]
+            x, y = x + ox, y + oy
             print(f"  located {label!r} at ({x}, {y}) "
                   f"[{hits[0]['content']!r}]", flush=True)
             return x, y
@@ -169,12 +237,45 @@ def locate(label: str, retries: int = 2) -> tuple[int, int] | None:
     return None
 
 
-def click_label(label: str) -> bool:
-    where = locate(label)
-    if where is None:
-        return False
-    click(*where)
-    return True
+def click_label(label: str, confirm: str | None = None, tries: int = 3) -> bool:
+    """Click ``label``, and prove it landed by finding ``confirm`` after.
+
+    A single located-then-clicked coordinate is not enough on the main menu,
+    which is where recovery starts. A pass died here: OmniParser put EDITORS
+    at y=795, the click went to y=795, and the game stayed on the main menu
+    - the following 'create scenario' lookups then failed three times and
+    recovery gave up with nine regions still untaken. The coordinate was not
+    wrong when it was read; this menu measurably moves between launches (the
+    y=795 / y=834 note above), and a menu that has just faded in is still
+    settling, so the button can leave before the cursor arrives.
+
+    Both of those are invisible to a blind click and obvious to a second
+    look, so every attempt re-reads the screen from scratch instead of
+    retrying the same stale point, and the click is only believed once the
+    screen it was supposed to open is actually there. ``confirm`` is a label
+    that exists on the destination and not on the origin.
+    """
+    for attempt in range(1, tries + 1):
+        where = locate(label)
+        if where is None:
+            return False
+        click(*where)
+        if confirm is None:
+            return True
+        # The destination fades in - and "Create Scenario" builds a whole
+        # editor session, which is slow - so be patient before calling the
+        # click a miss. Being impatient here is not free: the retry would
+        # re-click, and a click that lands in an editor that *had* loaded is
+        # a brush stroke on the map, which this project already suspects of
+        # causing crashes. (Re-locating first is the other guard: once the
+        # editor is up, the origin label is gone, so there is nothing to
+        # click again.)
+        time.sleep(3)
+        if locate(confirm, retries=3) is not None:
+            return True
+        print(f"  clicking {label!r} at {where} did not bring up {confirm!r} "
+              f"- re-reading the screen (attempt {attempt}/{tries})", flush=True)
+    return False
 
 
 def focus_game() -> bool:
@@ -680,17 +781,19 @@ def setup(players: int = 8) -> bool:
     if not focus_game():
         print("no game window")
         return False
-    # Located, not assumed - the main menu moves between launches.
-    print("editors")
-    if not click_label("editors"):
-        print("could not find EDITORS on the main menu")
-        return False
-    time.sleep(5)
-    print("create scenario (never load - loading one is what destabilises it)")
-    if not click_label("create scenario"):
-        print("could not find Create Scenario")
-        return False
-    time.sleep(6)
+    # Located, not assumed - the main menu moves between launches - and
+    # confirmed, not hoped: each click has to produce the screen it was
+    # aimed at before the walk goes on. One parser stays open across both,
+    # since confirming doubles the number of screen reads.
+    with parser_open():
+        print("editors")
+        if not click_label("editors", confirm="create scenario"):
+            print("could not get from the main menu to the Editors menu")
+            return False
+        print("create scenario (never load - loading one is what destabilises it)")
+        if not click_label("create scenario", confirm="generate map"):
+            print("could not get from the Editors menu into a new scenario")
+            return False
 
     print(f"players -> {players}")
     click(*PLAYERS_TAB)
