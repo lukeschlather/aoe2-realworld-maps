@@ -382,6 +382,102 @@ def click_when_ready(name: str, tries: int = 20, pause: float = 0.25,
     return False
 
 
+MOD_TITLES = ("Real World Maps", "Real World Maps (Debug)")
+
+
+def mod_status_path() -> Path:
+    sys.path.insert(0, str(REPO / "src"))
+    from rwmaps import install as install_mod  # noqa: PLC0415
+
+    return install_mod.find_profile() / "mods" / "mod-status.json"
+
+
+def mods_enabled() -> dict[str, bool]:
+    """Which of our mods the game currently has switched on.
+
+    ``mods/mod-status.json`` is the game's own record, so this is ground
+    truth rather than a screen reading - instant, and it cannot be confused
+    by OCR. Worth preferring over anything visual: the failure it detects
+    is completely silent. With the mod off, the placeholder script is not
+    in the Random Map list, the editor falls back to the first stock
+    script, and the capture is of a different map that still has the right
+    size and player count.
+    """
+    import json  # noqa: PLC0415
+
+    p = mod_status_path()
+    if not p.exists():
+        return {}
+    data = json.loads(p.read_text(encoding="utf-8"))
+    return {m["Title"]: bool(m.get("Enabled"))
+            for m in data.get("Mods", []) if m.get("Title") in MOD_TITLES}
+
+
+def enable_mods(priority: int | None = None) -> bool:
+    """Switch our mods back on. Only safe while the game is NOT running.
+
+    A crash makes the game disable every mod, and that state *persists* -
+    the "re-enable your mods?" prompt appears once, and if it is missed
+    (pressing Escape past it does exactly that) the mods simply stay off
+    with nothing to click. Editing the game's own record is the reliable
+    fix, and it must happen with the game closed or the running process
+    rewrites the file on exit.
+    """
+    import json  # noqa: PLC0415
+
+    if game_pid():
+        print("  not touching mod-status.json while the game is running - "
+              "it would be overwritten on exit")
+        return False
+    p = mod_status_path()
+    if not p.exists():
+        print(f"  no {p}")
+        return False
+    data = json.loads(p.read_text(encoding="utf-8"))
+    changed = 0
+    for m in data.get("Mods", []):
+        if m.get("Title") not in MOD_TITLES:
+            continue
+        if not m.get("Enabled"):
+            m["Enabled"] = True
+            changed += 1
+        # Our mods sit at the bottom of the Mods list (priority 23 and 25
+        # of ~25), so reaching them in the UI means scrolling a long list -
+        # the interaction this project has the most history with. Raising
+        # the priority puts them at the top, which is the same trick as
+        # naming the slot script AA_ so it sorts first and needs no click
+        # at all. Opt-in, because it is the user's mod ordering.
+        if priority is not None and m.get("Priority") != priority:
+            m["Priority"] = priority
+            changed += 1
+    if changed:
+        p.write_text(json.dumps(data), encoding="utf-8")
+        print(f"  re-enabled {changed} mod(s) in mod-status.json")
+    return True
+
+
+def selector_is_placeholder() -> bool | None:
+    """Is the Random Map list actually on our slot? None if not learnable.
+
+    Worth its own check because the failure it catches is silent and
+    expensive. With mods disabled the placeholder script is absent from
+    the list and the editor falls back to the first *stock* script; the
+    map still generates, still comes out 240x240 with 8 players, and is
+    simply a different map. One such capture was recorded under the name
+    "Britain" and was 100% land. The IoU guard caught it, but only after a
+    full generate-and-save had been spent on it.
+
+    Template rather than OCR: the selector's text is small and OmniParser
+    read it as "placeholder" once and not at all the next time, which is
+    not something to gate a pass on.
+    """
+    reg = controls.load()
+    c = reg.get("slot_selector")
+    if c is None:
+        return None
+    return controls.verify(c).ok
+
+
 def newest_scenario(scenario_dir: Path) -> Path | None:
     files = sorted(scenario_dir.glob("*.aoe2scenario"),
                    key=lambda p: p.stat().st_mtime)
@@ -481,6 +577,9 @@ def recover() -> bool:
         print("dismissing crash reporter")
         click(*BUGSPLAT_DONT_SEND)
         time.sleep(3)
+    # Do this before launching: the game reads mod-status.json at start
+    # and rewrites it on exit, so it is only editable with the game down.
+    enable_mods()
     print("launching")
     sh(f"Start-Process '{STEAM_URL}'")
     for _ in range(30):
