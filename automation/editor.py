@@ -281,6 +281,17 @@ def wait_for_main_menu(timeout: float = 120.0, poll: float = 1.5) -> bool:
         if menu is not None and controls.verify(menu).ok:
             print(f"  main menu up after {time.time()-t0:.0f}s")
             return True
+        # NEVER press Escape over the mods dialog. Escape dismisses it
+        # without re-enabling anything, and with mods off the placeholder
+        # script is not in the Random Map list at all - the editor silently
+        # falls back to the first stock script and generates that instead.
+        # Measured, and it cost a capture: the selector read "Acclivity"
+        # and the result was a 240x240 map that was 100% land. This exact
+        # bug was introduced by adding the cutscene skip.
+        if redness(MODS_DIALOG_BOX) > MODS_DIALOG_RED:
+            print("  mods dialog is up - leaving it for recover(), "
+                  "not escaping past it")
+            return False
         if is_foreground():
             press(VK_ESCAPE)
         time.sleep(poll)
@@ -479,7 +490,8 @@ def recover() -> bool:
     if not game_pid():
         print("game did not start")
         return False
-    wait_for_main_menu()
+    # Give the dialog a moment to appear before deciding it is absent.
+    time.sleep(12)
 
     # A crash makes the game disable every mod on the next launch and ask
     # whether to re-enable them. Miss this and the placeholder script is
