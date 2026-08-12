@@ -11,5 +11,200 @@
    834
   ],
   "label": "EDITORS"
+ },
+ "generate": {
+  "box": [
+   219,
+   1009,
+   387,
+   1040
+  ],
+  "click": [
+   303,
+   1024
+  ],
+  "label": "Generate Map"
+ },
+ "map_size_combo": {
+  "box": [
+   215,
+   914,
+   395,
+   946
+  ],
+  "click": [
+   305,
+   930
+  ],
+  "label": "240] Huge"
+ },
+ "random_map": {
+  "box": [
+   14,
+   940,
+   147,
+   967
+  ],
+  "click": [
+   80,
+   953
+  ],
+  "label": "Random Map"
+ },
+ "blank_map": {
+  "box": [
+   20,
+   915,
+   129,
+   942
+  ],
+  "click": [
+   74,
+   928
+  ],
+  "label": "Blank Map"
+ },
+ "seed_box": {
+  "box": [
+   15,
+   989,
+   57,
+   1018
+  ],
+  "click": [
+   36,
+   1003
+  ],
+  "label": "Seed"
+ },
+ "menu_button": {
+  "box": [
+   1748,
+   0,
+   1918,
+   45
+  ],
+  "click": [
+   1833,
+   21
+  ],
+  "label": "Menu"
+ },
+ "players_tab": {
+  "box": [
+   366,
+   3,
+   532,
+   36
+  ],
+  "click": [
+   449,
+   19
+  ],
+  "label": "Players"
+ },
+ "map_tab": {
+  "box": [
+   16,
+   4,
+   181,
+   36
+  ],
+  "click": [
+   98,
+   20
+  ],
+  "label": "Map"
+ },
+ "menu_save": {
+  "box": [
+   810,
+   414,
+   1108,
+   458
+  ],
+  "click": [
+   959,
+   436
+  ],
+  "label": "Save"
+ },
+ "menu_cancel": {
+  "box": [
+   810,
+   713,
+   1108,
+   759
+  ],
+  "click": [
+   959,
+   736
+  ],
+  "label": "Cancel"
+ },
+ "menu_title": {
+  "box": [
+   893,
+   313,
+   1030,
+   348
+  ],
+  "click": [
+   961,
+   330
+  ],
+  "label": "Main Menu"
+ },
+ "save_dlg_confirm": {
+  "box": [
+   826,
+   908,
+   1078,
+   946
+  ],
+  "click": [
+   952,
+   927
+  ],
+  "label": "Save Scenario"
+ },
+ "save_dlg_back": {
+  "box": [
+   275,
+   908,
+   528,
+   946
+  ],
+  "click": [
+   401,
+   927
+  ],
+  "label": "Back"
+ },
+ "save_dlg_title": {
+  "box": [
+   724,
+   111,
+   1195,
+   162
+  ],
+  "click": [
+   959,
+   136
+  ],
+  "label": "Save Scenario"
+ },
+ "save_dlg_name": {
+  "box": [
+   280,
+   248,
+   620,
+   276
+  ],
+  "click": [
+   450,
+   262
+  ],
+  "label": "File Name field"
  }
 }

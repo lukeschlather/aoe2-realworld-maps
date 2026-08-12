@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import shutil
 import subprocess
 import sys
@@ -48,13 +47,6 @@ import editor  # noqa: E402
 from frame_server import snapshot_ring  # noqa: E402
 from rwmaps.fairness import profile_capture  # noqa: E402
 from sample_analysis import analyze_capture  # noqa: E402
-from tuning_matrix import (  # noqa: E402
-    CANCEL_BTN,
-    GENERATE_BTN,
-    MENU_BTN,
-    SAVE_BTN,
-    UI_DRIVER,
-)
 
 # The placeholder slot lives in the DEBUG mod - that is the whole reason
 # the debug variant exists, and it is where install_mod.py --all syncs it.
@@ -167,24 +159,36 @@ def newest_scenario():
 
 
 def click_sequence(before_mtime: float):
-    ps = f"""
-. "{UI_DRIVER}"
-Reset-IfMenuStuck {CANCEL_BTN[0]} {CANCEL_BTN[1]}
-$ok = Click-GenerateMapVerified {GENERATE_BTN[0]} {GENERATE_BTN[1]}
-if (-not $ok) {{ exit 1 }}
-Click-At {MENU_BTN[0]} {MENU_BTN[1]}
-$beforeTime = [DateTimeOffset]::FromUnixTimeMilliseconds({math.ceil(before_mtime * 1000) + 200}).LocalDateTime
-$ok = Click-SaveVerified {SAVE_BTN[0]} {SAVE_BTN[1]} {MENU_BTN[0]} {MENU_BTN[1]} "{SCENARIO_DIR}" $beforeTime
-if (-not $ok) {{ exit 2 }}
-"""
-    result = subprocess.run(["powershell.exe", "-NoProfile", "-Command", ps],
-                             capture_output=True, text=True)
-    if result.returncode == 1:
-        raise RuntimeError("Generate Map never registered a seed change")
-    if result.returncode == 2:
-        raise RuntimeError("Save never closed the Menu")
-    if result.returncode != 0:
-        raise RuntimeError(f"click sequence failed rc={result.returncode}: {result.stderr}")
+    """Generate, then save - in Python, and never on a blind click.
+
+    Replaces the PowerShell driver. Three things changed, each of which had
+    caused a wrong result before:
+
+    * Generation is watched by the **Generate button's colour** rather than
+      by OCR-polling the seed box. The button greys on start and returns to
+      red on finish, so a crash *during* generation is distinguishable from
+      a generation that never started - the seed only ever changes at the
+      end and cannot tell those apart. It also stops screen-grabbing a
+      fullscreen D3D application a few times a second while the engine is
+      under load.
+    * Save **verifies the Menu overlay is really up** before clicking Save.
+      The old sequence slept 200ms and clicked (960, 436), which without
+      the overlay is the middle of the map, where a click is a brush
+      stroke. That is the leading suspicion for the editor's crashes.
+    * Save answers the **Save Scenario file browser**, which the first save
+      of every session opens. The old code only knew the silent form, so it
+      left the dialog open and reported "the menu closed but no file
+      appeared" - a failure mode recorded as not understood at the time.
+
+    ``before_mtime`` is unused now: ``editor.save`` takes its own baseline
+    immediately before clicking, which is tighter than one taken by the
+    caller several seconds earlier.
+    """
+    result = editor.generate()
+    if not result.ok:
+        raise RuntimeError(f"generate: {result.detail}")
+    if editor.save(SCENARIO_DIR) is None:
+        raise RuntimeError("save produced no new scenario file")
 
 
 def already_done(results_path: Path, region: str) -> int:

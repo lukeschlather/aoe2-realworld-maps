@@ -227,23 +227,48 @@ def wait_for(name: str, timeout: float = 10.0, poll: float = 0.15,
     return False
 
 
-def learn(name: str, label: str, pad: int = 4) -> Control | None:
-    """Find ``label`` with a full OmniParser pass and remember where it is."""
-    from omni import find, grab_screen, parse_image  # noqa: PLC0415
+def learn_screen(specs: dict[str, str], pad: int = 4,
+                 server=None) -> dict[str, Control]:
+    """Learn every control on the screen as it is now, from ONE parse.
+
+    One OmniParser pass costs ~18s, so learning eight controls one at a
+    time would cost two and a half minutes to look at the same screen eight
+    times. Everything visible together is learned together.
+    """
+    from omni import Server, find, grab_screen  # noqa: PLC0415
 
     shot = grab_screen(REPO / "out" / "omni" / "learn.png", (0, 0, 1920, 1080))
-    hits = find(parse_image(shot), label)
-    if not hits:
-        print(f"  {label!r} not on screen")
-        return None
-    hit = hits[0]
-    x1, y1, x2, y2 = hit["bbox"]
-    box = (max(0, x1 - pad), max(0, y1 - pad), x2 + pad, y2 + pad)
+    own = server is None
+    server = server or Server()
+    try:
+        elements = server.parse(shot)
+    finally:
+        if own:
+            server.close()
+
     TEMPLATES.mkdir(parents=True, exist_ok=True)
-    Image.fromarray(grab(box).astype(np.uint8)).save(TEMPLATES / f"{name}.png")
-    c = Control(name, box, tuple(hit["center"]), hit["content"])
-    print(f"  learned {name}: {hit['content']!r} box={box} click={c.click}")
-    return c
+    out: dict[str, Control] = {}
+    for name, spec in specs.items():
+        # A spec is a label, or (label, near) when the same text appears
+        # twice - the Save Scenario dialog has a title and a button both
+        # reading "Save Scenario", and only one of them is clickable.
+        label, near = spec if isinstance(spec, tuple) else (spec, None)
+        hits = find(elements, label, near=near)
+        if not hits:
+            print(f"  MISS {name}: no element matching {label!r}")
+            continue
+        hit = hits[0]
+        x1, y1, x2, y2 = hit["bbox"]
+        box = (max(0, x1 - pad), max(0, y1 - pad), x2 + pad, y2 + pad)
+        Image.fromarray(grab(box).astype(np.uint8)).save(TEMPLATES / f"{name}.png")
+        out[name] = Control(name, box, tuple(hit["center"]), hit["content"])
+        print(f"  learned {name:18} {hit['content']!r:24} click={out[name].click}")
+    return out
+
+
+def learn(name: str, label: str, pad: int = 4) -> Control | None:
+    """Learn a single control. See :func:`learn_screen` for the batch form."""
+    return learn_screen({name: label}, pad).get(name)
 
 
 def main() -> int:

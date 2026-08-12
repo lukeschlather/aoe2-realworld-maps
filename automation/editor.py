@@ -52,6 +52,7 @@ REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(Path(__file__).parent))
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+import controls  # noqa: E402
 from frame_server import _make_dpi_aware, find_window_rect  # noqa: E402
 
 STEAM_URL = "steam://rungameid/813780"
@@ -223,6 +224,222 @@ def generate(timeout: float = 300.0, poll: float = 0.5) -> GenResult:
                      "timed out" + ("" if started else " - never started"))
 
 
+def press(vk: int, hold: float = 0.05) -> None:
+    """Tap a virtual key at the focused window."""
+    u = ctypes.windll.user32
+    u.keybd_event(vk, 0, 0, 0)
+    time.sleep(hold)
+    u.keybd_event(vk, 0, 2, 0)  # KEYEVENTF_KEYUP
+
+
+VK_ESCAPE = 0x1B
+VK_BACK = 0x08
+
+#: The scenario the capture loop keeps overwriting. One fixed name so the
+#: file browser is answered once per session and every later save is silent.
+SAVE_NAME = "rw_capture_slot"
+
+
+def type_text(text: str, clear: int = 40, hold: float = 0.02) -> None:
+    """Type into whatever has keyboard focus, clearing it first.
+
+    ``VkKeyScanW`` rather than a scancode table so the shift state for
+    each character comes from the active layout instead of being assumed.
+    """
+    u = ctypes.windll.user32
+    for _ in range(clear):
+        press(VK_BACK, hold)
+    for ch in text:
+        vk = u.VkKeyScanW(ord(ch))
+        if vk == -1:
+            continue
+        shift = (vk >> 8) & 1
+        if shift:
+            u.keybd_event(0x10, 0, 0, 0)
+        press(vk & 0xFF, hold)
+        if shift:
+            u.keybd_event(0x10, 0, 2, 0)
+
+
+def wait_for_main_menu(timeout: float = 120.0, poll: float = 1.5) -> bool:
+    """Skip the opening cinematic and wait until the main menu is really up.
+
+    The game plays an intro on launch, and the previous code just slept 20
+    seconds and hoped - which is both slower than needed when the intro is
+    short and wrong when it is not. Escape skips it; the loop presses
+    Escape and then *checks*, rather than assuming either the press or the
+    duration.
+
+    The check is the main menu's own template, so this returns when the
+    menu is verifiably there - which is also exactly the precondition the
+    first click needs.
+    """
+    reg = controls.load()
+    menu = reg.get("editors_menu")
+    t0 = time.time()
+    while time.time() - t0 < timeout:
+        if menu is not None and controls.verify(menu).ok:
+            print(f"  main menu up after {time.time()-t0:.0f}s")
+            return True
+        if is_foreground():
+            press(VK_ESCAPE)
+        time.sleep(poll)
+    print(f"  main menu did not appear within {timeout:.0f}s")
+    return menu is None  # no template learned yet: do not block the caller
+
+
+def is_foreground() -> bool:
+    """Is the game the window receiving input right now?"""
+    import ctypes  # noqa: PLC0415
+    from ctypes import wintypes  # noqa: PLC0415
+
+    u = ctypes.windll.user32
+    hwnd = u.GetForegroundWindow()
+    n = u.GetWindowTextLengthW(hwnd)
+    buf = ctypes.create_unicode_buffer(n + 1)
+    u.GetWindowTextW(hwnd, buf, n + 1)
+    return "age of empires" in buf.value.lower()
+
+
+def why_not_there(name: str, pid: str | None) -> str:
+    """Why did a control fail to verify? Cheapest explanations first.
+
+    A pixel mismatch has four causes and only one of them needs a model:
+
+    1. **The game crashed.** A pid check, ~50ms, and it is the one cause
+       where clicking anything at all is wrong.
+    2. **Somebody is using the machine.** If the game is not foreground,
+       the automation is looking at whatever is on top of it - and its
+       clicks would land there too. Wait, do not click.
+    3. **The UI has not settled yet.** By far the most common, and the
+       remedy is simply to wait and look again, which is what the caller's
+       retry loop does.
+    4. **The screen is genuinely not what we expected.** Only this one is
+       worth an OmniParser pass, and when it happens an annotated dump is
+       exactly what a human wants to see anyway.
+
+    Checking in this order matters because 1 and 2 are ~50ms each while 4
+    is seconds, and because 1 and 2 have *different* correct responses -
+    recover, and wait for the human to finish, respectively.
+    """
+    if game_pid() != pid:
+        return "crashed"
+    if not is_foreground():
+        return "not-foreground"
+    return "unsettled"
+
+
+def click_when_ready(name: str, tries: int = 20, pause: float = 0.25,
+                     pid: str | None = None) -> bool:
+    """Verify, wait, verify again - and never click on a guess.
+
+    Escalates to a full OmniParser pass with an annotated image only after
+    the cheap explanations are exhausted, because that is the only case
+    where a labelled picture of the screen tells anyone anything.
+    """
+    reg = controls.load()
+    pid = pid or game_pid()
+    for attempt in range(tries):
+        try:
+            controls.click(name, reg)
+            return True
+        except controls.NotThere:
+            why = why_not_there(name, pid)
+            if why == "crashed":
+                print(f"  {name}: the game is gone - not clicking")
+                return False
+            if why == "not-foreground":
+                if attempt % 8 == 0:
+                    print(f"  {name}: the game is not foreground, waiting "
+                          f"rather than clicking into whatever is")
+                time.sleep(1.0)
+                continue
+            time.sleep(pause)
+    # Cheap explanations exhausted: this is the case a picture is for.
+    shot = REPO / "out" / "omni" / f"unexpected_{name}.png"
+    print(f"  {name}: still not there after {tries} tries - "
+          f"parsing the screen for a look")
+    try:
+        from omni import find, grab_screen, parse_image  # noqa: PLC0415
+        img = grab_screen(shot, (0, 0, 1920, 1080))
+        els = parse_image(img, annotate=shot.with_name(f"{shot.stem}_boxed.png"))
+        hits = find(els, controls.load()[name].label or name)
+        print(f"  {name}: OmniParser {'found it at ' + str(hits[0]['center']) if hits else 'cannot see it either'};"
+              f" annotated screen at {shot.with_name(shot.stem + '_boxed.png')}")
+    except Exception as e:
+        print(f"  {name}: escalation failed too ({e})")
+    return False
+
+
+def newest_scenario(scenario_dir: Path) -> Path | None:
+    files = sorted(scenario_dir.glob("*.aoe2scenario"),
+                   key=lambda p: p.stat().st_mtime)
+    return files[-1] if files else None
+
+
+def save(scenario_dir: Path, timeout: float = 30.0) -> Path | None:
+    """Menu -> Save, with the overlay confirmed present before Save is clicked.
+
+    This is the sequence that was demonstrably clicking blind. It slept a
+    fixed 200ms after opening the Menu and then clicked SAVE_BTN, which
+    with no overlay up is the middle of the map - where a click in the
+    Scenario Editor is a brush stroke, not a no-op. So a menu that had not
+    finished laying out did not produce a harmless missed click; it edited
+    the scenario silently, and is the leading suspect for the crashes.
+
+    Two independent confirmations, because the project has been burned by
+    each alone: the overlay's own control must be visible before Save is
+    clicked, and a genuinely newer file must appear before the save is
+    called done. The menu closing is not sufficient - that has been
+    observed with no file written.
+    """
+    before = newest_scenario(scenario_dir)
+    before_mtime = before.stat().st_mtime if before else 0.0
+
+    reg = controls.load()
+    try:
+        controls.click("menu_button", reg)
+    except controls.NotThere as e:
+        print(f"  save: {e}")
+        return None
+    if not controls.wait_for("menu_save", timeout=8.0, controls=reg):
+        print("  save: the Menu overlay never appeared - not clicking, "
+              "because that coordinate is the map when the menu is closed")
+        return None
+    try:
+        controls.click("menu_save", reg)
+    except controls.NotThere as e:
+        print(f"  save: {e}")
+        return None
+
+    # The FIRST save of a session opens a Save Scenario file browser;
+    # later ones write silently to the same file. The old pipeline only
+    # ever knew about the silent form, which is why it could report the
+    # menu closing with no file on disk - it had left this dialog sitting
+    # open and unanswered.
+    if controls.wait_for("save_dlg_confirm", timeout=4.0, controls=reg):
+        print(f"  save: file browser opened - naming it {SAVE_NAME}")
+        try:
+            controls.click("save_dlg_name", reg)
+            time.sleep(0.3)
+            type_text(SAVE_NAME)
+            time.sleep(0.3)
+            controls.click("save_dlg_confirm", reg)
+        except controls.NotThere as e:
+            print(f"  save: {e}")
+            return None
+
+    t0 = time.time()
+    while time.time() - t0 < timeout:
+        time.sleep(0.25)
+        newest = newest_scenario(scenario_dir)
+        if newest and newest.stat().st_mtime > before_mtime:
+            print(f"  saved {newest.name} after {time.time()-t0:.1f}s")
+            return newest
+    print(f"  save: no new scenario file after {timeout:.0f}s")
+    return None
+
+
 # ------------------------------------------------------------------ setup
 
 
@@ -262,7 +479,7 @@ def recover() -> bool:
     if not game_pid():
         print("game did not start")
         return False
-    time.sleep(20)
+    wait_for_main_menu()
 
     # A crash makes the game disable every mod on the next launch and ask
     # whether to re-enable them. Miss this and the placeholder script is
@@ -289,7 +506,7 @@ def recover() -> bool:
             time.sleep(3)
             if game_pid():
                 break
-        time.sleep(20)
+        wait_for_main_menu()
     return game_pid() is not None
 
 

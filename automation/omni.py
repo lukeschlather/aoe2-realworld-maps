@@ -290,10 +290,37 @@ def grab_screen(dest: Path, crop: tuple[int, int, int, int] | None) -> Path:
     return dest
 
 
-def find(elements: list[dict], text: str) -> list[dict]:
-    """Elements whose text contains ``text``, interactive ones first."""
-    hits = [e for e in elements if text.lower() in e["content"].lower()]
-    return sorted(hits, key=lambda e: not e["interactive"])
+def find(elements: list[dict], text: str,
+         near: tuple[int, int] | None = None) -> list[dict]:
+    """Elements matching ``text``, best first.
+
+    Plain "contains" is not good enough and picked the wrong control three
+    times in one pass: "map" matched *Generate Map* rather than the Map
+    tab, "seed" matched *Seed Map* rather than the Seed box, "random map"
+    matched *Random Map location* rather than the Random Map radio. The
+    user's own notes record the same class of failure from substring OCR
+    matching - two candidates averaged into a coordinate that hit neither.
+
+    So: exact match wins, then the shortest containing text, because a
+    longer string containing the query is usually a *different* control
+    that merely mentions it. ``near`` breaks remaining ties by distance,
+    for the genuinely ambiguous cases.
+    """
+    q = text.lower().strip()
+    hits = [e for e in elements if q in e["content"].lower()]
+
+    def rank(e):
+        content = e["content"].lower().strip()
+        dist = 0.0
+        if near is not None:
+            dx, dy = e["center"][0] - near[0], e["center"][1] - near[1]
+            dist = (dx * dx + dy * dy) ** 0.5
+        return (content != q,            # exact first
+                not e["interactive"],    # then clickable
+                len(content),            # then the least padded match
+                dist)
+
+    return sorted(hits, key=rank)
 
 
 def check_editor(elements: list[dict]) -> dict[str, bool]:
