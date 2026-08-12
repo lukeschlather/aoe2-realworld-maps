@@ -206,5 +206,18 @@
    262
   ],
   "label": "File Name field"
+ },
+ "slot_selector": {
+  "box": [
+   222,
+   968,
+   360,
+   995
+  ],
+  "click": [
+   305,
+   981
+  ],
+  "label": "AA_rw_placeholder"
  }
 }

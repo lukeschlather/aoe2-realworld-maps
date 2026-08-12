@@ -478,6 +478,36 @@ def selector_is_placeholder() -> bool | None:
     return controls.verify(c).ok
 
 
+def preflight() -> tuple[bool, str]:
+    """Is the editor actually going to generate OUR script?
+
+    Two checks, cheapest first, because the failure they catch is silent
+    and the whole pass depends on it. With the mod disabled the placeholder
+    is not in the Random Map list and the editor generates the first stock
+    script instead - right size, right player count, wrong map. One such
+    capture was filed under "Britain" and was 100% land; only the coastline
+    IoU caught it, after a full generate-and-save had been spent.
+
+    Costs about a quarter of a second against the ~90s a wasted sample
+    costs, and against a whole pass if it goes unnoticed.
+    """
+    off = [name for name, on in mods_enabled().items() if not on]
+    if off:
+        return False, (f"these mods are disabled: {off}. The placeholder "
+                       f"script is not in the Random Map list while they "
+                       f"are, so the editor would generate a stock map. "
+                       f"Close the game and run editor.enable_mods().")
+    on_slot = selector_is_placeholder()
+    if on_slot is False:
+        return False, ("the Random Map selector is not on "
+                       "AA_rw_placeholder_tester - the editor would "
+                       "generate whatever it is on instead.")
+    if on_slot is None:
+        return True, ("slot_selector is not in the control registry, so the "
+                      "selector was NOT checked - only the mod state was")
+    return True, "mods enabled and the selector is on the placeholder slot"
+
+
 def newest_scenario(scenario_dir: Path) -> Path | None:
     files = sorted(scenario_dir.glob("*.aoe2scenario"),
                    key=lambda p: p.stat().st_mtime)
