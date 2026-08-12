@@ -298,8 +298,7 @@ def main():
             ok, why = editor.preflight()
             print(f"  preflight: {why}")
             if not ok:
-                raise SystemExit(f"
-ABORTING before {name}: {why}")
+                raise SystemExit(f"\nABORTING before {name}: {why}")
 
             region_dir = outroot / name
             for sample_i in range(done, args.n_samples):
