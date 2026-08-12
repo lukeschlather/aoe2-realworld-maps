@@ -84,6 +84,69 @@ EDITOR_EXPECTED = {**EDITOR_PRESENT, **EDITOR_CONFIGURED}
 # ------------------------------------------------------------------ worker
 
 
+def _serve() -> int:
+    """Hold the models open and parse whatever paths arrive on stdin.
+
+    Measured on this machine: importing torch/easyocr costs 12.8s and
+    constructing the models another 7.1s, against 16.5s of actual inference
+    per full frame. A subprocess per call pays that 20s every time, which is
+    more than half the wall clock of a cold parse and all of it avoidable.
+
+    Protocol is one JSON request per line, one JSON response per line, so a
+    caller can keep this open for a whole capture pass.
+    """
+    import contextlib  # noqa: PLC0415
+
+    sys.path.insert(0, str(VMAUTO))
+    os.chdir(VMAUTO)
+    from PIL import Image
+
+    from omni import ScreenParser  # noqa: PLC0415
+
+    # The vendored Omniparser prints "Omniparser initialized!!!" to stdout,
+    # and stdout is the protocol here - the first read came back with that
+    # instead of the ready line and the client gave up. Anything the models
+    # want to say goes to stderr.
+    with contextlib.redirect_stdout(sys.stderr):
+        parser = ScreenParser()
+    print(json.dumps({"ready": True}), flush=True)
+    # readline(), not `for line in sys.stdin`: iterating a pipe read-ahead
+    # buffers, so the worker sat waiting for a full buffer and never saw a
+    # single request line. It looked exactly like a hang.
+    while True:
+        raw = sys.stdin.readline()
+        if not raw:
+            return 0
+        line = raw.strip()
+        if not line:
+            continue
+        try:
+            req = json.loads(line)
+            if req.get("stop"):
+                return 0
+            img = Image.open(req["image"]).convert("RGB")
+            if req.get("box"):
+                img = img.crop(tuple(req["box"]))
+            elif img.width > GAME_MONITOR[2]:
+                img = img.crop(GAME_MONITOR)
+            # The vendored parser prints during inference too, not only at
+            # construction, and stdout is the protocol - one stray line and
+            # the client's json.loads fails on the reply it never got.
+            with contextlib.redirect_stdout(sys.stderr):
+                els = parser.parse_screen_fast(img, debug_path=req.get("annotate"))
+            ox, oy = (req["box"][0], req["box"][1]) if req.get("box") else (0, 0)
+            print(json.dumps({"elements": [
+                {"type": e.type, "content": (e.content or "").strip(),
+                 "interactive": e.interactivity,
+                 "bbox": [e.bbox_px[0] + ox, e.bbox_px[1] + oy,
+                          e.bbox_px[2] + ox, e.bbox_px[3] + oy],
+                 "center": [e.center_px[0] + ox, e.center_px[1] + oy]}
+                for e in els]}), flush=True)
+        except Exception as e:  # a bad request must not kill the worker
+            print(json.dumps({"error": str(e)}), flush=True)
+    return 0
+
+
 def _worker(image_path: str, annotate: str | None) -> int:
     """Runs under vmauto's interpreter. Prints elements as JSON."""
     # Absolute before the chdir, or every relative path the caller passed
@@ -126,6 +189,73 @@ def _vmauto_python() -> Path:
             f"RWMAPS_VMAUTO if it lives somewhere else."
         )
     return exe
+
+
+class Server:
+    """A long-lived parser process, so the model load is paid once.
+
+    Use it as a context manager around a whole capture pass. Falls back to
+    nothing clever: if the worker dies, ``parse`` raises and the caller can
+    go back to :func:`parse_image`.
+    """
+
+    def __init__(self) -> None:
+        self.proc = subprocess.Popen(
+            [str(_vmauto_python()), str(Path(__file__).resolve()), "--serve"],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL, text=True, bufsize=1,
+            env={**os.environ, "RWMAPS_VMAUTO": str(VMAUTO)})
+        # Skip anything chatty the model stack emits before the handshake -
+        # belt and braces, since the worker already redirects its own
+        # construction noise to stderr.
+        for _ in range(20):
+            line = self.proc.stdout.readline()
+            if not line:
+                raise SystemExit("omniparser worker exited during startup")
+            if '"ready"' in line:
+                break
+        else:
+            raise SystemExit(f"omniparser worker never signalled ready: {line!r}")
+
+    def parse(self, image: Path, box: tuple[int, int, int, int] | None = None,
+              annotate: Path | None = None) -> list[dict]:
+        req = {"image": str(Path(image).resolve())}
+        if box:
+            req["box"] = list(box)
+        if annotate:
+            req["annotate"] = str(Path(annotate).resolve())
+        self.proc.stdin.write(json.dumps(req) + "\n")
+        self.proc.stdin.flush()
+        # Skip anything that is not the reply. Defensive rather than
+        # decorative: chatty inference code has now polluted this stream
+        # twice, and a JSONDecodeError here reads as "the parser failed"
+        # when the parse actually succeeded.
+        for _ in range(50):
+            line = self.proc.stdout.readline()
+            if not line:
+                raise RuntimeError("omniparser worker exited")
+            line = line.strip()
+            if not line.startswith("{"):
+                continue
+            reply = json.loads(line)
+            if "error" in reply:
+                raise RuntimeError(reply["error"])
+            return reply["elements"]
+        raise RuntimeError("omniparser worker sent no parseable reply")
+
+    def close(self) -> None:
+        try:
+            self.proc.stdin.write('{"stop":true}\n')
+            self.proc.stdin.flush()
+            self.proc.wait(timeout=10)
+        except Exception:
+            self.proc.kill()
+
+    def __enter__(self) -> "Server":
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.close()
 
 
 def parse_image(image: Path, annotate: Path | None = None,
@@ -177,6 +307,9 @@ def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
+    ap.add_argument("--serve", action="store_true",
+                    help="hold the models open and answer JSON requests on "
+                         "stdin, so a pass pays the 20s model load once")
     src = ap.add_mutually_exclusive_group()
     src.add_argument("--image", type=Path, help="parse this file")
     src.add_argument("--screen", action="store_true", help="parse a screenshot")
@@ -192,6 +325,8 @@ def main() -> int:
     ap.add_argument("--json", type=Path, help="write all elements here")
     args = ap.parse_args()
 
+    if args.serve:
+        return _serve()
     if args.worker:
         return _worker(str(args.image), str(args.annotate) if args.annotate else None)
 
