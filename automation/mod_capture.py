@@ -260,6 +260,18 @@ def main():
                   f"(elapsed {time.time()-t_start:.0f}s)")
 
             rms_dir = outroot / "scripts" / name
+            # Clear it first. rwmaps writes into a fresh timestamped subdir
+            # per invocation, so a region regenerated twice under one run-id
+            # leaves two .rms behind and the "exactly one" check below then
+            # skips it - permanently, since resuming regenerates and counts
+            # three, four, five. That is exactly backwards for the flag whose
+            # whole job is to resume: this pass crashed during Cramped Italy,
+            # and the resume skipped Cramped Italy for having generated it
+            # once already. Nothing here is worth keeping across runs - the
+            # script is a deterministic function of the region's args, and
+            # the copy that matters is archived beside its capture.
+            if rms_dir.exists():
+                shutil.rmtree(rms_dir)
             gen_cmd = ["uv", "run", "rwmaps", name, "--outdir", str(rms_dir),
                        "--no-preview", *extra_args, *args.extra]
             t0 = time.time()
