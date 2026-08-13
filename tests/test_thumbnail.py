@@ -8,10 +8,13 @@ import pytest
 from rwmaps.rms import PLAYER_SPAWN_PLACEHOLDER, build_rms
 from rwmaps.rms_land import build_land_generation, cover_mask, iou, rasterize_discs
 from rwmaps.thumbnail import (
+    AOE_PLAYER_COLORS,
+    ICON_PX,
     fill_pockets,
     fit_scale,
     parse_script,
     render,
+    render_icon,
     terrain_rgb,
 )
 
@@ -113,6 +116,40 @@ def test_render_is_square_and_painted(tmp_path):
     img = render(parse_script(path), px=64)
     assert img.size == (64, 64)
     assert len(img.getcolors(maxcolors=1 << 16)) > 3, "water, shallows, beach, land"
+
+
+def test_icon_matches_the_game_s_format(tmp_path):
+    """420x420 RGBA, full-bleed diamond, corners on the edge midpoints.
+
+    Measured off the stock mapicons/rm_arabia.png and the subscribed mods
+    that ship their own - the game shows <script>.png from beside the script.
+    """
+    _, _, path = _script(tmp_path)
+    icon = render_icon(parse_script(path))
+    assert icon.size == (ICON_PX, ICON_PX)
+    assert icon.mode == "RGBA"
+
+    alpha = np.array(icon)[..., 3]
+    mid = ICON_PX // 2
+    assert alpha[mid].all(), "the diamond spans the full width at its middle"
+    assert alpha[mid, mid] == 255
+    for corner in [(0, 0), (0, -1), (-1, 0), (-1, -1)]:
+        assert alpha[corner] == 0, "square corners are transparent"
+    # Every row is a slice of the diamond, so its opaque width tracks the
+    # distance to the nearest tip.
+    for row in (0, ICON_PX // 4, ICON_PX - 1):
+        width = int((alpha[row] > 0).sum())
+        expected = 2 * (mid - abs(row - mid))
+        assert abs(width - expected) <= 12, f"row {row}: {width} vs ~{expected}"
+
+
+def test_icon_starts_use_the_game_s_player_colours(tmp_path):
+    _, _, path = _script(tmp_path)
+    icon = render_icon(parse_script(path)).convert("RGB")
+    pixels = np.array(icon).reshape(-1, 3)
+    for color in AOE_PLAYER_COLORS[:2]:            # the two starts in _script
+        close = (np.abs(pixels.astype(int) - color).sum(1) < 30).sum()
+        assert close > 100, f"no marker drawn in player colour {color}"
 
 
 def test_terrain_bands_are_distinct():

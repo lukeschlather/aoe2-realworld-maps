@@ -48,6 +48,9 @@ from pathlib import Path
 
 REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
+sys.path.insert(0, str(Path(__file__).parent))
+
+import build_thumbnails  # noqa: E402
 
 MOD_NAME = "Real World Maps"
 DEBUG_MOD_NAME = "Real World Maps (Debug)"
@@ -247,6 +250,11 @@ def main():
               f"content = {why}, currently {slot_src.parent.name})")
 
     shutil.rmtree(tmp_out)
+    # The map-selection screen shows <script>.png from beside the script, and
+    # a full build has just wiped both mod roots, so the icons have to be
+    # redrawn here or the maps ship with the game's generic image. Engine-free
+    # and a few seconds for the whole mod.
+    build_thumbnails.write_icons()
     if failures:
         print(f"\nFAILED regions (not in either mod): {failures}")
     print(f"\ndone - {len(regions) - len(failures)}/{len(regions)} regions in "

@@ -1,15 +1,27 @@
-"""Render a terrain thumbnail for every shipped map, plus a gallery page.
+"""Render every shipped map's thumbnail: the in-game icon, and a gallery.
 
-Cheap and engine-free: each thumbnail is drawn from the shipped ``.rms``
-itself (see ``rwmaps.thumbnail``), so it always matches what is in
-``mod/Real World Maps/`` and a full rebuild takes seconds. It shows land,
+Cheap and engine-free: each image is drawn from the shipped ``.rms`` itself
+(see ``rwmaps.thumbnail``), so it always matches what is in
+``mod/Real World Maps/`` and a full rebuild takes seconds. They show land,
 water, the shoreline band and the script's pinned player starts - not
 forest, elevation or objects, which the engine rolls at generation time.
 
+Two outputs, because they are read in different places:
+
+* **Icons**, written into each mod next to the script as ``<stem>.png``.
+  That is the game's own convention for a mod-supplied map image - stock
+  ``mapicons/rm_arabia.png`` and the two subscribed mods that ship their
+  own (Legacy ES Maps, Zetnus HyperRandom) all use the same 420x420 RGBA
+  diamond - so these are isometric, the orientation the map-selection
+  screen displays.  ``build_mod.py`` calls this at the end of a build,
+  since a full build wipes the mod directories.
+* **A gallery** under ``reports/``, north-up, for judging how recognisable
+  a coastline is without the 45-degree rotation in the way.
+
 Usage:
     uv run python automation/build_thumbnails.py
-    uv run python automation/build_thumbnails.py --isometric --px 256
-    uv run python automation/build_thumbnails.py --outdir out/thumbs --no-gallery
+    uv run python automation/build_thumbnails.py --no-gallery
+    uv run python automation/build_thumbnails.py --no-icons --px 256
 """
 
 from __future__ import annotations
@@ -28,9 +40,43 @@ sys.path.insert(0, str(REPO / "src"))
 
 from rwmaps import thumbnail  # noqa: E402
 
-MOD_SCRIPTS = REPO / "mod" / "Real World Maps" / "resources" / "_common" / "random-map-scripts"
+SCRIPTS_SUBDIR = Path("resources") / "_common" / "random-map-scripts"
+#: Both mod roots build_mod.py maintains; the debug one carries the extra
+#: placeholder slot, which gets an icon like any other script.
+MOD_ROOTS = [REPO / "mod" / "Real World Maps", REPO / "mod" / "Real World Maps (Debug)"]
+MOD_SCRIPTS = MOD_ROOTS[0] / SCRIPTS_SUBDIR
 DEFAULT_OUT = REPO / "reports" / "map_thumbnails_data"
 GALLERY = REPO / "reports" / "map_thumbnails.html"
+
+
+def write_icons(roots=MOD_ROOTS, quiet: bool = False) -> int:
+    """Write ``<stem>.png`` beside every script in each mod root.
+
+    Called by ``build_mod.py`` after a build, since a full build wipes the
+    mod directories - an icon left behind for a renamed script would show up
+    against nothing, and a script with no icon gets the game's generic one.
+    """
+    written = 0
+    for root in roots:
+        scripts = root / SCRIPTS_SUBDIR
+        if not scripts.is_dir():
+            continue
+        for path in sorted(scripts.glob("*.rms")):
+            try:
+                script = thumbnail.parse_script(path)
+            except ValueError as exc:
+                print(f"  skip: {exc}")
+                continue
+            thumbnail.save_icon(script, path.with_suffix(".png"))
+            written += 1
+        # Icons for scripts that no longer exist are dead weight in the mod.
+        for stale in sorted(scripts.glob("*.png")):
+            if not stale.with_suffix(".rms").exists():
+                stale.unlink()
+                print(f"  removed stale icon {stale.name}")
+    if not quiet:
+        print(f"  {written} in-game icons written beside their scripts")
+    return written
 
 
 def _commit() -> str:
@@ -53,7 +99,9 @@ def _parse_args():
     p.add_argument("--no-starts", action="store_true",
                    help="omit the player start dots")
     p.add_argument("--no-gallery", action="store_true",
-                   help="write the PNGs only, no gallery page")
+                   help="skip the reports/ gallery and its north-up PNGs")
+    p.add_argument("--no-icons", action="store_true",
+                   help="skip the in-game icons written into the mod roots")
     return p.parse_args()
 
 
@@ -62,6 +110,11 @@ def main() -> int:
     scripts = sorted(args.scripts.glob("*.rms"))
     if not scripts:
         sys.exit(f"no .rms scripts in {args.scripts}")
+
+    if not args.no_icons:
+        write_icons()
+    if args.no_gallery:
+        return 0
 
     rendered: list[tuple[thumbnail.MapScript, Path]] = []
     for path in scripts:
@@ -78,9 +131,8 @@ def main() -> int:
               f"{len(script.discs)} lands  {len(script.starts)} starts  land {land:.0f}%")
         rendered.append((script, png))
 
-    if not args.no_gallery:
-        write_gallery(rendered, args)
-        print(f"\ngallery -> {GALLERY.relative_to(REPO)}")
+    write_gallery(rendered, args)
+    print(f"\ngallery -> {GALLERY.relative_to(REPO)}")
     print(f"{len(rendered)}/{len(scripts)} thumbnails in {args.outdir.relative_to(REPO)}")
     return 0
 

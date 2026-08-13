@@ -58,6 +58,23 @@ PLAYER_COLORS = [
     (200, 100, 230), (240, 140, 40), (60, 220, 220), (230, 230, 230),
 ]
 
+#: The game's own player colours, in player order - blue, red, green, yellow,
+#: cyan, purple, grey, orange. Used only for the in-game map icon, which
+#: should look like the stock ones rather than like this project's previews.
+AOE_PLAYER_COLORS = [
+    (42, 95, 232), (224, 48, 48), (38, 212, 38), (255, 232, 0),
+    (0, 232, 232), (232, 40, 232), (156, 156, 156), (255, 128, 0),
+]
+
+#: The map-selection icon the game looks for beside a script, measured off
+#: the stock ``mapicons/rm_arabia.png`` and the two subscribed mods that ship
+#: their own (Legacy ES Maps, Zetnus HyperRandom): 420x420 RGBA, the map a
+#: full-bleed diamond with its corners on the edge midpoints, edged with a
+#: tan border over a thin dark outline.
+ICON_PX = 420
+ICON_BORDER = (215, 182, 151)
+ICON_OUTLINE = (38, 30, 22)
+
 #: Tiles of water next to the shore drawn as shallows, and tiles of land next
 #: to the water drawn as beach - one ring each, as the engine paints beach.
 #: A wider beach band looks fine on a chunky landmass but eats the narrow
@@ -252,6 +269,49 @@ def render(
         ImageDraw.Draw(out).text((4, px + 5), label, fill=(235, 235, 235))
         return out
     return img
+
+
+def render_icon(script: MapScript, px: int = ICON_PX, supersample: int = 2) -> Image.Image:
+    """The map-selection icon, in the game's own format - see ICON_PX.
+
+    The grid is a square rotated 45 degrees, so the diamond's diagonal is the
+    icon's width and the square drawn before rotation is ``px/sqrt(2)`` on a
+    side. Start markers are drawn as axis-aligned squares *before* that
+    rotation, which is what makes them come out as diamonds sitting square to
+    the finished icon, exactly like the stock ones.
+    """
+    side = round(px / math.sqrt(2)) * supersample
+    img = Image.fromarray(terrain_rgb(script.land_mask)).convert("RGBA")
+    img = img.resize((side, side), Image.NEAREST)
+
+    if script.starts:
+        d = ImageDraw.Draw(img)
+        # 34px across on a 420 icon, as the stock icons draw them; a square
+        # of that diagonal before the rotation.
+        half = max(2, round(34 / math.sqrt(2) / 2 * side / (px / math.sqrt(2))))
+        for player, y, x in script.starts:
+            cx = x * side / script.size
+            cy = y * side / script.size
+            color = AOE_PLAYER_COLORS[(player - 1) % len(AOE_PLAYER_COLORS)]
+            d.rectangle([cx - half, cy - half, cx + half, cy + half],
+                        fill=color, outline=(0, 0, 0), width=max(2, half // 5))
+
+    img = img.rotate(-45, expand=True, resample=Image.BILINEAR, fillcolor=(0, 0, 0, 0))
+    span = img.width - 1
+    mid = span / 2
+    diamond = [(mid, 0), (span, mid), (mid, span), (0, mid)]
+    frame = ImageDraw.Draw(img)
+    frame.polygon(diamond, outline=ICON_OUTLINE, width=round(9 * supersample))
+    frame.polygon(diamond, outline=ICON_BORDER, width=round(6 * supersample))
+    return img.resize((px, px), Image.LANCZOS)
+
+
+def save_icon(script: MapScript, path: str | Path, px: int = ICON_PX) -> Path:
+    """Write the icon the game shows for ``script`` on the map-selection screen."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    render_icon(script, px=px).save(path)
+    return path
 
 
 def save_thumbnail(script: MapScript, path: str | Path, **kwargs) -> Path:
