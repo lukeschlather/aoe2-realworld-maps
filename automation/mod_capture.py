@@ -238,13 +238,15 @@ def main():
             raise SystemExit(f"unknown region(s): {missing}")
 
     recoveries = 0
+    # Build the editor rather than demanding someone else did. This used to
+    # abort if the game was not up, which was reasonable when setup was
+    # manual and is now just a way to lose a pass to the state the *previous*
+    # pass's crash left behind - mods off, editor at Blank Map / Small [144].
+    ok, why = editor.ensure_ready(PLAYERS)
+    if not ok:
+        raise SystemExit(f"ABORTING: the editor is not usable: {why}")
+    print(f"editor ready: {why}")
     started_pid = game_pid()
-    if started_pid is None:
-        raise SystemExit(
-            "ABORTING: the game is not running. Launch AoE2, open the "
-            "Scenario Editor on AA_rw_placeholder_tester at Huge [240] with "
-            "8 players, and rerun."
-        )
     print(f"game pid {started_pid} - a change means it crashed and came back "
           f"at its defaults, which no capture after that point can be trusted "
           f"against")
@@ -334,12 +336,15 @@ def main():
                     break
 
             # Confirm the editor will generate OUR script before spending
-            # ~90s a sample on it. A disabled mod silently substitutes the
-            # first stock script and the result looks superficially right.
-            ok, why = editor.preflight()
+            # ~90s a sample on it - and fix it if it will not, rather than
+            # ending the pass over a state a rebuild repairs. A disabled mod
+            # silently substitutes the first stock script and the result
+            # looks superficially right.
+            ok, why = editor.ensure_ready(PLAYERS)
             print(f"  preflight: {why}")
             if not ok:
                 raise SystemExit(f"\nABORTING before {name}: {why}")
+            started_pid = game_pid()
 
             region_dir = outroot / name
             # A while loop, not `for sample_i in range(...)`: a sample lost
@@ -399,25 +404,14 @@ def main():
                     # it, discarding every remaining region over something a
                     # second recovery fixes: editor.recover() now treats a
                     # running game with our mods off as recoverable.
-                    for rebuild in range(1, 3):
-                        if not (editor.recover() and editor.setup(PLAYERS)):
-                            raise SystemExit(
-                                "\nABORTING: could not get the editor back to "
-                                "a usable state. Frames and logs above say "
-                                "how far it got."
-                            )
-                        started_pid = game_pid()
-                        ok, why = editor.preflight()
-                        if ok:
-                            break
-                        print(f"  recovered, but the editor would not generate "
-                              f"our script: {why}")
-                        print(f"  rebuilding again ({rebuild}/2)")
-                    else:
+                    ok, why = editor.ensure_ready(PLAYERS)
+                    if not ok:
                         raise SystemExit(
-                            f"\nABORTING: recovered twice and the editor still "
-                            f"would not generate our script: {why}"
+                            f"\nABORTING: could not get the editor back to a "
+                            f"usable state: {why}. Frames and logs above say "
+                            f"how far it got."
                         )
+                    started_pid = game_pid()
                     print(f"  recovered as pid {started_pid} ({why}), "
                           f"retrying sample")
                 before = newest_scenario()
