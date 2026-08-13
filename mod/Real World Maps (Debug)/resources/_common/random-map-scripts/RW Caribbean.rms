@@ -140,6 +140,7 @@ create_land
   assign_to_player              8
 }
 
+/* 3 unowned islands carry their own land ids (10+), so the resource layer can place onto them by id rather than hoping a map-wide pass reaches them - measured, it does not */
 /* coastline: 700 lands approximating the real outline (10212 tiles total) */
 create_land
 {
@@ -519,7 +520,7 @@ create_land
   number_of_tiles               66
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -929,7 +930,7 @@ create_land
   number_of_tiles               19
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -1039,7 +1040,7 @@ create_land
   number_of_tiles               17
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -1049,7 +1050,7 @@ create_land
   number_of_tiles               17
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -1379,7 +1380,7 @@ create_land
   number_of_tiles               10
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -1709,7 +1710,7 @@ create_land
   number_of_tiles               8
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -1729,7 +1730,7 @@ create_land
   number_of_tiles               8
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -1739,7 +1740,7 @@ create_land
   number_of_tiles               8
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -1749,7 +1750,7 @@ create_land
   number_of_tiles               8
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -2269,7 +2270,7 @@ create_land
   number_of_tiles               4
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -2279,7 +2280,7 @@ create_land
   number_of_tiles               4
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -2299,7 +2300,7 @@ create_land
   number_of_tiles               4
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -2309,7 +2310,7 @@ create_land
   number_of_tiles               4
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -4979,7 +4980,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -4989,7 +4990,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -5019,7 +5020,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -5119,7 +5120,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -5129,7 +5130,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -5179,7 +5180,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -5199,7 +5200,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -5239,7 +5240,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -5289,7 +5290,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -5469,7 +5470,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -5479,7 +5480,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       10
 }
 create_land
 {
@@ -6399,7 +6400,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6409,7 +6410,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6419,7 +6420,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6529,7 +6530,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6539,7 +6540,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6549,7 +6550,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -6559,7 +6560,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -6569,7 +6570,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -6579,7 +6580,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -6659,7 +6660,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -6669,7 +6670,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -6679,7 +6680,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -6689,7 +6690,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -6769,7 +6770,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6779,7 +6780,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6789,7 +6790,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6799,7 +6800,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -6909,7 +6910,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6919,7 +6920,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6929,7 +6930,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6939,7 +6940,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6949,7 +6950,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -6989,7 +6990,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -6999,7 +7000,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       11
 }
 create_land
 {
@@ -7009,7 +7010,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -7019,7 +7020,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -7039,7 +7040,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -7049,7 +7050,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -7059,7 +7060,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -7069,7 +7070,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -7089,7 +7090,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -7119,7 +7120,7 @@ create_land
   number_of_tiles               2
   other_zone_avoidance_distance 0
   clumping_factor                8
-  land_id                       1
+  land_id                       12
 }
 create_land
 {
@@ -7537,6 +7538,8 @@ create_elevation        7
     avoid_actor_area 11020
     avoid_actor_area 1210
     avoid_actor_area 1220
+    avoid_actor_area 1310
+    avoid_actor_area 1320
     avoid_actor_area 20 /* Villagers */
     avoid_actor_area 30 /* Scout */
     avoid_actor_area 60 /* Straggler, Spawn */
@@ -7570,11 +7573,26 @@ create_elevation        7
     avoid_actor_area 11020
     avoid_actor_area 1210
     avoid_actor_area 1220
+    avoid_actor_area 1310
+    avoid_actor_area 1320
     avoid_actor_area 20 /* Villagers */
     avoid_actor_area 30 /* Scout */
     avoid_actor_area 60 /* Straggler, Spawn */
   }
 
+
+/* --- neutral trees -------------------------------------------------
+ * The loose wood between bases. We pinned STRAGGLER_NEUTRAL from the
+ * day System A landed and never included the file that reads it, so
+ * every region measured exactly 40 tree objects off forest terrain -
+ * 5 per player from stragglers.inc and nothing else. Stock carries
+ * 182 (Arabia) to 318 (Team Islands).
+ */
+
+  #const STRAGGLER_GROUPS   24
+  #const STRAGGLER_DISTANCE 16
+  #const STRAGGLER_SPACING  2
+  #include_drs includes/stragglers_neutral.inc
 
 /* --- relics ------------------------------------------------------- */
 
