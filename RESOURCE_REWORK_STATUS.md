@@ -550,3 +550,71 @@ safe - e.g. a tighter `land_percent`/`base_size` on the island lands, or
 avoiding `land_id` targeting altogether in favour of terrain- or
 distance-based placement. Every variant tested here either aims at a real
 non-player land (fails) or does not aim at all (works).
+
+## Access, measured on the 11-region HEAD pass (N=1 per map, 2026-08-12)
+
+`automation/access_report.py --run-id head_n1`, over captures generated
+from the committed scripts - i.e. **without** any per-island resource
+targeting. The question it answers: does the map already do what the
+island work was meant to do?
+
+**A 2x2 camp spot is a non-issue.** Of 69 unowned islands with >= 8
+non-shore tiles across all 11 maps, **0** lack a 2x2 buildable spot, and
+**0** carry resources without one. Nothing needs fixing here.
+
+**Bare islands are real, and not only tiny ones.** 37 of those 69 are
+completely empty - no gold, stone, food *or* trees. "No resources" and
+"no resources and no wood" are the same set, so nothing is trees-only.
+
+| map | islands >=8 non-shore | empty | largest empty (non-shore tiles) |
+|---|---|---|---|
+| Chesapeake Bay | 3 | 3 | 71 |
+| Scandinavia | 6 | 5 | 60 |
+| Greece | 12 | 7 | 81 |
+| Cramped Italy | 11 | 7 | 111 |
+| Salish Sea | 8 | 6 | 29 |
+| Caribbean | 8 | 4 | 15 |
+| Japan | 6 | 2 | 65 |
+| Black Sea | 3 | 2 | 44 |
+| Italy | 7 | 1 | 33 |
+| Britain | 5 | 0 | - |
+| New Zealand | 0 | - | - |
+
+An empty 8-tile rock is geography; an empty 111-tile island with camp
+spots is a landing worth making with nothing on it. Both are in that
+column, so read the size, not the count.
+
+**Getting out of the base is where the maps actually bite.** Measured on
+walking-distance rings with only corridors reachable from the town centre
+counted (`forest_structure.py`'s definition - see the warning below), 4 of
+88 starts are tight and one is sealed:
+
+| map | player | exits@20 | blocked@20 | exits@32 | blocked@32 | where |
+|---|---|---|---|---|---|---|
+| Britain | 2 | 1 | 0.87 | **0** | **1.00** | 3.6E 49.0N, northern France |
+| Britain | 3 | 3 | 0.43 | 2 | 0.75 | 5.4E 51.7N |
+| Greece | 1 | 5 | 0.47 | 2 | 0.51 | 27.8E 39.8N |
+| Caribbean | 8 | 2 | 0.74 | 2 | 0.50 | 63.8W 8.9N |
+
+Britain's player 2 has one corridor out at 20 tiles and, at 32, no
+walkable ring tile at all - every tile of a 148-tile perimeter is wood.
+`pairwise_land_reachable_fraction` reports this map as fine, because the
+player *is* land-connected; the corridor is simply one tile-wide-ish and
+through forest.
+
+**Ponds ringed by forest did not reproduce here.** Inland water bodies
+(excluding the sea) have essentially no forest behind their shore on any
+map - the highest is Japan at 0.13, and most are 0.00. Britain's three
+inland ponds are on the mainland, not on the Norway island; that island
+came out 1296 tiles at 42% forest with 459 camp spots and 16 resources.
+**N=1 per map**, so this does not contradict "most generations" - it means
+the one sample does not show it, and repeat sampling of Britain is what
+would settle it.
+
+**A measurement warning worth keeping.** A first version of
+`access_report.py` measured its own rings on straight-line distance and
+reported *no* walled players anywhere, including 35% blocked where
+`forest_structure.py` reported 100%. Straight-line rings count open ground
+lying behind a wall of trees as an exit. Walking distance from the town
+centre does not. The walking-distance number is the correct one, and the
+disagreement is exactly the failure this metric exists to catch.
