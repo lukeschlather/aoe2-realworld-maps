@@ -70,16 +70,18 @@ create_terrain DEEP_WATER
 }
 """
 
-_LAND_TERRAIN = """
+_FOREST_BLOCK = """
 create_terrain {forest}
 {{
   base_terrain                   {land}
-  spacing_to_other_terrain_types 5
+  spacing_to_other_terrain_types {spacing}
   land_percent                   {forest_percent}
   number_of_clumps               {forest_clumps}
 {forest_clumping}{forest_avoidance}  set_scale_by_groups
 }}
+"""
 
+_ALT_TERRAIN = """
 create_terrain {land_alt}
 {{
   base_terrain                   {land}
@@ -99,8 +101,65 @@ create_terrain {land_alt2}
 }}
 """
 
+
+def build_land_terrain(opts: "RmsOptions") -> str:
+    """Forest and the two alt-terrain patches, in an order that matters.
+
+    ``spacing_to_other_terrain_types`` is measured against terrain that has
+    already been created. The forest has always been emitted first, right
+    after the water, so its ``spacing 5`` had nothing to stand off from and
+    did nothing at all - which is why raising it changes nothing and why the
+    wood is free to fuse into one mass.
+
+    ``forest_last`` emits the forest after the alt patches instead. They are
+    scattered over the map (8% in 18 clumps, 5% in 12), so a forest that has
+    to keep its distance from them is carved into pieces around them, and
+    the gaps are ordinary walkable land rather than more wood.
+    """
+    alt = _ALT_TERRAIN.format(land=opts.land, land_alt=opts.land_alt,
+                              land_alt2=opts.land_alt2)
+    forest = build_forest_blocks(opts)
+    return alt + forest if opts.forest_last else forest + alt
+
 #: Emitted into the forest block when ``RmsOptions.forest_avoid_starts``.
 _FOREST_AVOIDANCE = "  set_avoid_player_start_areas\n"
+
+
+def build_forest_blocks(opts: "RmsOptions") -> str:
+    """The map-wide forest, as one terrain type or as several.
+
+    One forest terrain cannot be kept apart from itself.
+    ``spacing_to_other_terrain_types`` is spacing to *other* terrain types,
+    so every clump of a single forest is free to grow into its neighbour,
+    and asking for more clumps just seeds more of them closer together.
+    Measured on Greece: 12 clumps -> 28 blobs with 33% of the wood in the
+    largest; 36 clumps -> **21** blobs with **61%** in the largest. More
+    forests, fewer woods, because they fused.
+
+    Splitting the same budget across two terrain types gives the engine a
+    reason to leave gaps: they are other terrain types to each other, so the
+    spacing clause now applies *between the woods* and the lanes it opens
+    are the ones a scout walks. The total ``land_percent`` is unchanged - it
+    is divided, not reduced - so this buys structure without spending wood.
+    """
+    kinds = [opts.forest] + list(opts.forest_alt or ())
+    share, extra = divmod(opts.forest_percent, len(kinds))
+    clumping = _forest_clumping(opts.forest_clumping_factor)
+    avoidance = _FOREST_AVOIDANCE if opts.forest_avoid_starts else ""
+    out = []
+    for i, kind in enumerate(kinds):
+        out.append(_FOREST_BLOCK.format(
+            forest=kind,
+            land=opts.land,
+            # Spacing only bites between different terrain types, so a split
+            # forest is the only case where raising it does anything.
+            spacing=opts.forest_spacing if len(kinds) > 1 else 5,
+            forest_percent=share + (1 if i < extra else 0),
+            forest_clumps=opts.forest_clumps,
+            forest_clumping=clumping,
+            forest_avoidance=avoidance,
+        ))
+    return "".join(out)
 
 
 def _forest_clumping(factor: int | None) -> str:
@@ -403,6 +462,22 @@ class RmsOptions:
     #: ``None`` leaves the clause out entirely, which is the behaviour every
     #: map shipped so far.
     forest_clumping_factor: int | None = None
+    #: Extra forest terrain types to split the map-wide forest across. The
+    #: budget is divided between them, not multiplied, so wood is unchanged.
+    #: The point is spacing: see build_forest_blocks - clumps of one terrain
+    #: type have nothing keeping them apart, and on Greece asking for more
+    #: of them produced FEWER, larger woods (21 blobs, 61% of the wood in
+    #: one) because they fused. Different types repel each other.
+    forest_alt: tuple[str, ...] = ()
+    #: Tiles of clearance between the split forest types. Only meaningful
+    #: when forest_alt is set; a single forest type keeps the historical 5.
+    forest_spacing: int = 5
+    #: Emit the forest AFTER the alt-terrain patches instead of before them.
+    #: Spacing is measured against terrain already created, so with the
+    #: forest first (the historical order) its spacing clause is inert. Put
+    #: it last and the scattered alt patches become obstacles it must stand
+    #: off from, breaking the wood up along ordinary walkable land.
+    forest_last: bool = False
     #: Whether the map-wide forest avoids player start areas.
     #:
     #: This pushes wood AWAY from players and into whatever land nobody
@@ -550,16 +625,7 @@ def build_rms(
         + _LEGACY_PLAYER_SETUP.format(ai_map_type=ai_map_type),
         land_section,
         _WATER,
-        _LAND_TERRAIN.format(
-            land=opts.land,
-            land_alt=opts.land_alt,
-            land_alt2=opts.land_alt2,
-            forest=opts.forest,
-            forest_percent=opts.forest_percent,
-            forest_clumps=opts.forest_clumps,
-            forest_clumping=_forest_clumping(opts.forest_clumping_factor),
-            forest_avoidance=_FOREST_AVOIDANCE if opts.forest_avoid_starts else "",
-        ),
+        build_land_terrain(opts),
     ]
     if opts.elevation:
         parts.append(
@@ -597,16 +663,7 @@ def _build_rms_system_a(
         build_player_setup(opts.pins, ai_map_type),
         land_section,
         _WATER,
-        _LAND_TERRAIN.format(
-            land=opts.land,
-            land_alt=opts.land_alt,
-            land_alt2=opts.land_alt2,
-            forest=opts.forest,
-            forest_percent=opts.forest_percent,
-            forest_clumps=opts.forest_clumps,
-            forest_clumping=_forest_clumping(opts.forest_clumping_factor),
-            forest_avoidance=_FOREST_AVOIDANCE if opts.forest_avoid_starts else "",
-        ),
+        build_land_terrain(opts),
     ]
     if opts.per_player_forest:
         parts.append(

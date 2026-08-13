@@ -878,6 +878,53 @@ def setup(players: int = 8) -> bool:
     return True
 
 
+def ensure_ready(players: int = 8, tries: int = 3) -> tuple[bool, str]:
+    """Get the editor into a state a capture can use, and prove it did.
+
+    Recovery has to be a loop, not a step, because the state it repairs is
+    not observable when it runs: the game disables our mods on the launch
+    after a crash and records it minutes later, so a rebuild can pass every
+    check it can make and still be wrong by the time a capture starts. The
+    only honest test is preflight, and the only useful response to preflight
+    saying no is to rebuild and ask again.
+
+    Callers used to each grow their own version of this - mod_capture's
+    crash path, its per-region check, the A/B harness - and the ones that
+    forgot simply aborted on a state that a second rebuild fixes. One
+    function, so a pass cannot start against an editor that would generate
+    a stock map under one of our region names.
+    """
+    why = "not checked"
+    for attempt in range(1, tries + 1):
+        if game_pid() is not None and not mods_off():
+            ok, why = preflight()
+            if ok:
+                return True, why
+            # A Menu overlay left open by a failed save sits over the whole
+            # panel and eats every click aimed underneath it, so the editor
+            # looks unusable while being perfectly fine one click away. Try
+            # that click before paying for a relaunch: measured, the panel
+            # underneath still had Random Map, the placeholder slot and Huge
+            # [240] exactly as set up.
+            with parser_open():
+                where = locate("cancel", retries=1)
+                if where is not None:
+                    print(f"  a dialog is covering the panel - closing it",
+                          flush=True)
+                    click(*where)
+                    time.sleep(2)
+                    ok, why = preflight()
+                    if ok:
+                        return True, why
+        else:
+            why = f"pid={game_pid()}, mods disabled={mods_off()}"
+        print(f"  editor not ready ({why}) - rebuilding ({attempt}/{tries})",
+              flush=True)
+        if not (recover() and setup(players)):
+            return False, "could not rebuild the editor"
+    return preflight()
+
+
 def status() -> None:
     pid = game_pid()
     print(f"game pid: {pid or 'not running'}")

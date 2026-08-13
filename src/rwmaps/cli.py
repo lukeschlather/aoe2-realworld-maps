@@ -197,6 +197,24 @@ def build_parser() -> argparse.ArgumentParser:
                            "fingers and gaps rather than one mass. Omitted "
                            "from the script entirely when not given, which "
                            "is what every map so far shipped")
+    grid.add_argument("--forest-alt", nargs="+", metavar="TERRAIN", default=None,
+                      help="extra forest terrain types to split the map-wide "
+                           "forest across, e.g. PINE_FOREST. The budget is "
+                           "DIVIDED between them, so wood is unchanged - what "
+                           "changes is that spacing_to_other_terrain_types "
+                           "now applies between the woods, which it cannot do "
+                           "for a single type. Asking one type for more clumps "
+                           "made Greece worse (21 blobs, 61%% of the wood in "
+                           "one) because the clumps fused")
+    grid.add_argument("--forest-last", action="store_true", default=None,
+                      help="emit the forest AFTER the alt-terrain patches. "
+                           "spacing_to_other_terrain_types only counts terrain "
+                           "already created, and the forest has always gone "
+                           "first, so its spacing clause has been inert - this "
+                           "makes it bite against the scattered alt patches")
+    grid.add_argument("--forest-spacing", type=int, default=None,
+                      help="tiles of clearance between the split forest types "
+                           "(only meaningful with --forest-alt)")
     grid.add_argument("--forest-percent", type=int, default=None,
                       help="share of the map's land the map-wide forest "
                            "covers (biome default 10)")
@@ -335,6 +353,9 @@ def generate(args) -> dict:
         ("forest_clumps", args.forest_clumps),
         ("forest_clumping_factor", args.forest_clumping_factor),
         ("forest_percent", args.forest_percent),
+        ("forest_alt", tuple(args.forest_alt) if args.forest_alt else None),
+        ("forest_spacing", args.forest_spacing),
+        ("forest_last", args.forest_last),
     ) if v is not None}
     if forest_overrides:
         opts = rms.RmsOptions(**{**opts.__dict__, **forest_overrides})
