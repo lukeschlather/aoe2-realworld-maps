@@ -618,3 +618,62 @@ reported *no* walled players anywhere, including 35% blocked where
 lying behind a wall of trees as an exit. Walking distance from the town
 centre does not. The walking-distance number is the correct one, and the
 disagreement is exactly the failure this metric exists to catch.
+
+## Forest structure on Britain and Greece, 2026-08-13
+
+Goal: more woods, not fused into one mass, without spending the wood.
+Measured on real captures, 22 generations across nine conditions.
+
+**A single forest terrain has no spacing against itself.**
+`spacing_to_other_terrain_types` is clearance from *other* terrain types,
+so nothing stops one forest's clumps growing into each other. This is why
+the obvious knob backfires: asking Greece for 36 clumps instead of 12 gave
+it **fewer** woods (21 blobs against 28) with **61%** of the wood in the
+largest instead of 33%. Greece's blocked-perimeter share would not move at
+all across the single-forest conditions - 41, 47, 47, 41, 42 percent for
+12 clumps, 36, 36 compact, 36 ragged, 60 compact.
+
+Two directions were tried on clump shape and the compact one is wrong:
+`clumping_factor 15` made **both** maps worse (Britain's worst start went
+to 84% blocked and it regained a walled player), because a compact clump
+is individually solid. Ragged (factor 4) roughly tied baseline.
+
+**What works is splitting the budget across two forest terrain types.**
+FOREST and PINE_FOREST are other terrain types to each other, so the
+spacing clause applies between the woods and opens lanes. The budget is
+divided, not reduced.
+
+Shipped (`FOREST_SPLIT` in `automation/build_mod.py`): 36 clumps,
+`--forest-alt PINE_FOREST`, spacing 3. Greece additionally needs
+`--forest-percent 14`, because the second block is squeezed by the spacing
+and under-places - a nominal 10 split 5+5 effectively spends about 5, which
+cost Greece 32% of its wood.
+
+N=3 per map, 24 player-starts each, against the N=1 baseline:
+
+| map | wood | blobs | largest blob | blk20 | p90 | worst |
+|---|---|---|---|---|---|---|
+| Britain before | 21% | 27 | 37% | 22% | 58% | 60% |
+| Britain after | **21%** | 93 | **7%** | 25% | **32%** | **52%** |
+| Greece before | 25% | 28 | 33% | 41% | 55% | 62% |
+| Greece after | **23%** | 126 | **5%** | **33%** | **43%** | **45%** |
+
+Britain pays no wood at all; Greece pays 8%, inside the 10% budget. No
+start on either map is walled, sealed or tight across those 48 starts,
+against a baseline where Britain's player in France had a single corridor
+out at 87% blocked and nothing walkable at all at 32 tiles.
+
+Spacing 6 was measured and is worse than 3: it costs more wood (16%/15%)
+and buys no structure.
+
+**Controlled against the obvious confound.** Since the split under-places
+its second block, most of its effect could have been "less map-wide wood".
+It is not: at matched wood, a single forest at `--forest-percent 5` gives
+Britain 34 blobs / 19% largest / 61% worst, where the split gives 85 / 12%
+/ 35%; Greece 67 / 6% / 42% against 192 / 3% / 31%.
+
+`--forest-last` was added while diagnosing this and is **untested**.
+Spacing counts only terrain already created and the forest has always been
+emitted first, right after the water, so its spacing clause has been inert
+on every script shipped to date. Emitting it after the alt patches should
+make it bite; the option exists, the default is unchanged.

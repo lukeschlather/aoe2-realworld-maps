@@ -93,13 +93,35 @@ def shipped_filename(name: str) -> str:
 #: explicit that the modern tuning *replaces* this rather than stacking
 #: with it. Per-region resource flavor is now a `ResourceFlavor` choice, not
 #: a CLI flag.
+#: More woods, kept apart. A single forest terrain has no spacing against
+#: itself, so its clumps fuse: asking Greece for 36 clumps instead of 12
+#: gave it FEWER woods (21 against 28) with 61% of the wood in the largest.
+#: Split across two terrain types they are "other terrain types" to each
+#: other and the spacing clause finally applies between them.
+#:
+#: Measured N=3 per map, 24 player-starts each, against the N=1 baseline:
+#:
+#: | map     | wood     | blobs   | largest  | p90 blocked | worst |
+#: |---------|----------|---------|----------|-------------|-------|
+#: | Britain | 21 -> 21 | 27 -> 93| 37% -> 7%| 58% -> 32%  | 60->52|
+#: | Greece  | 25 -> 23 | 28 ->126| 33% -> 5%| 55% -> 43%  | 62->45|
+#:
+#: and no start on either map is walled, sealed or tight in 48 starts,
+#: against Britain's France player sitting on one corridor at 87% blocked.
+FOREST_SPLIT = ["--forest-clumps", "36", "--forest-alt", "PINE_FOREST",
+                "--forest-spacing", "3"]
+
 MOD_REGIONS = [
     ("Salish Sea", ["--center=-122.9,48.15", "--span-km", "260",
                      "--overlap", "0.85", "--min-water-width", "5", "--min-land-width", "3"]),
     ("Cramped Italy", ["--region", "italy"]),
     ("Italy", ["--region", "italy", "--spread-islands"]),
-    ("Britain", ["--region", "britain"]),
-    ("Greece", ["--region", "greece"]),
+    # Britain and Greece split their forest across two terrain types so it
+    # stops fusing into one mass - see FOREST_SPLIT below. Britain pays no
+    # wood for it; Greece needs its budget raised to 14 because the second
+    # block under-places, which nets out at 23% wood against 25% before.
+    ("Britain", ["--region", "britain", *FOREST_SPLIT]),
+    ("Greece", ["--region", "greece", *FOREST_SPLIT, "--forest-percent", "14"]),
     ("Japan", ["--region", "japan", "--rotate", "35"]),
     ("Chesapeake Bay", ["--region", "chesapeake"]),
     ("Black Sea", ["--region", "blacksea"]),
