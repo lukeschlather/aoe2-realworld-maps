@@ -218,6 +218,16 @@ def build_parser() -> argparse.ArgumentParser:
                       help="drop the per-island tree pass - scattered "
                            "stragglers on small islands, a copse on ones big "
                            "enough to settle")
+    grid.add_argument("--island-land-id-objects", action="store_true",
+                      help="aim objects at islands with "
+                           "place_on_specific_land_id. OFF by default because "
+                           "it CRASHES THE ENGINE during generation whenever "
+                           "the id names a real non-player land: Britain "
+                           "measured 0/5 generated with it against 5/5 "
+                           "without, and cutting any single block still "
+                           "crashed, so it is the clause and not one object "
+                           "(RESOURCE_REWORK_STATUS.md). Only pass this to "
+                           "study the crash")
     grid.add_argument("--ai-map-type", help="override the auto-detected ai_info_map_type")
     grid.add_argument("--clumping-factor", type=int, default=8,
                       help="create_land clumping_factor - higher grows a more "
@@ -359,8 +369,16 @@ def generate(args) -> dict:
         # ordinary land or the placeholder would never be cleaned up.
         player_terrain=(rms.PLAYER_SPAWN_PLACEHOLDER if use_per_player_forest else None),
     )
+    # Aiming objects at an island by its land id kills the engine during
+    # generation - measured 2026-08-12, Britain 0/5 generated against 5/5
+    # for the same map without it, and it is the clause rather than any one
+    # object (see RESOURCE_REWORK_STATUS.md). It is off unless asked for, so
+    # a default generation produces a script the engine will actually run.
+    # The land ids themselves stay: they are harmless, and `islands_out`
+    # feeds the island analysis either way.
     script = rms.build_rms(args.name, args.proj, size, land_section, opts, ai_type,
-                           system_a=not args.legacy_resources, islands=islands)
+                           system_a=not args.legacy_resources,
+                           islands=islands if args.island_land_id_objects else [])
 
     # The grid size is baked into the land areas, so it belongs in the name -
     # picking the wrong lobby size is the one way to get a broken map.
