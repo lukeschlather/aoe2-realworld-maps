@@ -17,7 +17,7 @@ sys.path.insert(0, str(AUTOMATION))
 
 @pytest.mark.parametrize("name", [
     "controls", "crash_bisect", "editor", "frame_server", "omni",
-    "build_mod", "mod_capture", "stock_capture",
+    "build_mod", "build_thumbnails", "mod_capture", "stock_capture",
 ])
 def test_module_imports(name):
     importlib.import_module(name)
