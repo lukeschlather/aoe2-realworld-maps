@@ -47,6 +47,11 @@ MOD_ROOTS = [REPO / "mod" / "Real World Maps", REPO / "mod" / "Real World Maps (
 MOD_SCRIPTS = MOD_ROOTS[0] / SCRIPTS_SUBDIR
 DEFAULT_OUT = REPO / "reports" / "map_thumbnails_data"
 GALLERY = REPO / "reports" / "map_thumbnails.html"
+#: A real capture of the game's Select Location screen showing these icons,
+#: embedded in the gallery when it is present. Captured by hand-driving the
+#: UI automation; nothing regenerates it, so it is evidence rather than
+#: output - if the icon format ever changes, recapture it.
+INGAME_PROOF = DEFAULT_OUT / "ingame_select_location.png"
 
 
 def write_icons(roots=MOD_ROOTS, quiet: bool = False) -> int:
@@ -158,6 +163,19 @@ def write_gallery(rendered, args) -> None:
       </figcaption>
     </figure>""")
 
+    proof = ""
+    if INGAME_PROOF.exists():
+        b64 = base64.b64encode(INGAME_PROOF.read_bytes()).decode("ascii")
+        proof = f"""
+<figure class="proof">
+  <img src="data:image/png;base64,{b64}" alt="the game's Select Location screen">
+  <figcaption>The icons as the game actually draws them, captured off the
+    Select Location screen. <code>LJFS_real_world_spain</code> is an
+    unrelated script with no image of its own, so the generic "?" it still
+    shows is the control: the game is reading ours from beside the
+    scripts.</figcaption>
+</figure>"""
+
     GALLERY.parent.mkdir(parents=True, exist_ok=True)
     GALLERY.write_text(f"""<!doctype html>
 <meta charset="utf-8">
@@ -174,6 +192,8 @@ def write_gallery(rendered, args) -> None:
   figcaption {{ display:flex; flex-direction:column; padding-top:.4rem; }}
   figcaption span {{ color:#9a9a9a; font-size:12px; }}
   a {{ color:#7fb3ff; font-size:12px; }}
+  figure.proof {{ margin:0 0 2rem; max-width:1000px; }}
+  figure.proof figcaption {{ color:#9a9a9a; font-size:12px; padding-top:.5rem; }}
 </style>
 <h1>Real World Maps &mdash; terrain thumbnails</h1>
 <p class="meta">
@@ -182,8 +202,10 @@ def write_gallery(rendered, args) -> None:
   player starts. Forest, elevation and objects are engine RNG at generation
   time and are not shown &mdash; this is the terrain the script asks for, not a
   render of a generated game.<br>
+  The mod additionally ships each map an isometric 420&times;420 icon beside
+  its script, which is what the game's map-selection screen displays.<br>
   Generated {stamp} &middot; commit {_commit()}
-</p>
+</p>{proof}
 <div class="grid">{''.join(cards)}
 </div>
 """, encoding="utf-8")
