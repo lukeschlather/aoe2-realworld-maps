@@ -167,7 +167,7 @@ def test_per_player_forest_splits_before_budgeting():
     budget on one player - which is the very failure the per-player forest
     exists to fix.
     """
-    from rwmaps.rms import build_per_player_forest
+    from rwmaps.rms import PLACEHOLDER_CLEANUP_PASSES, build_per_player_forest
 
     text = build_per_player_forest(forest="FOREST", land="GRASS",
                                    tiles=100, clumps=3, n_players=8)
@@ -175,12 +175,35 @@ def test_per_player_forest_splits_before_budgeting():
     grow = text.index("number_of_tiles                100")
     assert split < grow, "regions must be split before any forest is budgeted"
 
-    # every region addressed exactly once in each of the three passes
+    # split once, grow once, then cleaned up repeatedly
     for letter in "ABCDEFGH":
-        assert text.count(f"PLACEHOLDER_TERRAIN_{letter}") == 3
+        assert text.count(f"PLACEHOLDER_TERRAIN_{letter}") == (
+            2 + PLACEHOLDER_CLEANUP_PASSES
+        )
 
     # and nothing may be left painted as a placeholder
     assert text.rindex("SPAWN_PLACEHOLDER") > grow
+
+
+def test_placeholder_cleanup_is_repeated():
+    """One cleanup pass leaves black placeholder tiles on the map.
+
+    ``create_terrain`` grows its clumps from random seeds and stops when the
+    tile budget is spent, so a single pass strands fragments - measured at
+    4-46 leftover tiles on every one of ten Britain captures, drawn in game
+    as a black placeholder texture. The stock ``includes/forest.inc`` repeats
+    the identical block sixteen times, which is the fix.
+    """
+    from rwmaps.rms import PLACEHOLDER_CLEANUP_PASSES, build_per_player_forest
+
+    text = build_per_player_forest(forest="FOREST", land="GRASS",
+                                   tiles=100, clumps=3, n_players=8)
+    assert PLACEHOLDER_CLEANUP_PASSES > 1
+    for name in [f"PLACEHOLDER_TERRAIN_{c}" for c in "ABCDEFGH"] + [
+        "SPAWN_PLACEHOLDER"
+    ]:
+        cleanup = f"create_terrain GRASS {{ base_terrain {name} "
+        assert text.count(cleanup) == PLACEHOLDER_CLEANUP_PASSES
 
 
 def test_per_player_forest_needs_placeholder_player_lands():

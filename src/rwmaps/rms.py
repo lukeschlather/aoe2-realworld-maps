@@ -179,6 +179,23 @@ PLAYER_SPAWN_PLACEHOLDER = "SPAWN_PLACEHOLDER"
 #: ``constants.inc``. Eight, which is the map's player cap.
 _PLACEHOLDER_TERRAINS = [f"PLACEHOLDER_TERRAIN_{c}" for c in "ABCDEFGH"]
 
+#: How many times the placeholder-to-land cleanup pass is repeated.
+#:
+#: One pass is not enough and never was. ``create_terrain`` seeds its clumps
+#: at random tiles of the base terrain and grows each one until its share of
+#: the tile budget is spent; nothing in that walk guarantees it visits every
+#: tile, so a single pass reliably strands a scatter of 1-8 tile fragments -
+#: measured at 4-46 leftover tiles on all ten Britain captures in
+#: ``reports/20260809-052633_mod_report_data_sysa_n10``, most of them on the
+#: shoreline of a player's own land. Those tiles keep a placeholder terrain
+#: id, which the game draws as a black "placeholder" texture.
+#:
+#: Repeating is the stock remedy, not a workaround: ``includes/forest.inc``
+#: emits this same block sixteen times per ``PLACEHOLDER_TERRAIN_*`` and
+#: thirty-two times for ``SPAWN_PLACEHOLDER``, which is only worth doing if
+#: one pass demonstrably misses tiles. Sixteen matches it.
+PLACEHOLDER_CLEANUP_PASSES = 16
+
 
 def build_per_player_forest(
     forest: str,
@@ -216,7 +233,8 @@ def build_per_player_forest(
        the town centre by ``set_avoid_player_start_areas``.
     3. **Clean up.** Whatever placeholder is left becomes ordinary land -
        otherwise the unused part of every player's region renders as a
-       placeholder terrain.
+       placeholder terrain. Repeated ``PLACEHOLDER_CLEANUP_PASSES`` times,
+       because one pass provably leaves tiles behind.
     """
     out: list[str] = [
         "",
@@ -255,16 +273,19 @@ def build_per_player_forest(
             "}\n"
         )
 
-    out.append("/* 3. clean up: unused placeholder becomes ordinary land */")
+    out.append(
+        "/* 3. clean up: unused placeholder becomes ordinary land.\n"
+        f" * {PLACEHOLDER_CLEANUP_PASSES} passes each - one pass strands a scatter of\n"
+        " * single tiles that the game then draws as a black placeholder\n"
+        " * texture. includes/forest.inc repeats it 16x for the same reason. */"
+    )
     for name in used + [PLAYER_SPAWN_PLACEHOLDER]:
         out.append(
-            f"create_terrain {land}\n"
-            "{{\n".replace("{{", "{")
-            + f"  base_terrain                   {name}\n"
-            "  land_percent                   100\n"
-            "  number_of_clumps               512\n"
-            "  set_scale_by_groups\n"
-            "}\n"
+            "".join(
+                f"create_terrain {land} {{ base_terrain {name} "
+                "land_percent 100 number_of_clumps 512 set_scale_by_groups }\n"
+                for _ in range(PLACEHOLDER_CLEANUP_PASSES)
+            )
         )
     return "\n".join(out)
 
