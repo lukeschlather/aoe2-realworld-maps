@@ -25,6 +25,10 @@ uv run python automation/build_mod.py --list      # regions and their flags
 uv run python automation/build_mod.py --regions "Salish Sea" --placeholder "Salish Sea"
 uv run python automation/install_mod.py --all
 
+# map-selection icons + the reports/ gallery, engine-free, ~12s for the mod.
+# build_mod.py already calls this; run it alone after editing the renderer.
+uv run python automation/build_thumbnails.py
+
 # capture needs the game running, Scenario Editor, AA_rw_placeholder_tester,
 # Huge [240], 8 players. It aborts immediately if the game is not up.
 uv run python automation/mod_capture.py --run-id <id> --n-samples 1
@@ -37,6 +41,11 @@ uv run pytest tests -q
 `mod/` is generated, never hand-edited. The lobby Map Size must be `Huge
 [240]` - land areas are absolute tile counts, so the wrong size breaks the
 map rather than shrinking it.
+
+Each script ships a `<stem>.png` beside it: the image the map-selection
+screen shows, 420x420 RGBA and isometric, matching the format stock
+`mapicons` and other map-pack mods use. Verified on the real screen
+(`reports/map_thumbnails.html`), not just against the file format.
 
 ## The docs
 
