@@ -14,6 +14,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 
+from . import thumbnail
+
 SEA = (32, 74, 150)
 LAND = (78, 138, 62)
 SPILL = (150, 150, 70)   # script builds land where the real map has sea
@@ -55,8 +57,12 @@ def _panel(
             d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=(255, 70, 70), width=3)
             d.text((cx + r + 2, cy - r - 2), str(i), fill=(255, 255, 255))
     if isometric:
-        # The engine draws the square grid rotated 45 degrees clockwise.
-        img = img.rotate(-45, expand=True, resample=Image.NEAREST, fillcolor=BG)
+        # The game draws the square grid rotated 45 degrees COUNTER-clockwise
+        # - north ends up at the upper left. This said clockwise, and drew it
+        # that way, until 2026-08-14; the stock real-world maps' own icons
+        # settle it (see thumbnail.ICON_ROTATION for the measurement).
+        img = img.rotate(thumbnail.ICON_ROTATION, expand=True,
+                         resample=Image.NEAREST, fillcolor=BG)
     img = img.resize((px, px), Image.LANCZOS)
     out = Image.new("RGB", (px, px + 22), BG)
     out.paste(img, (0, 22))

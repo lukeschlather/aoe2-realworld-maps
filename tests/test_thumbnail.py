@@ -10,6 +10,7 @@ from rwmaps.rms_land import build_land_generation, cover_mask, iou, rasterize_di
 from rwmaps.thumbnail import (
     AOE_PLAYER_COLORS,
     ICON_PX,
+    ICON_ROTATION,
     fill_pockets,
     fit_scale,
     parse_script,
@@ -141,6 +142,42 @@ def test_icon_matches_the_game_s_format(tmp_path):
         width = int((alpha[row] > 0).sum())
         expected = 2 * (mid - abs(row - mid))
         assert abs(width - expected) <= 12, f"row {row}: {width} vs ~{expected}"
+
+
+def test_icon_puts_north_at_the_upper_left():
+    """The rotation is counter-clockwise - see thumbnail.ICON_ROTATION.
+
+    Measured off the stock real-world maps' icons: rwm_iberia puts Africa
+    (south) at the lower right, rwm_britain puts Scotland (north) at the
+    upper left. Clockwise instead of counter-clockwise is a 90 degree error,
+    which is exactly the bug this pins down.
+    """
+    size = 120
+    mid = ICON_PX / 2
+    for edge, band, side in [
+        ("north", (slice(None, size // 4), slice(None)), (-1, -1)),
+        ("east", (slice(None), slice(-size // 4, None)), (+1, -1)),
+        ("south", (slice(-size // 4, None), slice(None)), (+1, +1)),
+        ("west", (slice(None), slice(None, size // 4)), (-1, +1)),
+    ]:
+        mask = np.zeros((size, size), dtype=bool)
+        mask[band] = True
+        ys, xs = np.nonzero(np.array(_rotate_mask(mask))[..., 3] > 0)
+        cx, cy = xs.mean() - mid, ys.mean() - mid
+        assert np.sign(cx) == side[0] and np.sign(cy) == side[1], (
+            f"{edge} landed at ({cx:+.0f}, {cy:+.0f}), expected quadrant {side}")
+
+
+def _rotate_mask(mask):
+    """The icon pipeline's rotation alone, for orientation checks."""
+    from PIL import Image
+
+    rgba = np.zeros(mask.shape + (4,), np.uint8)
+    rgba[..., 3] = mask * 255
+    img = Image.fromarray(rgba).resize((ICON_PX, ICON_PX), Image.NEAREST)
+    img = img.rotate(ICON_ROTATION, expand=True, resample=Image.NEAREST,
+                     fillcolor=(0, 0, 0, 0))
+    return img.resize((ICON_PX, ICON_PX), Image.NEAREST)
 
 
 def test_icon_starts_use_the_game_s_player_colours(tmp_path):

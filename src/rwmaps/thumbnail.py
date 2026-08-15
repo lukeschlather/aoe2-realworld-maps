@@ -75,6 +75,21 @@ ICON_PX = 420
 ICON_BORDER = (215, 182, 151)
 ICON_OUTLINE = (38, 30, 22)
 
+#: Degrees to rotate the north-up grid by, PIL's sense (positive is
+#: counter-clockwise). COUNTER-clockwise, measured off the stock real-world
+#: maps' own icons - the three that show recognisable geography all agree:
+#: rwm_iberia puts Africa (south) at the lower RIGHT and the Balearics
+#: (east) at the upper right; rwm_britain puts Scotland (north) at the upper
+#: left with Ireland (west) below it; rwm_italy puts the Alps (north) upper
+#: left and Sardinia (west) lower left. So north lands at the upper left and
+#: the sequence round the diamond is N, E, S, W clockwise from there.
+#:
+#: This was clockwise until 2026-08-14 and was wrong: 45 degrees the wrong
+#: way is a 90 degree error, and every map shipped an icon that did not
+#: match the map. Do not "simplify" the sign without re-measuring against
+#: those stock icons.
+ICON_ROTATION = 45
+
 #: Tiles of water next to the shore drawn as shallows, and tiles of land next
 #: to the water drawn as beach - one ring each, as the engine paints beach.
 #: A wider beach band looks fine on a chunky landmass but eats the narrow
@@ -239,9 +254,9 @@ def render(
 ) -> Image.Image:
     """One square thumbnail of ``script``'s terrain.
 
-    ``isometric`` rotates 45 degrees clockwise, the orientation the engine
-    draws the grid in; the default leaves it north-up, which is how the real
-    place is recognisable.
+    ``isometric`` rotates by ICON_ROTATION, the orientation the game draws
+    the grid in; the default leaves it north-up, which is how the real place
+    is recognisable.
     """
     size = script.size
     # Draw the marks at whole-tile resolution first, then resample once, so
@@ -260,7 +275,8 @@ def render(
                       outline=(20, 20, 20), width=max(1, r // 3))
 
     if isometric:
-        img = img.rotate(-45, expand=True, resample=Image.BICUBIC, fillcolor=DEEP)
+        img = img.rotate(ICON_ROTATION, expand=True, resample=Image.BICUBIC,
+                         fillcolor=DEEP)
     img = img.resize((px, px), Image.LANCZOS)
 
     if label:
@@ -279,6 +295,8 @@ def render_icon(script: MapScript, px: int = ICON_PX, supersample: int = 2) -> I
     side. Start markers are drawn as axis-aligned squares *before* that
     rotation, which is what makes them come out as diamonds sitting square to
     the finished icon, exactly like the stock ones.
+
+    The rotation is COUNTER-clockwise - see ICON_ROTATION.
     """
     side = round(px / math.sqrt(2)) * supersample
     img = Image.fromarray(terrain_rgb(script.land_mask)).convert("RGBA")
@@ -296,7 +314,8 @@ def render_icon(script: MapScript, px: int = ICON_PX, supersample: int = 2) -> I
             d.rectangle([cx - half, cy - half, cx + half, cy + half],
                         fill=color, outline=(0, 0, 0), width=max(2, half // 5))
 
-    img = img.rotate(-45, expand=True, resample=Image.BILINEAR, fillcolor=(0, 0, 0, 0))
+    img = img.rotate(ICON_ROTATION, expand=True, resample=Image.BILINEAR,
+                     fillcolor=(0, 0, 0, 0))
     span = img.width - 1
     mid = span / 2
     diamond = [(mid, 0), (span, mid), (mid, span), (0, mid)]

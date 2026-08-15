@@ -47,11 +47,18 @@ MOD_ROOTS = [REPO / "mod" / "Real World Maps", REPO / "mod" / "Real World Maps (
 MOD_SCRIPTS = MOD_ROOTS[0] / SCRIPTS_SUBDIR
 DEFAULT_OUT = REPO / "reports" / "map_thumbnails_data"
 GALLERY = REPO / "reports" / "map_thumbnails.html"
-#: A real capture of the game's Select Location screen showing these icons,
-#: embedded in the gallery when it is present. Captured by hand-driving the
-#: UI automation; nothing regenerates it, so it is evidence rather than
-#: output - if the icon format ever changes, recapture it.
+#: Real captures embedded in the gallery when present: the Select Location
+#: screen showing these icons, and the Scenario Editor's minimap of a
+#: generated Britain, which is what settles the rotation. Captured by
+#: hand-driving the UI automation; nothing regenerates them, so they are
+#: evidence rather than output - recapture if the icons change.
+#:
+#: NOTE the game caches these images at startup. After rebuilding icons,
+#: restart the game before checking them, or you will be looking at the
+#: previous set - which happened, and briefly looked like the fix had not
+#: worked.
 INGAME_PROOF = DEFAULT_OUT / "ingame_select_location.png"
+MINIMAP_PROOF = DEFAULT_OUT / "ingame_minimap_britain.png"
 
 
 def write_icons(roots=MOD_ROOTS, quiet: bool = False) -> int:
@@ -166,7 +173,7 @@ def write_gallery(rendered, args) -> None:
     proof = ""
     if INGAME_PROOF.exists():
         b64 = base64.b64encode(INGAME_PROOF.read_bytes()).decode("ascii")
-        proof = f"""
+        proof += f"""
 <figure class="proof">
   <img src="data:image/png;base64,{b64}" alt="the game's Select Location screen">
   <figcaption>The icons as the game actually draws them, captured off the
@@ -174,6 +181,20 @@ def write_gallery(rendered, args) -> None:
     unrelated script with no image of its own, so the generic "?" it still
     shows is the control: the game is reading ours from beside the
     scripts.</figcaption>
+</figure>"""
+    if MINIMAP_PROOF.exists():
+        b64 = base64.b64encode(MINIMAP_PROOF.read_bytes()).decode("ascii")
+        proof += f"""
+<figure class="proof">
+  <img src="data:image/png;base64,{b64}" alt="the editor's minimap of a generated Britain">
+  <figcaption>What fixes the rotation: the Scenario Editor's own minimap of
+    a generated <code>RW Britain</code>. Unwarping this diamond back to a
+    square scores IoU 0.60 against the script's land when north is put at
+    the upper left, against 0.25 for the clockwise alternative the icons
+    shipped with until 2026-08-14 - a 90&deg; error. The stock real-world
+    maps' icons agree independently: <code>rwm_iberia</code> puts Africa at
+    the lower right, <code>rwm_britain</code> puts Scotland at the upper
+    left.</figcaption>
 </figure>"""
 
     GALLERY.parent.mkdir(parents=True, exist_ok=True)
