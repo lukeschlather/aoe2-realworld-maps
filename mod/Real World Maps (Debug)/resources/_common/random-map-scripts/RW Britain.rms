@@ -7340,78 +7340,162 @@ create_terrain FOREST
   set_avoid_player_start_areas
 }
 
-/* 3. clean up: unused placeholder becomes ordinary land */
-create_terrain GRASS
-{
-  base_terrain                   PLACEHOLDER_TERRAIN_A
-  land_percent                   100
-  number_of_clumps               512
-  set_scale_by_groups
-}
+/* 3. clean up: unused placeholder becomes ordinary land.
+ * 16 passes each - one pass strands a scatter of
+ * single tiles that the game then draws as a black placeholder
+ * texture. includes/forest.inc repeats it 16x for the same reason. */
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_A land_percent 100 number_of_clumps 512 set_scale_by_groups }
 
-create_terrain GRASS
-{
-  base_terrain                   PLACEHOLDER_TERRAIN_B
-  land_percent                   100
-  number_of_clumps               512
-  set_scale_by_groups
-}
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_B land_percent 100 number_of_clumps 512 set_scale_by_groups }
 
-create_terrain GRASS
-{
-  base_terrain                   PLACEHOLDER_TERRAIN_C
-  land_percent                   100
-  number_of_clumps               512
-  set_scale_by_groups
-}
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_C land_percent 100 number_of_clumps 512 set_scale_by_groups }
 
-create_terrain GRASS
-{
-  base_terrain                   PLACEHOLDER_TERRAIN_D
-  land_percent                   100
-  number_of_clumps               512
-  set_scale_by_groups
-}
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_D land_percent 100 number_of_clumps 512 set_scale_by_groups }
 
-create_terrain GRASS
-{
-  base_terrain                   PLACEHOLDER_TERRAIN_E
-  land_percent                   100
-  number_of_clumps               512
-  set_scale_by_groups
-}
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_E land_percent 100 number_of_clumps 512 set_scale_by_groups }
 
-create_terrain GRASS
-{
-  base_terrain                   PLACEHOLDER_TERRAIN_F
-  land_percent                   100
-  number_of_clumps               512
-  set_scale_by_groups
-}
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_F land_percent 100 number_of_clumps 512 set_scale_by_groups }
 
-create_terrain GRASS
-{
-  base_terrain                   PLACEHOLDER_TERRAIN_G
-  land_percent                   100
-  number_of_clumps               512
-  set_scale_by_groups
-}
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_G land_percent 100 number_of_clumps 512 set_scale_by_groups }
 
-create_terrain GRASS
-{
-  base_terrain                   PLACEHOLDER_TERRAIN_H
-  land_percent                   100
-  number_of_clumps               512
-  set_scale_by_groups
-}
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain PLACEHOLDER_TERRAIN_H land_percent 100 number_of_clumps 512 set_scale_by_groups }
 
-create_terrain GRASS
-{
-  base_terrain                   SPAWN_PLACEHOLDER
-  land_percent                   100
-  number_of_clumps               512
-  set_scale_by_groups
-}
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
+create_terrain GRASS { base_terrain SPAWN_PLACEHOLDER land_percent 100 number_of_clumps 512 set_scale_by_groups }
 
 
 <ELEVATION_GENERATION>
