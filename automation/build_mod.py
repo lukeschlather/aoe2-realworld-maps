@@ -78,6 +78,13 @@ SHIPPED_PREFIX = "RW "
 #: region tagged Broken.
 BROKEN_REGIONS = set()
 
+#: Dropped from the shipped mod 2026-08-15 on the user's call: their
+#: projections do not read as the real place. They stay in
+#: ``cli.REGIONS`` - that dict is a library of starting points, not a
+#: shipping list, and the windows are still useful to experiment from.
+#: Replacements are being chosen from the window-candidate report.
+RETIRED_REGIONS = ("Japan", "Caribbean", "New Zealand")
+
 
 def shipped_filename(name: str) -> str:
     tag = "(Broken) " if name in BROKEN_REGIONS else ""
@@ -125,12 +132,9 @@ MOD_REGIONS = [
     # block under-places, which nets out at 23% wood against 25% before.
     ("Britain", ["--region", "britain", *FOREST_SPLIT]),
     ("Greece", ["--region", "greece", *FOREST_SPLIT, "--forest-percent", "14"]),
-    ("Japan", ["--region", "japan", "--rotate", "35"]),
     ("Chesapeake Bay", ["--region", "chesapeake"]),
     ("Black Sea", ["--region", "blacksea"]),
     ("Scandinavia", ["--region", "scandinavia"]),
-    ("Caribbean", ["--region", "caribbean"]),
-    ("New Zealand", ["--region", "newzealand"]),
 ]
 
 

@@ -168,6 +168,14 @@ CANDIDATES: list[Candidate] = [
     Candidate("britain", "Britain north-up 1050 south", -3.0, 53.2, 1050, 45,
               "pushed south for more of the French Channel coast"),
     Candidate("britain", "Britain north-up 1150", -3.2, 54.0, 1150, 45),
+    # The candidates above all put the continental patch's centroid near
+    # 1.5E - that is Flanders and the Pas-de-Calais, not Normandy or
+    # Brittany. Which one "a patch of France" means changes the window, so
+    # both readings get candidates.
+    Candidate("britain", "Britain north-up 1000 west", -4.0, 53.0, 1000, 45,
+              "shifted west/south to reach Normandy and Brittany"),
+    Candidate("britain", "Britain north-up 1050 west", -4.5, 52.8, 1050, 45),
+    Candidate("britain", "Britain north-up 950 west", -4.0, 52.5, 950, 45),
 
     # --- proposed replacements -------------------------------------------
     Candidate("new", "Iberia", -4.0, 40.0, 1400, 45,
