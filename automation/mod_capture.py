@@ -220,6 +220,15 @@ def parse_args():
                          "this is what makes 'did this change break the "
                          "engine' answerable with the engine rather than by "
                          "reading the diff. Recorded per sample.")
+    p.add_argument("--region-set", type=Path, default=None,
+                    help="JSON file of [[name, [rwmaps args...]], ...] to "
+                         "capture INSTEAD of build_mod.MOD_REGIONS. This is "
+                         "how a window that does not ship yet gets put "
+                         "through the real engine: candidates have to be "
+                         "captured before they can be judged, and adding "
+                         "them to MOD_REGIONS to do that would ship them. "
+                         "Everything downstream is unchanged - the same "
+                         "editor, recovery, analysis and IoU-vs-truth check.")
     p.add_argument("--extra", nargs=argparse.REMAINDER, default=[],
                     help="extra rwmaps flags appended to every region's regen, "
                          "for testing a parameter that is not in MOD_REGIONS yet "
@@ -229,10 +238,19 @@ def parse_args():
 
 def main():
     args = parse_args()
-    regions = MOD_REGIONS
+    if args.region_set:
+        source = [(n, list(e)) for n, e in
+                  json.loads(args.region_set.read_text(encoding="utf-8"))]
+        if args.from_git:
+            raise SystemExit("--from-git reads mod/, so it cannot be combined "
+                             "with --region-set (those regions do not ship)")
+        print(f"region set: {args.region_set} ({len(source)} regions)")
+    else:
+        source = MOD_REGIONS
+    regions = source
     if args.regions:
         wanted = {r.strip() for r in args.regions.split(",")}
-        regions = [(n, e) for n, e in MOD_REGIONS if n in wanted]
+        regions = [(n, e) for n, e in source if n in wanted]
         missing = wanted - {n for n, _ in regions}
         if missing:
             raise SystemExit(f"unknown region(s): {missing}")
