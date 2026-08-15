@@ -1,0 +1,1726 @@
+[
+  {
+    "group": "greatlakes",
+    "name": "GL current (rotate 0)",
+    "lon": -84.0,
+    "lat": 44.5,
+    "span_km": 1600,
+    "rotate": 0,
+    "note": "the window in cli.REGIONS today - north reads to the upper left",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"GL current (rotate 0)\" --center=-84.0,44.5 --span-km 1600",
+    "km_per_tile": 6.666666666666667,
+    "land_fraction": 0.8988888888888888,
+    "cover_iou": 0.9845035946263708,
+    "cover_misses_frac": 0.013461835599505562,
+    "landmasses": [
+      {
+        "tiles": 51776,
+        "lon": -84.0,
+        "lat": 44.3
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 1793,
+        "lon": -87.8,
+        "lat": 47.5
+      },
+      {
+        "tiles": 1244,
+        "lon": -86.8,
+        "lat": 44.0
+      },
+      {
+        "tiles": 1230,
+        "lon": -82.2,
+        "lat": 44.9
+      },
+      {
+        "tiles": 559,
+        "lon": -81.2,
+        "lat": 42.2
+      },
+      {
+        "tiles": 412,
+        "lon": -77.8,
+        "lat": 43.7
+      },
+      {
+        "tiles": 69,
+        "lon": -88.5,
+        "lat": 49.8
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/greatlakes/gl_current_rotate_0__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/greatlakes/gl_current_rotate_0__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/greatlakes/gl_current_rotate_0__minimap.png"
+    }
+  },
+  {
+    "group": "greatlakes",
+    "name": "GL north-up, same window",
+    "lon": -84.0,
+    "lat": 44.5,
+    "span_km": 1600,
+    "rotate": 45,
+    "note": "current centre and span, rotated so north is up in game",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"GL north-up, same window\" --center=-84.0,44.5 --span-km 1600 --rotate 45",
+    "km_per_tile": 6.666666666666667,
+    "land_fraction": 0.90203125,
+    "cover_iou": 0.986822137272605,
+    "cover_misses_frac": 0.011278557268510498,
+    "landmasses": [
+      {
+        "tiles": 51957,
+        "lon": -83.9,
+        "lat": 44.2
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 1799,
+        "lon": -87.7,
+        "lat": 47.5
+      },
+      {
+        "tiles": 1273,
+        "lon": -82.2,
+        "lat": 44.9
+      },
+      {
+        "tiles": 1215,
+        "lon": -86.8,
+        "lat": 43.9
+      },
+      {
+        "tiles": 543,
+        "lon": -81.3,
+        "lat": 42.1
+      },
+      {
+        "tiles": 408,
+        "lon": -77.8,
+        "lat": 43.6
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_same_window__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_same_window__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_same_window__minimap.png"
+    }
+  },
+  {
+    "group": "greatlakes",
+    "name": "GL north-up 1400",
+    "lon": -84.0,
+    "lat": 44.5,
+    "span_km": 1400,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"GL north-up 1400\" --center=-84.0,44.5 --span-km 1400 --rotate 45",
+    "km_per_tile": 5.833333333333333,
+    "land_fraction": 0.8778298611111112,
+    "cover_iou": 0.9849049902326408,
+    "cover_misses_frac": 0.012835472578763127,
+    "landmasses": [
+      {
+        "tiles": 50558,
+        "lon": -83.9,
+        "lat": 44.3
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 2360,
+        "lon": -87.7,
+        "lat": 47.5
+      },
+      {
+        "tiles": 1681,
+        "lon": -82.2,
+        "lat": 44.9
+      },
+      {
+        "tiles": 1629,
+        "lon": -86.8,
+        "lat": 44.0
+      },
+      {
+        "tiles": 721,
+        "lon": -81.3,
+        "lat": 42.1
+      },
+      {
+        "tiles": 539,
+        "lon": -77.8,
+        "lat": 43.6
+      },
+      {
+        "tiles": 89,
+        "lon": -88.5,
+        "lat": 49.8
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_1400__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_1400__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_1400__minimap.png"
+    }
+  },
+  {
+    "group": "greatlakes",
+    "name": "GL north-up 1200",
+    "lon": -83.5,
+    "lat": 44.5,
+    "span_km": 1200,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"GL north-up 1200\" --center=-83.5,44.5 --span-km 1200 --rotate 45",
+    "km_per_tile": 5.0,
+    "land_fraction": 0.8403298611111111,
+    "cover_iou": 0.9821207876740545,
+    "cover_misses_frac": 0.014937090676197756,
+    "landmasses": [
+      {
+        "tiles": 48385,
+        "lon": -83.3,
+        "lat": 44.3
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 2323,
+        "lon": -82.2,
+        "lat": 44.9
+      },
+      {
+        "tiles": 2225,
+        "lon": -86.8,
+        "lat": 44.0
+      },
+      {
+        "tiles": 992,
+        "lon": -81.2,
+        "lat": 42.2
+      },
+      {
+        "tiles": 737,
+        "lon": -77.8,
+        "lat": 43.6
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_1200__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_1200__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_1200__minimap.png"
+    }
+  },
+  {
+    "group": "greatlakes",
+    "name": "GL north-up 1000",
+    "lon": -83.0,
+    "lat": 45.0,
+    "span_km": 1000,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"GL north-up 1000\" --center=-83.0,45.0 --span-km 1000 --rotate 45",
+    "km_per_tile": 4.166666666666667,
+    "land_fraction": 0.7935416666666667,
+    "cover_iou": 0.9809604815493327,
+    "cover_misses_frac": 0.015949067996849565,
+    "landmasses": [
+      {
+        "tiles": 45518,
+        "lon": -82.8,
+        "lat": 45.0
+      },
+      {
+        "tiles": 190,
+        "lon": -82.3,
+        "lat": 45.8
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 3361,
+        "lon": -82.2,
+        "lat": 44.9
+      },
+      {
+        "tiles": 1433,
+        "lon": -81.2,
+        "lat": 42.2
+      },
+      {
+        "tiles": 1055,
+        "lon": -77.8,
+        "lat": 43.6
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_1000__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_1000__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/greatlakes/gl_north-up_1000__minimap.png"
+    }
+  },
+  {
+    "group": "greatlakes",
+    "name": "GL five lakes 1800",
+    "lon": -85.0,
+    "lat": 45.5,
+    "span_km": 1800,
+    "rotate": 45,
+    "note": "widest - tries to hold all five lakes inside the square",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"GL five lakes 1800\" --center=-85.0,45.5 --span-km 1800 --rotate 45",
+    "km_per_tile": 7.5,
+    "land_fraction": 0.9022222222222223,
+    "cover_iou": 0.9861321860054165,
+    "cover_misses_frac": 0.012065116995073892,
+    "landmasses": [
+      {
+        "tiles": 51960,
+        "lon": -85.1,
+        "lat": 45.1
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 1397,
+        "lon": -87.7,
+        "lat": 47.5
+      },
+      {
+        "tiles": 955,
+        "lon": -86.8,
+        "lat": 43.9
+      },
+      {
+        "tiles": 954,
+        "lon": -82.2,
+        "lat": 44.9
+      },
+      {
+        "tiles": 427,
+        "lon": -81.3,
+        "lat": 42.1
+      },
+      {
+        "tiles": 312,
+        "lon": -77.8,
+        "lat": 43.6
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/greatlakes/gl_five_lakes_1800__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/greatlakes/gl_five_lakes_1800__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/greatlakes/gl_five_lakes_1800__minimap.png"
+    }
+  },
+  {
+    "group": "greatlakes",
+    "name": "GL Michigan-Huron",
+    "lon": -85.0,
+    "lat": 44.5,
+    "span_km": 1200,
+    "rotate": 45,
+    "note": "drops Superior and Ontario",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"GL Michigan-Huron\" --center=-85.0,44.5 --span-km 1200 --rotate 45",
+    "km_per_tile": 5.0,
+    "land_fraction": 0.8331076388888888,
+    "cover_iou": 0.9820961242886221,
+    "cover_misses_frac": 0.01464980098776752,
+    "landmasses": [
+      {
+        "tiles": 47844,
+        "lon": -85.1,
+        "lat": 44.3
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 3215,
+        "lon": -87.7,
+        "lat": 47.5
+      },
+      {
+        "tiles": 2330,
+        "lon": -82.2,
+        "lat": 44.9
+      },
+      {
+        "tiles": 2241,
+        "lon": -86.8,
+        "lat": 44.0
+      },
+      {
+        "tiles": 998,
+        "lon": -81.2,
+        "lat": 42.2
+      },
+      {
+        "tiles": 725,
+        "lon": -77.8,
+        "lat": 43.6
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/greatlakes/gl_michigan-huron__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/greatlakes/gl_michigan-huron__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/greatlakes/gl_michigan-huron__minimap.png"
+    }
+  },
+  {
+    "group": "greatlakes",
+    "name": "GL Huron-Erie",
+    "lon": -82.0,
+    "lat": 44.0,
+    "span_km": 1100,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"GL Huron-Erie\" --center=-82.0,44.0 --span-km 1100 --rotate 45",
+    "km_per_tile": 4.583333333333333,
+    "land_fraction": 0.8446180555555556,
+    "cover_iou": 0.9830074201615218,
+    "cover_misses_frac": 0.014244604316546762,
+    "landmasses": [
+      {
+        "tiles": 48645,
+        "lon": -81.7,
+        "lat": 43.8
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 2764,
+        "lon": -82.2,
+        "lat": 44.9
+      },
+      {
+        "tiles": 2687,
+        "lon": -86.8,
+        "lat": 44.0
+      },
+      {
+        "tiles": 1188,
+        "lon": -81.2,
+        "lat": 42.2
+      },
+      {
+        "tiles": 865,
+        "lon": -77.8,
+        "lat": 43.6
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/greatlakes/gl_huron-erie__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/greatlakes/gl_huron-erie__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/greatlakes/gl_huron-erie__minimap.png"
+    }
+  },
+  {
+    "group": "greatlakes",
+    "name": "GL Erie-Ontario",
+    "lon": -79.5,
+    "lat": 43.2,
+    "span_km": 900,
+    "rotate": 45,
+    "note": "the Niagara isthmus as the map's spine",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"GL Erie-Ontario\" --center=-79.5,43.2 --span-km 900 --rotate 45",
+    "km_per_tile": 3.75,
+    "land_fraction": 0.86703125,
+    "cover_iou": 0.9865531778856721,
+    "cover_misses_frac": 0.011313349752708196,
+    "landmasses": [
+      {
+        "tiles": 49703,
+        "lon": -79.2,
+        "lat": 43.0
+      },
+      {
+        "tiles": 238,
+        "lon": -82.4,
+        "lat": 45.8
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 1792,
+        "lon": -81.2,
+        "lat": 42.2
+      },
+      {
+        "tiles": 1304,
+        "lon": -77.8,
+        "lat": 43.6
+      },
+      {
+        "tiles": 66,
+        "lon": -82.7,
+        "lat": 42.4
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/greatlakes/gl_erie-ontario__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/greatlakes/gl_erie-ontario__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/greatlakes/gl_erie-ontario__minimap.png"
+    }
+  },
+  {
+    "group": "greatlakes",
+    "name": "GL Superior",
+    "lon": -87.5,
+    "lat": 47.5,
+    "span_km": 1200,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"GL Superior\" --center=-87.5,47.5 --span-km 1200 --rotate 45",
+    "km_per_tile": 5.0,
+    "land_fraction": 0.8638368055555555,
+    "cover_iou": 0.9851572528883183,
+    "cover_misses_frac": 0.012882609482082924,
+    "landmasses": [
+      {
+        "tiles": 49412,
+        "lon": -87.8,
+        "lat": 47.7
+      },
+      {
+        "tiles": 197,
+        "lon": -81.2,
+        "lat": 44.6
+      },
+      {
+        "tiles": 135,
+        "lon": -82.3,
+        "lat": 45.8
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 3224,
+        "lon": -87.8,
+        "lat": 47.5
+      },
+      {
+        "tiles": 2234,
+        "lon": -86.8,
+        "lat": 44.0
+      },
+      {
+        "tiles": 150,
+        "lon": -88.5,
+        "lat": 49.9
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/greatlakes/gl_superior__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/greatlakes/gl_superior__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/greatlakes/gl_superior__minimap.png"
+    }
+  },
+  {
+    "group": "britain",
+    "name": "Britain NW (current, keep)",
+    "lon": -3.0,
+    "lat": 54.5,
+    "span_km": 1300,
+    "rotate": 0,
+    "note": "the shipped window - north reads to the upper left",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Britain NW (current, keep)\" --center=-3.0,54.5 --span-km 1300",
+    "km_per_tile": 5.416666666666667,
+    "land_fraction": 0.3046527777777778,
+    "cover_iou": 0.9643615238520835,
+    "cover_misses_frac": 0.01618418053339412,
+    "landmasses": [
+      {
+        "tiles": 7837,
+        "lon": -2.6,
+        "lat": 53.9
+      },
+      {
+        "tiles": 5488,
+        "lon": 3.6,
+        "lat": 50.2
+      },
+      {
+        "tiles": 2929,
+        "lon": -7.9,
+        "lat": 53.4
+      },
+      {
+        "tiles": 1142,
+        "lon": 6.9,
+        "lat": 59.1
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/britain/britain_nw_current_keep__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/britain/britain_nw_current_keep__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/britain/britain_nw_current_keep__minimap.png"
+    }
+  },
+  {
+    "group": "britain",
+    "name": "Britain north-up, same window",
+    "lon": -3.0,
+    "lat": 54.5,
+    "span_km": 1300,
+    "rotate": 45,
+    "note": "current centre and span, north up - reaches Norway",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Britain north-up, same window\" --center=-3.0,54.5 --span-km 1300 --rotate 45",
+    "km_per_tile": 5.416666666666667,
+    "land_fraction": 0.2937326388888889,
+    "cover_iou": 0.9619151878312975,
+    "cover_misses_frac": 0.013239553165080678,
+    "landmasses": [
+      {
+        "tiles": 7824,
+        "lon": -2.5,
+        "lat": 53.9
+      },
+      {
+        "tiles": 6041,
+        "lon": 3.3,
+        "lat": 50.9
+      },
+      {
+        "tiles": 2925,
+        "lon": -7.9,
+        "lat": 53.4
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_same_window__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_same_window__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_same_window__minimap.png"
+    }
+  },
+  {
+    "group": "britain",
+    "name": "Britain north-up 1100",
+    "lon": -2.8,
+    "lat": 53.8,
+    "span_km": 1100,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Britain north-up 1100\" --center=-2.8,53.8 --span-km 1100 --rotate 45",
+    "km_per_tile": 4.583333333333333,
+    "land_fraction": 0.35649305555555555,
+    "cover_iou": 0.9664070339752473,
+    "cover_misses_frac": 0.01509691243790786,
+    "landmasses": [
+      {
+        "tiles": 10793,
+        "lon": -2.5,
+        "lat": 53.9
+      },
+      {
+        "tiles": 5457,
+        "lon": 1.9,
+        "lat": 50.4
+      },
+      {
+        "tiles": 4077,
+        "lon": -7.9,
+        "lat": 53.4
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1100__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1100__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1100__minimap.png"
+    }
+  },
+  {
+    "group": "britain",
+    "name": "Britain north-up 1000",
+    "lon": -2.5,
+    "lat": 53.5,
+    "span_km": 1000,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Britain north-up 1000\" --center=-2.5,53.5 --span-km 1000 --rotate 45",
+    "km_per_tile": 4.166666666666667,
+    "land_fraction": 0.4084548611111111,
+    "cover_iou": 0.9682998324958124,
+    "cover_misses_frac": 0.017171760105410806,
+    "landmasses": [
+      {
+        "tiles": 13010,
+        "lon": -2.5,
+        "lat": 53.9
+      },
+      {
+        "tiles": 5432,
+        "lon": 1.6,
+        "lat": 50.3
+      },
+      {
+        "tiles": 4956,
+        "lon": -7.9,
+        "lat": 53.4
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1000__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1000__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1000__minimap.png"
+    }
+  },
+  {
+    "group": "britain",
+    "name": "Britain north-up 950",
+    "lon": -2.5,
+    "lat": 53.2,
+    "span_km": 950,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Britain north-up 950\" --center=-2.5,53.2 --span-km 950 --rotate 45",
+    "km_per_tile": 3.9583333333333335,
+    "land_fraction": 0.4377951388888889,
+    "cover_iou": 0.9718133416849358,
+    "cover_misses_frac": 0.01558472459055399,
+    "landmasses": [
+      {
+        "tiles": 14054,
+        "lon": -2.5,
+        "lat": 53.8
+      },
+      {
+        "tiles": 5662,
+        "lon": 1.3,
+        "lat": 50.2
+      },
+      {
+        "tiles": 5438,
+        "lon": -7.9,
+        "lat": 53.4
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_950__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_950__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_950__minimap.png"
+    }
+  },
+  {
+    "group": "britain",
+    "name": "Britain north-up 900",
+    "lon": -2.2,
+    "lat": 53.0,
+    "span_km": 900,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Britain north-up 900\" --center=-2.2,53.0 --span-km 900 --rotate 45",
+    "km_per_tile": 3.75,
+    "land_fraction": 0.4663715277777778,
+    "cover_iou": 0.9746611667648792,
+    "cover_misses_frac": 0.01485314372929308,
+    "landmasses": [
+      {
+        "tiles": 14771,
+        "lon": -2.3,
+        "lat": 53.5
+      },
+      {
+        "tiles": 6129,
+        "lon": 1.4,
+        "lat": 50.2
+      },
+      {
+        "tiles": 5922,
+        "lon": -7.9,
+        "lat": 53.4
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_900__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_900__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_900__minimap.png"
+    }
+  },
+  {
+    "group": "britain",
+    "name": "Britain north-up 1050 south",
+    "lon": -3.0,
+    "lat": 53.2,
+    "span_km": 1050,
+    "rotate": 45,
+    "note": "pushed south for more of the French Channel coast",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Britain north-up 1050 south\" --center=-3.0,53.2 --span-km 1050 --rotate 45",
+    "km_per_tile": 4.375,
+    "land_fraction": 0.39395833333333335,
+    "cover_iou": 0.9691647150663544,
+    "cover_misses_frac": 0.015203595980962454,
+    "landmasses": [
+      {
+        "tiles": 11922,
+        "lon": -2.5,
+        "lat": 53.9
+      },
+      {
+        "tiles": 6230,
+        "lon": 1.6,
+        "lat": 50.2
+      },
+      {
+        "tiles": 4488,
+        "lon": -7.9,
+        "lat": 53.4
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1050_south__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1050_south__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1050_south__minimap.png"
+    }
+  },
+  {
+    "group": "britain",
+    "name": "Britain north-up 1150",
+    "lon": -3.2,
+    "lat": 54.0,
+    "span_km": 1150,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Britain north-up 1150\" --center=-3.2,54.0 --span-km 1150 --rotate 45",
+    "km_per_tile": 4.791666666666667,
+    "land_fraction": 0.32046875,
+    "cover_iou": 0.9619522017911081,
+    "cover_misses_frac": 0.01657727937591419,
+    "landmasses": [
+      {
+        "tiles": 9894,
+        "lon": -2.6,
+        "lat": 53.9
+      },
+      {
+        "tiles": 4634,
+        "lon": 1.9,
+        "lat": 50.5
+      },
+      {
+        "tiles": 3733,
+        "lon": -7.9,
+        "lat": 53.4
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1150__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1150__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/britain/britain_north-up_1150__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Iberia",
+    "lon": -4.0,
+    "lat": 40.0,
+    "span_km": 1400,
+    "rotate": 45,
+    "note": "already in cli.REGIONS, never shipped; IoU 0.98 in the README candidate table",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Iberia\" --center=-4.0,40.0 --span-km 1400 --rotate 45",
+    "km_per_tile": 5.833333333333333,
+    "land_fraction": 0.48114583333333333,
+    "cover_iou": 0.9840581786916959,
+    "cover_misses_frac": 0.008840297322652811,
+    "landmasses": [
+      {
+        "tiles": 20856,
+        "lon": -3.5,
+        "lat": 41.0
+      },
+      {
+        "tiles": 6718,
+        "lon": -3.0,
+        "lat": 34.1
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/iberia__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/iberia__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/iberia__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Anatolia",
+    "lon": 33.0,
+    "lat": 39.0,
+    "span_km": 1500,
+    "rotate": 45,
+    "note": "already in cli.REGIONS, never shipped; IoU 0.97",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Anatolia\" --center=33.0,39.0 --span-km 1500 --rotate 45",
+    "km_per_tile": 6.25,
+    "land_fraction": 0.5622222222222222,
+    "cover_iou": 0.981760774937159,
+    "cover_misses_frac": 0.011023962450592886,
+    "landmasses": [
+      {
+        "tiles": 30872,
+        "lon": 34.6,
+        "lat": 39.0
+      },
+      {
+        "tiles": 1198,
+        "lon": 22.6,
+        "lat": 38.5
+      },
+      {
+        "tiles": 222,
+        "lon": 33.1,
+        "lat": 35.0
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 260,
+        "lon": 28.2,
+        "lat": 40.7
+      },
+      {
+        "tiles": 67,
+        "lon": 42.9,
+        "lat": 38.6
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/anatolia__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/anatolia__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/anatolia__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Gibraltar",
+    "lon": -4.8,
+    "lat": 36.2,
+    "span_km": 900,
+    "rotate": 45,
+    "note": "two continents and a strait",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Gibraltar\" --center=-4.8,36.2 --span-km 900 --rotate 45",
+    "km_per_tile": 3.75,
+    "land_fraction": 0.6660243055555556,
+    "cover_iou": 0.9921179959419385,
+    "cover_misses_frac": 0.005838959414018716,
+    "landmasses": [
+      {
+        "tiles": 19479,
+        "lon": -4.8,
+        "lat": 38.7
+      },
+      {
+        "tiles": 18884,
+        "lon": -3.6,
+        "lat": 33.7
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/gibraltar__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/gibraltar__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/gibraltar__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Korea",
+    "lon": 127.0,
+    "lat": 36.5,
+    "span_km": 1200,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Korea\" --center=127.0,36.5 --span-km 1200 --rotate 45",
+    "km_per_tile": 5.0,
+    "land_fraction": 0.33055555555555555,
+    "cover_iou": 0.9757135443694862,
+    "cover_misses_frac": 0.0125,
+    "landmasses": [
+      {
+        "tiles": 13714,
+        "lon": 126.7,
+        "lat": 39.6
+      },
+      {
+        "tiles": 2438,
+        "lon": 119.8,
+        "lat": 36.6
+      },
+      {
+        "tiles": 1503,
+        "lon": 133.2,
+        "lat": 34.8
+      },
+      {
+        "tiles": 1143,
+        "lon": 130.8,
+        "lat": 32.9
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/korea__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/korea__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/korea__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Red Sea",
+    "lon": 37.5,
+    "lat": 22.5,
+    "span_km": 2000,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Red Sea\" --center=37.5,22.5 --span-km 2000 --rotate 45",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.8877777777777778,
+    "cover_iou": 0.9922448820128145,
+    "cover_misses_frac": 0.006668491864831039,
+    "landmasses": [
+      {
+        "tiles": 51128,
+        "lon": 37.4,
+        "lat": 22.6
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/red_sea__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/red_sea__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/red_sea__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Persian Gulf",
+    "lon": 52.0,
+    "lat": 27.0,
+    "span_km": 1700,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Persian Gulf\" --center=52.0,27.0 --span-km 1700 --rotate 45",
+    "km_per_tile": 7.083333333333333,
+    "land_fraction": 0.8744097222222222,
+    "cover_iou": 0.9897469458987783,
+    "cover_misses_frac": 0.009113290711988246,
+    "landmasses": [
+      {
+        "tiles": 50358,
+        "lon": 51.7,
+        "lat": 27.0
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/persian_gulf__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/persian_gulf__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/persian_gulf__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Baltic",
+    "lon": 19.0,
+    "lat": 59.0,
+    "span_km": 1500,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Baltic\" --center=19.0,59.0 --span-km 1500 --rotate 45",
+    "km_per_tile": 6.25,
+    "land_fraction": 0.7365104166666666,
+    "cover_iou": 0.978356807511737,
+    "cover_misses_frac": 0.017561228578836952,
+    "landmasses": [
+      {
+        "tiles": 42320,
+        "lon": 20.0,
+        "lat": 58.9
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 9745,
+        "lon": 19.7,
+        "lat": 58.8
+      },
+      {
+        "tiles": 448,
+        "lon": 31.5,
+        "lat": 60.8
+      },
+      {
+        "tiles": 128,
+        "lon": 13.4,
+        "lat": 59.0
+      },
+      {
+        "tiles": 62,
+        "lon": 27.4,
+        "lat": 58.7
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/baltic__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/baltic__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/baltic__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Levant and Cyprus",
+    "lon": 33.5,
+    "lat": 33.5,
+    "span_km": 1300,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Levant and Cyprus\" --center=33.5,33.5 --span-km 1300 --rotate 45",
+    "km_per_tile": 5.416666666666667,
+    "land_fraction": 0.6585763888888889,
+    "cover_iou": 0.9899611058551456,
+    "cover_misses_frac": 0.00695945589708441,
+    "landmasses": [
+      {
+        "tiles": 37545,
+        "lon": 35.1,
+        "lat": 33.4
+      },
+      {
+        "tiles": 300,
+        "lon": 33.2,
+        "lat": 35.0
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/levant_and_cyprus__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/levant_and_cyprus__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/levant_and_cyprus__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Florida",
+    "lon": -83.0,
+    "lat": 27.5,
+    "span_km": 1700,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Florida\" --center=-83.0,27.5 --span-km 1700 --rotate 45",
+    "km_per_tile": 7.083333333333333,
+    "land_fraction": 0.2887152777777778,
+    "cover_iou": 0.977736770045836,
+    "cover_misses_frac": 0.01232711966325917,
+    "landmasses": [
+      {
+        "tiles": 14918,
+        "lon": -84.2,
+        "lat": 32.4
+      },
+      {
+        "tiles": 1307,
+        "lon": -80.6,
+        "lat": 22.3
+      },
+      {
+        "tiles": 224,
+        "lon": -87.4,
+        "lat": 21.1
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/florida__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/florida__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/florida__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Bay of Biscay",
+    "lon": -3.0,
+    "lat": 45.0,
+    "span_km": 1400,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Bay of Biscay\" --center=-3.0,45.0 --span-km 1400 --rotate 45",
+    "km_per_tile": 5.833333333333333,
+    "land_fraction": 0.5539236111111111,
+    "cover_iou": 0.9878063993014408,
+    "cover_misses_frac": 0.007240017551557701,
+    "landmasses": [
+      {
+        "tiles": 29247,
+        "lon": -0.6,
+        "lat": 43.5
+      },
+      {
+        "tiles": 2659,
+        "lon": -2.3,
+        "lat": 51.8
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/bay_of_biscay__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/bay_of_biscay__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/bay_of_biscay__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Adriatic",
+    "lon": 16.5,
+    "lat": 43.0,
+    "span_km": 1100,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Adriatic\" --center=16.5,43.0 --span-km 1100 --rotate 45",
+    "km_per_tile": 4.583333333333333,
+    "land_fraction": 0.6405729166666667,
+    "cover_iou": 0.9876076567941899,
+    "cover_misses_frac": 0.00859148440252595,
+    "landmasses": [
+      {
+        "tiles": 36462,
+        "lon": 17.7,
+        "lat": 44.1
+      },
+      {
+        "tiles": 428,
+        "lon": 9.1,
+        "lat": 42.1
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/adriatic__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/adriatic__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/adriatic__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Denmark",
+    "lon": 10.0,
+    "lat": 56.3,
+    "span_km": 1000,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Denmark\" --center=10.0,56.3 --span-km 1000 --rotate 45",
+    "km_per_tile": 4.166666666666667,
+    "land_fraction": 0.5192708333333333,
+    "cover_iou": 0.9813868613138687,
+    "cover_misses_frac": 0.011066532932129723,
+    "landmasses": [
+      {
+        "tiles": 15420,
+        "lon": 11.5,
+        "lat": 59.0
+      },
+      {
+        "tiles": 14270,
+        "lon": 10.7,
+        "lat": 53.2
+      },
+      {
+        "tiles": 144,
+        "lon": 18.5,
+        "lat": 57.4
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 306,
+        "lon": 13.3,
+        "lat": 58.9
+      },
+      {
+        "tiles": 87,
+        "lon": 14.5,
+        "lat": 58.3
+      }
+    ],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/denmark__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/denmark__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/denmark__minimap.png"
+    }
+  },
+  {
+    "group": "new",
+    "name": "Ireland",
+    "lon": -8.0,
+    "lat": 53.3,
+    "span_km": 900,
+    "rotate": 45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Ireland\" --center=-8.0,53.3 --span-km 900 --rotate 45",
+    "km_per_tile": 3.75,
+    "land_fraction": 0.30387152777777776,
+    "cover_iou": 0.9687062643452947,
+    "cover_misses_frac": 0.01136947951779695,
+    "landmasses": [
+      {
+        "tiles": 11240,
+        "lon": -2.8,
+        "lat": 53.6
+      },
+      {
+        "tiles": 6038,
+        "lon": -7.9,
+        "lat": 53.4
+      }
+    ],
+    "waterbodies": [],
+    "png": {
+      "truth": "reports/20260815-223447_window_candidates_data/new/ireland__truth.png",
+      "cover": "reports/20260815-223447_window_candidates_data/new/ireland__cover.png",
+      "minimap": "reports/20260815-223447_window_candidates_data/new/ireland__minimap.png"
+    }
+  }
+]
