@@ -360,7 +360,7 @@ still wanted before spending engine time. If it is, the one risk to check
 is per-player placement: each island id is another zone, and
 `starting_resources.inc` and `huntable.inc` are keyed on zone distance.
 
-### 4. Drop the problem regions; find better windows
+### 4. Drop the problem regions; find better windows - DONE 2026-08-15/16
 
 Japan, New Zealand and Caribbean are land-starved at 240x240 for 8 players
 (17%, 12%, 21% land). The user's decision is to **stop tuning against them**

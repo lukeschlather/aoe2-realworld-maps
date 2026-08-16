@@ -1,5 +1,19 @@
 # Tuning status
 
+> **HISTORY (2026-07-31). Do not take guidance from this file.** Its
+> known-good defaults are real and are what `src/rwmaps/cli.py` ships
+> today, and its "why fairness stats were the wrong tool" section is still
+> the right instinct. Everything else predates the resource rework, the
+> current fairness model and the mod build:
+>
+> * The fairness numbers here come from the superseded nearest-TC model.
+>   `README_AGENTS.md` has the current one.
+> * The automation inventory describes the PowerShell/Windows-OCR driver.
+>   The capture path is `automation/editor.py` + OmniParser now; see
+>   `EDITOR_AUTOMATION.md`.
+> * The 5 candidate windows were superseded by the shipped mod and then by
+>   the 2026-08-15 window-candidate report.
+
 Read this first when resuming work on the Puget Sound window/parameter
 search - it should make a fresh conversation productive without needing to
 re-derive session history from git log alone.

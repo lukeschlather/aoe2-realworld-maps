@@ -1,113 +1,200 @@
-# rwmaps
+# rwmaps: the concepts
 
-Generates AoE2 DE random map scripts whose land/water outline is a real place,
-under any map projection. Output is one self-contained `.rms` per map — no
-companion files, nothing in the game install — so the engine ships it to other
-players automatically and the maps work in multiplayer.
+What the project is optimising, how it decides whether it got there, and
+how to change things without breaking them.
+
+- **Mechanism** — what runs in what order: `GENERATION.md`
+- **Conventions** — how to work here: `CLAUDE.md`
+- **Stock reference** — the two stock resource systems and their measured
+  budgets: `RESOURCE_TEMPLATES.md`
+- **UI automation** — driving the editor: `EDITOR_AUTOMATION.md`
+
+The project generates AoE2 DE random-map scripts whose land/water outline
+is a real place. Output is one self-contained `.rms` per map, so the engine
+ships it to other players automatically and the maps work in multiplayer.
+
+---
+
+## 1. Aesthetics: the actual optimisation target
+
+**A map succeeds when a human recognises the place.** Does a strait look
+like a strait; does an island stay an island. Everything else is a
+constraint, not the goal.
+
+This matters because it is not what the metrics naturally measure. **IoU
+against the true coastline is the headline number and it is easy to
+misread.** Every Great Lakes window scores 0.88–0.91 whether the lakes come
+out as five distinct lakes or one merged blob, because on an 85%-land map
+IoU is dominated by land that is trivially correct. The feature you care
+about is the negative space, and the metric cannot see it.
+
+So: **pick the measurement that can see the thing being judged.**
+
+| what you're judging | what to measure |
+|---|---|
+| coastline fidelity overall | `iou_10m` vs the 10m truth mask |
+| do the lakes/bays read separately | enclosed water bodies, with sizes |
+| do the islands survive | `preserved_fraction`, deleted vs merged |
+| is it speckled | `pockmark`, `bnd_ratio` |
+
+And two shape rules learned the hard way:
+
+- **A narrow landmass cannot seat 8 players.** A long thin island chain has
+  no interior, so every start is on the coastline and the per-player land
+  distribution collapses however starts are arranged. New Zealand's worst
+  player got 300 buildable tiles against Arabia's 2,676. No tuning fixes
+  this.
+- **Narrow archipelagos also look alike.** At 240 tiles they read as a
+  generic scatter of slivers whichever real place they are — which forfeits
+  the target above. Japan and New Zealand were visually interchangeable.
+  Both were retired. Prefer chunky continental and peninsular windows.
+
+Screen a window for **width, not just area**, before spending engine time:
+`automation/window_candidates.py` renders any window's truth mask and
+disc-cover in seconds.
+
+---
+
+## 2. Fairness: what it means here
+
+Fairness is **not** the optimisation target — a real archipelago puts
+players on separate islands and that is geography, not unfairness. It is a
+constraint: a window that starves a player is unusable however good it
+looks.
+
+### The model
+
+`src/rwmaps/fairness.py`, `profile_capture()`. Three ideas, each replacing
+something weaker:
+
+1. **Distance, not counts.** Eight gold 12 tiles away and eight gold 38
+   tiles away are different games.
+2. **Exclusive / contested / unclaimed, not owned.** Assigning each
+   resource to its single nearest TC is wrong on tight maps, where most of
+   what a player can reach a neighbour can reach too. A contested resource
+   counts for **both** players, because both can genuinely take it.
+   Unclaimed is the neutral pool nobody can reach — mostly a *good* thing,
+   the supply players leave home to fight over.
+3. **Walked distances, on the walkable mask.** Water and forest are
+   barriers; a ford is a route.
+
+Two constants govern everything: `OWNERSHIP_RADIUS` (30 tiles) and
+`CONTEST_MARGIN` (8 tiles).
+
+> `analyze_capture`'s `resources` block is the **superseded** nearest-TC
+> model with straight-line distances and a tie-break by player index. It
+> survives only so pre-2026-08 runs stay comparable. Don't report from it —
+> it disagrees in both directions.
+
+### Reading the numbers
+
+**Stock is the yardstick.** Those maps define "reasonable"; this project
+has no better definition. Arabia is held out as the reference rather than
+averaged into a stock mean, because a mean over Arabia, Black Forest and
+Team Islands describes no real map.
+
+**Count resources, not objects** (`rwmaps/resource_value.py`). Six bushes
+and six gold mines are both "6"; a boar is worth 3+ sheep *and* gathers
+fastest because it is lured to the TC. Keep the per-kind breakdown beside
+any food total.
+
+Confirmed in game: gold 800/tile, stone 350, berries 125, deer 140 (the
+whole `HUNTABLE_A` role, all nine skins), boar 340, one forest tile 100
+wood. Sheep 100, small game 30 and the fish are still assumed.
+
+**Quote the radius.** Arabia gives a player 9 stone within 30 walked tiles
+and 16 within 50 — same map. A count without a radius is not a fact.
+
+**The unit is a player, not a map.** Pool per-player observations; map-wide
+totals hide the only thing that matters.
+
+**"Zero of a kind" is not a verdict.** Stock Arabia rolls
+`percent_chance 50 GAME_HUNTABLE`, so half of all Arabia games contain no
+deer anywhere. Read any such rate against a comparable stock map.
+
+### Land is a resource
+
+The one that cannot be topped up — a player can walk further for gold, not
+for somewhere to put a farm. Measured the same exclusive/contested way;
+buildable means dry and unforested.
+
+Read the **worst-off player as a fraction of that map's own median**. Every
+stock map holds **0.79–0.96**. Below ~0.7 the window, not the tuning, is
+the problem.
+
+### Where things stand (157 archived captures, all one model)
+
+Per player, within 30 walked tiles. Full tables in the candidate report.
+
+| | food | wood | gold | stone | land min/med |
+|---|---|---|---|---|---|
+| Arabia (reference) | 2,230 | 20,050 | 12,000 | 3,150 | 0.82 |
+| stock range | 2,230–6,160 | 11,200–32,300 | 8,800–21,600 | 3,150–5,775 | 0.79–0.96 |
+| shipped range | 2,590–2,990 | 8,250–26,250 | 8,800 | 3,150 | **0.23–0.84** |
+| retired (Japan) | 2,590 | 6,700 | 5,600 | **875** | 0.60 |
+
+Three things to know from that:
+
+- **Food is nearly flat everywhere** (2,230–2,990 outside Yucatan), so it
+  barely distinguishes maps. Gold, stone, wood and land are where maps
+  differ.
+- **The retired three failed on three independent axes** — stone, wood and
+  land — which is why they were retired rather than tuned.
+- **Italy (0.23) and Greece (0.42) are outside the stock land band and
+  currently ship.** Open issue.
+
+---
+
+## 3. How to make changes
+
+### The one rule
+
+**The lobby Map Size must match the size baked into the script.** Land
+areas are absolute tile counts while `land_position` is a percentage, so a
+mismatch breaks the map rather than degrading it. Every shipped map is
+240×240 and wants `Huge [240]`.
+
+### The loop
 
 ```bash
-uv run rwmaps-batch --sizes 220 240 --install      # the candidate set
-uv run rwmaps "Great Lakes" --region greatlakes --rotate 45 --players 8 --install
+uv run python automation/window_candidates.py          # screen windows, ~5s each, no engine
+uv run python automation/build_mod.py --regions "X" --placeholder "X"
+uv run python automation/install_mod.py --all
+uv run python automation/mod_capture.py --run-id <id> --n-samples 2
+uv run python automation/resource_baseline.py          # re-profile archives, no engine
+uv run python automation/build_candidate_report.py --run-id <id>
 uv run pytest tests -q
 ```
 
-Then restart AoE2 DE → Skirmish → Map Style **Custom**.
+`mod_capture.py --region-set <json>` drives windows that don't ship yet
+(see `automation/candidate_set.py`), so a candidate can be captured without
+adding it to `MOD_REGIONS`.
 
-## The one rule
+A full `build_mod.py` is ~70s of `choose_starts` annealing per region.
+`choose_starts` uses a fixed RNG seed, so rebuilds are byte-identical and a
+diff shows only what you actually changed.
 
-**The lobby Map Size must match the number in the map name.** `rw_great_lakes_240`
-needs `Huge [240]`.
+### Non-obvious things that are load-bearing
 
-Land areas are absolute tile counts while positions are percentages, so a size
-mismatch breaks the map rather than degrading it: at `Large [220]` a 240-tuned
-Great Lakes asks for more land tiles than the map has and the lakes vanish
-entirely. That's why each map is generated once per size.
-
-Lobby sizes: `Tiny 120 · Small 144 · Medium 168 · Normal 200 · Large 220 · Huge
-240 · Ludicrous 480`. We generate 200 and up (6 players and up).
-
-## How it works
-
-1. **`projection.py`** — a square window in any projected CRS (`--proj` takes a
-   name, a PROJ string, or an EPSG code); each tile centre is inverse-transformed
-   to lon/lat.
-2. **`raster.py`** — point-in-polygon against Natural Earth coastlines *in
-   geographic space*, so limited-domain projections and the antimeridian can't
-   produce garbage. Downloads and caches to `data/` on first use.
-3. **`rms_land.py`** — greedily covers the land mask with discs, emitted as
-   `create_land` blocks at absolute `land_position`. This is the whole trick:
-   it's what lets a coastline live in plain script text.
-4. **`analysis.py`** — picks start positions, clusters them into teams, and
-   chooses `ai_info_map_type`.
-5. **`rms.py`** — wraps it in water depths, forests, resources and fish.
-
-Grid convention is `[y][x]`, row 0 north, column 0 west. The 45° tilt in game is
-just the isometric camera — `--rotate 45` cancels it, so the landmass reads
-north-up on screen. Much easier to recognise in play.
-
-## Non-obvious things that are load-bearing
-
-Every one of these was a bug found by running the maps, not by reading docs.
+Every one was a bug found by running the maps.
 
 | | Why |
 |---|---|
-| Discs must **overlap** (`overlap=0.72`) | Circles don't tile the plane. Clearing exactly the disc you placed leaves a sliver between every pair of neighbours, and each sliver becomes a 1-tile pond. Cost 7.3% of the land as speckle and made the landmass unreadable; overlapping drops it to 2.5% and IoU 0.92 → 0.97. |
-| One shared `land_id` for the whole coastline | Per-blob ids create hundreds of zones, which breaks `max_distance_to_other_zones` — the thing that keeps fish off the shore. With 700 ids, **no fish spawned at all**. |
-| Script must create its own water depths | `base_terrain` is `WATER`, so `DEEP_WATER` doesn't exist until we make it. The shipped real-world scripts chain `MED_WATER` off `DEEP_WATER` because their `.scx` already supplies deep ocean; copying that gives a flat sea and deep-water fish have nowhere legal to sit. |
-| `base_size` is a half-width | It alone covers `(2b+1)²` tiles. Setting it to the disc radius overshoots the budget and floods the map with land. |
-| Tile budget needs rescaling (`FILL_FACTOR` 1.18) | Overlapping discs' areas sum to more than their union. Budget exactly and lands stop just shy of touching; slightly over and they meet. |
-| A narrow landmass cannot seat 8 players | Land is a resource and the only one that cannot be topped up. Worst-off player as a fraction of that map's own median: every stock map holds 0.79-0.96; New Zealand managed 0.35 with a worst player on **300 buildable tiles against Arabia's 2,676**, Japan 0.60. A long thin island chain has no interior, so no start arrangement fixes it — and at 240 tiles those chains all look alike, which costs the project its actual target. Screen a window for width, not just area. |
-| A resource **role** has many skins; list them all | `themes.inc` re-skins every animal per biome, and `object_groups.inc` can redefine a role as a *group* of ids on top of that. Miss one and a whole role reads as zero: the boar list once held only id 48 (2026-08-08), and small game only the Arctic Hare until 2026-08-16, when a stock Arabia capture with 103 wild chickens in it counted zero of them. Check both files, not just `themes.inc`. |
-| Count resources, not objects, and quote the radius | Six bushes and six gold mines are both "6"; a boar is worth 3+ sheep and gathers faster than any of them. Convert with `rwmaps/resource_value.py`. And every count is relative to `fairness.OWNERSHIP_RADIUS` — Arabia gives a player 9 stone within 30 walked tiles and 16 within 50, off the same map. |
-| "Zero of a kind" is **not** a verdict | Stock Arabia rolls `percent_chance 50 GAME_HUNTABLE`, so half of all Arabia games place no deer at all — not a reachability artifact, there is no deer object on the map. Read the rate against a comparable stock map, never against zero. |
-| Placeholder→land cleanup must be **repeated** (16x) | `create_terrain` seeds clumps at random tiles and grows each until its budget is spent; nothing makes that walk visit every tile. One pass left 2-81 stranded tiles on **all 110** captures in `reports/20260809-052633_mod_report_data_sysa_n10` — every seed of every region — still carrying a `PLACEHOLDER_TERRAIN_*`/`SPAWN_PLACEHOLDER` id, which the game draws as a black "placeholder" texture, mostly on the shoreline of a player's own land. Stock `includes/forest.inc` emits the identical block 16x per placeholder terrain for exactly this reason. Repeating it took Britain to 0/5 on real captures. |
-| `ai_info_map_type` keyed on **dock-worthy water**, not land fraction | `ARABIA` tells the AI there are no fish, so it never fish-booms. Great Lakes is 88% *land* but every start is on a lake — it must be `COASTAL`. Keying off land fraction also made the same geography flip type just by rotating it. |
+| Discs must **overlap** (`overlap=0.85`) | Circles don't tile the plane. Clearing exactly the disc you placed leaves a sliver between every neighbouring pair, and each becomes a 1-tile pond — 7.3% of the land as speckle, landmass unreadable. Overlapping drops it to 2.5% and IoU 0.92 → 0.97. |
+| One shared `land_id` for the whole coastline | Per-blob ids create hundreds of zones, which breaks `max_distance_to_other_zones` — the thing keeping fish off the shore. With 700 ids, **no fish spawned at all**. |
+| Script must create its own water depths | `base_terrain` is `WATER`, so `DEEP_WATER` doesn't exist until we make it. The shipped real-world scripts chain `MED_WATER` off `DEEP_WATER` because their `.scx` already supplies deep ocean; copying that gives a flat sea and deep-water fish nowhere legal to sit. |
+| `base_size` is a half-width | It alone covers `(2b+1)²` tiles. Setting it to the disc radius floods the map with land. |
+| Tile budget needs rescaling (`FILL_FACTOR` 1.18) | Overlapping discs' areas sum to more than their union. Budget exactly and lands stop just shy of touching. |
+| Placeholder→land cleanup must be **repeated** (16×) | `create_terrain` grows clumps from random seeds until the budget is spent; nothing makes that walk visit every tile. One pass left 2–81 stranded tiles on **all 110** captures of a full pass, drawn in game as a black "placeholder" texture. Stock `includes/forest.inc` repeats the identical block 16× for this reason. |
+| A resource **role** has many skins; list them all | `themes.inc` re-skins every animal per biome, and `object_groups.inc` can redefine a role as a *group* of ids on top of that. Miss one and a whole role reads as zero — boar (2026-08-08) and small game (2026-08-16, 103 wild chickens counted as none). Check both files. |
+| `place_on_specific_land_id` at a real island kills generation | Measured: Britain 0/5 generated with it against 5/5 without. Land ids are still emitted; only the object clause is off. |
+| `ai_info_map_type` keyed on **dock-worthy water**, not land fraction | `ARABIA` tells the AI there are no fish, so it never fish-booms. Great Lakes is 88% *land* but every start is on a lake — it must be `COASTAL`. Keying off land fraction also flipped the type just by rotating the same geography. |
 
-## Candidates (8 players, 2 teams)
+### Orientation
 
-Land % first — on a team map, land area is what decides whether 8 players have
-room. `ally`/`enemy` are mean start distances; allies closer than enemies is the
-shape you want.
-
-| map | land% | IoU | min sep | ally | enemy | ai |
-|---|---|---|---|---|---|---|
-| great_lakes_northup | 88.9 | 0.97 | 44 | 99 | 155 | COASTAL |
-| great_lakes | 88.1 | 0.96 | 48 | 96 | 141 | COASTAL |
-| black_sea | 76.8 | 0.97 | 52 | 97 | 152 | COASTAL |
-| black_sea_northup | 76.4 | 0.97 | 60 | 112 | 163 | COASTAL |
-| chesapeake | 63.8 | 0.96 | 40 | 88 | 91 | COASTAL |
-| anatolia | 56.1 | 0.97 | 40 | 77 | 122 | COASTAL |
-| iberia | 50.7 | 0.98 | 36 | 60 | 89 | MEDITERRANEAN |
-| italy | 50.5 | 0.97 | 40 | 53 | 118 | MEDITERRANEAN |
-
-Britain and Denmark are omitted: at 8 players their starts land ~20–26 tiles
-apart and the analyzer flags them unfair.
-
-Every run writes to `out/<UTC timestamp>/` with a 3-panel PNG per map: the real
-coastline, what the script actually builds (olive = spill into sea, red =
-missed land), and how the game draws it.
-
-## What's missing
-
-- **Town centre placement.** `analysis.choose_starts` picks a start tile from
-  the land mask alone; where the engine actually drops the Town Centre within
-  that assigned land isn't independently verified, and it's visibly not always
-  great. See [`RENDER_PIPELINE.md`](RENDER_PIPELINE.md) for the real-render
-  loop this needs and the plan to close it.
-- **Resource fairness.** Fish exist and starts are placed deliberately, but
-  nothing checks that each player has boar, berries, gold and stone at a sane
-  distance and actually reachable. Depends on town centre placement being
-  solid first, since resource placement is relative to the TC.
-- **Real elevation.** Terrain height is procedural; a DEM could be draped.
-- **A real multiplayer game.** Scripts are self-contained and `.rms`
-  auto-transfer is documented behaviour, but only verified in single player.
-
-## Verifying against the real engine
-
-Coastline fidelity (IoU) and fairness are computed from the Python land mask
-alone, before the game ever sees the script — good for fast iteration, but the
-engine's random-map interpreter has its own behaviour that doesn't always
-match. [`RENDER_PIPELINE.md`](RENDER_PIPELINE.md) documents a working,
-UI-automation-driven pipeline that generates real `.aoe2scenario` files from
-candidate scripts at scale, for tuning against actual engine output instead of
-an approximation.
+The grid is stored north-up; the engine draws it rotated 45° counter-
+clockwise. So at `--rotate 0` north appears at the **upper left**, and
+`--rotate 45` is what puts north actually up on screen and in the minimap.
+`thumbnail.ICON_ROTATION` is the same turn, and its sign was wrong once —
+45° the wrong way is a 90° error and every map shipped a mismatched icon.
+Don't "simplify" it without re-measuring against the stock icons.

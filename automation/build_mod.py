@@ -11,20 +11,21 @@ overrides consolidation width to victoria_recenter's own verified value
 (5/3, cell 0a8509cf) since that's a specific already-verified-good data
 point rather than the general-purpose default.
 
-All regions have now been through the N=10-per-region real-engine capture
-pass (see MOD_STATUS.md) - Salish Sea was the original hand-verified data
-point; the rest were a first cut picked for geographic variety (archipelago,
-fjords, enclosed sea, bay, island nations), verified/fixed since.
+All regions have been through an N=10-per-region real-engine capture pass
+(reports/20260809-052633_mod_report_sysa_n10.html). Salish Sea was the
+original hand-verified data point; the rest were a first cut picked for
+geographic variety, verified/fixed since. Three of that cut were retired on
+2026-08-15 - see RETIRED_REGIONS below.
 
 Italy ships as two variants: "Cramped Italy" (all 8 players crowded onto
 the single connected mainland/France/Balkans landmass - the original,
 unmodified behavior) and "Italy" (`--spread-islands`, spreading players
 across Sardinia/Corsica/Tunisia and the Italian peninsula itself instead of
 just the mainland's far corners - see MOD_STATUS.md for the full
-investigation). Both carry `--tight-resources` too.
+investigation).
 
-A full build is ~11 regions x ~70s of choose_starts annealing, so roughly
-17 minutes - far too slow to sit inside an edit/generate/capture loop. Pass
+A full build is ~8 regions x ~70s of choose_starts annealing, so roughly
+10 minutes - far too slow to sit inside an edit/generate/capture loop. Pass
 ``--regions`` to rebuild just the ones you are working on: that skips the
 wipe and overwrites only those scripts in place, leaving the other regions'
 scripts alone. ``--placeholder`` then drops the region you care about into
@@ -57,7 +58,7 @@ DEBUG_MOD_NAME = "Real World Maps (Debug)"
 PLACEHOLDER_SLOT = "AA_rw_placeholder_tester.rms"
 
 #: prefixed onto every shipped script's filename (the in-game "Random Map
-#: location" list shows the filename verbatim) so all 10 sort together
+#: location" list shows the filename verbatim) so they all sort together
 #: instead of being scattered alphabetically among 100+ subscribed-mod
 #: entries. Doesn't touch PLACEHOLDER_SLOT, which needs to keep sorting
 #: near the very front for the tuning automation's list-crash workaround

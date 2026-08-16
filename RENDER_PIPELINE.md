@@ -1,5 +1,14 @@
 # Real-render verification pipeline
 
+> **The mechanics here are superseded by `EDITOR_AUTOMATION.md`.** The
+> capture path no longer shells out to `ui_driver.ps1` and the Windows OCR
+> seed poll is gone; `automation/editor.py` reads the screen with
+> OmniParser and confirms a control before clicking it.
+>
+> This file is kept for the part that has not changed: **why** the pipeline
+> is GUI automation rather than a direct engine call. See "Why not call the
+> engine directly" below before proposing that again.
+
 `rwmaps` computes fairness and coastline fidelity entirely from the Python
 land mask, before the game ever sees the script. That's necessary but not
 sufficient — the *engine's own* random-map interpreter has its own ideas

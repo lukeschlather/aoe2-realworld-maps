@@ -14,14 +14,15 @@ cited so a stale line here is checkable in one grep.
 | doc | what it is | status |
 |---|---|---|
 | this file | the generation mechanism | live |
-| `RESOURCE_TEMPLATES.md` | the two stock resource systems and their measured budgets | live, authoritative on resources |
+| `RESOURCE_TEMPLATES.md` | the two stock resource systems and their measured budgets | live, authoritative on stock |
 | `STOCK_MAP_INVENTORY.md` | what stock scripts exist on disk, script name vs UI name | live |
-| `RENDER_PIPELINE.md` | the UI automation that drives real engine renders | live |
+| `EDITOR_AUTOMATION.md` | the UI automation that drives real engine renders | live |
+| `RENDER_PIPELINE.md` | why the pipeline is GUI automation at all | **history** for the mechanics, live for the rationale |
 | `RESOURCE_REWORK_STATUS.md` | the resource rework's open items | live, a work queue not a reference |
-| `CLAUDE.md` | working conventions - verification philosophy, git hygiene | live |
+| `CLAUDE.md` | working conventions | live |
+| `README_AGENTS.md` | concepts: fairness, aesthetics, how to make changes | live |
 | `MOD_STATUS.md` | 2026-08-01 mod state | **history**, carries a superseded banner |
 | `TUNING_STATUS.md` | 2026-07-31 window/parameter search | **history**, but its known-good defaults are the ones in `cli.py` today |
-| `README_AGENTS.md` | older agent-written readme | **history**, its CLI examples predate the mod build |
 
 ## The one thing that breaks maps
 
@@ -355,7 +356,7 @@ its own `MOD_REGIONS` list, which is where each region's CLI flags live.
 ```sh
 uv run python automation/build_mod.py --list          # region names + their flags
 
-# full rebuild: 11 regions x ~70s of annealing, ~17 minutes
+# full rebuild: 8 regions x ~70s of annealing, ~10 minutes
 uv run python automation/build_mod.py
 
 # one region, in place, other regions untouched: ~2 minutes

@@ -1,6 +1,10 @@
 # RW Maps
 
-This has a mod "Real World Maps" which includes a bunch of RW maps.
+This has a mod "Real World Maps" which includes a bunch of RW maps. Eight
+ship right now: Black Sea, Britain, Chesapeake Bay, Cramped Italy, Greece,
+Italy, Salish Sea, Scandinavia. Japan, Caribbean and New Zealand were
+retired 2026-08-15 - unrecognisable projections, and measurably short on
+stone, wood and land besides.
 
 All the code is vibecoded by Claude Sonnet, for some reason we ended up with code both in automation/ and src/rwmaps/ and there are even some tests in tests.
 
@@ -10,7 +14,15 @@ The reports/ folder has some examples of intermediate maps generated and resourc
 
 I have some ideas about how to reduce the crashiness to allow an agent to click around in the UI more freely and need less handholding. I think probably rewriting the UI automation to use python and OCR, possibly making a map of the scenario editor would help. When left to its own devices Claude doesn't do a very good job even clicking on the correct boxes - I suspect that simply recording a human using the UI and using the pixels the human clicks on for specific UI elements might be enough to stop the crash. Though with how often it crashes, it does seem there is something specific to how Powershell/Python uses the UI that causes crashes, I still feel it's possible the UI automation is just really good at finding the one pixel that triggers a crash.
 
-Other hypotheses for why it's crashing: 
+**Update: that idea got built.** The UI automation is Python now, and it
+does map the editor - `automation/omni.py` runs OmniParser over a
+screenshot and hands back labelled boxes, so `automation/editor.py` finds
+each control by reading the screen and confirms it is there before
+clicking. Crash recovery is automatic. `EDITOR_AUTOMATION.md` has the
+details. The old PowerShell/Windows-OCR driver still backs the older
+scripts (`tuning_matrix.py`, `stock_capture.py`).
+
+Other hypotheses for why it was crashing: 
 
 * bot detection is active in the scenario editor because it's just always on whether or not you're in a multiplayer game. (pretty sure this is not the case)
 * there's some sort of a mismatch because my UI scale on my machine is not at 100% (it's like 150% or something) and my resolution has some weird interaction with whatever thing is calculating coordinates between AOE2 and the desktop environment which is processing the UI automation click coordinates.
@@ -21,7 +33,7 @@ Other hypotheses for why it's crashing:
 ```sh
 uv run python automation/build_mod.py --list      # regions and their flags
 
-# one region, ~2 min (a full rebuild is ~17: 11 regions x ~70s of annealing)
+# one region, ~2 min (a full rebuild is ~10: 8 regions x ~70s of annealing)
 uv run python automation/build_mod.py --regions "Salish Sea" --placeholder "Salish Sea"
 uv run python automation/install_mod.py --all
 
@@ -57,8 +69,9 @@ Live:
 | RESOURCE_TEMPLATES.md | the two stock resource systems, and their measured budgets. Authoritative on resources |
 | STOCK_MAP_INVENTORY.md | what stock scripts are on disk; script name vs UI name |
 | **EDITOR_AUTOMATION.md** | **how the capture pipeline drives the Scenario Editor - start here for anything UI.** Verify-before-click, what each check costs, the mods failure that silently captures the wrong map |
-| RENDER_PIPELINE.md | the original PowerShell pipeline. Superseded for `mod_capture` by EDITOR_AUTOMATION.md; `stock_capture` still uses it |
+| RENDER_PIPELINE.md | the original PowerShell pipeline. Mechanics superseded by EDITOR_AUTOMATION.md; keep it for *why* this is GUI automation and not a direct engine call |
 | RESOURCE_REWORK_STATUS.md | the resource rework's open items - a work queue, not a reference |
+| **README_AGENTS.md** | **the concepts: what "fair" and "recognisable" mean here, and how to change things safely.** The fairness model, the stock yardstick, resource amounts, and the load-bearing gotchas |
 | CLAUDE.md | working conventions: verify with real renders, no agent quality verdicts, commit incrementally |
 
 History - kept for the record, and carrying known-bad assumptions:
@@ -67,5 +80,4 @@ History - kept for the record, and carrying known-bad assumptions:
 |---|---|---|
 | MOD_STATUS.md | 2026-08-01 mod state | its resource analysis rests on a 1999 orphan include no shipping map uses; carries a banner saying so |
 | TUNING_STATUS.md | 2026-07-31 window/parameter search | superseded as narrative, but the known-good defaults it settled on are the ones in `cli.py` today |
-| README_AGENTS.md | older agent-written readme | its CLI examples predate the mod build |
 
