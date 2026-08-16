@@ -53,6 +53,7 @@ from rwmaps import thumbnail  # noqa: E402
 from rwmaps.scx_read import read_capture  # noqa: E402
 
 from candidate_set import CANDIDATES  # noqa: E402
+import resource_compare  # noqa: E402
 
 #: Same floors the pre-generation screen used, so a captured map's structure
 #: can be read against the truth mask it was cut from.
@@ -384,8 +385,16 @@ def main() -> None:
         body.append(f'<section><h2>{title}</h2><p class="blurb">{blurb}</p>'
                     + "".join(sections[title]) + "</section>")
 
+    baseline = resource_compare.load()
+    if baseline:
+        print(f"baseline: {len(baseline)} archived captures")
+    comparison = resource_compare.comparison_html(baseline)
+    historical = resource_compare.historical_html(baseline, spread_table)
+
     html = TEMPLATE.format(
         run_id=args.run_id,
+        comparison=comparison,
+        historical=historical,
         generated_at=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         commit=git_commit(),
         total=total,
@@ -437,6 +446,20 @@ TEMPLATE = """<!doctype html>
  table.spread th {{ text-align:left; }}
  .legend {{ color:#8f8f8f; font-size:.76rem; margin:.3rem 0 .2rem;
             max-width:60ch; }}
+ table.cmp {{ font-size:.82rem; margin:.4rem 0 1.6rem; }}
+ table.cmp th {{ text-align:left; white-space:nowrap; }}
+ table.cmp td {{ text-align:right; padding:.13rem .55rem .13rem 0;
+                 white-space:nowrap; }}
+ table.cmp td.cohort {{ text-align:left; color:#bdbdbd; vertical-align:top;
+                        border-right:1px solid #333; padding-right:.8rem; }}
+ table.cmp tr.sub th {{ color:#6f6f6f; font-weight:400; font-size:.75rem;
+                        border-bottom:1px solid #333; }}
+ table.cmp tr.c-arabia th, table.cmp tr.c-arabia td {{ background:#1d2419; }}
+ table.cmp tr.c-candidate th {{ color:#cfe3ff; }}
+ .up {{ color:#7fbf7f; }} .down {{ color:#e08a6a; }}
+ details.region {{ border:1px solid #2e2e2e; border-radius:8px;
+                   padding:.6rem .9rem; margin:0 0 .6rem; background:#191919; }}
+ details.region summary {{ cursor:pointer; color:#dcdcdc; }}
  .caveat {{ border-left:3px solid #6b5a2a; background:#1e1a12; padding:.7rem 1rem;
             margin:1.2rem 0; color:#d8d0b8; max-width:80ch; }}
 </style>
@@ -470,7 +493,11 @@ TEMPLATE = """<!doctype html>
  (<code>small_game</code> excluded: plenty of good maps place none).
 </div>
 
+{comparison}
+
 {body}
+
+{historical}
 """
 
 
