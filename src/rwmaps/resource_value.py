@@ -21,21 +21,36 @@ instead.
 **It does not pretend gold and stone are comparable to food.** They are
 reported as three separate currencies.
 
-.. warning::
+Provenance, because these numbers are not all equally solid
+-----------------------------------------------------------
 
-   **The amounts below are provisional.** They are the standard
-   Definitive Edition values as commonly documented, and they were NOT
-   read out of the game's own data. The authoritative source is
-   ``resources/_common/dat/empires2_x2_p1.dat``, which is the binary genie
-   dat, and this project has no parser for it. Public sources disagree on
-   some entries - wild boar is variously given as 300 and 340 - and the
-   small-game and fish numbers are the least certain of the set.
+The authoritative source is ``resources/_common/dat/empires2_x2_p1.dat``,
+the binary genie dat, and this project has no parser for it. Three other
+places were checked on 2026-08-16:
 
-   Every report that uses these shows the **object counts alongside**, and
-   those counts are ground truth read straight from the capture. Treat the
-   amounts as a convenience for scale, correct this table when better
-   numbers are available, and do not let a decision rest on a difference
-   of a few percent.
+* **A saved scenario does not store amounts.** The on-disk ``UnitStruct``
+  is exactly ``x, y, z, reference_id, unit_const, status, rotation,
+  initial_animation_frame, garrisoned_in_id, caption_string_id,
+  caption_string`` (AoE2ScenarioParser's DE v1.58 structure). There is no
+  amount field, so a capture cannot be asked what a gold mine was worth,
+  and a map that alters amounts is indistinguishable from one that does
+  not once saved. Do not go looking again.
+* **Mods alter amounts at generation time**, via
+  ``effect_amount GAIA_SET_ATTRIBUTE <unit> ATTR_STORAGE_VALUE <n>``, which
+  rewrites the running game's unit-type table rather than any per-object
+  data. Zetnus HyperRandom does exactly this - and because it has to name
+  the value, its script IS a readable source for a couple of them.
+* **The localisation strings** carry no per-object amounts.
+
+So each entry below is tagged with where it comes from. ``CONFIRMED``
+means read out of a script that sets it explicitly; ``ASSUMED`` means the
+commonly documented DE value and nothing stronger. Public sources disagree
+on some of the assumed ones - wild boar is variously given as 300 and 340.
+
+Every report that uses these shows the **object counts alongside**, and
+those counts are ground truth read straight from the capture. Treat the
+assumed amounts as a convenience for scale, correct them when better
+numbers turn up, and do not let a decision rest on a few percent.
 """
 
 from __future__ import annotations
@@ -43,6 +58,18 @@ from __future__ import annotations
 FOOD = "food"
 GOLD = "gold"
 STONE = "stone"
+WOOD = "wood"
+
+#: What one forest tile is worth. CONFIRMED, near enough: Zetnus
+#: HyperRandom randomises every tree type it touches over ``rnd(50,150)``,
+#: symmetric about 100, and the one it narrows (``REEDTREE``) it gives
+#: ``rnd(25,75)``, symmetric about 50. A randomiser centres on the value it
+#: is perturbing.
+#:
+#: Worth having because wood is the resource the late game actually turns
+#: on - past the point where farms take over, food comes from wood - and
+#: forest tiles are already counted per player by ``rwmaps.fairness``.
+WOOD_PER_FOREST_TILE = 100
 
 #: role -> (currency, amount carried by one object).
 #:
@@ -50,27 +77,30 @@ STONE = "stone"
 #: value is used and the spread is noted - a capture records the role, not
 #: the skin, so there is nothing finer to key on.
 RESOURCE_AMOUNTS: dict[str, tuple[str, int]] = {
-    # One gold mine tile.
+    # One gold mine tile. ASSUMED.
     "gold": (GOLD, 800),
-    # One stone mine tile.
+    # One stone mine tile. ASSUMED.
     "stone": (STONE, 350),
-    # FORAGE_PLANT. Slow to gather but safe and close.
+    # FORAGE_PLANT. Slow to gather but safe and close. ASSUMED.
     "forage": (FOOD, 125),
-    # HERDABLE_A. Walks to you; no gather-rate penalty.
+    # HERDABLE_A. Walks to you; no gather-rate penalty. ASSUMED.
     "sheep": (FOOD, 100),
     # HUNTABLE_A/B. Flees, so it needs chasing or a mill.
+    # CONFIRMED: HyperRandom sets both `DEER` and `DLC_ZEBRA` to 140, and
+    # zebra is one of the nine HUNTABLE_A skins - so the whole role is 140,
+    # not just the classic deer.
     "deer": (FOOD, 140),
     # LUREABLE_A. The most valuable food on the map per object AND per
     # second, because it is lured to the town centre and gathered there.
     # Skins vary: wild boar and javelina alike, elephant and rhinoceros
     # carry more.
     "boar": (FOOD, 340),
-    # HUNTABLE_SMALL_A/B - wild chickens and the arctic hare. Minor, and
-    # the least certain number here.
+    # HUNTABLE_SMALL_A/B - wild chickens and the arctic hare. ASSUMED, and
+    # the least certain number here by some way.
     "small_game": (FOOD, 30),
 }
 
-#: Water food, same caveat, and separate because it needs a dock and ships
+#: Water food. All ASSUMED, and separate because it needs a dock and ships
 #: rather than villagers on foot.
 WATER_AMOUNTS: dict[str, tuple[str, int]] = {
     "shore_fish": (FOOD, 225),
@@ -93,13 +123,15 @@ def value_of(role: str, count: int) -> tuple[str, int]:
     return currency, each * count
 
 
-def wallet(counts: dict[str, int]) -> dict[str, int]:
-    """Total food / gold / stone represented by a bag of object counts.
+def wallet(counts: dict[str, int], forest_tiles: int = 0) -> dict[str, int]:
+    """Food / gold / stone / wood represented by a bag of object counts.
 
     ``counts`` is a role -> number mapping, e.g. one player's ``counts``
-    block out of :func:`rwmaps.fairness.profile_capture`.
+    block out of :func:`rwmaps.fairness.profile_capture`. ``forest_tiles``
+    is that player's reachable forest (exclusive + contested), which the
+    same function already reports.
     """
-    out = {FOOD: 0, GOLD: 0, STONE: 0}
+    out = {FOOD: 0, GOLD: 0, STONE: 0, WOOD: forest_tiles * WOOD_PER_FOREST_TILE}
     for role, n in counts.items():
         currency, total = value_of(role, n)
         if total:

@@ -213,8 +213,11 @@ def spread_table(fair: dict) -> str:
         # Objects are the ground truth; the wallet is what they are worth.
         # See rwmaps.resource_value for why both are shown and why the
         # food kinds are not collapsed into the food total alone.
-        w = rv.wallet(pp["counts"])
+        w = rv.wallet(pp["counts"],
+                      pp["wood"]["forest_exclusive"]
+                      + pp["wood"]["forest_contested"])
         cells.append(f'<td class="cur">{w[rv.FOOD]:,}</td>'
+                     f'<td class="cur">{w[rv.WOOD]:,}</td>'
                      f'<td class="cur">{w[rv.GOLD]:,}</td>'
                      f'<td class="cur">{w[rv.STONE]:,}</td>')
         rows.append(f"<tr><th>P{p}</th>{''.join(cells)}</tr>")
@@ -223,11 +226,11 @@ def spread_table(fair: dict) -> str:
     return f"""
           <table class="spread">
             <tr><th>player</th>{head}
-                <th class="cur">food</th><th class="cur">gold</th>
-                <th class="cur">stone</th></tr>
+                <th class="cur">food</th><th class="cur">wood</th>
+                <th class="cur">gold</th><th class="cur">stone</th></tr>
             {''.join(rows)}
             <tr class="foot"><th>unclaimed</th>{unclaimed}
-                <td colspan="3"></td></tr>
+                <td colspan="4"></td></tr>
           </table>
           <p class="legend">cells are
             <code>exclusive+contested&nbsp;@nearest</code> objects, then
