@@ -27,10 +27,32 @@ visually/topologically going on, not fairness tables.
 
 **Never fold geometry facts into a pass/fail verdict.** A real-world
 archipelago map normally has players on separate islands — that's geography,
-not unfairness. The only unambiguous problem worth flagging is a player
-having literally zero of some resource kind; everything else (TC separation,
-landmass count, pairwise land-reachability) is a plain fact for the user to
-judge, never a computed verdict.
+not unfairness. TC separation, landmass count and pairwise
+land-reachability are plain facts for the user to judge, never a computed
+verdict.
+
+**Measure resources in resources, not in objects, and always against
+stock.** Six bushes and six gold mines are both "6" and are nothing alike;
+a boar is worth more than three sheep and gathers faster than any of them.
+Convert with `rwmaps/resource_value.py`, keep the per-kind breakdown beside
+any food total (boar is the best food on the map and a total hides that),
+and show object counts next to amounts — the counts are ground truth, the
+amounts are provisional.
+
+"Zero of a kind" is **not** the unambiguous problem this file used to call
+it. Stock Arabia rolls a 50% chance of placing no deer at all, so half of
+all Arabia games trip it by design; Loch Ness and Black Forest leave a
+third of players with no sheep. Read any such rate against the stock rate
+for a comparable map, never against zero.
+
+Every count depends on `fairness.OWNERSHIP_RADIUS` (30 tiles walked), and
+that choice dominates the answer — Arabia gives a player 9 stone within 30
+tiles and 16 within 50. **Quote the radius whenever quoting a count.**
+
+What *is* worth flagging is supply far below what stock maps give for the
+same currency at the same radius — the retired Japan window sat at a median
+of 2 stone per player against Arabia's 9, with 39 of 80 player-samples
+having none at all. See `RESOURCE_TEMPLATES.md`.
 
 ## Automation and scale
 

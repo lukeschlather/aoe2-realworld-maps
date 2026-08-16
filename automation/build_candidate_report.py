@@ -51,6 +51,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from rwmaps import terrain as T  # noqa: E402
 from rwmaps import thumbnail  # noqa: E402
 from rwmaps.scx_read import read_capture  # noqa: E402
+from rwmaps import resource_value as rv  # noqa: E402
 
 from candidate_set import CANDIDATES  # noqa: E402
 import resource_compare  # noqa: E402
@@ -209,17 +210,30 @@ def spread_table(fair: dict) -> str:
             dist = "" if near is None else \
                 f" <span class='dim'>@{near:g}</span>"
             cells.append(f"<td>{split}{dist}</td>")
+        # Objects are the ground truth; the wallet is what they are worth.
+        # See rwmaps.resource_value for why both are shown and why the
+        # food kinds are not collapsed into the food total alone.
+        w = rv.wallet(pp["counts"])
+        cells.append(f'<td class="cur">{w[rv.FOOD]:,}</td>'
+                     f'<td class="cur">{w[rv.GOLD]:,}</td>'
+                     f'<td class="cur">{w[rv.STONE]:,}</td>')
         rows.append(f"<tr><th>P{p}</th>{''.join(cells)}</tr>")
 
     unclaimed = "".join(f'<td>{fair["unclaimed"].get(k, 0)}</td>' for k in kinds)
     return f"""
           <table class="spread">
-            <tr><th>player</th>{head}</tr>
+            <tr><th>player</th>{head}
+                <th class="cur">food</th><th class="cur">gold</th>
+                <th class="cur">stone</th></tr>
             {''.join(rows)}
-            <tr class="foot"><th>unclaimed</th>{unclaimed}</tr>
+            <tr class="foot"><th>unclaimed</th>{unclaimed}
+                <td colspan="3"></td></tr>
           </table>
           <p class="legend">cells are
-            <code>exclusive+contested&nbsp;@nearest</code>; contested counts
+            <code>exclusive+contested&nbsp;@nearest</code> objects, then
+            what they are worth. Amounts are provisional &mdash; see
+            <code>rwmaps.resource_value</code>; the object counts are ground
+            truth. Contested counts
             for both players, distance is walked on the walkable mask.
             <b>unclaimed</b> is the neutral pool no player can reach.</p>"""
 
@@ -457,6 +471,7 @@ TEMPLATE = """<!doctype html>
  table.cmp tr.c-arabia th, table.cmp tr.c-arabia td {{ background:#1d2419; }}
  table.cmp tr.c-candidate th {{ color:#cfe3ff; }}
  .up {{ color:#7fbf7f; }} .down {{ color:#e08a6a; }}
+ td.cur, th.cur {{ border-left:1px solid #333; color:#cfc39a; }}
  details.region {{ border:1px solid #2e2e2e; border-radius:8px;
                    padding:.6rem .9rem; margin:0 0 .6rem; background:#191919; }}
  details.region summary {{ cursor:pointer; color:#dcdcdc; }}

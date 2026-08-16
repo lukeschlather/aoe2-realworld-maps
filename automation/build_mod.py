@@ -78,11 +78,30 @@ SHIPPED_PREFIX = "RW "
 #: region tagged Broken.
 BROKEN_REGIONS = set()
 
-#: Dropped from the shipped mod 2026-08-15 on the user's call: their
-#: projections do not read as the real place. They stay in
-#: ``cli.REGIONS`` - that dict is a library of starting points, not a
-#: shipping list, and the windows are still useful to experiment from.
-#: Replacements are being chosen from the window-candidate report.
+#: Dropped from the shipped mod 2026-08-15 because their projections do not
+#: read as the real place.
+#:
+#: Re-profiling the archived N=10 captures on 2026-08-16 showed they were
+#: also **broken on supply**, which is a harder fact than the aesthetic
+#: call. Stone per player within 30 walked tiles, against stock Arabia's
+#: median of 9 (80 player-samples each, 24 for Arabia):
+#:
+#: | map         | median stone | players with none |
+#: |-------------|--------------|-------------------|
+#: | Arabia      | 9            | 0/24              |
+#: | Japan       | **2**        | **39/80**         |
+#: | New Zealand | 5            | 28/80             |
+#: | Caribbean   | 9            | 14/80             |
+#: | Britain     | 9            | 0/80              |
+#: | Salish Sea  | 9            | 0/80              |
+#:
+#: Two stone is not a start. Every shipped region that survived has zero
+#: players missing gold or stone across all 80 samples. Japan also ran a
+#: median of 7 gold against Arabia's 15, with 18/80 players at none.
+#:
+#: The windows stay in ``cli.REGIONS`` - that dict is a library of starting
+#: points, not a shipping list. Replacements are being chosen from the
+#: window-candidate report.
 RETIRED_REGIONS = ("Japan", "Caribbean", "New Zealand")
 
 

@@ -18,10 +18,19 @@
 >   include's silent failures; System A retries placements instead of
 >   dropping them, so the backstop would only double-place.
 > * **The zero-of-a-kind rates quoted below are not comparable to zero.**
->   Measured 2026-08-08, stock Arabia itself shows a player with zero owned
->   deer in 2 of 3 samples. The metric is partly measuring its own
->   nearest-TC-within-30-tiles definition. See the end of
->   `RESOURCE_TEMPLATES.md`.
+>   Measured 2026-08-08, stock Arabia itself shows a player with zero deer
+>   in 2 of 3 samples. The reason recorded at the time - that the metric was
+>   measuring its own nearest-TC-within-30-tiles definition - was checked on
+>   2026-08-16 and is **wrong**: those captures contain no deer object
+>   anywhere on the map, because Arabia rolls
+>   `percent_chance 50 #define GAME_HUNTABLE` and places small game the
+>   other half of the time. See the end of `RESOURCE_TEMPLATES.md`.
+> * **Supply below is counted in objects, which is the wrong unit.** A boar
+>   is worth more than three sheep and gathers faster than any of them; six
+>   bushes and six gold mines are both "6". Use
+>   `rwmaps/resource_value.py`, and quote
+>   `fairness.OWNERSHIP_RADIUS` with any count - Arabia gives a player 9
+>   stone within 30 tiles and 16 within 50.
 > * **`ai_info_map_type` claims below are shakier than stated.** Both
 >   Thames and Loch Ness declare `ARABIA` despite significant water, so the
 >   AI map type does not have to track water topology at all.

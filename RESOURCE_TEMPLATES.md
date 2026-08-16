@@ -603,15 +603,81 @@ against the stock maps, that metric fires on the game's own reference maps:
 **Arabia** shows a player with zero owned deer in 2 of 3 samples, and
 **Loch Ness** shows a player with neither sheep nor deer.
 
-That does not mean those maps are broken. It means the metric, as
-implemented, is partly measuring its own definition: `resource_ownership`
-assigns a resource to the single nearest town centre within a 30-tile
-walking radius, so a resource one tile past that radius, or a tile closer
-to a neighbour, counts as owned by nobody or by someone else. On a map
-where huntables are deliberately sparse, some player will lose the
-tie-break.
+That does not mean those maps are broken, and the reason is **not** the one
+originally recorded here. This section used to say the metric was measuring
+its own ownership definition - a resource one tile past the radius, or a
+tie-break lost to a neighbour. That was checked directly on 2026-08-16 and
+is wrong for Arabia:
 
-So a zero-of-a-kind rate should be compared *against the stock rate on a
-comparable map*, not against zero. Distance-to-nearest (see
-`rwmaps/fairness.py`) does not have this failure mode and is the better
-primary signal.
+- The zero-deer Arabia captures contain **no deer object anywhere on the
+  map**. Not "none within 30 tiles of some player" - `unclaimed.deer` is 0
+  too, and no `HUNTABLE_A`/`HUNTABLE_B` unit id appears in the file at all.
+- The cause is in Arabia's own script. It rolls
+  `percent_chance 50 #define GAME_HUNTABLE` against
+  `percent_chance 50 #define GAME_CHICKEN`, so **half of all Arabia games
+  have no deer by design** and place small game instead. Our three captures
+  came out 1 deer / 2 chicken, exactly as that coin flip predicts.
+
+The detection was also checked while chasing this and is complete:
+`HUNTABLE_A`/`B` has nine skins in `themes.inc` and `scx_read` lists all
+nine. What *was* missing is small game - `object_groups.inc` redefines
+`HUNTABLE_SMALL_A/B` as a group of three wild-chicken ids under
+`WILD_CHICKEN_VARIATION_A/B`, so the chicken half of that coin flip was
+being counted as nothing at all. Fixed; see the module comment.
+
+The conclusion survives its broken reasoning: **a zero-of-a-kind rate is
+meaningless against zero and has to be read against the stock rate for a
+comparable map.** A stock reference map deliberately omits an entire food
+kind half the time.
+
+The deeper point is that "kinds" is the wrong unit for food in the first
+place - see the next section.
+
+## Count resources, not objects
+
+Six berry bushes and six gold mines are both "6" and are not remotely the
+same thing. Neither are a boar and a sheep, which differ by more than
+three to one. What a player actually has is an *amount* of food, gold and
+stone within walking range.
+
+`rwmaps/resource_value.py` holds the conversion. Two rules it encodes:
+
+- **Food is broadly fungible, up to a point.** You need enough food to
+  reach the stage where farms take over and wood becomes the real food
+  source; past that, more huntable is worth less. So a food total is worth
+  reporting - but *beside* the per-kind breakdown, never instead of it.
+- **The kinds are not interchangeable in play.** Boar is the most valuable
+  food on the map because it gathers fastest when lured to the town centre.
+  Deer need chasing or a mill. Sheep walk to you. Berries are slow but
+  safe. A start with two boar is a different start from one with the same
+  food in berries, and a report that shows only the total hides that.
+
+Gold and stone stay separate currencies; neither converts to food.
+
+The amounts in that table are **provisional** - they are the standard DE
+values as commonly documented, not read from
+`resources/_common/dat/empires2_x2_p1.dat` (binary genie dat, no parser
+here), and public sources disagree on some of them. Every report shows the
+object counts next to the amounts, and those counts are ground truth.
+
+## "Accessible" is a radius choice, and it dominates the numbers
+
+`fairness.OWNERSHIP_RADIUS` is 30 tiles of walking distance. That single
+constant decides most of what any supply table says. Measured on the three
+stock Arabia captures, stone reachable per player:
+
+| within | s0 | s1 | s2 |
+|---|---|---|---|
+| 20 tiles | 5 | 9 | 5 |
+| **30 tiles** (the model) | **9** | **9** | **9** |
+| 40 tiles | 10 | 9 | 10 |
+| 50 tiles | 16 | 14 | 17 |
+| anywhere on the map | 96 | 96 | 96 |
+
+So "Arabia gives a player 9 stone" and "Arabia gives a player 16-24 stone"
+are both true statements about the same map, and they differ only in what
+counts as reachable. Arabia places 96 stone tiles for 8 players - 12 each
+if split evenly - and a player's own primary pile is the 5 within 20 tiles.
+
+Quote the radius whenever quoting a count. A number without one is not a
+fact about the map.
