@@ -42,10 +42,16 @@ places were checked on 2026-08-16:
   the value, its script IS a readable source for a couple of them.
 * **The localisation strings** carry no per-object amounts.
 
-So each entry below is tagged with where it comes from. ``CONFIRMED``
-means read out of a script that sets it explicitly; ``ASSUMED`` means the
-commonly documented DE value and nothing stronger. Public sources disagree
-on some of the assumed ones - wild boar is variously given as 300 and 340.
+Then on 2026-08-16 the user read five of them straight off a real RW
+Britain generation in game, which beats every source above: gold 800,
+stone 350, berries 125, deer 140, boar 340. That settles the ones that
+matter - the two currencies maps actually differ on, and the best food.
+Note it also settles boar at 340 rather than the 300 some public sources
+give.
+
+Each entry below is tagged with where it comes from. ``CONFIRMED`` means
+observed in game or read out of a script that sets it explicitly;
+``ASSUMED`` means the commonly documented DE value and nothing stronger.
 
 Every report that uses these shows the **object counts alongside**, and
 those counts are ground truth read straight from the capture. Treat the
@@ -77,13 +83,15 @@ WOOD_PER_FOREST_TILE = 100
 #: value is used and the spread is noted - a capture records the role, not
 #: the skin, so there is nothing finer to key on.
 RESOURCE_AMOUNTS: dict[str, tuple[str, int]] = {
-    # One gold mine tile. ASSUMED.
+    # One gold mine tile. CONFIRMED in game, RW Britain, 2026-08-16.
     "gold": (GOLD, 800),
-    # One stone mine tile. ASSUMED.
+    # One stone mine tile. CONFIRMED in game, RW Britain, 2026-08-16.
     "stone": (STONE, 350),
-    # FORAGE_PLANT. Slow to gather but safe and close. ASSUMED.
+    # FORAGE_PLANT. Slow to gather but safe and close.
+    # CONFIRMED in game, RW Britain, 2026-08-16.
     "forage": (FOOD, 125),
-    # HERDABLE_A. Walks to you; no gather-rate penalty. ASSUMED.
+    # HERDABLE_A. Walks to you; no gather-rate penalty. ASSUMED - one of
+    # the two land amounts still unconfirmed.
     "sheep": (FOOD, 100),
     # HUNTABLE_A/B. Flees, so it needs chasing or a mill.
     # CONFIRMED: HyperRandom sets both `DEER` and `DLC_ZEBRA` to 140, and
@@ -92,8 +100,9 @@ RESOURCE_AMOUNTS: dict[str, tuple[str, int]] = {
     "deer": (FOOD, 140),
     # LUREABLE_A. The most valuable food on the map per object AND per
     # second, because it is lured to the town centre and gathered there.
-    # Skins vary: wild boar and javelina alike, elephant and rhinoceros
-    # carry more.
+    # CONFIRMED in game, RW Britain, 2026-08-16 - so 340, not the 300 some
+    # public sources give. Skins vary: wild boar and javelina alike,
+    # elephant and rhinoceros carry more.
     "boar": (FOOD, 340),
     # HUNTABLE_SMALL_A/B - wild chickens and the arctic hare. ASSUMED, and
     # the least certain number here by some way.

@@ -234,9 +234,10 @@ def spread_table(fair: dict) -> str:
           </table>
           <p class="legend">cells are
             <code>exclusive+contested&nbsp;@nearest</code> objects, then
-            what they are worth. Amounts are provisional &mdash; see
-            <code>rwmaps.resource_value</code>; the object counts are ground
-            truth. Contested counts
+            what they are worth. Gold 800, stone 350, berries 125, deer 140
+            and boar 340 are confirmed in game; sheep, small game and fish
+            are still assumed &mdash; see <code>rwmaps.resource_value</code>.
+            Object counts are ground truth either way. Contested counts
             for both players, distance is walked on the walkable mask.
             <b>unclaimed</b> is the neutral pool no player can reach.</p>"""
 
