@@ -55,7 +55,7 @@ def pool(rows: list[dict]) -> dict[tuple[str, str], dict]:
     out: dict[tuple[str, str], dict] = defaultdict(
         lambda: {"n_caps": 0, "retired": False,
                  "counts": defaultdict(list), "nearest": defaultdict(list),
-                 "wood": [], "unclaimed": defaultdict(list)})
+                 "wood": [], "land": [], "unclaimed": defaultdict(list)})
     for r in rows:
         key = (r["cohort"], r["map"])
         e = out[key]
@@ -72,6 +72,9 @@ def pool(rows: list[dict]) -> dict[tuple[str, str], dict]:
                     e["nearest"][kind].append(near)
             e["wood"].append(pp["wood"]["forest_exclusive"]
                              + pp["wood"]["forest_contested"])
+            ld = pp.get("land")
+            if ld:
+                e["land"].append(ld["land_exclusive"] + ld["land_contested"])
     return out
 
 
@@ -171,6 +174,51 @@ def wood_table(pooled: dict) -> str:
     </table>"""
 
 
+def land_table(pooled: dict) -> str:
+    """Buildable land per player - the resource that cannot be topped up.
+
+    The ``min/med`` column is the one to read. A player can walk further
+    for gold; there is no walking further for somewhere to put a farm, so
+    how far the worst-off player sits below the middle of their own map is
+    the whole question. Arabia runs 0.83-0.92.
+    """
+    ref = pooled.get(("arabia", "Arabia"))
+    ref_med = statistics.median(ref["land"]) if ref and ref["land"] else None
+    rows = []
+    for cohort in COHORT_ORDER:
+        keys = sorted(k for k in pooled if k[0] == cohort)
+        for i, key in enumerate(keys):
+            e = pooled[key]
+            if not e["land"]:
+                continue
+            v = _stat(e["land"])
+            ratio = v[0] / v[1] if v[1] else 0.0
+            cls = " class='bad'" if ratio < 0.7 else ""
+            label = key[1] + (' <span class="dim">(retired)</span>'
+                              if e["retired"] else "")
+            cohort_cell = (f'<td rowspan="{len(keys)}" class="cohort">'
+                           f'{COHORT_LABEL[cohort]}</td>' if i == 0 else "")
+            rows.append(
+                f'<tr class="c-{cohort}">{cohort_cell}<th>{label}</th>'
+                f'<td class="dim">{e["n_caps"]}&times;8={len(e["land"])}</td>'
+                f'<td>{v[0]:,.0f}</td><td><b>{v[1]:,.0f}</b></td>'
+                f'<td>{v[2]:,.0f}</td>'
+                f'<td{cls}>{ratio:.2f}</td>'
+                f'<td>{_delta(v[1], ref_med)}</td></tr>')
+    return f"""
+    <h3 id="res-land">land</h3>
+    <p class="legend">Buildable tiles a player can reach: dry (shallows
+      excluded - a ford is a route, not ground) and unforested (clearable,
+      but not land you have yet). <b>min/med</b> is how far the worst-off
+      player on that map sits below its own middle; Arabia runs 0.83-0.92.</p>
+    <table class="cmp">
+      <tr><th>cohort</th><th>map</th><th>players</th>
+          <th>min</th><th>med</th><th>max</th><th>min/med</th>
+          <th>&Delta;med vs Arabia</th></tr>
+      {''.join(rows)}
+    </table>"""
+
+
 def comparison_html(rows: list[dict]) -> str:
     if not rows:
         return ('<section><h2>Against stock</h2><p class="missing">'
@@ -179,7 +227,8 @@ def comparison_html(rows: list[dict]) -> str:
     pooled = pool(rows)
     n_caps = len(rows)
     maps = len(pooled)
-    tables = "".join(kind_table(pooled, k) for k in KINDS) + wood_table(pooled)
+    tables = ("".join(kind_table(pooled, k) for k in KINDS)
+              + wood_table(pooled) + land_table(pooled))
     return f"""
   <section>
     <h2>Against stock</h2>
