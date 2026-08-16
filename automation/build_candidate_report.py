@@ -161,48 +161,113 @@ EXTRA_KINDS = ("small_game",)
 
 
 def spread_table(fair: dict) -> str:
-    """Per-kind supply from ``rwmaps.fairness``, the current model.
+    """Every resource, for every player, from ``rwmaps.fairness``.
 
-    NOT ``analyze_capture``'s ``resources`` block, which is kept in the
-    record only so old runs stay comparable. That one assigns every
-    resource to its single nearest town centre, breaking exact ties by
-    player index, and measures straight-line distance. On the tight maps
-    this project makes, most of what a player can reach is equally
-    reachable by a neighbour, so sole-ownership overstates what anyone
-    actually has. It disagrees with the current model in both directions
-    on this very run: it flagged four players on Britain north-up where
-    two are real, and it missed a player with no reachable deer at all on
-    GL Erie-Ontario.
+    Deliberately NOT a summary. A cross-player min-max per kind hides the
+    thing worth seeing - which player is short of what - and a map-wide
+    total hides it completely: two maps with identical gold totals play
+    differently when one player's share is 4 tiles and another's is 30.
+    So this is the full matrix, one row per player, one column per kind,
+    and no row of the table is an aggregate over players.
 
-    Every number below is exclusive/contested/unclaimed over walking
-    distance on the walkable mask, so water and forest are barriers.
+    Cells read ``exclusive+contested @nearest``. Contested counts for both
+    players because both can genuinely go and take it; nearest is walked on
+    the walkable mask, so water and forest are barriers rather than
+    straight-line shortcuts.
+
+    The one footer row is per-resource, not a player total: ``unclaimed``
+    is the neutral pool no player can reach at all.
+
+    This replaces ``analyze_capture``'s ``resources`` block, which is kept
+    in the record only so past runs stay comparable. That one assigns each
+    resource to its single nearest town centre, breaks exact ties by player
+    index, and measures straight lines. It disagrees in both directions on
+    this run: four players flagged on Britain north-up where two are real,
+    and a player with no reachable deer on GL Erie-Ontario missed entirely.
     """
+    kinds = SPREAD_KINDS + EXTRA_KINDS
+    players = sorted(fair["per_player"], key=int)
+
+    head = "".join(
+        f'<th class="{"dim" if k in EXTRA_KINDS else ""}">{k}</th>'
+        for k in kinds)
     rows = []
-    for kind in SPREAD_KINDS + EXTRA_KINDS:
-        s = fair["spread"].get(kind)
-        if not s:
-            continue
-        extra = ' class="dimrow"' if kind in EXTRA_KINDS else ""
-        # The nearest_* keys are absent entirely, not None, for a kind no
-        # player can reach anywhere - which is every capture's small_game.
-        near = ("&mdash;" if s.get("nearest_min") is None else
-                f"{s['nearest_min']:g}&ndash;{s['nearest_max']:g}"
-                f" <span class='dim'>(&Delta;{s['nearest_range']:g})</span>")
-        miss = s["n_players_without_any"]
-        unreach = s["n_players_unreachable"]
-        rows.append(
-            f"<tr{extra}><td>{kind}</td>"
-            f"<td>{s['count_min']}&ndash;{s['count_max']}</td>"
-            f"<td>{s['exclusive_min']}&ndash;{s['exclusive_max']}</td>"
-            f"<td>{near}</td>"
-            f"<td>{miss or '&middot;'}</td><td>{unreach or '&middot;'}</td>"
-            f"<td>{fair['unclaimed'].get(kind, 0)}</td></tr>")
+    for p in players:
+        pp = fair["per_player"][p]
+        cells = []
+        for k in kinds:
+            excl = pp["exclusive"].get(k, 0)
+            cont = pp["contested"].get(k, 0)
+            near = pp["nearest"].get(k)
+            if excl + cont == 0:
+                # The only unambiguous problem: nothing of this kind at all.
+                cls = "" if k in EXTRA_KINDS else ' class="bad"'
+                cells.append(f"<td{cls}>0</td>")
+                continue
+            split = f"{excl}+{cont}" if cont else f"{excl}"
+            dist = "" if near is None else \
+                f" <span class='dim'>@{near:g}</span>"
+            cells.append(f"<td>{split}{dist}</td>")
+        rows.append(f"<tr><th>P{p}</th>{''.join(cells)}</tr>")
+
+    unclaimed = "".join(f'<td>{fair["unclaimed"].get(k, 0)}</td>' for k in kinds)
     return f"""
           <table class="spread">
-            <tr><th>kind</th><th>count</th><th>exclusive</th>
-                <th>nearest (tiles)</th><th>no&nbsp;any</th>
-                <th>unreach</th><th>unclaimed</th></tr>
+            <tr><th>player</th>{head}</tr>
             {''.join(rows)}
+            <tr class="foot"><th>unclaimed</th>{unclaimed}</tr>
+          </table>
+          <p class="legend">cells are
+            <code>exclusive+contested&nbsp;@nearest</code>; contested counts
+            for both players, distance is walked on the walkable mask.
+            <b>unclaimed</b> is the neutral pool no player can reach.</p>"""
+
+
+def wood_water_table(fair: dict) -> str:
+    """Wood and water per player - the two supplies not in the object list.
+
+    Forest is classified by the same exclusive/contested rule rather than
+    by a disc around the town centre, which used to claim forest across
+    water and forest behind another player. ``unclaimed`` here is the wood
+    nobody starts near, which on Britain is most of France.
+    """
+    players = sorted(fair["per_player"], key=int)
+    fo = fair["forest"]
+    rows = []
+    for p in players:
+        w = fair["per_player"][p]["wood"]
+        aq = fair["per_player"][p]["water"]
+
+        def fish(near_key: str, n_key: str) -> str:
+            n, d = aq.get(n_key, 0), aq.get(near_key)
+            if not n and d is None:
+                return "<td>0</td>"
+            return f"<td>{n} <span class='dim'>@{d:g}</span></td>" if d is not None \
+                else f"<td>{n}</td>"
+
+        rows.append(
+            f"<tr><th>P{p}</th>"
+            f"<td>{w['forest_exclusive']:,}</td>"
+            f"<td>{w['forest_contested']:,}</td>"
+            f"<td>{w['open_tiles_within_10']:,}</td>"
+            f"<td>{w['open_tiles_within_20']:,}</td>"
+            f"<td>{w['stragglers_within_6']}</td>"
+            + fish("nearest_shore_fish", "shore_fish_within_20")
+            + fish("nearest_deep_fish", "deep_fish_within_20")
+            + fish("nearest_whale", "whale_within_20")
+            + "</tr>")
+    return f"""
+          <table class="spread">
+            <tr><th>player</th><th>forest excl</th><th>forest cont</th>
+                <th>open&le;10</th><th>open&le;20</th><th>stragglers&le;6</th>
+                <th>shore fish&le;20</th><th>deep fish&le;20</th>
+                <th>whale&le;20</th></tr>
+            {''.join(rows)}
+            <tr class="foot"><th>unclaimed</th>
+                <td colspan="2">{fo['unclaimed']:,} forest tiles
+                  <span class="dim">of {fo['total']:,},
+                  {fo['share_of_land']*100:.0f}% of land is wood</span></td>
+                <td colspan="6"></td></tr>
           </table>"""
 
 
@@ -212,7 +277,6 @@ def sample_card(r: dict, struct: dict, scen_rel: str | None) -> str:
     zero = fair["zero_kinds_by_player"] or {}
     zero_txt = ("none" if not zero else
                 "; ".join(f"P{k}: {', '.join(v)}" for k, v in sorted(zero.items())))
-    fo = fair["forest"]
     a = r["aesthetic"]
     masses = ", ".join(f"{v:,}" for v in struct["landmasses"][:6]) or "&mdash;"
     waters = ", ".join(f"{v:,}" for v in struct["waterbodies"][:8]) or "&mdash;"
@@ -235,16 +299,12 @@ def sample_card(r: dict, struct: dict, scen_rel: str | None) -> str:
           <tr><th>min TC separation</th><td>{p['min_tc_separation']}</td></tr>
           <tr><th>pairwise land-reachable</th>
               <td>{p['pairwise_land_reachable_fraction']}</td></tr>
-          <tr><th>forest</th>
-              <td>{fo['exclusive']:,} exclusive / {fo['contested']:,} contested /
-                  {fo['unclaimed']:,} unclaimed of {fo['total']:,}
-                  ({fo['share_of_land']*100:.0f}% of land)</td></tr>
-          <tr><th>neutral objects</th><td>{fair['neutral_total']:,}</td></tr>
           <tr><th>players with zero of a kind</th>
               <td class="{'bad' if zero else ''}">{zero_txt}</td></tr>
           <tr><th>file</th><td>{link}</td></tr>
         </table>
         {spread_table(fair)}
+        {wood_water_table(fair)}
       </div>"""
 
 
@@ -354,7 +414,7 @@ TEMPLATE = """<!doctype html>
  .region {{ border:1px solid #2e2e2e; border-radius:8px; padding:1rem 1.1rem;
             margin:0 0 1.3rem; background:#191919; }}
  .samples {{ display:flex; gap:1.1rem; flex-wrap:wrap; margin-top:.9rem; }}
- .sample {{ flex:1 1 480px; min-width:380px; }}
+ .sample {{ flex:1 1 560px; min-width:520px; }}
  .sample img {{ width:100%; max-width:420px; display:block; border-radius:4px;
                 background:#0d1b2a; }}
  table {{ border-collapse:collapse; font-size:.85rem; width:100%; margin-top:.4rem; }}
@@ -372,7 +432,11 @@ TEMPLATE = """<!doctype html>
                     padding-bottom:.2rem; width:auto; white-space:nowrap; }}
  table.spread td {{ padding:.12rem .7rem .12rem 0; white-space:nowrap; }}
  table.spread td:first-child {{ color:#bdbdbd; }}
- tr.dimrow td {{ color:#777; }}
+ tr.foot th, tr.foot td {{ border-top:1px solid #333; color:#9a9a9a;
+                           padding-top:.25rem; }}
+ table.spread th {{ text-align:left; }}
+ .legend {{ color:#8f8f8f; font-size:.76rem; margin:.3rem 0 .2rem;
+            max-width:60ch; }}
  .caveat {{ border-left:3px solid #6b5a2a; background:#1e1a12; padding:.7rem 1rem;
             margin:1.2rem 0; color:#d8d0b8; max-width:80ch; }}
 </style>
