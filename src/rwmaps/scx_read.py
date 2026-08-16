@@ -212,8 +212,22 @@ RESOURCE_UNITS: dict[int, str] = {
     # LUREABLE_A - aggressive, lured back to the TC. The big early food
     # spike, and the role most sensitive to placement distance.
     48: "boar", 822: "boar", 1139: "boar", 1301: "boar", 2589: "boar",
-    # HUNTABLE_SMALL_A - minor supplementary food (Great Wall asks for 8)
-    2100: "small_game",
+    # HUNTABLE_SMALL_A/B - minor supplementary food.
+    #
+    # The wild chickens are not a fourth skin in themes.inc; they come from
+    # includes/object_groups.inc, which REDEFINES HUNTABLE_SMALL_A/B as an
+    # object *group* of three chicken ids whenever a theme declares
+    # WILD_CHICKEN_VARIATION_A/B. Grepping themes.inc alone says the role
+    # is only ever 2100, and that is how this list came to miss them.
+    #
+    # Found 2026-08-16 chasing a stock Arabia capture that reported no
+    # deer: the capture has 103 wild chickens in it and counted zero of
+    # everything huntable-small. Same failure as the 2026-08-08 boar fix -
+    # one role, several skins, only one listed.
+    2100: "small_game",   # Arctic Hare
+    2084: "small_game",   # Wild Chicken (brown)
+    2086: "small_game",   # Wild Chicken (white)
+    2088: "small_game",   # Wild Chicken (black)
 }
 
 #: Water food, by role. Kept separate from ``RESOURCE_UNITS`` because it is
