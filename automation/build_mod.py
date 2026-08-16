@@ -157,20 +157,28 @@ def shipped_filename(name: str) -> str:
 FOREST_SPLIT = ["--forest-clumps", "36", "--forest-alt", "PINE_FOREST",
                 "--forest-spacing", "3"]
 
+#: Every shipped region generates with north toward the upper left - the
+#: engine's uncorrected view - which is what they have always looked like.
+#: Before 2026-08-16 that was the default and went unwritten; orientation is
+#: screen-space now and 0 means north-up, so it has to be said out loud.
+#: This is a knob to revisit per region, not a law: north-up reads better
+#: for most places (see the window-candidate report).
+NW = ["--north", "-45"]
+
 MOD_REGIONS = [
     ("Salish Sea", ["--center=-122.9,48.15", "--span-km", "260",
-                     "--overlap", "0.85", "--min-water-width", "5", "--min-land-width", "3"]),
-    ("Cramped Italy", ["--region", "italy"]),
-    ("Italy", ["--region", "italy", "--spread-islands"]),
+                     "--overlap", "0.85", "--min-water-width", "5", "--min-land-width", "3", *NW]),
+    ("Cramped Italy", ["--region", "italy", *NW]),
+    ("Italy", ["--region", "italy", "--spread-islands", *NW]),
     # Britain and Greece split their forest across two terrain types so it
     # stops fusing into one mass - see FOREST_SPLIT below. Britain pays no
     # wood for it; Greece needs its budget raised to 14 because the second
     # block under-places, which nets out at 23% wood against 25% before.
-    ("Britain", ["--region", "britain", *FOREST_SPLIT]),
-    ("Greece", ["--region", "greece", *FOREST_SPLIT, "--forest-percent", "14"]),
-    ("Chesapeake Bay", ["--region", "chesapeake"]),
-    ("Black Sea", ["--region", "blacksea"]),
-    ("Scandinavia", ["--region", "scandinavia"]),
+    ("Britain", ["--region", "britain", *FOREST_SPLIT, *NW]),
+    ("Greece", ["--region", "greece", *FOREST_SPLIT, "--forest-percent", "14", *NW]),
+    ("Chesapeake Bay", ["--region", "chesapeake", *NW]),
+    ("Black Sea", ["--region", "blacksea", *NW]),
+    ("Scandinavia", ["--region", "scandinavia", *NW]),
 ]
 
 

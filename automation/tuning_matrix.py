@@ -1,4 +1,10 @@
-"""Real-engine parameter exploration: for each (window, condition) cell,
+"""LEGACY ORIENTATION: the ``--rotate`` values below are grid-space and
+predate the 2026-08-16 switch to screen-space ``--north``. ``rwmaps`` no
+longer accepts ``--rotate``, so these will fail until converted -
+``north = rotate - 45`` (projection.north_from_legacy_rotate). Left
+unconverted because this script targets regions that no longer ship.
+
+Real-engine parameter exploration: for each (window, condition) cell,
 regenerate the script once, capture a handful of real samples, and analyze
 each IMMEDIATELY (fairness from actual TC placement + resource ownership +
 a small preview render) - appending one JSON line to a shared results.jsonl

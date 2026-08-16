@@ -27,7 +27,7 @@ def test_center_lands_on_center_tile():
 def test_rotation_moves_geography():
     kwargs = dict(proj="laea", lon=10.0, lat=45.0, span_km=1500, size=32)
     plain = MapWindow.from_center(**kwargs).tile_lonlat()[1]
-    turned = MapWindow.from_center(**kwargs, rotate_deg=90).tile_lonlat()[1]
+    turned = MapWindow.from_center(**kwargs, north_deg=90).tile_lonlat()[1]
     assert not np.allclose(plain, turned, equal_nan=True)
 
 
@@ -66,3 +66,24 @@ def test_whole_world_window_covers_both_hemispheres():
     assert np.nanmin(lat) < -80
     assert np.nanmax(lon) > 170
     assert np.nanmin(lon) < -170
+
+
+def test_orientation_is_screen_space():
+    """``north_deg`` says where north points ON SCREEN, 0 = straight up.
+
+    Pinned because the grid and the screen are 45 degrees apart and this
+    project spent a long time documenting that gap instead of removing it.
+    The engine turns the grid 45 degrees counter-clockwise to draw it, so a
+    grid stored north-up displays with north toward the upper left - which
+    is ``north_deg == -45``, not 0.
+    """
+    from rwmaps.projection import (SCREEN_TURN, MapWindow,
+                                   north_from_legacy_rotate)
+
+    kw = dict(proj="laea", lon=-3.0, lat=54.5, span_km=1000, size=64)
+    assert MapWindow.from_center(**kw, north_deg=0).grid_rotate_deg == SCREEN_TURN
+    assert MapWindow.from_center(**kw, north_deg=-SCREEN_TURN).grid_rotate_deg == 0
+    # A window with no rotation applied inside the grid is the engine's
+    # uncorrected view, and must NOT be described as north-up.
+    assert north_from_legacy_rotate(0) == -SCREEN_TURN
+    assert north_from_legacy_rotate(SCREEN_TURN) == 0

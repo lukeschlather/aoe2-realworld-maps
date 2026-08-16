@@ -122,8 +122,11 @@ def build_parser() -> argparse.ArgumentParser:
     proj = p.add_argument_group("projection")
     proj.add_argument("--proj", default="laea",
                       help="projection name, PROJ string, or EPSG code")
-    proj.add_argument("--rotate", type=float, default=0.0,
-                      help="rotate the geography within the grid, degrees (0 = north up)")
+    proj.add_argument("--north", type=float, default=0.0, dest="north",
+                      help="where north points ON SCREEN, degrees clockwise "
+                           "from straight up. 0 (default) = north up in game "
+                           "and in the minimap; -45 = north toward the upper "
+                           "left, which is what the engine does uncorrected.")
 
     grid = p.add_argument_group("map")
     grid.add_argument("--size", type=int,
@@ -310,7 +313,7 @@ def generate(args) -> dict:
         size = args.size
         lobby_size = LOBBY_SIZES.get(size, f"NOT SELECTABLE IN THE LOBBY ({size})")
 
-    window = MapWindow.from_center(args.proj, lon, lat, span, size, args.rotate)
+    window = MapWindow.from_center(args.proj, lon, lat, span, size, args.north)
     result = raster.rasterize(
         window, terrain.BIOMES[args.biome], resolution=args.resolution,
         min_island_tiles=args.min_island_tiles,
@@ -411,7 +414,7 @@ def generate(args) -> dict:
         png = save_preview(
             mask, approx, starts, args.outdir / f"{stem}.png",
             title=(f"{args.name}  {args.proj}"
-                   f"{f' rot{args.rotate:g}' if args.rotate else ''}  "
+                   f"{f' north{args.north:g}' if args.north else ''}  "
                    f"{size}x{size}  {args.players}p  land {100*result.land_fraction:.0f}%  "
                    f"IoU {fidelity:.2f}  ai {ai_type}"),
         )
@@ -426,7 +429,7 @@ def generate(args) -> dict:
         "stem": stem,
         "name": args.name,
         "proj": args.proj,
-        "rotate": args.rotate,
+        "north_deg": args.north,
         "size": size,
         "lobby_size": lobby_size,
         "players": args.players,
@@ -447,7 +450,7 @@ def generate(args) -> dict:
 
     if not args.quiet:
         print(f"[rwmaps] {args.name}: {args.proj}"
-              f"{f' rot{args.rotate:g}' if args.rotate else ''}, "
+              f"{f' north{args.north:g}' if args.north else ''}, "
               f"{size}x{size}, {window.km_per_tile:.1f} km/tile")
         print(f"[rwmaps] land {summary['land_pct']:.1f}%  coastline IoU {fidelity:.2f}  "
               f"ai_info_map_type {ai_type}")

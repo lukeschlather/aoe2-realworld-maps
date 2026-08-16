@@ -3,8 +3,23 @@
 Grid convention, confirmed by rendering the shipped ``real_world_britain.scx``
 terrain in all eight dihedral orientations: the grid is stored ``[y][x]`` with
 ``y = 0`` at the **north** edge and ``x = 0`` at the **west** edge, i.e. plain
-north-up. The engine's isometric view rotates the square 45 degrees on screen,
-but nothing is pre-rotated in the file.
+north-up. The engine's isometric view then rotates the square 45 degrees
+counter-clockwise on screen, so a grid stored north-up is NOT displayed
+north-up.
+
+**Orientation is specified in screen space, because that is the only frame
+anyone makes decisions in.** ``north_deg`` is where north points on screen,
+clockwise from straight up:
+
+* ``0`` - north straight up. This is the default, and what you want unless
+  you have a reason.
+* ``-45`` - north toward the upper left, which is what the engine does to a
+  grid with no correction applied.
+
+The grid-space rotation that produces it is an implementation detail
+(:attr:`MapWindow.grid_rotate_deg`) and nothing outside this module should
+need it. Specifying orientation in grid space is what produced years of
+"north-up means 45" confusion in this project's own docs.
 """
 
 from __future__ import annotations
@@ -16,6 +31,25 @@ import numpy as np
 from pyproj import CRS, Transformer
 
 WGS84 = CRS.from_epsg(4326)
+
+#: Degrees the engine turns the grid counter-clockwise when it draws it.
+#: The isometric camera; measured against the stock real-world maps' own
+#: icons (see ``thumbnail.ICON_ROTATION``, which is the same turn applied to
+#: a picture). A grid stored north-up therefore displays with north toward
+#: the upper left, not up.
+SCREEN_TURN = 45.0
+
+
+def north_from_legacy_rotate(rotate_deg: float) -> float:
+    """Convert a pre-2026-08-16 grid-space ``rotate`` to ``north_deg``.
+
+    Records written before the switch (``results.jsonl``, archived reports)
+    store the grid rotation under the key ``rotate``. Feeding one of those
+    straight in as ``north_deg`` builds a truth mask 45 degrees off, which
+    corrupts IoU silently rather than failing - so anything reading an old
+    record must come through here.
+    """
+    return rotate_deg - SCREEN_TURN
 
 #: Handy projection families. ``{lon}``/``{lat}`` are filled from the centre.
 PROJECTIONS: dict[str, str] = {
@@ -62,8 +96,8 @@ class MapWindow:
     span: float
     """Width and height of the window in the CRS's units (metres, usually)."""
     size: int
-    rotate_deg: float = 0.0
-    """Rotate the geography within the grid. 0 keeps north at the top edge."""
+    north_deg: float = 0.0
+    """Where north points on screen, clockwise from straight up. 0 = north up."""
 
     _to_wgs: Transformer = field(init=False, repr=False)
 
@@ -78,9 +112,12 @@ class MapWindow:
         lat: float,
         span_km: float,
         size: int,
-        rotate_deg: float = 0.0,
+        north_deg: float = 0.0,
     ) -> "MapWindow":
-        """Build a window ``span_km`` across, centred on ``lon``/``lat``."""
+        """Build a window ``span_km`` across, centred on ``lon``/``lat``.
+
+        ``north_deg`` is screen-space - see the module docstring.
+        """
         crs = build_crs(proj, lon, lat)
         fwd = Transformer.from_crs(WGS84, crs, always_xy=True)
         cx, cy = fwd.transform(lon, lat)
@@ -88,7 +125,7 @@ class MapWindow:
             raise ValueError(
                 f"centre ({lon}, {lat}) is outside the domain of projection {proj!r}"
             )
-        return cls(crs, cx, cy, span_km * 1000.0, size, rotate_deg)
+        return cls(crs, cx, cy, span_km * 1000.0, size, north_deg)
 
     @classmethod
     def whole_world(cls, proj: str = "eck4", lon: float = 0.0, size: int = 480) -> "MapWindow":
@@ -105,6 +142,18 @@ class MapWindow:
         span = max(max(xs) - min(xs), max(ys) - min(ys))
         return cls(crs, (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2, span, size)
 
+    @property
+    def grid_rotate_deg(self) -> float:
+        """Rotation applied inside the grid, derived from :attr:`north_deg`.
+
+        In the grid, real north sits at bearing ``grid_rotate_deg`` clockwise
+        from grid-up. The engine then turns the picture 45 degrees
+        counter-clockwise, which moves that bearing to
+        ``grid_rotate_deg - 45`` on screen. Setting that equal to
+        ``north_deg`` gives the offset below.
+        """
+        return self.north_deg + SCREEN_TURN
+
     def tile_lonlat(self) -> tuple[np.ndarray, np.ndarray]:
         """Longitude/latitude of every tile centre, shaped ``(size, size)``.
 
@@ -117,8 +166,8 @@ class MapWindow:
         offs = (np.arange(n) + 0.5) * step - self.span / 2
         gx, gy = np.meshgrid(offs, -offs)
 
-        if self.rotate_deg:
-            theta = math.radians(self.rotate_deg)
+        if self.grid_rotate_deg % 360:
+            theta = math.radians(self.grid_rotate_deg)
             cos_t, sin_t = math.cos(theta), math.sin(theta)
             gx, gy = gx * cos_t - gy * sin_t, gx * sin_t + gy * cos_t
 

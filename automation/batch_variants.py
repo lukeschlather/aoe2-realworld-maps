@@ -1,4 +1,10 @@
-"""Run the real-render loop for a curated set of experiment variants (new
+"""LEGACY ORIENTATION: the ``--rotate`` values below are grid-space and
+predate the 2026-08-16 switch to screen-space ``--north``. ``rwmaps`` no
+longer accepts ``--rotate``, so these will fail until converted -
+``north = rotate - 45`` (projection.north_from_legacy_rotate). Left
+unconverted because this script targets regions that no longer ship.
+
+Run the real-render loop for a curated set of experiment variants (new
 choose_starts algorithm, small-island filtering, tighter viewports, rotation)
 against the regions that clustered badly in the first full batch.
 

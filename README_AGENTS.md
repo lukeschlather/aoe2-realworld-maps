@@ -9,10 +9,6 @@ how to change things without breaking them.
   budgets: `RESOURCE_TEMPLATES.md`
 - **UI automation** — driving the editor: `EDITOR_AUTOMATION.md`
 
-The project generates AoE2 DE random-map scripts whose land/water outline
-is a real place. Output is one self-contained `.rms` per map, so the engine
-ships it to other players automatically and the maps work in multiplayer.
-
 ---
 
 ## 1. Aesthetics: the actual optimisation target
@@ -57,26 +53,22 @@ disc-cover in seconds.
 
 ## 2. Fairness: what it means here
 
-Fairness is **not** the optimisation target — a real archipelago puts
-players on separate islands and that is geography, not unfairness. It is a
-constraint: a window that starves a player is unusable however good it
-looks.
+Not the optimisation target — a real archipelago puts players on separate
+islands and that is geography. It is a *constraint*: a window that starves
+a player is unusable however good it looks.
 
 ### The model
 
-`src/rwmaps/fairness.py`, `profile_capture()`. Three ideas, each replacing
-something weaker:
+`src/rwmaps/fairness.py`, `profile_capture()`. Three ideas:
 
 1. **Distance, not counts.** Eight gold 12 tiles away and eight gold 38
    tiles away are different games.
-2. **Exclusive / contested / unclaimed, not owned.** Assigning each
-   resource to its single nearest TC is wrong on tight maps, where most of
-   what a player can reach a neighbour can reach too. A contested resource
-   counts for **both** players, because both can genuinely take it.
-   Unclaimed is the neutral pool nobody can reach — mostly a *good* thing,
-   the supply players leave home to fight over.
-3. **Walked distances, on the walkable mask.** Water and forest are
-   barriers; a ford is a route.
+2. **Exclusive / contested / unclaimed, not owned.** On tight maps most of
+   what a player can reach a neighbour can reach too, so a contested
+   resource counts for **both**. Unclaimed is the neutral pool nobody can
+   reach — mostly a *good* thing, the supply players leave home to contest.
+3. **Walked distances** on the walkable mask: water and forest are
+   barriers, a ford is a route.
 
 Two constants govern everything: `OWNERSHIP_RADIUS` (30 tiles) and
 `CONTEST_MARGIN` (8 tiles).
@@ -192,9 +184,7 @@ Every one was a bug found by running the maps.
 
 ### Orientation
 
-The grid is stored north-up; the engine draws it rotated 45° counter-
-clockwise. So at `--rotate 0` north appears at the **upper left**, and
-`--rotate 45` is what puts north actually up on screen and in the minimap.
-`thumbnail.ICON_ROTATION` is the same turn, and its sign was wrong once —
-45° the wrong way is a 90° error and every map shipped a mismatched icon.
-Don't "simplify" it without re-measuring against the stock icons.
+`--north` is **screen space**: where north points in game, clockwise from
+straight up. `0` (the default) is north-up; `-45` is the engine's
+uncorrected view with north toward the upper left, which is what all eight
+shipped maps use. Nothing outside `projection.py` deals in grid space.

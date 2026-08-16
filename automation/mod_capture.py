@@ -41,6 +41,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from rwmaps import install as install_mod  # noqa: E402
 from rwmaps import scx_read  # noqa: E402
 from rwmaps.cli import REGIONS  # noqa: E402
+from rwmaps.projection import north_from_legacy_rotate  # noqa: E402
 from aesthetic_metrics import cached_true_mask_geo, compute_metrics_from_truth  # noqa: E402
 from build_mod import (DEBUG_MOD_NAME, MOD_NAME, MOD_REGIONS,  # noqa: E402
                        shipped_filename)
@@ -78,14 +79,16 @@ N_SAMPLES = 10
 
 
 def resolve_geo(extra_args: list[str]) -> tuple[float, float, float, float]:
-    """Recover (lon, lat, span_km, rotate) for a MOD_REGIONS entry, the same
-    way cli.generate() resolves them from --region/--center/--span-km/
-    --rotate - needed so the aesthetic truth mask uses the exact window
-    each region actually ships with."""
+    """Recover (lon, lat, span_km, north_deg) for a region entry.
+
+    Resolves the same way cli.generate() does, so the aesthetic truth mask
+    uses the exact window the region ships with. ``north_deg`` is screen
+    space (0 = north up); a legacy grid-space ``--rotate`` is converted.
+    """
     region = None
     center = None
     span = None
-    rotate = 0.0
+    north = 0.0
     it = iter(extra_args)
     for tok in it:
         if tok == "--region":
@@ -96,8 +99,10 @@ def resolve_geo(extra_args: list[str]) -> tuple[float, float, float, float]:
             center = next(it)
         elif tok == "--span-km":
             span = float(next(it))
-        elif tok == "--rotate":
-            rotate = float(next(it))
+        elif tok == "--north":
+            north = float(next(it))
+        elif tok == "--rotate":   # pre-2026-08-16 grid-space value
+            north = north_from_legacy_rotate(float(next(it)))
 
     if region:
         lon, lat, region_span = REGIONS[region]
@@ -107,7 +112,7 @@ def resolve_geo(extra_args: list[str]) -> tuple[float, float, float, float]:
         lon, lat = (float(v) for v in center.split(","))
     if lon is None or lat is None or span is None:
         raise ValueError(f"could not resolve geo from extra_args={extra_args}")
-    return lon, lat, span, rotate
+    return lon, lat, span, north
 
 
 def _frames_note() -> str:
@@ -495,7 +500,7 @@ def main():
                 record = {
                     "region": name, "extra_args": extra_args, "ai_map_type": ai_type,
                     "from_git": args.from_git,
-                    "lon": lon, "lat": lat, "span_km": span, "rotate": rot,
+                    "lon": lon, "lat": lat, "span_km": span, "north_deg": rot,
                     "sample_index": sample_i,
                     **analysis, "aesthetic": aesthetic, "fairness": fairness,
                 }

@@ -7,25 +7,22 @@ conventions.
 ## Verification
 
 **Produce real artifacts and let the user judge them.** Don't offer an
-opinion on whether a result "looks right" — agents can't recognise a
-coastline the way a human does. A synthetic Python preview is not a
-substitute for an engine render: one was once mistaken for validation and a
-real capture later showed materially worse accuracy the preview hadn't
-revealed. Surface the data; the judgement is the user's.
+opinion on whether a result "looks right". A synthetic Python preview is
+not a substitute for an engine render — one was once mistaken for
+validation and a real capture later showed materially worse accuracy.
+Surface the data; the judgement is the user's.
 
-**The optimisation target is human-judged recognisability of major
-real-world features** — does a strait look like a strait, does an island
-stay an island. Not statistical fairness. When analysing a batch of
-captures, foreground what's visually and topologically going on.
+**The target is human-judged recognisability** — does a strait look like a
+strait, does an island stay an island. Not statistical fairness. When
+analysing a batch, foreground what's visually and topologically going on.
 
-**Never fold geometry into a verdict.** An archipelago map has players on
-separate islands because that's the geography. TC separation, landmass
-count and reachability are facts to report, not scores.
+**Never fold geometry into a verdict.** TC separation, landmass count and
+reachability are facts to report, not scores.
 
 **Small N settles nothing.** 1–2 samples per condition is right for
-exploring breadth (RNG variance isn't controllable, so spend the engine
-time on more conditions instead) — but never present aggregates from such a
-sweep as if they decided a comparison. That needs N=10+ per condition.
+breadth (RNG variance isn't controllable — spend engine time on more
+conditions). Never present aggregates from such a sweep as deciding a
+comparison; that needs N=10+.
 
 ## Balance, in one page
 

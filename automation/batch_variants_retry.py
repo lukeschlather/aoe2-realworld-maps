@@ -1,4 +1,10 @@
-"""Rerun just the variants that failed in the first batch_variants.py pass
+"""LEGACY ORIENTATION: the ``--rotate`` values below are grid-space and
+predate the 2026-08-16 switch to screen-space ``--north``. ``rwmaps`` no
+longer accepts ``--rotate``, so these will fail until converted -
+``north = rotate - 45`` (projection.north_from_legacy_rotate). Left
+unconverted because this script targets regions that no longer ship.
+
+Rerun just the variants that failed in the first batch_variants.py pass
 because gen_loop.py used to require --region (fixed now)."""
 
 import sys

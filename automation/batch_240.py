@@ -1,4 +1,10 @@
-"""Regenerate a handful of specific maps at size 240 (requires the editor's
+"""LEGACY ORIENTATION: the ``--rotate`` values below are grid-space and
+predate the 2026-08-16 switch to screen-space ``--north``. ``rwmaps`` no
+longer accepts ``--rotate``, so these will fail until converted -
+``north = rotate - 45`` (projection.north_from_legacy_rotate). Left
+unconverted because this script targets regions that no longer ship.
+
+Regenerate a handful of specific maps at size 240 (requires the editor's
 Map Size dropdown already switched to Huge [240] by hand - see
 RENDER_PIPELINE.md; that list is one of the crash-prone ones automation must
 never touch).

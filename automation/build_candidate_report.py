@@ -4,11 +4,10 @@ actually built for each candidate window, turned the way the game draws it.
 Different from build_mod_report.py in three ways that matter here:
 
 1. **Orientation.** ``sample_analysis`` renders its preview in grid space,
-   which for a ``--rotate 45`` map is the geography tilted 45 degrees - not
-   how anyone will ever see it. Every preview here is turned
+   which is not how anyone sees the map. Every preview here is turned
    counter-clockwise by ``thumbnail.ICON_ROTATION``, the turn the engine
    itself applies, so the picture is the minimap. North is up in it exactly
-   when the window's own ``--rotate`` is 45.
+   when the window's ``--north`` is 0.
 
 2. **Waterbodies.** Whether the lakes come out distinct is the open question
    about the Great Lakes windows, and no existing metric answers it. This
@@ -50,6 +49,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from rwmaps import terrain as T  # noqa: E402
 from rwmaps import thumbnail  # noqa: E402
+from rwmaps.projection import north_from_legacy_rotate  # noqa: E402
 from rwmaps.scx_read import read_capture  # noqa: E402
 from rwmaps import resource_value as rv  # noqa: E402
 
@@ -343,7 +343,11 @@ def region_section(name: str, extra_args: list[str], records: list[dict],
         return (f'<article class="region"><h3>{name}</h3>'
                 f'<p class="missing">no samples captured</p></article>')
     r0 = records[0]
-    rotate = r0["rotate"]
+    # New records carry north_deg (screen space); older ones carry a
+    # grid-space rotate. See projection.north_from_legacy_rotate.
+    north = r0.get("north_deg")
+    if north is None:
+        north = north_from_legacy_rotate(r0["rotate"])
     rms_link = (f'<a class="fl" href="{rms_rel}">{name}.rms</a>' if rms_rel
                 else '<span class="fl missing">.rms missing</span>')
     cards = "".join(sample_card(r, structs[r["sample_index"]],
@@ -355,8 +359,8 @@ def region_section(name: str, extra_args: list[str], records: list[dict],
         <tr><th>centre</th><td>{r0['lon']}, {r0['lat']}</td>
             <th>span</th><td>{r0['span_km']:g} km
               ({r0['span_km']/240:.2f} km/tile)</td></tr>
-        <tr><th>rotate</th><td>{rotate:g}&deg;
-              (north up in game: {'yes' if rotate == 45 else 'no'})</td>
+        <tr><th>north on screen</th><td>{north:g}&deg;
+              {'(north up)' if north == 0 else '(clockwise from up)'}</td>
             <th>ai_info_map_type</th><td>{r0['ai_map_type']}</td></tr>
         <tr><th>grid</th><td>240&times;240, 8 players, laea</td>
             <th>script</th><td>{rms_link}</td></tr>
@@ -502,7 +506,7 @@ TEMPLATE = """<!doctype html>
 <div class="caveat">
  Every picture is a <b>real engine capture</b>, turned counter-clockwise 45
  degrees so it is the minimap - north is up exactly when the window's
- <code>--rotate</code> is 45. Dots are real town centres and the land
+ <code>--north</code> is 0. Dots are real town centres and the land
  resources each one can walk to first.
  <br><br>
  <b>Supply comes from <code>rwmaps.fairness</code></b>, the current model:

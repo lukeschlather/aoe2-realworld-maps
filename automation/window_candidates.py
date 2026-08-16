@@ -26,8 +26,9 @@ Three views per candidate:
   This is the shape that ships; the gap between it and truth is the
   fidelity cost of the window.
 * **minimap** - the same cover, turned the way the game draws the grid
-  (counter-clockwise 45 degrees, see ``thumbnail.ICON_ROTATION``). North is
-  up in this view only when the window's own ``--rotate`` is 45.
+  (counter-clockwise 45 degrees, see ``thumbnail.ICON_ROTATION``). This is
+  the view that matters; north is up in it when the window's ``--north`` is
+  0, which is the default.
 
 Usage:
     uv run python automation/window_candidates.py
@@ -93,7 +94,7 @@ class Candidate:
     lon: float
     lat: float
     span_km: float
-    rotate: float
+    north: float
     note: str = ""
     proj: str = "laea"
     #: Overrides onto SHIPPED, for a candidate that needs a non-default knob.
@@ -112,8 +113,8 @@ class Candidate:
             f"--center={self.lon},{self.lat}",
             f"--span-km {self.span_km:g}",
         ]
-        if self.rotate:
-            parts.append(f"--rotate {self.rotate:g}")
+        if self.north:
+            parts.append(f"--north {self.north:g}")
         if p["proj"] != "laea":
             parts.append(f"--proj {p['proj']}")
         for flag, key in (("--overlap", "overlap"),
@@ -140,61 +141,61 @@ class Candidate:
 
 CANDIDATES: list[Candidate] = [
     # --- Great Lakes: wanted more recognisable, and north-up -------------
-    Candidate("greatlakes", "GL current (rotate 0)", -84.0, 44.5, 1600, 0,
-              "the window in cli.REGIONS today - north reads to the upper left"),
-    Candidate("greatlakes", "GL north-up, same window", -84.0, 44.5, 1600, 45,
+    Candidate("greatlakes", "GL current (north -45)", -84.0, 44.5, 1600, -45,
+              "the window in cli.REGIONS today - north toward the upper left"),
+    Candidate("greatlakes", "GL north-up, same window", -84.0, 44.5, 1600, 0,
               "current centre and span, rotated so north is up in game"),
-    Candidate("greatlakes", "GL north-up 1400", -84.0, 44.5, 1400, 45),
-    Candidate("greatlakes", "GL north-up 1200", -83.5, 44.5, 1200, 45),
-    Candidate("greatlakes", "GL north-up 1000", -83.0, 45.0, 1000, 45),
-    Candidate("greatlakes", "GL five lakes 1800", -85.0, 45.5, 1800, 45,
+    Candidate("greatlakes", "GL north-up 1400", -84.0, 44.5, 1400, 0),
+    Candidate("greatlakes", "GL north-up 1200", -83.5, 44.5, 1200, 0),
+    Candidate("greatlakes", "GL north-up 1000", -83.0, 45.0, 1000, 0),
+    Candidate("greatlakes", "GL five lakes 1800", -85.0, 45.5, 1800, 0,
               "widest - tries to hold all five lakes inside the square"),
-    Candidate("greatlakes", "GL Michigan-Huron", -85.0, 44.5, 1200, 45,
+    Candidate("greatlakes", "GL Michigan-Huron", -85.0, 44.5, 1200, 0,
               "drops Superior and Ontario"),
-    Candidate("greatlakes", "GL Huron-Erie", -82.0, 44.0, 1100, 45),
-    Candidate("greatlakes", "GL Erie-Ontario", -79.5, 43.2, 900, 45,
+    Candidate("greatlakes", "GL Huron-Erie", -82.0, 44.0, 1100, 0),
+    Candidate("greatlakes", "GL Erie-Ontario", -79.5, 43.2, 900, 0,
               "the Niagara isthmus as the map's spine"),
-    Candidate("greatlakes", "GL Superior", -87.5, 47.5, 1200, 45),
+    Candidate("greatlakes", "GL Superior", -87.5, 47.5, 1200, 0),
 
     # --- Britain: keep the current one, add a zoomed north-up ------------
-    Candidate("britain", "Britain NW (current, keep)", -3.0, 54.5, 1300, 0,
+    Candidate("britain", "Britain NW (current, keep)", -3.0, 54.5, 1300, -45,
               "the shipped window - north reads to the upper left"),
-    Candidate("britain", "Britain north-up, same window", -3.0, 54.5, 1300, 45,
+    Candidate("britain", "Britain north-up, same window", -3.0, 54.5, 1300, 0,
               "current centre and span, north up - reaches Norway"),
-    Candidate("britain", "Britain north-up 1100", -2.8, 53.8, 1100, 45),
-    Candidate("britain", "Britain north-up 1000", -2.5, 53.5, 1000, 45),
-    Candidate("britain", "Britain north-up 950", -2.5, 53.2, 950, 45),
-    Candidate("britain", "Britain north-up 900", -2.2, 53.0, 900, 45),
-    Candidate("britain", "Britain north-up 1050 south", -3.0, 53.2, 1050, 45,
+    Candidate("britain", "Britain north-up 1100", -2.8, 53.8, 1100, 0),
+    Candidate("britain", "Britain north-up 1000", -2.5, 53.5, 1000, 0),
+    Candidate("britain", "Britain north-up 950", -2.5, 53.2, 950, 0),
+    Candidate("britain", "Britain north-up 900", -2.2, 53.0, 900, 0),
+    Candidate("britain", "Britain north-up 1050 south", -3.0, 53.2, 1050, 0,
               "pushed south for more of the French Channel coast"),
-    Candidate("britain", "Britain north-up 1150", -3.2, 54.0, 1150, 45),
+    Candidate("britain", "Britain north-up 1150", -3.2, 54.0, 1150, 0),
     # The candidates above all put the continental patch's centroid near
     # 1.5E - that is Flanders and the Pas-de-Calais, not Normandy or
     # Brittany. Which one "a patch of France" means changes the window, so
     # both readings get candidates.
-    Candidate("britain", "Britain north-up 1000 west", -4.0, 53.0, 1000, 45,
+    Candidate("britain", "Britain north-up 1000 west", -4.0, 53.0, 1000, 0,
               "shifted west/south to reach Normandy and Brittany"),
-    Candidate("britain", "Britain north-up 1050 west", -4.5, 52.8, 1050, 45),
-    Candidate("britain", "Britain north-up 950 west", -4.0, 52.5, 950, 45),
+    Candidate("britain", "Britain north-up 1050 west", -4.5, 52.8, 1050, 0),
+    Candidate("britain", "Britain north-up 950 west", -4.0, 52.5, 950, 0),
 
     # --- proposed replacements -------------------------------------------
-    Candidate("new", "Iberia", -4.0, 40.0, 1400, 45,
+    Candidate("new", "Iberia", -4.0, 40.0, 1400, 0,
               "already in cli.REGIONS, never shipped; IoU 0.98 in the "
               "README candidate table"),
-    Candidate("new", "Anatolia", 33.0, 39.0, 1500, 45,
+    Candidate("new", "Anatolia", 33.0, 39.0, 1500, 0,
               "already in cli.REGIONS, never shipped; IoU 0.97"),
-    Candidate("new", "Gibraltar", -4.8, 36.2, 900, 45,
+    Candidate("new", "Gibraltar", -4.8, 36.2, 900, 0,
               "two continents and a strait"),
-    Candidate("new", "Korea", 127.0, 36.5, 1200, 45),
-    Candidate("new", "Red Sea", 37.5, 22.5, 2000, 45),
-    Candidate("new", "Persian Gulf", 52.0, 27.0, 1700, 45),
-    Candidate("new", "Baltic", 19.0, 59.0, 1500, 45),
-    Candidate("new", "Levant and Cyprus", 33.5, 33.5, 1300, 45),
-    Candidate("new", "Florida", -83.0, 27.5, 1700, 45),
-    Candidate("new", "Bay of Biscay", -3.0, 45.0, 1400, 45),
-    Candidate("new", "Adriatic", 16.5, 43.0, 1100, 45),
-    Candidate("new", "Denmark", 10.0, 56.3, 1000, 45),
-    Candidate("new", "Ireland", -8.0, 53.3, 900, 45),
+    Candidate("new", "Korea", 127.0, 36.5, 1200, 0),
+    Candidate("new", "Red Sea", 37.5, 22.5, 2000, 0),
+    Candidate("new", "Persian Gulf", 52.0, 27.0, 1700, 0),
+    Candidate("new", "Baltic", 19.0, 59.0, 1500, 0),
+    Candidate("new", "Levant and Cyprus", 33.5, 33.5, 1300, 0),
+    Candidate("new", "Florida", -83.0, 27.5, 1700, 0),
+    Candidate("new", "Bay of Biscay", -3.0, 45.0, 1400, 0),
+    Candidate("new", "Adriatic", 16.5, 43.0, 1100, 0),
+    Candidate("new", "Denmark", 10.0, 56.3, 1000, 0),
+    Candidate("new", "Ireland", -8.0, 53.3, 900, 0),
 ]
 
 
@@ -256,7 +257,7 @@ def screen(c: Candidate, outdir: Path) -> dict:
     """Rasterise one candidate and write its three views."""
     p = c.params
     window = MapWindow.from_center(c.proj, c.lon, c.lat, c.span_km,
-                                   p["size"], c.rotate)
+                                   p["size"], c.north)
     lon, lat = window.tile_lonlat()
     result = raster.rasterize(window, resolution=p["resolution"],
                               min_island_tiles=p["min_island_tiles"])
@@ -272,9 +273,10 @@ def screen(c: Candidate, outdir: Path) -> dict:
     # projection.MapWindow.tile_lonlat), so turning the grid counter-clockwise
     # by `rotate` puts it back at the top. At rotate 45 that is the same turn
     # the game itself applies, which is exactly why 45 is the north-up value.
+    grid_rotate = c.north + thumbnail.ICON_ROTATION
     views = {
-        "truth": to_png(truth, c.rotate),
-        "cover": to_png(cover, c.rotate),
+        "truth": to_png(truth, grid_rotate),
+        "cover": to_png(cover, grid_rotate),
         "minimap": to_png(cover, thumbnail.ICON_ROTATION),
     }
     slug = c.name.lower().replace(" ", "_").replace(",", "").replace("(", "").replace(")", "")
@@ -351,7 +353,7 @@ def render_html(rows: list[dict], stamp: str, commit: str, data_dir: str) -> str
         masses = fmt(r["landmasses"][:5])
         waters = fmt(r["waterbodies"][:6])
         p = r["params"]
-        north_up = "yes" if r["rotate"] == 45 else "no"
+        north_up = "yes" if r["north"] == 0 else "no"
         return f"""
     <article class="cand">
       <h3>{r['name']}</h3>
@@ -367,7 +369,7 @@ def render_html(rows: list[dict], stamp: str, commit: str, data_dir: str) -> str
       <table class="facts">
         <tr><th>centre</th><td>{r['lon']}, {r['lat']}</td>
             <th>span</th><td>{r['span_km']:g} km ({r['km_per_tile']:.2f} km/tile)</td></tr>
-        <tr><th>rotate</th><td>{r['rotate']:g}&deg; (north up in game: {north_up})</td>
+        <tr><th>north on screen</th><td>{r['north']:g}&deg; (north up in game: {north_up})</td>
             <th>projection</th><td>{p['proj']}</td></tr>
         <tr><th>land</th><td>{r['land_fraction']*100:.1f}%</td>
             <th>cover IoU</th><td>{r['cover_iou']:.3f}

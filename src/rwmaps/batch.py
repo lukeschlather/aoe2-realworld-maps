@@ -17,17 +17,18 @@ from .cli import LOBBY_SIZES, TEAM_SIZES, generate, timestamped_dir
 
 #: (name, region, projection, rotation).
 #:
-#: ``rotate 45`` cancels the engine's isometric rotation, so the landmass reads
-#: north-up on screen instead of tilted - much easier to recognise in play.
+#: The last column is ``--north``: where north points on screen, clockwise
+#: from straight up. ``0`` reads north-up in game; ``-45`` is the engine's
+#: uncorrected view, north toward the upper left.
 SPREAD: list[tuple[str, str, str, float]] = [
-    ("RW Great Lakes", "greatlakes", "laea", 0),
-    ("RW Great Lakes NorthUp", "greatlakes", "laea", 45),
-    ("RW Black Sea", "blacksea", "laea", 0),
-    ("RW Black Sea NorthUp", "blacksea", "laea", 45),
-    ("RW Chesapeake", "chesapeake", "laea", 0),
-    ("RW Anatolia", "anatolia", "laea", 0),
-    ("RW Iberia", "iberia", "laea", 0),
-    ("RW Italy", "italy", "laea", 0),
+    ("RW Great Lakes", "greatlakes", "laea", -45),
+    ("RW Great Lakes NorthUp", "greatlakes", "laea", 0),
+    ("RW Black Sea", "blacksea", "laea", -45),
+    ("RW Black Sea NorthUp", "blacksea", "laea", 0),
+    ("RW Chesapeake", "chesapeake", "laea", -45),
+    ("RW Anatolia", "anatolia", "laea", -45),
+    ("RW Iberia", "iberia", "laea", -45),
+    ("RW Italy", "italy", "laea", -45),
 ]
 
 #: Players to place, by grid size. Bigger maps get more starts.
@@ -57,12 +58,12 @@ def main(argv: list[str] | None = None) -> int:
     rows = []
     for size in args.sizes:
         players = PLAYERS_FOR_SIZE.get(size, 8)
-        for name, region, proj, rotate in SPREAD:
+        for name, region, proj, north in SPREAD:
             if args.only and args.only.lower() not in name.lower():
                 continue
             opts = SimpleNamespace(
                 name=name, region=region, center=None, span_km=None,
-                proj=proj, rotate=rotate, size=size, players=players,
+                proj=proj, north=north, size=size, players=players,
                 teams=args.teams, lands=args.lands, biome="temperate",
                 resolution="10m", no_elevation=False, ai_map_type=None,
                 clumping_factor=8, min_island_tiles=0,
