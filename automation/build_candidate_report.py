@@ -483,6 +483,9 @@ TEMPLATE = """<!doctype html>
                         border-bottom:1px solid #333; }}
  table.cmp tr.c-arabia th, table.cmp tr.c-arabia td {{ background:#1d2419; }}
  table.cmp tr.c-candidate th {{ color:#cfe3ff; }}
+ table.cmp tr.c-retired th, table.cmp tr.c-retired td {{
+   color:#7a6a63; text-decoration:line-through;
+   text-decoration-color:#4a3f3a; }}
  .up {{ color:#7fbf7f; }} .down {{ color:#e08a6a; }}
  td.cur, th.cur {{ border-left:1px solid #333; color:#cfc39a; }}
  details.region {{ border:1px solid #2e2e2e; border-radius:8px;

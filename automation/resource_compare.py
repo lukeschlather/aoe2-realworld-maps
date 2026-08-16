@@ -29,13 +29,24 @@ REPO = Path(__file__).parent.parent
 
 KINDS = ("gold", "stone", "forage", "sheep", "deer", "boar")
 
-COHORT_ORDER = ["arabia", "stock", "shipped", "candidate"]
+COHORT_ORDER = ["arabia", "stock", "shipped", "candidate", "retired"]
 COHORT_LABEL = {
     "arabia": "Arabia (reference)",
     "stock": "other stock",
-    "shipped": "shipped",
+    "shipped": "shipped now",
     "candidate": "candidate",
+    "retired": "RETIRED - not in the mod",
 }
+
+#: Retired maps get their own cohort rather than a tag inside "shipped".
+#: They were listed among the shipped regions with a "(retired)" note and
+#: that reads, at a glance, as though they still ship. They do not: the mod
+#: has eight maps and none of these is one of them. Their captures stay
+#: because they are the evidence for the retirement, not despite it.
+def cohort_of(row: dict) -> str:
+    if row.get("retired"):
+        return "retired"
+    return row["cohort"]
 
 
 def load(path: Path | None = None) -> list[dict]:
@@ -57,7 +68,7 @@ def pool(rows: list[dict]) -> dict[tuple[str, str], dict]:
                  "counts": defaultdict(list), "nearest": defaultdict(list),
                  "wood": [], "land": [], "unclaimed": defaultdict(list)})
     for r in rows:
-        key = (r["cohort"], r["map"])
+        key = (cohort_of(r), r["map"])
         e = out[key]
         e["n_caps"] += 1
         e["retired"] = e["retired"] or r.get("retired", False)
@@ -115,8 +126,7 @@ def kind_table(pooled: dict, kind: str) -> str:
                      else f"<b class='bad'>{zeros}</b>/{obs}"
                           f" <span class='dim'>({zpct:.0f}%)</span>")
             unc = statistics.median(e["unclaimed"][kind]) if e["unclaimed"][kind] else 0
-            label = key[1] + (' <span class="dim">(retired)</span>'
-                              if e["retired"] else "")
+            label = key[1]
             cohort_cell = (f'<td rowspan="{len(keys)}" class="cohort">'
                            f'{COHORT_LABEL[cohort]}</td>' if i == 0 else "")
             rows.append(
@@ -154,8 +164,7 @@ def wood_table(pooled: dict) -> str:
         for i, key in enumerate(keys):
             e = pooled[key]
             w = _stat(e["wood"])
-            label = key[1] + (' <span class="dim">(retired)</span>'
-                              if e["retired"] else "")
+            label = key[1]
             cohort_cell = (f'<td rowspan="{len(keys)}" class="cohort">'
                            f'{COHORT_LABEL[cohort]}</td>' if i == 0 else "")
             rows.append(
@@ -194,8 +203,7 @@ def land_table(pooled: dict) -> str:
             v = _stat(e["land"])
             ratio = v[0] / v[1] if v[1] else 0.0
             cls = " class='bad'" if ratio < 0.7 else ""
-            label = key[1] + (' <span class="dim">(retired)</span>'
-                              if e["retired"] else "")
+            label = key[1]
             cohort_cell = (f'<td rowspan="{len(keys)}" class="cohort">'
                            f'{COHORT_LABEL[cohort]}</td>' if i == 0 else "")
             rows.append(
@@ -272,11 +280,12 @@ def historical_html(rows: list[dict], matrix_fn) -> str:
         return ""
     by_map: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for r in rows:
-        if r["cohort"] in ("arabia", "stock", "shipped"):
-            by_map[(r["cohort"], r["map"])].append(r)
+        c = cohort_of(r)
+        if c in ("arabia", "stock", "shipped", "retired"):
+            by_map[(c, r["map"])].append(r)
 
     blocks = []
-    for cohort in ("arabia", "stock", "shipped"):
+    for cohort in ("arabia", "stock", "shipped", "retired"):
         keys = sorted(k for k in by_map if k[0] == cohort)
         if not keys:
             continue

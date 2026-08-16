@@ -99,6 +99,22 @@ BROKEN_REGIONS = set()
 #: players missing gold or stone across all 80 samples. Japan also ran a
 #: median of 7 gold against Arabia's 15, with 18/80 players at none.
 #:
+#: Land, added to the model 2026-08-16, says the same thing a third time
+#: and says it about the shape rather than the placement. Worst-off player
+#: as a fraction of that map's own median - every stock map holds
+#: 0.79-0.96:
+#:
+#: | map         | min land | median | min/med |
+#: |-------------|----------|--------|---------|
+#: | Arabia      | 2,676    | 3,248  | 0.82    |
+#: | New Zealand | **300**  | 848    | 0.35    |
+#: | Japan       | 456      | 756    | 0.60    |
+#:
+#: A long thin island chain has no interior, so eight starts have nowhere
+#: to go but the coastline and no arrangement of them fixes it. Neither
+#: window is redeemable by tuning, and at 240 tiles the two look
+#: interchangeable anyway. Do not revisit these two; pick chunkier targets.
+#:
 #: The windows stay in ``cli.REGIONS`` - that dict is a library of starting
 #: points, not a shipping list. Replacements are being chosen from the
 #: window-candidate report.

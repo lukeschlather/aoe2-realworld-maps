@@ -660,6 +660,52 @@ values as commonly documented, not read from
 here), and public sources disagree on some of them. Every report shows the
 object counts next to the amounts, and those counts are ground truth.
 
+## A narrow landmass cannot hold eight players, and no tuning fixes it
+
+Land is a resource, and it is the only one that cannot be topped up: a
+player can walk further for gold, but not for somewhere to put a farm.
+`fairness.py` measures it the same exclusive/contested way as everything
+else - buildable means dry and unforested.
+
+The number to read is the worst-off player as a fraction of that map's own
+median. **Every stock map holds 0.79-0.96.** Measured over all 157 archived
+captures:
+
+| map | min | median | min/med |
+|---|---|---|---|
+| Thames | 2,963 | 3,075 | 0.96 |
+| Arabia | 2,676 | 3,248 | 0.82 |
+| Black Forest | 1,876 | 2,378 | 0.79 |
+| Michigan (candidate) | 2,093 | 2,306 | 0.91 |
+| Britain north-up France (candidate) | 1,615 | 1,767 | 0.91 |
+| Britain (shipped) | 744 | 1,452 | 0.51 |
+| Greece (shipped) | 649 | 1,545 | 0.42 |
+| Italy (shipped) | 359 | 1,556 | 0.23 |
+| Japan (retired) | 456 | 756 | 0.60 |
+| New Zealand (retired) | 300 | 848 | 0.35 |
+
+New Zealand's worst player got **300 buildable tiles against Arabia's
+2,676**. That is not a tuning problem. A long thin island chain has no
+interior, so eight starts have nowhere to go but the coastline, and the
+per-player land distribution collapses however the starts are arranged.
+Japan is the same shape and the same result.
+
+Two rules follow, and they apply *before* any engine time is spent:
+
+1. **Screen the window for width, not just for area.** A region can have
+   plenty of total land and still be unable to seat eight players if none
+   of it is more than a few tiles from water. Landmass sizes alone do not
+   catch this - both retirees passed that check.
+2. **Narrow archipelagos also look alike.** At 240 tiles a long thin island
+   chain reads as a generic scatter of slivers regardless of which real
+   place it is, which costs the project its actual optimisation target -
+   human-judged recognisability. Japan and New Zealand were visually
+   interchangeable.
+
+Prefer chunky continental and peninsular targets. The land column is also
+how the three retirements were confirmed a third time, after stone and
+wood.
+
 ## "Accessible" is a radius choice, and it dominates the numbers
 
 `fairness.OWNERSHIP_RADIUS` is 30 tiles of walking distance. That single

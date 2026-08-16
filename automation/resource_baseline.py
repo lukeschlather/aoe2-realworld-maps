@@ -47,9 +47,11 @@ OUT = REPO / "out" / "resource_baseline.json"
 #: which is what ships now.
 SHIPPED_PASS = REPO / "reports" / "20260809-052633_mod_report_data_sysa_n10"
 
-#: Retired from the mod on 2026-08-15. Kept in the comparison because the
-#: captures are real and the resource picture is still evidence, but
-#: labelled so nobody reads them as current.
+#: Retired from the mod on 2026-08-15 and NOT in it: the mod ships eight
+#: maps and none of these is one of them. Their captures are kept because
+#: they are the evidence for the retirement - short on stone, wood and
+#: land alike - and ``resource_compare`` files them under their own
+#: cohort so they cannot be read as current.
 RETIRED = {"Japan", "Caribbean", "New Zealand"}
 
 #: Arabia is its own cohort - see the module docstring.
