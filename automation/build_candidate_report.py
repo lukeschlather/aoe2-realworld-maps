@@ -153,11 +153,66 @@ def archive(run_out: Path, data_dir: Path, name: str,
     return rms_rel, scen
 
 
+#: Kinds the current fairness model zero-checks, in the order it lists
+#: them. ``small_game`` is reported but never zero-checked - plenty of good
+#: maps place none - so it is shown last and visually separated.
+SPREAD_KINDS = ("gold", "stone", "forage", "sheep", "deer", "boar")
+EXTRA_KINDS = ("small_game",)
+
+
+def spread_table(fair: dict) -> str:
+    """Per-kind supply from ``rwmaps.fairness``, the current model.
+
+    NOT ``analyze_capture``'s ``resources`` block, which is kept in the
+    record only so old runs stay comparable. That one assigns every
+    resource to its single nearest town centre, breaking exact ties by
+    player index, and measures straight-line distance. On the tight maps
+    this project makes, most of what a player can reach is equally
+    reachable by a neighbour, so sole-ownership overstates what anyone
+    actually has. It disagrees with the current model in both directions
+    on this very run: it flagged four players on Britain north-up where
+    two are real, and it missed a player with no reachable deer at all on
+    GL Erie-Ontario.
+
+    Every number below is exclusive/contested/unclaimed over walking
+    distance on the walkable mask, so water and forest are barriers.
+    """
+    rows = []
+    for kind in SPREAD_KINDS + EXTRA_KINDS:
+        s = fair["spread"].get(kind)
+        if not s:
+            continue
+        extra = ' class="dimrow"' if kind in EXTRA_KINDS else ""
+        # The nearest_* keys are absent entirely, not None, for a kind no
+        # player can reach anywhere - which is every capture's small_game.
+        near = ("&mdash;" if s.get("nearest_min") is None else
+                f"{s['nearest_min']:g}&ndash;{s['nearest_max']:g}"
+                f" <span class='dim'>(&Delta;{s['nearest_range']:g})</span>")
+        miss = s["n_players_without_any"]
+        unreach = s["n_players_unreachable"]
+        rows.append(
+            f"<tr{extra}><td>{kind}</td>"
+            f"<td>{s['count_min']}&ndash;{s['count_max']}</td>"
+            f"<td>{s['exclusive_min']}&ndash;{s['exclusive_max']}</td>"
+            f"<td>{near}</td>"
+            f"<td>{miss or '&middot;'}</td><td>{unreach or '&middot;'}</td>"
+            f"<td>{fair['unclaimed'].get(kind, 0)}</td></tr>")
+    return f"""
+          <table class="spread">
+            <tr><th>kind</th><th>count</th><th>exclusive</th>
+                <th>nearest (tiles)</th><th>no&nbsp;any</th>
+                <th>unreach</th><th>unclaimed</th></tr>
+            {''.join(rows)}
+          </table>"""
+
+
 def sample_card(r: dict, struct: dict, scen_rel: str | None) -> str:
     p = r["placement"]
-    zero = r["resources"]["zero_kinds_by_player"]
+    fair = r["fairness"]
+    zero = fair["zero_kinds_by_player"] or {}
     zero_txt = ("none" if not zero else
                 "; ".join(f"P{k}: {', '.join(v)}" for k, v in sorted(zero.items())))
+    fo = fair["forest"]
     a = r["aesthetic"]
     masses = ", ".join(f"{v:,}" for v in struct["landmasses"][:6]) or "&mdash;"
     waters = ", ".join(f"{v:,}" for v in struct["waterbodies"][:8]) or "&mdash;"
@@ -180,9 +235,16 @@ def sample_card(r: dict, struct: dict, scen_rel: str | None) -> str:
           <tr><th>min TC separation</th><td>{p['min_tc_separation']}</td></tr>
           <tr><th>pairwise land-reachable</th>
               <td>{p['pairwise_land_reachable_fraction']}</td></tr>
-          <tr><th>players with zero of a kind</th><td>{zero_txt}</td></tr>
+          <tr><th>forest</th>
+              <td>{fo['exclusive']:,} exclusive / {fo['contested']:,} contested /
+                  {fo['unclaimed']:,} unclaimed of {fo['total']:,}
+                  ({fo['share_of_land']*100:.0f}% of land)</td></tr>
+          <tr><th>neutral objects</th><td>{fair['neutral_total']:,}</td></tr>
+          <tr><th>players with zero of a kind</th>
+              <td class="{'bad' if zero else ''}">{zero_txt}</td></tr>
           <tr><th>file</th><td>{link}</td></tr>
         </table>
+        {spread_table(fair)}
       </div>"""
 
 
@@ -303,6 +365,14 @@ TEMPLATE = """<!doctype html>
          font-size:.82rem; }}
  .fl {{ color:#8fc7ff; }}
  .missing {{ color:#c98b6b; }}
+ .bad {{ color:#e08a6a; }}
+ .dim {{ color:#8f8f8f; }}
+ table.spread {{ margin-top:.6rem; font-size:.8rem; }}
+ table.spread th {{ color:#8f8f8f; border-bottom:1px solid #333;
+                    padding-bottom:.2rem; width:auto; white-space:nowrap; }}
+ table.spread td {{ padding:.12rem .7rem .12rem 0; white-space:nowrap; }}
+ table.spread td:first-child {{ color:#bdbdbd; }}
+ tr.dimrow td {{ color:#777; }}
  .caveat {{ border-left:3px solid #6b5a2a; background:#1e1a12; padding:.7rem 1rem;
             margin:1.2rem 0; color:#d8d0b8; max-width:80ch; }}
 </style>
@@ -317,11 +387,23 @@ TEMPLATE = """<!doctype html>
  <code>--rotate</code> is 45. Dots are real town centres and the land
  resources each one can walk to first.
  <br><br>
+ <b>Supply comes from <code>rwmaps.fairness</code></b>, the current model:
+ every resource is exclusive, contested or unclaimed, contested counts for
+ both players because both can genuinely take it, and all distances are
+ walked on the walkable mask so water and forest are barriers.
+ <code>analyze_capture</code>'s older <code>resources</code> block is still
+ in the record for comparability with past runs and is <i>not</i> used
+ here - it assigns each resource to its single nearest TC and measures
+ straight lines, and on this run it disagreed in both directions: four
+ players flagged on Britain north-up where two are real, and a player with
+ no reachable deer on GL Erie-Ontario missed entirely.
+ <br><br>
  <b>N=2 per window.</b> That is the sample count for exploring breadth, and
- it cannot settle a fairness question. TC separation, landmass counts and
- reachability are listed per sample as plain facts about that capture, not
- averaged and not scored. The one thing treated as an outright problem is a
- player with literally zero of some resource kind.
+ it cannot settle a fairness question. Everything below is listed per
+ sample as a plain fact about that capture - not averaged, not scored, and
+ not a comparison between windows. The one thing treated as an outright
+ problem is a player with literally zero of some resource kind
+ (<code>small_game</code> excluded: plenty of good maps place none).
 </div>
 
 {body}
