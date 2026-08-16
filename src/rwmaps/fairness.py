@@ -139,6 +139,7 @@ def profile_capture(path: str | Path) -> dict:
     players, stack = _distance_stack(walk, tcs)
     index_of = {p: i for i, p in enumerate(players)}
     n_dry_land = int(cap.dry_land_mask.sum())
+    land_stats = _land_ownership(stack, players, cap)
 
     exclusive = {p: dict.fromkeys(all_kinds, 0) for p in players}
     contested_n = {p: dict.fromkeys(all_kinds, 0) for p in players}
@@ -209,6 +210,7 @@ def profile_capture(path: str | Path) -> dict:
             "nearest": nearest,
             "wood": wood,
             "water": water,
+            "land": land_stats["per_player"][player],
         }
 
     return {
@@ -223,11 +225,62 @@ def profile_capture(path: str | Path) -> dict:
         "unclaimed": unclaimed,
         "neutral_total": sum(unclaimed.values()),
         "forest": forest_stats["totals"],
+        "land": land_stats["totals"],
         "spread": _spread(per_player, all_kinds),
         "zero_kinds_by_player": {
             str(p): [k for k in LAND_KINDS if v["counts"].get(k, 0) == 0]
             for p, v in per_player.items()
             if any(v["counts"].get(k, 0) == 0 for k in LAND_KINDS)
+        },
+    }
+
+
+def _land_ownership(stack: np.ndarray, players: list[int], cap) -> dict:
+    """Split buildable land into exclusive / contested / unclaimed.
+
+    Land is a resource and was the one this module did not count. It is
+    also the only one that cannot be topped up: a player can walk further
+    for gold, but not for somewhere to put a farm.
+
+    "Buildable" is dry and unforested - shallows are excluded because a
+    ford is a route, not ground you can build on, and forest is excluded
+    because it is wood you have to clear before it is land. Distances are
+    still walked on the walkable mask, so a ford is a route.
+
+    Same exclusive/contested/unclaimed rule as everything else here, so a
+    tile two players can both reach counts for both.
+    """
+    buildable = ~np.isin(cap.terrain, list(T.WATER_IDS)) & ~cap.forest_mask
+    ys, xs = np.nonzero(buildable)
+    per_player = {p: {"land_exclusive": 0, "land_contested": 0} for p in players}
+    if ys.size == 0:
+        return {"per_player": per_player,
+                "totals": {"exclusive": 0, "contested": 0, "unclaimed": 0,
+                           "total": 0}}
+
+    near, runner, claimed, contest = _classify(stack, ys, xs)
+    excl = dict.fromkeys(players, 0)
+    cont = dict.fromkeys(players, 0)
+    n_unclaimed = 0
+    for i in range(ys.size):
+        if not claimed[i]:
+            n_unclaimed += 1
+        elif contest[i]:
+            cont[players[near[i]]] += 1
+            cont[players[runner[i]]] += 1
+        else:
+            excl[players[near[i]]] += 1
+
+    for p in players:
+        per_player[p] = {"land_exclusive": excl[p], "land_contested": cont[p]}
+    return {
+        "per_player": per_player,
+        "totals": {
+            "exclusive": int(sum(excl.values())),
+            # halved: each contested tile was counted once per player
+            "contested": int(sum(cont.values()) // 2),
+            "unclaimed": int(n_unclaimed),
+            "total": int(ys.size),
         },
     }
 

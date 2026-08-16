@@ -252,10 +252,15 @@ def wood_water_table(fair: dict) -> str:
     """
     players = sorted(fair["per_player"], key=int)
     fo = fair["forest"]
+    lt = fair.get("land", {})
+    fo_land = (f'{lt.get("unclaimed", 0):,} land tiles of {lt.get("total", 0):,}'
+               if lt else "")
     rows = []
     for p in players:
         w = fair["per_player"][p]["wood"]
         aq = fair["per_player"][p]["water"]
+        ld = fair["per_player"][p].get("land", {"land_exclusive": 0,
+                                                "land_contested": 0})
 
         def fish(near_key: str, n_key: str) -> str:
             n, d = aq.get(n_key, 0), aq.get(near_key)
@@ -271,6 +276,8 @@ def wood_water_table(fair: dict) -> str:
             f"<td>{w['open_tiles_within_10']:,}</td>"
             f"<td>{w['open_tiles_within_20']:,}</td>"
             f"<td>{w['stragglers_within_6']}</td>"
+            f"<td class=\"cur\">{ld['land_exclusive']:,}</td>"
+            f"<td class=\"cur\">{ld['land_contested']:,}</td>"
             + fish("nearest_shore_fish", "shore_fish_within_20")
             + fish("nearest_deep_fish", "deep_fish_within_20")
             + fish("nearest_whale", "whale_within_20")
@@ -279,6 +286,7 @@ def wood_water_table(fair: dict) -> str:
           <table class="spread">
             <tr><th>player</th><th>forest excl</th><th>forest cont</th>
                 <th>open&le;10</th><th>open&le;20</th><th>stragglers&le;6</th>
+                <th class="cur">land excl</th><th class="cur">land cont</th>
                 <th>shore fish&le;20</th><th>deep fish&le;20</th>
                 <th>whale&le;20</th></tr>
             {''.join(rows)}
@@ -286,7 +294,8 @@ def wood_water_table(fair: dict) -> str:
                 <td colspan="2">{fo['unclaimed']:,} forest tiles
                   <span class="dim">of {fo['total']:,},
                   {fo['share_of_land']*100:.0f}% of land is wood</span></td>
-                <td colspan="6"></td></tr>
+                <td colspan="6"></td>
+                <td class="cur" colspan="2">{fo_land}</td></tr>
           </table>"""
 
 
