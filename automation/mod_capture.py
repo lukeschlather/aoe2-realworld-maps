@@ -6,8 +6,8 @@ research phases deliberately skipped (see TUNING_STATUS.md /
 [[feedback-verification-and-automation]]: N=1-2 was fine for breadth-over-
 parameters exploration, not for a fairness claim).
 
-Reuses tuning_matrix.py's proven capture primitives (SLOT_PATH swap,
-click_sequence, sample_analysis.analyze_capture) unchanged - this script
+Reuses the shared capture primitives (SLOT_PATH swap,
+editor.generate_and_save, sample_analysis.analyze_capture) - this script
 only supplies a different iteration shape (10 independent named regions,
 one condition each, N=10) and additionally scores every sample against
 aesthetic_metrics.compute_metrics_from_truth() using the region's own
@@ -162,39 +162,6 @@ def game_is_running() -> bool:
 def newest_scenario():
     files = sorted(SCENARIO_DIR.glob("*.aoe2scenario"), key=lambda p: p.stat().st_mtime)
     return files[-1] if files else None
-
-
-def click_sequence(before_mtime: float):
-    """Generate, then save - in Python, and never on a blind click.
-
-    Replaces the PowerShell driver. Three things changed, each of which had
-    caused a wrong result before:
-
-    * Generation is watched by the **Generate button's colour** rather than
-      by OCR-polling the seed box. The button greys on start and returns to
-      red on finish, so a crash *during* generation is distinguishable from
-      a generation that never started - the seed only ever changes at the
-      end and cannot tell those apart. It also stops screen-grabbing a
-      fullscreen D3D application a few times a second while the engine is
-      under load.
-    * Save **verifies the Menu overlay is really up** before clicking Save.
-      The old sequence slept 200ms and clicked (960, 436), which without
-      the overlay is the middle of the map, where a click is a brush
-      stroke. That is the leading suspicion for the editor's crashes.
-    * Save answers the **Save Scenario file browser**, which the first save
-      of every session opens. The old code only knew the silent form, so it
-      left the dialog open and reported "the menu closed but no file
-      appeared" - a failure mode recorded as not understood at the time.
-
-    ``before_mtime`` is unused now: ``editor.save`` takes its own baseline
-    immediately before clicking, which is tighter than one taken by the
-    caller several seconds earlier.
-    """
-    result = editor.generate()
-    if not result.ok:
-        raise RuntimeError(f"generate: {result.detail}")
-    if editor.save(SCENARIO_DIR) is None:
-        raise RuntimeError("save produced no new scenario file")
 
 
 def already_done(results_path: Path, region: str) -> int:
@@ -440,7 +407,7 @@ def main():
                 before = newest_scenario()
                 before_mtime = before.stat().st_mtime if before else 0
                 try:
-                    click_sequence(before_mtime)
+                    editor.generate_and_save(SCENARIO_DIR)
                 except Exception as e:
                     # Distinguish "the engine rejected this" from "the engine
                     # died". A crash *during* the click sequence used to abort

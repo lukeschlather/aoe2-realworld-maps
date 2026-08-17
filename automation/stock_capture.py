@@ -35,9 +35,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import shutil
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -49,15 +47,9 @@ REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
+import editor  # noqa: E402
 from rwmaps import install as install_mod  # noqa: E402
 from sample_analysis import analyze_capture  # noqa: E402
-from tuning_matrix import (  # noqa: E402
-    CANCEL_BTN,
-    GENERATE_BTN,
-    MENU_BTN,
-    SAVE_BTN,
-    UI_DRIVER,
-)
 
 SLOT_PATH = install_mod.scripts_dir() / "AA_rw_placeholder_tester.rms"
 SCENARIO_DIR = install_mod.find_profile() / "resources" / "_common" / "scenario"
@@ -71,6 +63,7 @@ STOCK_DIR = Path(
 )
 
 SIZE = 240
+PLAYERS = 8
 N_SAMPLES = 3
 
 #: (label, filename, why it is in the benchmark set). Chosen to span the
@@ -120,11 +113,6 @@ STOCK_MAPS: list[tuple[str, str, str]] = [
 ]
 
 
-def newest_scenario():
-    files = sorted(SCENARIO_DIR.glob("*.aoe2scenario"), key=lambda p: p.stat().st_mtime)
-    return files[-1] if files else None
-
-
 def put_slot(src: Path):
     """Copy a script into the slot, normalised to the ascii/LF form the
     engine's parser wants (same as ``rwmaps.rms.write_rms`` - a CRLF copy is
@@ -142,31 +130,6 @@ def put_slot(src: Path):
         except PermissionError:
             time.sleep(0.5)
     raise RuntimeError(f"slot stayed locked by the game: {SLOT_PATH}")
-
-
-def click_sequence(before_mtime: float):
-    """Generate + Save, both OCR/mtime-verified. Byte-identical in behaviour
-    to mod_capture.click_sequence - kept as its own copy only because
-    importing mod_capture would drag in build_mod's MOD_REGIONS and the
-    geodata stack, which this script has no use for."""
-    ps = f"""
-. "{UI_DRIVER}"
-Reset-IfMenuStuck {CANCEL_BTN[0]} {CANCEL_BTN[1]}
-$ok = Click-GenerateMapVerified {GENERATE_BTN[0]} {GENERATE_BTN[1]}
-if (-not $ok) {{ exit 1 }}
-Click-At {MENU_BTN[0]} {MENU_BTN[1]}
-$beforeTime = [DateTimeOffset]::FromUnixTimeMilliseconds({math.ceil(before_mtime * 1000) + 200}).LocalDateTime
-$ok = Click-SaveVerified {SAVE_BTN[0]} {SAVE_BTN[1]} {MENU_BTN[0]} {MENU_BTN[1]} "{SCENARIO_DIR}" $beforeTime
-if (-not $ok) {{ exit 2 }}
-"""
-    result = subprocess.run(["powershell.exe", "-NoProfile", "-Command", ps],
-                            capture_output=True, text=True)
-    if result.returncode == 1:
-        raise RuntimeError("Generate Map never registered a seed change")
-    if result.returncode == 2:
-        raise RuntimeError("Save never closed the Menu")
-    if result.returncode != 0:
-        raise RuntimeError(f"click sequence failed rc={result.returncode}: {result.stderr}")
 
 
 def already_done(results_path: Path, label: str) -> int:
@@ -189,6 +152,10 @@ def parse_args():
 
 def main():
     args = parse_args()
+    ok, why = editor.ensure_ready(PLAYERS)
+    if not ok:
+        raise SystemExit(f"ABORTING: the editor is not usable: {why}")
+    print(f"editor ready: {why}")
     maps = STOCK_MAPS
     if args.maps:
         wanted = {m.strip() for m in args.maps.split(",")}
@@ -224,16 +191,10 @@ def main():
             map_dir = outroot / label
             for sample_i in range(done, args.n_samples):
                 t1 = time.time()
-                before = newest_scenario()
-                before_mtime = before.stat().st_mtime if before else 0
                 try:
-                    click_sequence(before_mtime)
+                    after = editor.generate_and_save(SCENARIO_DIR)
                 except Exception as e:
                     print(f"  sample {sample_i}: capture FAILED ({e})")
-                    continue
-                after = newest_scenario()
-                if after is None or after.stat().st_mtime <= before_mtime:
-                    print(f"  sample {sample_i}: no new file, skipping")
                     continue
 
                 archive_dir = map_dir / "raw"

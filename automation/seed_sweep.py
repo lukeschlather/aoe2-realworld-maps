@@ -19,7 +19,6 @@ Usage:
 
 import argparse
 import json
-import math
 import shutil
 import subprocess
 import sys
@@ -31,48 +30,15 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
+sys.path.insert(0, str(Path(__file__).parent))
 
+import editor  # noqa: E402
 from rwmaps import install as install_mod  # noqa: E402
 from rwmaps import scx_read  # noqa: E402
 from rwmaps.analysis import resource_ownership  # noqa: E402
 
 SLOT_PATH = install_mod.scripts_dir() / "AA_rw_placeholder_tester.rms"
 SCENARIO_DIR = install_mod.find_profile() / "resources" / "_common" / "scenario"
-UI_DRIVER = Path(__file__).parent / "ui_driver.ps1"
-
-# Same physical-pixel coordinates gen_loop.py uses - specific to this
-# machine's current display layout.
-GENERATE_BTN = (256, 1028)
-MENU_BTN = (1834, 23)
-SAVE_BTN = (960, 436)
-CANCEL_BTN = (960, 737)
-
-
-def newest_scenario():
-    files = sorted(SCENARIO_DIR.glob("*.aoe2scenario"), key=lambda p: p.stat().st_mtime)
-    return files[-1] if files else None
-
-
-def click_sequence(before_mtime: float):
-    ps = f"""
-. "{UI_DRIVER}"
-Reset-IfMenuStuck {CANCEL_BTN[0]} {CANCEL_BTN[1]}
-$ok = Click-GenerateMapVerified {GENERATE_BTN[0]} {GENERATE_BTN[1]}
-if (-not $ok) {{ exit 1 }}
-Click-At {MENU_BTN[0]} {MENU_BTN[1]}
-Start-Sleep -Milliseconds 200
-$beforeTime = [DateTimeOffset]::FromUnixTimeMilliseconds({math.ceil(before_mtime * 1000) + 200}).LocalDateTime
-$ok = Click-SaveVerified {SAVE_BTN[0]} {SAVE_BTN[1]} {MENU_BTN[0]} {MENU_BTN[1]} "{SCENARIO_DIR}" $beforeTime
-if (-not $ok) {{ exit 2 }}
-"""
-    result = subprocess.run(["powershell.exe", "-NoProfile", "-Command", ps],
-                             capture_output=True, text=True)
-    if result.returncode == 1:
-        raise RuntimeError(f"Generate Map never registered a seed change:\n{result.stdout}\n{result.stderr}")
-    if result.returncode == 2:
-        raise RuntimeError(f"Save never closed the Menu:\n{result.stdout}\n{result.stderr}")
-    if result.returncode != 0:
-        raise RuntimeError(f"click sequence failed unexpectedly:\n{result.stdout}\n{result.stderr}")
 
 
 def main():
@@ -106,6 +72,11 @@ def main():
     shutil.copyfile(rms_files[0], SLOT_PATH)
     print(f"[seed_sweep] slot script: {rms_files[0].name}")
 
+    ok, why = editor.ensure_ready(args.players)
+    if not ok:
+        raise SystemExit(f"ABORTING: the editor is not usable: {why}")
+    print(f"[seed_sweep] editor ready: {why}")
+
     done = 0
     if results_path.exists():
         done = sum(1 for _ in results_path.open(encoding="utf-8"))
@@ -115,17 +86,10 @@ def main():
         for i in range(done, args.n):
             t0 = time.time()
             print(f"\n[seed_sweep] ({i + 1}/{args.n})")
-            before = newest_scenario()
-            before_mtime = before.stat().st_mtime if before else 0
             try:
-                click_sequence(before_mtime)
+                after = editor.generate_and_save(SCENARIO_DIR)
             except Exception as e:
                 print(f"[seed_sweep] iteration {i} FAILED: {e}")
-                continue
-
-            after = newest_scenario()
-            if after is None or after.stat().st_mtime <= before_mtime:
-                print(f"[seed_sweep] iteration {i}: no new file, skipping")
                 continue
 
             dest = outdir / f"{args.name}_seed_{i:03d}.aoe2scenario"

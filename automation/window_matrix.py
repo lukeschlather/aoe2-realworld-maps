@@ -13,7 +13,6 @@ Usage:
 
 from __future__ import annotations
 
-import math
 import shutil
 import subprocess
 import sys
@@ -25,18 +24,14 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
+sys.path.insert(0, str(Path(__file__).parent))
 
+import editor  # noqa: E402
 from rwmaps import install as install_mod  # noqa: E402
 from rwmaps.projection import MapWindow  # noqa: E402
 
 SLOT_PATH = install_mod.scripts_dir() / "AA_rw_placeholder_tester.rms"
 SCENARIO_DIR = install_mod.find_profile() / "resources" / "_common" / "scenario"
-UI_DRIVER = Path(__file__).parent / "ui_driver.ps1"
-
-GENERATE_BTN = (256, 1028)
-MENU_BTN = (1834, 23)
-SAVE_BTN = (960, 436)
-CANCEL_BTN = (960, 737)
 
 SIZE = 240
 PLAYERS = 8
@@ -74,34 +69,11 @@ def conditions_for(window_name: str) -> list[tuple[str, list[str]]]:
     ]
 
 
-def newest_scenario():
-    files = sorted(SCENARIO_DIR.glob("*.aoe2scenario"), key=lambda p: p.stat().st_mtime)
-    return files[-1] if files else None
-
-
-def click_sequence(before_mtime: float):
-    ps = f"""
-. "{UI_DRIVER}"
-Reset-IfMenuStuck {CANCEL_BTN[0]} {CANCEL_BTN[1]}
-$ok = Click-GenerateMapVerified {GENERATE_BTN[0]} {GENERATE_BTN[1]}
-if (-not $ok) {{ exit 1 }}
-Click-At {MENU_BTN[0]} {MENU_BTN[1]}
-Start-Sleep -Milliseconds 200
-$beforeTime = [DateTimeOffset]::FromUnixTimeMilliseconds({math.ceil(before_mtime * 1000) + 200}).LocalDateTime
-$ok = Click-SaveVerified {SAVE_BTN[0]} {SAVE_BTN[1]} {MENU_BTN[0]} {MENU_BTN[1]} "{SCENARIO_DIR}" $beforeTime
-if (-not $ok) {{ exit 2 }}
-"""
-    result = subprocess.run(["powershell.exe", "-NoProfile", "-Command", ps],
-                             capture_output=True, text=True)
-    if result.returncode == 1:
-        raise RuntimeError("Generate Map never registered a seed change")
-    if result.returncode == 2:
-        raise RuntimeError("Save never closed the Menu")
-    if result.returncode != 0:
-        raise RuntimeError(f"click sequence failed rc={result.returncode}: {result.stderr}")
-
-
 def main():
+    ok, why = editor.ensure_ready(PLAYERS)
+    if not ok:
+        raise SystemExit(f"ABORTING: the editor is not usable: {why}")
+    print(f"editor ready: {why}")
     t_start = time.time()
     total_cells = sum(len(conditions_for(name)) for name, *_ in WINDOWS)
     cell_i = 0
@@ -142,16 +114,10 @@ def main():
 
             for i in range(done, N_SAMPLES):
                 t1 = time.time()
-                before = newest_scenario()
-                before_mtime = before.stat().st_mtime if before else 0
                 try:
-                    click_sequence(before_mtime)
+                    after = editor.generate_and_save(SCENARIO_DIR)
                 except Exception as e:
                     print(f"  sample {i}: FAILED ({e})")
-                    continue
-                after = newest_scenario()
-                if after is None or after.stat().st_mtime <= before_mtime:
-                    print(f"  sample {i}: no new file, skipping")
                     continue
                 dest = cell_dir / f"sample_{i:03d}.aoe2scenario"
                 shutil.copyfile(after, dest)

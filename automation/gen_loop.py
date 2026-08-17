@@ -1,15 +1,16 @@
 """End-to-end real-render loop: generate an .rms, swap it into the fixed
-editor slot, click Generate Map -> Menu -> Save, then rename the resulting
-.aoe2scenario to a unique name. Requires the one-time manual editor setup in
-EDITOR_WORKFLOW.md to already be done (Map panel open, Random Map checked,
-size + slot script + players already selected).
+editor slot, generate and save in the editor, then rename the resulting
+.aoe2scenario to a unique name.
+
+The editor no longer has to be set up by hand: ``editor.ensure_ready()``
+walks it there from whatever state it is in, and every click it makes is
+verified against the screen first (see EDITOR_AUTOMATION.md).
 
 Usage:
-    uv run python scratch_compare/gen_loop.py <name> --region <region> [rwmaps args...]
+    uv run python automation/gen_loop.py <name> --region <region> [rwmaps args...]
 """
 
 import argparse
-import math
 import shutil
 import subprocess
 import sys
@@ -18,48 +19,12 @@ from pathlib import Path
 
 REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
+sys.path.insert(0, str(Path(__file__).parent))
+import editor  # noqa: E402
 from rwmaps import install as install_mod  # noqa: E402
 
 SLOT_PATH = install_mod.scripts_dir() / "AA_rw_placeholder_tester.rms"
 SCENARIO_DIR = install_mod.find_profile() / "resources" / "_common" / "scenario"
-UI_DRIVER = Path(__file__).parent / "ui_driver.ps1"
-
-# Screen coordinates (physical pixels, per-monitor-v2 DPI aware) found by hand
-# on this machine's current resolution/layout - see EDITOR_WORKFLOW.md.
-GENERATE_BTN = (256, 1028)
-MENU_BTN = (1834, 23)
-SAVE_BTN = (960, 436)
-CANCEL_BTN = (960, 737)  # Main Menu's "Cancel" - only clicked if a prior
-# failed/partial run left the Menu stuck open (detected via Test-MenuOpen).
-
-
-def click_sequence(before_mtime: float):
-    ps = f"""
-. "{UI_DRIVER}"
-Reset-IfMenuStuck {CANCEL_BTN[0]} {CANCEL_BTN[1]}
-$ok = Click-GenerateMapVerified {GENERATE_BTN[0]} {GENERATE_BTN[1]}
-if (-not $ok) {{ exit 1 }}
-Click-At {MENU_BTN[0]} {MENU_BTN[1]}
-Start-Sleep -Milliseconds 200
-$beforeTime = [DateTimeOffset]::FromUnixTimeMilliseconds({math.ceil(before_mtime * 1000) + 200}).LocalDateTime
-$ok = Click-SaveVerified {SAVE_BTN[0]} {SAVE_BTN[1]} {MENU_BTN[0]} {MENU_BTN[1]} "{SCENARIO_DIR}" $beforeTime
-if (-not $ok) {{ exit 2 }}
-"""
-    # ui_driver.ps1 needs WinRT OCR, which only projects correctly under
-    # Windows PowerShell 5.1 (powershell.exe), not PowerShell 7 (pwsh).
-    result = subprocess.run(["powershell.exe", "-NoProfile", "-Command", ps], capture_output=True, text=True)
-    print(result.stdout.strip())
-    if result.returncode == 1:
-        raise RuntimeError(f"Generate Map never registered a seed change:\n{result.stdout}\n{result.stderr}")
-    if result.returncode == 2:
-        raise RuntimeError(f"Save never closed the Menu:\n{result.stdout}\n{result.stderr}")
-    if result.returncode != 0:
-        raise RuntimeError(f"click sequence failed unexpectedly:\n{result.stdout}\n{result.stderr}")
-
-
-def newest_scenario():
-    files = sorted(SCENARIO_DIR.glob("*.aoe2scenario"), key=lambda p: p.stat().st_mtime)
-    return files[-1] if files else None
 
 
 def main():
@@ -74,9 +39,6 @@ def main():
     stamp = time.strftime("%Y%m%d-%H%M%S")
     outdir = REPO / args.outdir / f"loop-{stamp}"
     outdir.mkdir(parents=True, exist_ok=True)
-
-    before = newest_scenario()
-    before_mtime = before.stat().st_mtime if before else 0
 
     gen_cmd = [
         "uv", "run", "rwmaps", args.name,
@@ -96,12 +58,15 @@ def main():
     print(f"[gen_loop] swapping {rms_path.name} into slot {SLOT_PATH}")
     shutil.copyfile(rms_path, SLOT_PATH)
 
-    print("[gen_loop] driving Generate Map -> Menu -> Save")
-    click_sequence(before_mtime)
+    # Check the editor is on our slot with the mods on before spending a
+    # generation on it - with the mods off the editor silently generates a
+    # stock map under this run's name instead.
+    ok, why = editor.ensure_ready(args.players)
+    if not ok:
+        raise RuntimeError(f"the editor is not usable: {why}")
 
-    after = newest_scenario()
-    if after is None or after.stat().st_mtime <= before_mtime:
-        raise RuntimeError("no new .aoe2scenario appeared after Save - check screenshots")
+    print(f"[gen_loop] generating and saving in the editor ({why})")
+    after = editor.generate_and_save(SCENARIO_DIR)
 
     dest = outdir / f"{rms_path.stem}.aoe2scenario"
     shutil.copyfile(after, dest)

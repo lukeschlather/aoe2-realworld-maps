@@ -702,6 +702,33 @@ def save(scenario_dir: Path, timeout: float = 30.0) -> Path | None:
     return None
 
 
+class CaptureFailed(RuntimeError):
+    """One generate-and-save did not produce a scenario."""
+
+
+def generate_and_save(scenario_dir: Path) -> Path:
+    """One capture: generate a map, save it, return the file that appeared.
+
+    This is the whole of what the PowerShell driver did for every capture
+    harness in this directory - ``Click-GenerateMapVerified``, click Menu,
+    ``Click-SaveVerified`` - and six harnesses each carried their own copy
+    of that block, with their own stale coordinates. They now share this,
+    so a fix to the click path reaches all of them.
+
+    The callers used to pass a ``before_mtime`` baseline taken before the
+    script was even copied into the slot. ``save()`` takes its own,
+    immediately before clicking, which cannot be fooled by a file that
+    landed in between.
+    """
+    result = generate()
+    if not result.ok:
+        raise CaptureFailed(f"generate: {result.detail}")
+    saved = save(scenario_dir)
+    if saved is None:
+        raise CaptureFailed("save produced no new scenario file")
+    return saved
+
+
 # ------------------------------------------------------------------ setup
 
 
