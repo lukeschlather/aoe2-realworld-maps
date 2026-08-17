@@ -219,13 +219,14 @@ identified as destabilising the editor.
   generate-and-save.
 - **A full pass over all regions has not been run** on this pipeline. One
   region has, end to end.
-- The harnesses that were migrated off PowerShell on 2026-08-17 —
-  `tuning_matrix`, `stock_capture`, `batch_capture`, `seed_sweep`,
-  `window_matrix` — have been import-checked and share a cycle that is
-  proven on `gen_loop`/`mod_capture`, but have **not each been re-run
-  through the engine**. Their old coordinates were stale (Generate at
-  (256, 1028) against the registry's verified (305, 1024)), so any of them
-  was going to need this before it could be trusted anyway.
+- Of the harnesses migrated off PowerShell on 2026-08-17, `gen_loop` and
+  `batch_capture` have been re-run through the engine (Britain: a
+  cold-start capture at IoU 0.838, then 3/3 consecutive at 0.803–0.824,
+  ~61s each). `tuning_matrix`, `stock_capture`, `seed_sweep` and
+  `window_matrix` are import-checked and share that exact cycle, but have
+  **not each been run**. Their old coordinates were stale anyway — every
+  one of them clicked Generate at (256, 1028) against the registry's
+  verified (305, 1024) — so none of them was trustworthy before this.
 - The editor crash itself is **unexplained**. Ruled out by measurement:
   file copying (the slot is byte-identical to its git blob by sha256),
   dangling land ids, the island copse block, seed `-1` (just the default
