@@ -15,10 +15,21 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+from AoE2ScenarioParser import settings as _asp_settings
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
 from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 
 from . import terrain as T
+
+#: The library's own progress printing, off. It writes timestamped,
+#: ANSI-coloured, emoji-bearing lines straight to stdout on every load -
+#: ``[13:47:51] Reading file: '...'`` - which is nobody's log but its own.
+#: ``_load_scenario`` below redirects stdout for the same reason, but four
+#: other readers in this file call ``from_file`` directly and leaked two of
+#: these lines into every capture the pass took. This is the switch the
+#: library provides, so it covers all five call sites at once and keeps the
+#: terse run log free of timestamps (see ``automation/runlog.py``).
+_asp_settings.PRINT_STATUS_UPDATES = False
 
 
 def _load_scenario(path: str | Path) -> AoE2DEScenario:

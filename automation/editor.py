@@ -89,6 +89,24 @@ MODS_DIALOG_BOX = (760, 645, 840, 672)
 MODS_DIALOG_RED = 50.0
 
 
+#: Where this module's narration goes. ``None`` means stdout, which is what
+#: a person running ``editor.py`` directly wants.
+#:
+#: A harness with its own two logs replaces this with a callable, so lines
+#: like "idle redness 100.6, pid 34948" land in the verbose JSON log instead
+#: of stdout. They are useful - a pid and a redness are exactly what a
+#: post-mortem needs - and they are also precisely what must stay out of a
+#: terse log intended to diff cleanly between runs. See ``runlog.py``.
+SINK = None
+
+
+def _say(*args, **kwargs) -> None:
+    if SINK is None:
+        print(*args, **kwargs)
+        return
+    SINK(" ".join(str(a) for a in args))
+
+
 def sh(cmd: str) -> str:
     return subprocess.run(["powershell.exe", "-NoProfile", "-Command", cmd],
                           capture_output=True, text=True).stdout.strip()
@@ -181,7 +199,7 @@ def parser_open():
     try:
         _SERVER = Server()
     except Exception as e:       # noqa: BLE001 - a slow path is still a path
-        print(f"  (no parser server: {e} - parsing per call instead)", flush=True)
+        _say(f"  (no parser server: {e} - parsing per call instead)", flush=True)
         yield
         return
     try:
@@ -229,10 +247,10 @@ def locate(label: str, retries: int = 2) -> tuple[int, int] | None:
         if hits:
             x, y = hits[0]["center"]
             x, y = x + ox, y + oy
-            print(f"  located {label!r} at ({x}, {y}) "
+            _say(f"  located {label!r} at ({x}, {y}) "
                   f"[{hits[0]['content']!r}]", flush=True)
             return x, y
-        print(f"  {label!r} not found (attempt {attempt + 1})", flush=True)
+        _say(f"  {label!r} not found (attempt {attempt + 1})", flush=True)
         time.sleep(2)
     return None
 
@@ -273,7 +291,7 @@ def click_label(label: str, confirm: str | None = None, tries: int = 3) -> bool:
         time.sleep(3)
         if locate(confirm, retries=3) is not None:
             return True
-        print(f"  clicking {label!r} at {where} did not bring up {confirm!r} "
+        _say(f"  clicking {label!r} at {where} did not bring up {confirm!r} "
               f"- re-reading the screen (attempt {attempt}/{tries})", flush=True)
     return False
 
@@ -304,7 +322,7 @@ def generate(timeout: float = 300.0, poll: float = 0.5) -> GenResult:
     if pid is None:
         return GenResult(False, 0.0, "game not running")
     idle = redness()
-    print(f"idle redness {idle:.1f}, pid {pid}", flush=True)
+    _say(f"idle redness {idle:.1f}, pid {pid}", flush=True)
     click(*GENERATE_BTN)
     t0 = time.time()
     started = False
@@ -317,7 +335,7 @@ def generate(timeout: float = 300.0, poll: float = 0.5) -> GenResult:
         r = redness()
         if not started and r < idle - BUSY_DROP:
             started = True
-            print(f"  generating at {time.time()-t0:.1f}s (redness {r:.1f})",
+            _say(f"  generating at {time.time()-t0:.1f}s (redness {r:.1f})",
                   flush=True)
         elif started and r > idle - IDLE_RETURN:
             return GenResult(True, time.time() - t0, "button returned to red")
@@ -389,7 +407,7 @@ def wait_for_main_menu(timeout: float = 120.0, poll: float = 1.5) -> bool:
     t0 = time.time()
     while time.time() - t0 < timeout:
         if menu is not None and controls.verify(menu).ok:
-            print(f"  main menu up after {time.time()-t0:.0f}s")
+            _say(f"  main menu up after {time.time()-t0:.0f}s")
             return True
         # NEVER press Escape over the mods dialog. Escape dismisses it
         # without re-enabling anything, and with mods off the placeholder
@@ -399,13 +417,13 @@ def wait_for_main_menu(timeout: float = 120.0, poll: float = 1.5) -> bool:
         # and the result was a 240x240 map that was 100% land. This exact
         # bug was introduced by adding the cutscene skip.
         if redness(MODS_DIALOG_BOX) > MODS_DIALOG_RED:
-            print("  mods dialog is up - leaving it for recover(), "
+            _say("  mods dialog is up - leaving it for recover(), "
                   "not escaping past it")
             return False
         if is_foreground():
             press(VK_ESCAPE)
         time.sleep(poll)
-    print(f"  main menu did not appear within {timeout:.0f}s")
+    _say(f"  main menu did not appear within {timeout:.0f}s")
     return menu is None  # no template learned yet: do not block the caller
 
 
@@ -467,28 +485,28 @@ def click_when_ready(name: str, tries: int = 20, pause: float = 0.25,
         except controls.NotThere:
             why = why_not_there(name, pid)
             if why == "crashed":
-                print(f"  {name}: the game is gone - not clicking")
+                _say(f"  {name}: the game is gone - not clicking")
                 return False
             if why == "not-foreground":
                 if attempt % 8 == 0:
-                    print(f"  {name}: the game is not foreground, waiting "
+                    _say(f"  {name}: the game is not foreground, waiting "
                           f"rather than clicking into whatever is")
                 time.sleep(1.0)
                 continue
             time.sleep(pause)
     # Cheap explanations exhausted: this is the case a picture is for.
     shot = REPO / "out" / "omni" / f"unexpected_{name}.png"
-    print(f"  {name}: still not there after {tries} tries - "
+    _say(f"  {name}: still not there after {tries} tries - "
           f"parsing the screen for a look")
     try:
         from omni import find, grab_screen, parse_image  # noqa: PLC0415
         img = grab_screen(shot, (0, 0, 1920, 1080))
         els = parse_image(img, annotate=shot.with_name(f"{shot.stem}_boxed.png"))
         hits = find(els, controls.load()[name].label or name)
-        print(f"  {name}: OmniParser {'found it at ' + str(hits[0]['center']) if hits else 'cannot see it either'};"
+        _say(f"  {name}: OmniParser {'found it at ' + str(hits[0]['center']) if hits else 'cannot see it either'};"
               f" annotated screen at {shot.with_name(shot.stem + '_boxed.png')}")
     except Exception as e:
-        print(f"  {name}: escalation failed too ({e})")
+        _say(f"  {name}: escalation failed too ({e})")
     return False
 
 
@@ -536,12 +554,12 @@ def enable_mods(priority: int | None = None) -> bool:
     import json  # noqa: PLC0415
 
     if game_pid():
-        print("  not touching mod-status.json while the game is running - "
+        _say("  not touching mod-status.json while the game is running - "
               "it would be overwritten on exit")
         return False
     p = mod_status_path()
     if not p.exists():
-        print(f"  no {p}")
+        _say(f"  no {p}")
         return False
     data = json.loads(p.read_text(encoding="utf-8"))
     changed = 0
@@ -562,7 +580,7 @@ def enable_mods(priority: int | None = None) -> bool:
             changed += 1
     if changed:
         p.write_text(json.dumps(data), encoding="utf-8")
-        print(f"  re-enabled {changed} mod(s) in mod-status.json")
+        _say(f"  re-enabled {changed} mod(s) in mod-status.json")
     return True
 
 
@@ -671,21 +689,21 @@ def save(scenario_dir: Path, timeout: float = 30.0) -> Path | None:
         try:
             controls.click("menu_button", reg)
         except controls.NotThere as e:
-            print(f"  save: {e}")
+            _say(f"  save: {e}")
             return None
         if controls.wait_for("menu_save", timeout=8.0, controls=reg):
             break
-        print(f"  save: the Menu overlay never appeared "
+        _say(f"  save: the Menu overlay never appeared "
               f"({attempt}/{MENU_TRIES}) - re-clicking Menu")
     else:
-        print("  save: could not get the Menu overlay up - not clicking "
+        _say("  save: could not get the Menu overlay up - not clicking "
               "where Save would be, because that coordinate is the map "
               "when the menu is closed")
         return None
     try:
         controls.click("menu_save", reg)
     except controls.NotThere as e:
-        print(f"  save: {e}")
+        _say(f"  save: {e}")
         return None
 
     # Three things can follow the Save click and only two are dialogs:
@@ -713,7 +731,7 @@ def save(scenario_dir: Path, timeout: float = 30.0) -> Path | None:
     while time.time() - t0 < timeout:
         newest = newest_scenario(scenario_dir)
         if newest and newest.stat().st_mtime > before_mtime:
-            print(f"  saved {newest.name} after {time.time()-t0:.1f}s")
+            _say(f"  saved {newest.name} after {time.time()-t0:.1f}s")
             return newest
         for dialog in ("save_dlg_confirm", "overwrite_yes"):
             # A dialog still on screen a moment after being answered was not
@@ -729,19 +747,19 @@ def save(scenario_dir: Path, timeout: float = 30.0) -> Path | None:
             clicked_at[dialog] = time.time()
             try:
                 if dialog == "save_dlg_confirm":
-                    print(f"  save: file browser opened - naming it {SAVE_NAME}")
+                    _say(f"  save: file browser opened - naming it {SAVE_NAME}")
                     controls.click("save_dlg_name", reg)
                     time.sleep(0.3)
                     type_text(SAVE_NAME)
                     time.sleep(0.3)
                 controls.click(dialog, reg)
             except controls.NotThere as e:
-                print(f"  save: {e}")
+                _say(f"  save: {e}")
                 return None
         # Only needed while both dialogs are inside their re-click cooldown -
         # a verify is a screen grab and already paces the loop otherwise.
         time.sleep(0.1)
-    print(f"  save: no new scenario file after {timeout:.0f}s")
+    _say(f"  save: no new scenario file after {timeout:.0f}s")
     return None
 
 
@@ -789,7 +807,7 @@ def generate_and_save(scenario_dir: Path) -> Capture:
     save_s = time.time() - t0
     if saved is None:
         raise CaptureFailed("save produced no new scenario file")
-    print(f"  capture: generate {result.seconds:.1f}s + save {save_s:.1f}s")
+    _say(f"  capture: generate {result.seconds:.1f}s + save {save_s:.1f}s")
     return Capture(saved, result.seconds, save_s)
 
 
@@ -835,7 +853,7 @@ def _quit() -> None:
 def recover() -> bool:
     """Clear crash dialogs, re-enable mods, and get back to the main menu."""
     if game_pid() and not mods_off():
-        print("game already running")
+        _say("game already running")
         return True
     if game_pid():
         # Not "nothing to recover", which is what this used to report. A
@@ -844,13 +862,13 @@ def recover() -> bool:
         # generates a stock script and the capture is filed under one of our
         # region names anyway. Only the loop at the end can help, since
         # mod-status.json is unwritable while this process lives.
-        print(f"game is running, but {mods_off()} disabled")
+        _say(f"game is running, but {mods_off()} disabled")
     else:
         titles = "".join(
             sh("Get-Process | ForEach-Object { $_.MainWindowTitle }").splitlines())
         # BugSplat holds Steam's "game is running" lock, so it has to go first.
         if "encountered a problem" in titles:
-            print("dismissing crash reporter")
+            _say("dismissing crash reporter")
             click(*BUGSPLAT_DONT_SEND)
             time.sleep(3)
         # The engine does not always crash into BugSplat. It also faults
@@ -863,15 +881,15 @@ def recover() -> bool:
         # WerFault is what clears it; nothing here needs the debug option it
         # offers.
         if "Application Error" in titles:
-            print("dismissing Windows' Application Error box (WerFault)")
+            _say("dismissing Windows' Application Error box (WerFault)")
             sh("Stop-Process -Name WerFault -Force -ErrorAction SilentlyContinue")
             time.sleep(2)
         # Do this before launching: the game reads mod-status.json at start
         # and rewrites it on exit, so it is only editable with the game down.
         enable_mods()
-        print("launching")
+        _say("launching")
         if not _launch():
-            print("game did not start")
+            _say("game did not start")
             return False
         # Give the dialog a moment to appear before deciding it is absent.
         time.sleep(12)
@@ -885,7 +903,7 @@ def recover() -> bool:
         # usually is: measured 102 redness with the dialog up against 6 on the
         # bare main menu, which is not a marginal difference.
         if redness(MODS_DIALOG_BOX) > MODS_DIALOG_RED:
-            print("mods were disabled by the crash - re-enabling")
+            _say("mods were disabled by the crash - re-enabling")
             click(*MODS_REENABLE_YES)
             time.sleep(3)
             click(*MODS_REENABLED_OK)
@@ -893,7 +911,7 @@ def recover() -> bool:
             # The game says outright that a restart may be needed for mods to
             # take effect, and a half-loaded mod is exactly the state that
             # silently generates the wrong script. Pay the restart.
-            print("restarting so the mod loads from launch")
+            _say("restarting so the mod loads from launch")
             _quit()
             _launch()
             wait_for_main_menu()
@@ -908,16 +926,16 @@ def recover() -> bool:
         off = mods_off()
         if not off:
             return game_pid() is not None
-        print(f"  the game has {off} disabled - closing to fix its own "
+        _say(f"  the game has {off} disabled - closing to fix its own "
               f"record, then relaunching ({attempt}/2)")
         _quit()
         enable_mods()
         if not _launch():
-            print("  game did not come back")
+            _say("  game did not come back")
             return False
         wait_for_main_menu()
     if mods_off():
-        print(f"  {mods_off()} will not stay enabled across a relaunch")
+        _say(f"  {mods_off()} will not stay enabled across a relaunch")
         return False
     return game_pid() is not None
 
@@ -925,23 +943,23 @@ def recover() -> bool:
 def setup(players: int = 8) -> bool:
     """Main menu -> editor -> N players, Random Map, Huge [240]."""
     if not focus_game():
-        print("no game window")
+        _say("no game window")
         return False
     # Located, not assumed - the main menu moves between launches - and
     # confirmed, not hoped: each click has to produce the screen it was
     # aimed at before the walk goes on. One parser stays open across both,
     # since confirming doubles the number of screen reads.
     with parser_open():
-        print("editors")
+        _say("editors")
         if not click_label("editors", confirm="create scenario"):
-            print("could not get from the main menu to the Editors menu")
+            _say("could not get from the main menu to the Editors menu")
             return False
-        print("create scenario (never load - loading one is what destabilises it)")
+        _say("create scenario (never load - loading one is what destabilises it)")
         if not click_label("create scenario", confirm="generate map"):
-            print("could not get from the Editors menu into a new scenario")
+            _say("could not get from the Editors menu into a new scenario")
             return False
 
-    print(f"players -> {players}")
+    _say(f"players -> {players}")
     click(*PLAYERS_TAB)
     time.sleep(3)
     click(*PLAYER_COUNT_COMBO)
@@ -953,13 +971,13 @@ def setup(players: int = 8) -> bool:
     click(105, 1046)
     time.sleep(2)
 
-    print("map -> random map")
+    _say("map -> random map")
     click(*MENU_TAB)
     time.sleep(3)
     click(*RANDOM_MAP_RADIO)
     time.sleep(2)
 
-    print("map size -> Huge [240]")
+    _say("map size -> Huge [240]")
     click(*MAP_SIZE_COMBO)
     time.sleep(2)
     scroll_combo(MAP_SIZE_SCROLL_DOWN, 2)
@@ -1000,7 +1018,7 @@ def ensure_ready(players: int = 8, tries: int = 3) -> tuple[bool, str]:
             with parser_open():
                 where = locate("cancel", retries=1)
                 if where is not None:
-                    print(f"  a dialog is covering the panel - closing it",
+                    _say(f"  a dialog is covering the panel - closing it",
                           flush=True)
                     click(*where)
                     time.sleep(2)
@@ -1009,7 +1027,7 @@ def ensure_ready(players: int = 8, tries: int = 3) -> tuple[bool, str]:
                         return True, why
         else:
             why = f"pid={game_pid()}, mods disabled={mods_off()}"
-        print(f"  editor not ready ({why}) - rebuilding ({attempt}/{tries})",
+        _say(f"  editor not ready ({why}) - rebuilding ({attempt}/{tries})",
               flush=True)
         if not (recover() and setup(players)):
             return False, "could not rebuild the editor"
@@ -1018,10 +1036,10 @@ def ensure_ready(players: int = 8, tries: int = 3) -> tuple[bool, str]:
 
 def status() -> None:
     pid = game_pid()
-    print(f"game pid: {pid or 'not running'}")
+    _say(f"game pid: {pid or 'not running'}")
     if pid:
-        print(f"window  : {find_window_rect('Age of Empires')}")
-        print(f"generate button redness: {redness():.1f} "
+        _say(f"window  : {find_window_rect('Age of Empires')}")
+        _say(f"generate button redness: {redness():.1f} "
               f"(idle is ~107, generating ~68)")
 
 
@@ -1045,7 +1063,7 @@ def main() -> int:
         return 1
     if args.generate:
         r = generate()
-        print(f"\n{'OK' if r.ok else 'FAILED'} after {r.seconds:.1f}s - {r.detail}")
+        _say(f"\n{'OK' if r.ok else 'FAILED'} after {r.seconds:.1f}s - {r.detail}")
         return 0 if r.ok else 2
     return 0
 

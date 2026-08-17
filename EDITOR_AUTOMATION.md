@@ -214,6 +214,45 @@ Random Map → Huge [240]. **Create Scenario, never Load Scenario** —
 loading a scenario to save the player-count clicks is what the user
 identified as destabilising the editor.
 
+## What a pass writes
+
+Three files under `out/mod_capture/<run-id>/`, for three different readers.
+All three append, because a pass is resumed by reusing its `--run-id` and
+truncating would destroy the record of the failure that made the resume
+necessary.
+
+| file | for | contains |
+|---|---|---|
+| `log.txt` | **an agent, or a person** | one short line per event, and **no timestamps or durations** — so two runs of the same pass diff cleanly and a grep stays exact. The same lines go to stdout, which adds only a closing pointer to these files |
+| `events.jsonl` | **queries about timing** | one JSON object per event: absolute timestamp, `elapsed_s` since the run started, and every phase duration. Failures included, marked `ok: false` |
+| `results.jsonl` | **analysis** | one record per *successful* sample: fairness, aesthetics, resolved geo, and that sample's timings. What the report builders read |
+
+Times live only in the JSON, deliberately: a duration is the single most
+likely thing to differ between two otherwise identical runs, so keeping
+them out of the short log is what makes it diffable — and nothing is lost,
+because every event goes to both.
+
+```sh
+# what happened, nothing else
+cat out/mod_capture/<id>/log.txt
+
+# every phase duration for one region, in order
+jq -r 'select(.region=="Britain") | [.kind, .duration_s] | @tsv' \
+  out/mod_capture/<id>/events.jsonl
+
+# everything that failed, and what the pass was doing at the time
+jq -c 'select(.ok==false)' out/mod_capture/<id>/events.jsonl
+```
+
+`automation/runlog.py` is the writer and is reusable, but **only
+`mod_capture.py` is wired to it** — the other harnesses still just print.
+
+`editor.py` narrates every click it verifies (`idle redness 100.6, pid
+34948`, `saved ... after 0.4s`). Those lines carry a pid and durations, so
+they go to `events.jsonl` under kind `editor` rather than into the terse
+log — set `editor.SINK` to a callable to redirect them, or leave it `None`
+and they print, which is what you want when running `editor.py` by hand.
+
 ## Still open
 
 - **The Mods screen is not mapped** (above).
