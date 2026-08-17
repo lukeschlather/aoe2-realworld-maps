@@ -48,12 +48,9 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
 import editor  # noqa: E402
-from rwmaps import install as install_mod  # noqa: E402
 from runlog import RunLog  # noqa: E402
 from sample_analysis import analyze_capture  # noqa: E402
-
-SLOT_PATH = install_mod.scripts_dir() / "AA_rw_placeholder_tester.rms"
-SCENARIO_DIR = install_mod.find_profile() / "resources" / "_common" / "scenario"
+from slot import SCENARIO_DIR, SLOT_PATH, put_slot  # noqa: E402, F401
 
 #: The live stock scripts. Per `STOCK_MAP_INVENTORY.md`, this - not
 #: `random-map-scripts/`, and not the `.backup.20201109` snapshot - is what
@@ -112,25 +109,6 @@ STOCK_MAPS: list[tuple[str, str, str]] = [
      "out/stock_maps/smoke1; included so the benchmark set has it under the "
      "same run-id and sample count as everything else."),
 ]
-
-
-def put_slot(src: Path):
-    """Copy a script into the slot, normalised to the ascii/LF form the
-    engine's parser wants (same as ``rwmaps.rms.write_rms`` - a CRLF copy is
-    a silent failure mode).
-
-    Retries on PermissionError: the game holds the slot file open while it
-    is generating, so a swap issued too soon after the previous sample dies
-    with EACCES rather than anything descriptive.
-    """
-    data = src.read_bytes().replace(b"\r\n", b"\n")
-    for _ in range(40):
-        try:
-            SLOT_PATH.write_bytes(data)
-            return
-        except PermissionError:
-            time.sleep(0.5)
-    raise RuntimeError(f"slot stayed locked by the game: {SLOT_PATH}")
 
 
 def already_done(results_path: Path, label: str) -> int:
