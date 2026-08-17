@@ -345,6 +345,10 @@ SAVE_NAME = "rw_capture_slot"
 #: click that never landed.
 MENU_TRIES = 3
 
+#: How long a save dialog gets to disappear after being answered before the
+#: answer is assumed lost and re-clicked.
+DIALOG_RECLICK_S = 1.5
+
 
 def type_text(text: str, clear: int = 40, hold: float = 0.02) -> None:
     """Type into whatever has keyboard focus, clearing it first.
@@ -684,42 +688,59 @@ def save(scenario_dir: Path, timeout: float = 30.0) -> Path | None:
         print(f"  save: {e}")
         return None
 
-    # The FIRST save of a session opens a Save Scenario file browser;
-    # later ones write silently to the same file. The old pipeline only
-    # ever knew about the silent form, which is why it could report the
-    # menu closing with no file on disk - it had left this dialog sitting
-    # open and unanswered.
-    if controls.wait_for("save_dlg_confirm", timeout=4.0, controls=reg):
-        print(f"  save: file browser opened - naming it {SAVE_NAME}")
-        try:
-            controls.click("save_dlg_name", reg)
-            time.sleep(0.3)
-            type_text(SAVE_NAME)
-            time.sleep(0.3)
-            controls.click("save_dlg_confirm", reg)
-        except controls.NotThere as e:
-            print(f"  save: {e}")
-            return None
-
-    # "That file already exists. Overwrite it?" - every save after the
-    # first, because the slot name is deliberately fixed. Unanswered it
-    # blocks the save AND covers the map panel, which then makes the next
-    # region's preflight report the selector as wrong when it is merely
-    # hidden. One unanswered modal, two misleading symptoms.
-    if controls.wait_for("overwrite_yes", timeout=4.0, controls=reg):
-        try:
-            controls.click("overwrite_yes", reg)
-        except controls.NotThere as e:
-            print(f"  save: {e}")
-            return None
-
+    # Three things can follow the Save click and only two are dialogs:
+    #
+    # * the file simply appears - every save after the first, silently, to
+    #   the same fixed name;
+    # * the **Save Scenario file browser** opens - the first save of a
+    #   session. The old pipeline knew only the silent form, which is why it
+    #   could report the menu closing with no file on disk: it had left this
+    #   dialog sitting open and unanswered;
+    # * **"that file already exists, overwrite it?"** - unanswered this
+    #   blocks the save AND covers the map panel, which then makes the next
+    #   region's preflight report the selector as wrong when it is merely
+    #   hidden. One unanswered modal, two misleading symptoms.
+    #
+    # Waiting for each in turn spent the *full* timeout on every one that
+    # did not happen. Measured over 12 captures: save cost 10.1s every time,
+    # with a variance of 0.3s, of which 8.0s was two dialog waits timing out
+    # on dialogs that never come again after the first save - 2.2 hours of a
+    # 1000-capture pass, spent watching for nothing. So watch for all three
+    # at once and take whichever fires. The saved file is what makes leaving
+    # early safe: if it is on disk, there is no dialog left pending.
     t0 = time.time()
+    clicked_at: dict[str, float] = {}
     while time.time() - t0 < timeout:
-        time.sleep(0.25)
         newest = newest_scenario(scenario_dir)
         if newest and newest.stat().st_mtime > before_mtime:
             print(f"  saved {newest.name} after {time.time()-t0:.1f}s")
             return newest
+        for dialog in ("save_dlg_confirm", "overwrite_yes"):
+            # A dialog still on screen a moment after being answered was not
+            # answered - the click did not register, which is documented as
+            # happening to these clicks. Answering it once and then waiting
+            # out the timeout is the same mistake the Menu click made.
+            if dialog not in reg:
+                continue
+            if time.time() - clicked_at.get(dialog, 0.0) < DIALOG_RECLICK_S:
+                continue
+            if not controls.verify(reg[dialog]).ok:
+                continue
+            clicked_at[dialog] = time.time()
+            try:
+                if dialog == "save_dlg_confirm":
+                    print(f"  save: file browser opened - naming it {SAVE_NAME}")
+                    controls.click("save_dlg_name", reg)
+                    time.sleep(0.3)
+                    type_text(SAVE_NAME)
+                    time.sleep(0.3)
+                controls.click(dialog, reg)
+            except controls.NotThere as e:
+                print(f"  save: {e}")
+                return None
+        # Only needed while both dialogs are inside their re-click cooldown -
+        # a verify is a screen grab and already paces the loop otherwise.
+        time.sleep(0.1)
     print(f"  save: no new scenario file after {timeout:.0f}s")
     return None
 

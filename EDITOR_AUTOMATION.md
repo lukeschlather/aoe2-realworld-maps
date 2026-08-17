@@ -75,10 +75,14 @@ changes at the end and cannot tell those apart. It is also not a screen
 read of a fullscreen D3D application several times a second while the
 engine is under load, which the old OCR poll was.
 
-**CPU load works but is not sufficient alone.** It fires correctly
-(measured 1.56 against a 0.95 baseline) but called a lull inside
-generation the end, reporting done at 4 s of a generation still running a
-minute later. Kept as a gate, never as the authority.
+**CPU load is not used at all, and no longer exists in the code.** It was
+tried first and does fire correctly (measured 1.56 against a 0.95
+baseline), but it called a lull inside generation the end, reporting done
+at 4 s of a generation still running a minute later. It was kept for a
+while as a gate on the OCR poll; both went with `ui_driver.ps1`
+(`Get-GameCpuSeconds`, `Measure-GameCpuLoad`, `Wait-ForCpuBurst`), so
+nothing in the capture path samples CPU today. The button's colour is the
+whole signal.
 
 **Crash: the process id, not the process name.** A relaunched game is a
 different pid with the same name, and it comes back at Blank Map /
