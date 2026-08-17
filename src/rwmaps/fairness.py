@@ -215,6 +215,10 @@ def profile_capture(path: str | Path) -> dict:
 
     return {
         "n_players": len(tcs),
+        # Every count below is "within this many walked tiles". Carried in
+        # the payload because leaving it implicit is how the same map came
+        # to be described as giving a player 9 stone and 16 stone.
+        "ownership_radius": OWNERSHIP_RADIUS,
         "per_player": {str(p): v for p, v in per_player.items()},
         # Resources no player can reach. Despite the name this is mostly a
         # GOOD thing and was being read as waste: it is the neutral, out-on-

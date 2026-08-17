@@ -112,7 +112,7 @@ def _spatial_stratified_top(ys: np.ndarray, xs: np.ndarray, q: np.ndarray, budge
 
     Confirmed as the actual root cause of Italy's "no picks anywhere in the
     peninsula" failure (previously misattributed to Lloyd relaxation/the
-    scoring in ``choose_starts``' ``spread_islands`` path): the mainland
+    scoring in ``choose_starts``' ``spread_starts`` path): the mainland
     component's per-component candidate budget was being filled entirely by
     tiles tied at the maximum quality score (the flat Po valley/France/Balkans
     plains, thousands of tiles at quality==1.0), leaving the Apennine
@@ -568,7 +568,7 @@ def choose_starts(
     quality_percentile: float = 60.0,
     max_candidates: int = 6000,
     min_separation: float = 56.0,
-    spread_islands: bool = False,
+    spread_starts: bool = False,
     anneal: bool = True,
 ) -> list[tuple[int, int]]:
     """Pick start tiles that are both *good* and *far apart*.
@@ -599,7 +599,7 @@ def choose_starts(
     has no reason to prefer the actual Italian peninsula over French or
     Balkan territory within that same component).
 
-    ``spread_islands=True`` addresses both by handing the ordinary
+    ``spread_starts=True`` addresses both by handing the ordinary
     farthest-point pack below to ``_multistart_anneal``, which runs simulated
     annealing directly against ``_score_starts`` - a real scalar objective
     combining coverage (how much qualifying land sits farther than
@@ -665,7 +665,7 @@ def choose_starts(
         # perfectly playable smaller island - which silently defeats
         # same_component=False for archipelagos.
         #
-        # Under spread_islands the floor is forced to 0 (i.e. skipped, modulo
+        # Under spread_starts the floor is forced to 0 (i.e. skipped, modulo
         # the min_inland/edge_margin/min_component_tiles filters already baked
         # into `valid`) regardless of the requested percentile: confirmed on
         # Italy that even a *per-landmass* floor can wash out a genuinely
@@ -676,12 +676,12 @@ def choose_starts(
         # both sides so quality tops out around 0.89) - a 60th-percentile
         # floor computed over that whole component lands above 0.95, at which
         # point every peninsula tile is already gone before the candidate
-        # pool is even built, let alone downsampled. spread_islands exists
+        # pool is even built, let alone downsampled. spread_starts exists
         # specifically to admit real-but-lower-quality sub-regions, so it
         # relies on _spatial_stratified_top's per-cell selection (using
         # quality only as an in-cell tie-break) to keep the candidate count
         # bounded instead.
-        floor_percentile = 0.0 if spread_islands else percentile
+        floor_percentile = 0.0 if spread_starts else percentile
         cand = np.zeros_like(valid)
         for lbl in np.unique(labels[valid]):
             comp = valid & (labels == lbl)
@@ -693,19 +693,19 @@ def choose_starts(
         q = quality[ys, xs]
         comp_ids = labels[ys, xs]
         if len(ys) > max_candidates:
-            if spread_islands:
+            if spread_starts:
                 # Per-component, not one global top-K by quality: a global cut
                 # keeps whichever component has the most raw land (mainland
                 # candidates always outnumber a small island's), which can
                 # prune every single island candidate before farthest-point
                 # selection ever sees them - silently defeating
                 # same_component=False for archipelagos. Gated behind
-                # spread_islands (rather than applied unconditionally) because
+                # spread_starts (rather than applied unconditionally) because
                 # this alone measurably changes which candidates even exist
                 # for the *unmodified* farthest-point search below to find on
                 # every already-shipped multi-landmass region (Salish Sea,
                 # Britain, Japan, Caribbean, New Zealand, Greece), not just
-                # Italy - the whole point of spread_islands=False is to
+                # Italy - the whole point of spread_starts=False is to
                 # reproduce that already-verified behavior exactly.
                 comps_present = np.unique(comp_ids)
                 per_comp_budget = max(1, max_candidates // len(comps_present))
@@ -757,15 +757,15 @@ def choose_starts(
             if best_sep >= min_separation:
                 break
 
-    # Anneal on every region, not only under spread_islands. The objective
+    # Anneal on every region, not only under spread_starts. The objective
     # (separation + available land, see _score_starts) is what makes a start
     # layout good on ANY coastline; farthest-point packing above is now only
-    # an initialization for it. Previously this ran only for spread_islands,
+    # an initialization for it. Previously this ran only for spread_starts,
     # which left every other region on raw farthest-point selection - and
     # that is what seats a player on a scrap of land, measured at N=10 as
     # the single strongest predictor of a broken start.
     # ``anneal=False`` leaves the raw farthest-point pack, which is what every
-    # region except spread_islands used before. Kept so old and new placement
+    # region except spread_starts used before. Kept so old and new placement
     # can be measured against each other on the same mask.
     if anneal:
         best_pick = _multistart_anneal(

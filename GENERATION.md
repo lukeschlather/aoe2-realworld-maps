@@ -70,7 +70,7 @@ scenario grids.
 
 ### 3. Choose start positions - `analysis.py`
 
-`choose_starts(mask, players, radius, spread_islands)`, working on the land
+`choose_starts(mask, players, radius, spread_starts)`, working on the land
 mask alone, so a projection can be judged before the engine ever runs.
 
 Farthest-point sampling by itself is a bad model of fair placement: pure
@@ -81,7 +81,7 @@ player has least room. So it keeps only candidates above a quality floor
 economy, but every component above it is kept - restricting to the single
 largest landmass would be wrong for a genuine archipelago.
 
-`--spread-islands` additionally hands the farthest-point pack to
+`--spread-starts` additionally hands the farthest-point pack to
 `_multistart_anneal`, simulated annealing against `_score_starts`. The
 current objective scores **separation and available land, and nothing
 else**. This is the slow part of the whole pipeline: roughly 70s per region.

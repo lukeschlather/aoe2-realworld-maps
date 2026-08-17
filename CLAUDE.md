@@ -37,9 +37,9 @@ Details and numbers: `README_AGENTS.md`, then `RESOURCE_TEMPLATES.md`.
   beside any food total — boar is the best food on the map and a total
   hides that.
 - **Quote the radius.** Every count is relative to
-  `fairness.OWNERSHIP_RADIUS` (30 walked tiles). Arabia gives a player 9
-  stone within 30 tiles and 16 within 50. A count without a radius is not a
-  fact about the map.
+  `fairness.OWNERSHIP_RADIUS` (30 walked tiles) — Arabia gives a player 9
+  stone within 30 and 16 within 50. The profile stamps it into its output;
+  carry it through into anything you write.
 - **The unit is a player, not a map.** Map-wide totals hide the only thing
   that matters — what one player has within walking range.
 - **"Zero of a kind" is not a verdict.** Stock Arabia places no deer at all
@@ -48,8 +48,8 @@ Details and numbers: `README_AGENTS.md`, then `RESOURCE_TEMPLATES.md`.
   stock map keeps its worst-off player at 0.79–0.96 of that map's median. A
   window that can't clear that is a bad window, not a tuning problem.
 - Use `rwmaps.fairness` (exclusive / contested / unclaimed, walked
-  distances). `analyze_capture`'s `resources` block is the superseded
-  nearest-TC model, kept only so old runs stay comparable.
+  distances). `legacy_resources_nearest_tc` is the superseded model, kept
+  only so old runs stay comparable.
 
 ## Automation and scale
 

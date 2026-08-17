@@ -179,7 +179,7 @@ def build_parser() -> argparse.ArgumentParser:
                            "map has used in five years) instead of System A. Kept so "
                            "the two can be captured back-to-back in the engine and "
                            "compared; not intended to ship")
-    grid.add_argument("--spread-islands", action="store_true",
+    grid.add_argument("--spread-starts", action="store_true",
                       help="force at least one start per qualifying separate "
                            "landmass instead of letting farthest-point selection "
                            "seat everyone on the single biggest one - for a window "
@@ -328,7 +328,7 @@ def generate(args) -> dict:
     # Scale the working radius with the map: on a 255 grid a 20-tile radius is
     # a much smaller share of the map than it is on a 168.
     radius = max(16, round(20 * size / 220))
-    starts = choose_starts(mask, args.players, radius=radius, spread_islands=args.spread_islands)
+    starts = choose_starts(mask, args.players, radius=radius, spread_starts=args.spread_starts)
     if len(starts) < args.players:
         print(f"[rwmaps] warning: only placed {len(starts)}/{args.players} starts",
               file=sys.stderr)

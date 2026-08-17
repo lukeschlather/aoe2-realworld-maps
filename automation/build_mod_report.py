@@ -113,6 +113,15 @@ def archive_region_files(matrix_out: Path, data_dir: Path, name: str,
     return rms_relpath, scenario_relpaths
 
 
+def _legacy_res(rec: dict) -> dict:
+    """The nearest-TC resource block, under either key.
+
+    Renamed to `legacy_resources_nearest_tc` on 2026-08-16; archived runs
+    still carry it as `resources`.
+    """
+    return rec.get("legacy_resources_nearest_tc") or rec.get("resources", {})
+
+
 def stat_row(label: str, values: list[float], fmt: str = "{:.2f}") -> str:
     values = [v for v in values if v is not None and v == v]  # drop None/NaN
     if not values:
@@ -126,7 +135,7 @@ def summary_table(records: list[dict]) -> str:
     seps = [r["placement"]["min_tc_separation"] for r in records]
     reach = [r["placement"]["pairwise_land_reachable_fraction"] for r in records]
     landmasses = [r["placement"]["n_landmasses_with_a_player"] for r in records]
-    any_zero_rate = (sum(1 for r in records if r["resources"]["any_player_zero_of_a_kind"])
+    any_zero_rate = (sum(1 for r in records if _legacy_res(r)["any_player_zero_of_a_kind"])
                       / len(records)) if records else float("nan")
     iou = [r["aesthetic"]["iou_10m"] for r in records]
     bnd = [r["aesthetic"]["bnd_ratio"] for r in records]
@@ -168,7 +177,7 @@ def resource_table(per_player: dict) -> str:
 
 def sample_card(rec: dict, scenario_relpath: str | None) -> str:
     placement = rec["placement"]
-    resources = rec["resources"]
+    resources = _legacy_res(rec)
     aesthetic = rec["aesthetic"]
     any_zero = resources["any_player_zero_of_a_kind"]
     flag = (f"<span class='flag bad'>player {', '.join(resources['zero_kinds_by_player'])} "

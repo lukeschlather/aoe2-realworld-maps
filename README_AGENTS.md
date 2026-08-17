@@ -73,10 +73,10 @@ a player is unusable however good it looks.
 Two constants govern everything: `OWNERSHIP_RADIUS` (30 tiles) and
 `CONTEST_MARGIN` (8 tiles).
 
-> `analyze_capture`'s `resources` block is the **superseded** nearest-TC
-> model with straight-line distances and a tie-break by player index. It
-> survives only so pre-2026-08 runs stay comparable. Don't report from it —
-> it disagrees in both directions.
+> The other block in a capture record, `legacy_resources_nearest_tc`, is
+> the superseded model — nearest-TC ownership, straight-line distances,
+> ties broken by player index. It survives only so pre-2026-08 runs stay
+> comparable, and it disagrees with the current model in both directions.
 
 ### Reading the numbers
 
@@ -95,7 +95,8 @@ whole `HUNTABLE_A` role, all nine skins), boar 340, one forest tile 100
 wood. Sheep 100, small game 30 and the fish are still assumed.
 
 **Quote the radius.** Arabia gives a player 9 stone within 30 walked tiles
-and 16 within 50 — same map. A count without a radius is not a fact.
+and 16 within 50 — same map. `profile_capture` stamps `ownership_radius`
+into its own output so a count can't travel without one.
 
 **The unit is a player, not a map.** Pool per-player observations; map-wide
 totals hide the only thing that matters.
@@ -178,6 +179,7 @@ Every one was a bug found by running the maps.
 | `base_size` is a half-width | It alone covers `(2b+1)²` tiles. Setting it to the disc radius floods the map with land. |
 | Tile budget needs rescaling (`FILL_FACTOR` 1.18) | Overlapping discs' areas sum to more than their union. Budget exactly and lands stop just shy of touching. |
 | Placeholder→land cleanup must be **repeated** (16×) | `create_terrain` grows clumps from random seeds until the budget is spent; nothing makes that walk visit every tile. One pass left 2–81 stranded tiles on **all 110** captures of a full pass, drawn in game as a black "placeholder" texture. Stock `includes/forest.inc` repeats the identical block 16× for this reason. |
+| Water ids read backwards until 2026-08-16 | `MED_WATER` was id 22 and `DEEP_WATER` id 23 in Python, the reverse of both `constants.inc` and the tokens our own scripts emit — measured, a script's `DEEP_WATER` comes back as id 22, a mean 7.9 tiles from land against id 23's 2.8. Now `WATER_SHALLOW`/`WATER_MEDIUM`/`WATER_DEEP`, matching the engine. |
 | A resource **role** has many skins; list them all | `themes.inc` re-skins every animal per biome, and `object_groups.inc` can redefine a role as a *group* of ids on top of that. Miss one and a whole role reads as zero — boar (2026-08-08) and small game (2026-08-16, 103 wild chickens counted as none). Check both files. |
 | `place_on_specific_land_id` at a real island kills generation | Measured: Britain 0/5 generated with it against 5/5 without. Land ids are still emitted; only the object clause is off. |
 | `ai_info_map_type` keyed on **dock-worthy water**, not land fraction | `ARABIA` tells the AI there are no fish, so it never fish-booms. Great Lakes is 88% *land* but every start is on a lake — it must be `COASTAL`. Keying off land fraction also flipped the type just by rotating the same geography. |

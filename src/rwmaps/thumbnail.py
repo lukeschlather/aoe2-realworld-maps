@@ -248,20 +248,23 @@ def terrain_rgb(mask: np.ndarray) -> np.ndarray:
 def render(
     script: MapScript,
     px: int = 320,
-    isometric: bool = False,
+    as_grid: bool = False,
     show_starts: bool = True,
     label: str | None = None,
 ) -> Image.Image:
-    """One square thumbnail of ``script``'s terrain.
+    """One square thumbnail of ``script``'s terrain, as the game draws it.
 
-    ``isometric`` rotates by ICON_ROTATION, the orientation the game draws
-    the grid in; the default leaves it north-up, which is how the real place
-    is recognisable.
+    Turned by ICON_ROTATION by default, because that is the only view
+    anybody sees - the raw grid is 45 degrees off it and showing that was a
+    way to be confidently wrong about which way a map faces. Whether north
+    ends up up depends on the window's own ``--north``.
+
+    ``as_grid`` leaves it untouched, for debugging the grid itself.
     """
     size = script.size
     # Draw the marks at whole-tile resolution first, then resample once, so
     # dots stay round and the coastline does not get a staircase edge.
-    scale = max(1, math.ceil(px * (2 if isometric else 1) / size))
+    scale = max(1, math.ceil(px * (1 if as_grid else 2) / size))
     img = Image.fromarray(terrain_rgb(script.land_mask))
     img = img.resize((size * scale, size * scale), Image.NEAREST)
 
@@ -274,7 +277,7 @@ def render(
             d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color,
                       outline=(20, 20, 20), width=max(1, r // 3))
 
-    if isometric:
+    if not as_grid:
         img = img.rotate(ICON_ROTATION, expand=True, resample=Image.BICUBIC,
                          fillcolor=DEEP)
     img = img.resize((px, px), Image.LANCZOS)

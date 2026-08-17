@@ -25,7 +25,7 @@ def _two_islands(size=80, gap=10):
 
 
 def test_land_mask_from_terrain():
-    grid = np.array([[T.GRASS, T.WATER], [T.DEEP_WATER, T.DIRT]], dtype=np.uint8)
+    grid = np.array([[T.GRASS, T.WATER_SHALLOW], [T.WATER_DEEP, T.DIRT]], dtype=np.uint8)
     np.testing.assert_array_equal(land_mask_from_terrain(grid), [[True, False], [False, True]])
 
 

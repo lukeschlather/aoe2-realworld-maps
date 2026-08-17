@@ -157,7 +157,12 @@ def analyze_capture(path: str | Path, size: int) -> dict:
             "pairwise_land_reachable_fraction":
                 round(reachable_pairs / total_pairs, 2) if total_pairs else None,
         },
-        "resources": {
+        # NOT the current supply model. Nearest-TC ownership, straight-line
+        # distances, ties broken by player index - superseded by
+        # rwmaps.fairness (exclusive/contested, walked distances). Kept, and
+        # named for what it is, so pre-2026-08 runs stay comparable and
+        # nobody reports from it by reaching for the obvious key.
+        "legacy_resources_nearest_tc": {
             "per_player": {str(p): c for p, c in per_player.items()},
             "unclaimed": unclaimed,
             # the one thing treated as an unambiguous problem: a player

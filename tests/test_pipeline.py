@@ -51,7 +51,8 @@ def test_ocean_is_banded_by_depth():
     window = MapWindow.from_center("laea", lon=-3.0, lat=54.5, span_km=1300, size=120)
     grid = raster.rasterize(window, terrain.BIOMES["temperate"]).terrain
     present = set(np.unique(grid).tolist())
-    for tid in (terrain.WATER, terrain.MED_WATER, terrain.DEEP_WATER, terrain.BEACH):
+    for tid in (terrain.WATER_SHALLOW, terrain.WATER_MEDIUM,
+                terrain.WATER_DEEP, terrain.BEACH):
         assert tid in present, f"terrain id {tid} missing from the raster"
 
 

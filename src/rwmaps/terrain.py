@@ -7,17 +7,20 @@ against the terrain grids of the shipped ``real_world_*.scx`` maps.
 from __future__ import annotations
 
 # --- water ---------------------------------------------------------------
-# NOTE ON NAMING: the engine's own constants.inc calls id 22 WATER_DEEP and
-# id 23 WATER_MEDIUM - the opposite of the names below, which predate anyone
-# reading that file. The generated .rms uses the engine's spelling
-# (``create_terrain MED_WATER`` etc. are resolved by the engine, not here),
-# so scripts are unaffected; only these Python-side aliases are inverted.
-# Left as-is rather than renamed because both ids are water either way and
-# every caller only ever asks "is this water?" - but do not read meaning
-# into which of the two is called "deep" here.
-WATER = 1  # WATER_SHALLOW - the blue shore water
-MED_WATER = 22  # engine name: WATER_DEEP
-DEEP_WATER = 23  # engine name: WATER_MEDIUM
+# Names match the engine, and did not always: until 2026-08-16 id 22 was
+# called MED_WATER here and id 23 DEEP_WATER, which is backwards. It is
+# backwards against `includes/constants.inc` (WATER_DEEP 22, WATER_MEDIUM
+# 23) AND against the tokens this project's own scripts emit - measured on
+# a real capture, the `DEEP_WATER` a generated script creates comes back as
+# id 22, sitting a mean 7.9 tiles from land against id 23's 2.8.
+#
+# Nothing generated was wrong, because the .rms writes engine tokens rather
+# than these numbers. But `Palette.deep` was handing the raster the
+# engine's *medium* water, so previews drew the wrong band, and any future
+# reader of `DEEP_WATER` would have got the opposite of what it says.
+WATER_SHALLOW = 1    # the blue shore water
+WATER_MEDIUM = 23
+WATER_DEEP = 22      # the deepest band; deep-water fish need it
 SHALLOWS = 4  # fordable by land units; never used for open ocean
 
 # --- shoreline -----------------------------------------------------------
@@ -45,9 +48,9 @@ ICE = 35
 #: benchmarks this project is measuring itself against, in the direction of
 #: making stock maps look like they have far more usable land than they do.
 DEEP_WATER_IDS = frozenset({
-    WATER,      # 1   WATER_SHALLOW
-    MED_WATER,  # 22  WATER_DEEP
-    DEEP_WATER,  # 23  WATER_MEDIUM
+    WATER_SHALLOW,  # 1
+    WATER_DEEP,     # 22
+    WATER_MEDIUM,   # 23
     15,         # WATER_SHORELESS
     57,         # WATER_OCEAN
     58,         # WATER_AZURE
@@ -133,10 +136,10 @@ class Palette:
         self,
         land: int = GRASS,
         beach: int = BEACH,
-        shallow: int = WATER,
-        medium: int = MED_WATER,
-        deep: int = DEEP_WATER,
-        lake: int = WATER,
+        shallow: int = WATER_SHALLOW,
+        medium: int = WATER_MEDIUM,
+        deep: int = WATER_DEEP,
+        lake: int = WATER_SHALLOW,
     ) -> None:
         self.land = land
         self.beach = beach

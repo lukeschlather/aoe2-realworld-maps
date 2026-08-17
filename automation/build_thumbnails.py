@@ -105,9 +105,9 @@ def _parse_args():
                         "shipped mod)")
     p.add_argument("--outdir", type=Path, default=DEFAULT_OUT)
     p.add_argument("--px", type=int, default=320, help="thumbnail size in pixels")
-    p.add_argument("--isometric", action="store_true",
-                   help="rotate 45 degrees, the orientation the engine draws "
-                        "the grid in (default is north-up)")
+    p.add_argument("--as-grid", action="store_true",
+                   help="render the raw grid instead of the way the engine "
+                        "draws it (debugging only - nobody sees this view)")
     p.add_argument("--no-starts", action="store_true",
                    help="omit the player start dots")
     p.add_argument("--no-gallery", action="store_true",
@@ -136,7 +136,7 @@ def main() -> int:
             print(f"  skip: {exc}")
             continue
         png = args.outdir / f"{path.stem}.png"
-        thumbnail.save_thumbnail(script, png, px=args.px, isometric=args.isometric,
+        thumbnail.save_thumbnail(script, png, px=args.px, as_grid=args.as_grid,
                                  show_starts=not args.no_starts)
         land = 100.0 * script.land_mask.mean()
         print(f"  {png.relative_to(REPO)}  {script.size}x{script.size}  "
@@ -151,7 +151,8 @@ def main() -> int:
 
 def write_gallery(rendered, args) -> None:
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    orientation = "isometric (as the engine draws it)" if args.isometric else "north-up"
+    orientation = ("raw grid (debug)" if args.as_grid
+                   else "as the engine draws it")
     cards = []
     for script, png in rendered:
         b64 = base64.b64encode(png.read_bytes()).decode("ascii")

@@ -147,7 +147,7 @@ def resource_table(per_player: dict) -> str:
 
 def sample_card(rec: dict, scenario_relpath: str | None) -> str:
     placement = rec["placement"]
-    resources = rec["resources"]
+    resources = _legacy_res(rec)
     any_zero = resources["any_player_zero_of_a_kind"]
     flag = (f"<span class='flag bad'>player {', '.join(resources['zero_kinds_by_player'])} "
             f"has zero of a kind</span>" if any_zero else "<span class='flag ok'>no zero-of-a-kind</span>")
