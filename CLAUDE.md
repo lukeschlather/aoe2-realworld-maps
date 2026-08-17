@@ -76,11 +76,11 @@ at the end.
 ## UI automation
 
 Mechanics: `EDITOR_AUTOMATION.md`. Use `automation/editor.py`
-(`ensure_ready`, `locate`, `click_when_ready`) — it reads the screen with
-**OmniParser** and confirms a control is present before clicking it. The
-older PowerShell driver `ui_driver.ps1` and its Windows-OCR seed poll are
-legacy, still used by `tuning_matrix.py` and friends; don't build new work
-on them.
+(`ensure_ready`, `generate_and_save`, `locate`, `click_when_ready`) — it
+reads the screen with **OmniParser** and confirms a control is present
+before clicking it. There is no PowerShell driver any more; every capture
+harness shares `generate_and_save()`, so never hand-roll a click sequence
+or a coordinate.
 
 - **Never click a control without confirming it is there.** Blind clicks
   are the leading suspect for the editor crashes.

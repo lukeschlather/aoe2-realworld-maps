@@ -1,9 +1,10 @@
 # Real-render verification pipeline
 
-> **The mechanics here are superseded by `EDITOR_AUTOMATION.md`.** The
-> capture path no longer shells out to `ui_driver.ps1` and the Windows OCR
-> seed poll is gone; `automation/editor.py` reads the screen with
-> OmniParser and confirms a control before clicking it.
+> **The mechanics here are superseded by `EDITOR_AUTOMATION.md`.**
+> `ui_driver.ps1` and its Windows OCR seed poll have been deleted;
+> `automation/editor.py` reads the screen with OmniParser and confirms a
+> control before clicking it. The one-time manual setup below is also gone
+> — `editor.ensure_ready()` walks the editor there itself.
 >
 > This file is kept for the part that has not changed: **why** the pipeline
 > is GUI automation rather than a direct engine call. See "Why not call the
@@ -36,25 +37,16 @@ Repeat step 1-5 for as many scripts/regions/parameter variants as you want
 to compare, without ever touching the game's UI by hand again after a
 one-time setup.
 
-## One-time manual setup
+## Setup (no longer manual)
 
-In the running game:
-
-1. Main Menu → Editors → Create Scenario.
-2. Map panel → check "Random Map".
-3. Map Size → pick the size that matches what you'll generate (e.g. "Large
-   (8 player) [220]").
-4. Random Map location → select the slot script by hand once. **Currently
-   `AA_rw_placeholder_tester`** (see "Current slot" below).
-5. Players → set player count (8, to guarantee enough player slots/TCs for
-   any script).
-6. Click "Generate Map" once by hand, just to leave the editor sitting on
-   this panel in a known state.
-
-After this, `automation/gen_loop.py` drives everything else. The
-editor must stay open on this panel — the automation never navigates
-menus, only clicks Generate Map / Menu / Save on the panel you've already
-set up.
+This used to be a six-step manual walk through the editor that had to be
+redone after every crash, and every harness assumed someone had done it.
+`editor.ensure_ready()` now does it — Main Menu → Editors → **Create
+Scenario** → 8 players → Random Map → Huge [240], launching or recovering
+the game first if it needs to — and then *proves* it worked with
+`preflight()` before a generation is spent. Every harness in `automation/`
+calls it before its first capture. The steps and their traps are in
+`EDITOR_AUTOMATION.md`.
 
 ## Usage
 
@@ -117,48 +109,34 @@ UI-automation trick above achieves the same goal with far less risk, the
 RE path isn't worth resuming unless the UI-automation approach hits a wall
 of its own.
 
-## Reliability engineering (read before touching `ui_driver.ps1`)
+## Reliability engineering (history — the driver this described is gone)
 
-Both the "Generate Map" and "Save" clicks **intermittently fail to
-register** — confirmed directly, not inferred. This isn't rare; Generate
-Map typically needs on the order of 5-8 retries, Save typically needs 2.
-The automation compensates rather than assumes:
+`ui_driver.ps1` was deleted once every harness moved to
+`editor.generate_and_save()`. Read `EDITOR_AUTOMATION.md` for what the
+capture path does now. Four findings from that era still hold and are worth
+not rediscovering:
 
-- **Generate Map** is verified by OCR-reading the Seed value box (bottom
-  left of the Map panel) before and after each click attempt, retrying
-  until it changes.
-- **Save** is verified by requiring *both* the Menu to close (checked via
-  OCR of the "Main Menu" title) *and* a genuinely newer `.aoe2scenario`
-  file to appear on disk. Menu-closed alone was tried first and is **not**
-  sufficient — it was observed to report "closed" with no new file ever
-  appearing, for reasons not fully understood. If the menu closes but no
-  file shows up after ~2s of polling, the Menu is reopened and Save is
-  retried.
-- A stuck-open Menu left over from a prior failed/partial run silently
-  eats all clicks aimed at whatever's underneath it. Every run checks for
-  and clears this first (`Reset-IfMenuStuck`), but only when actually
-  detected open — not as a routine click.
+- Both the "Generate Map" and "Save" clicks **intermittently fail to
+  register** — confirmed directly, not inferred. Neither is safe to click
+  once and assume.
+- **Save needs two independent confirmations**: the Menu closing is *not*
+  sufficient. It was observed reporting "closed" with no new file ever
+  appearing, so a genuinely newer `.aoe2scenario` on disk is also
+  required. `editor.save()` keeps both.
 - Repeated clicks at the *exact same pixel* with no movement between them
-  can fail to register as separate clicks (looks like Windows' double-click
-  merging). Retry attempts jitter the cursor a couple pixels and back.
-- Detection uses OCR (Windows' built-in `Windows.Media.Ocr`), not pixel or
-  color comparison — both were tried and both gave false readings, likely
-  from subtle UI shimmer/animation that changes encoded bytes or average
-  color slightly between otherwise-identical-looking frames.
-  - This requires **Windows PowerShell 5.1 (`powershell.exe`), not
-    PowerShell 7 (`pwsh`)** — the WinRT OCR projection only works under
-    the .NET Framework-based PowerShell.
-  - Light-text-on-dark-background elements (the Seed box) read as empty
-    from the OCR engine until binarized (threshold to pure black/white by
-    luminance midpoint first).
-- Coordinates in `gen_loop.py` (`GENERATE_BTN`, `MENU_BTN`, `SAVE_BTN`,
-  `CANCEL_BTN`) are physical pixels specific to this machine's current
-  display layout (3840x1080, two 1920x1080 monitors) and will need
-  re-finding if that changes.
+  can fail to register as separate clicks (Windows' double-click merging).
+  `editor.move()` carries this forward.
+- **Pixel and colour diffs gave false readings** for whether a control is
+  present, from UI shimmer between otherwise identical frames. That is why
+  the replacement matches templates and reads the screen with OmniParser
+  rather than comparing bytes. (A colour *mean* over one crop is still
+  trustworthy for a binary "is it generating" — that is what the Generate
+  button's redness is.)
 
-One run currently takes ~35-40 seconds end to end, dominated by retries.
-Not yet tested at real scale (only a handful of consecutive runs so far,
-all successful).
+The OCR half of it is not carried forward at all: it needed Windows
+PowerShell 5.1 for the WinRT projection, needed the Seed box binarized to
+read light-on-dark text, and could only ever mark the *end* of a
+generation. Superseded, not ported.
 
 ## Next steps: what the at-scale generation capability is *for*
 
@@ -210,7 +188,7 @@ infrastructure for all of them.
 
 Both in `automation/`:
 
-- `ui_driver.ps1` — the automation library: DPI-aware click/move
-  primitives, OCR-based state checks, verified Generate/Save click
-  functions. Must be dot-sourced under `powershell.exe`.
+- `editor.py` — the driver: launch, recover, set up, generate, save. Its
+  `generate_and_save()` is the capture cycle every harness here calls.
+  Mechanics in `EDITOR_AUTOMATION.md`.
 - `gen_loop.py` — the Python orchestrator described above.

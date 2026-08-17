@@ -574,9 +574,11 @@ Both are worth knowing because both *looked* like script-level facts:
 2. **A capture failed because the game lost focus.** Clicks go wherever
    focus is; the user alt-tabbing mid-run sent them into another window.
 
-Both are fixed in `automation/ui_driver.ps1` (click once then wait; gate
-every click on `Test-GameFocused`/`Wait-ForGameFocus`). The lesson is the
-one `CLAUDE.md` already states: a failed UI action is evidence about the UI
+Both are fixed in `automation/editor.py`, which replaced that driver:
+`generate()` clicks Generate exactly once and then watches the button's
+colour for up to 300s, and `why_not_there()` treats "the game is not
+foreground" as a reason to wait rather than click. The lesson is the one
+`CLAUDE.md` already states: a failed UI action is evidence about the UI
 automation until proven otherwise, never evidence about the `.rms`.
 
 ## Measured stock budgets (`out/stock_capture/benchmarks`, N=3 each)

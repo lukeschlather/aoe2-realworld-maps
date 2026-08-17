@@ -20,10 +20,10 @@ Two jobs, and the second is the one that pays for this:
 click, focus, or move anything, so it can be left running during a pass
 without becoming a suspect when something breaks.
 
-Capture is Pillow's ``ImageGrab``, which is the GDI path - the same one
-``ui_driver.ps1``'s ``Save-Screenshot`` uses, and which has been capturing
-this game's window all along, so it is known to work here rather than
-assumed to. It grabs the virtual desktop, so a virtual display added later
+Capture is Pillow's ``ImageGrab``, which is the GDI path - the same one the
+retired PowerShell driver's ``Save-Screenshot`` used, and which has been
+capturing this game's window all along, so it is known to work here rather
+than assumed to. It grabs the virtual desktop, so a virtual display added later
 is captured the same way with no change: it is just another region of the
 same coordinate space.
 

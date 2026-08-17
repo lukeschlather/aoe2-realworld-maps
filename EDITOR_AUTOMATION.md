@@ -1,9 +1,9 @@
 # Driving the Scenario Editor
 
-How the capture pipeline talks to the game, as of 2026-08-11. Supersedes
-the PowerShell half of `RENDER_PIPELINE.md`: `mod_capture.py` no longer
-shells out to `ui_driver.ps1`, and the Windows OCR seed poll is gone from
-the capture path.
+How the capture pipeline talks to the game, as of 2026-08-17. Supersedes
+the PowerShell half of `RENDER_PIPELINE.md`: `ui_driver.ps1` and its
+Windows OCR seed poll are deleted, and every capture harness in
+`automation/` shares one cycle, `editor.generate_and_save()`.
 
 The governing rule, and the reason most of this exists:
 
@@ -22,7 +22,7 @@ checks are tiered.
 | file | what it does |
 |---|---|
 | `automation/controls.py` | the control registry: a box, a click point and a template crop per control. `click()` verifies then clicks, or raises |
-| `automation/editor.py` | the driver: launch, recover, set up, generate, save |
+| `automation/editor.py` | the driver: launch, recover, set up, generate, save. `generate_and_save()` is *the* capture cycle — `mod_capture`, `tuning_matrix`, `stock_capture`, `gen_loop`, `batch_capture`, `seed_sweep` and `window_matrix` all call it, and none of them holds a coordinate of its own |
 | `automation/omni.py` | OmniParser bridge (models live in the user's `vmauto` checkout, not here) |
 | `automation/frame_server.py` | 1 fps ring of frames + a viewer, for watching a run and for forensics after a crash |
 | `automation/crash_bisect.py` | cut one block out of a crashing `.rms` at a time |
@@ -219,7 +219,13 @@ identified as destabilising the editor.
   generate-and-save.
 - **A full pass over all regions has not been run** on this pipeline. One
   region has, end to end.
-- `stock_capture.py` still uses `ui_driver.ps1`.
+- The harnesses that were migrated off PowerShell on 2026-08-17 —
+  `tuning_matrix`, `stock_capture`, `batch_capture`, `seed_sweep`,
+  `window_matrix` — have been import-checked and share a cycle that is
+  proven on `gen_loop`/`mod_capture`, but have **not each been re-run
+  through the engine**. Their old coordinates were stale (Generate at
+  (256, 1028) against the registry's verified (305, 1024)), so any of them
+  was going to need this before it could be trusted anyway.
 - The editor crash itself is **unexplained**. Ruled out by measurement:
   file copying (the slot is byte-identical to its git blob by sha256),
   dangling land ids, the island copse block, seed `-1` (just the default

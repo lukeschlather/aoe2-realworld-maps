@@ -19,8 +19,8 @@ does map the editor - `automation/omni.py` runs OmniParser over a
 screenshot and hands back labelled boxes, so `automation/editor.py` finds
 each control by reading the screen and confirms it is there before
 clicking. Crash recovery is automatic. `EDITOR_AUTOMATION.md` has the
-details. The old PowerShell/Windows-OCR driver still backs the older
-scripts (`tuning_matrix.py`, `stock_capture.py`).
+details. The old PowerShell/Windows-OCR driver is gone — every capture
+harness now shares `editor.generate_and_save()`.
 
 Other hypotheses for why it was crashing: 
 
@@ -69,7 +69,7 @@ Live:
 | RESOURCE_TEMPLATES.md | the two stock resource systems, and their measured budgets. Authoritative on resources |
 | STOCK_MAP_INVENTORY.md | what stock scripts are on disk; script name vs UI name |
 | **EDITOR_AUTOMATION.md** | **how the capture pipeline drives the Scenario Editor - start here for anything UI.** Verify-before-click, what each check costs, the mods failure that silently captures the wrong map |
-| RENDER_PIPELINE.md | the original PowerShell pipeline. Mechanics superseded by EDITOR_AUTOMATION.md; keep it for *why* this is GUI automation and not a direct engine call |
+| RENDER_PIPELINE.md | the original PowerShell pipeline, now deleted. Mechanics superseded by EDITOR_AUTOMATION.md; keep it for *why* this is GUI automation and not a direct engine call |
 | RESOURCE_REWORK_STATUS.md | the resource rework's open items - a work queue, not a reference |
 | **README_AGENTS.md** | **the concepts: what "fair" and "recognisable" mean here, and how to change things safely.** The fairness model, the stock yardstick, resource amounts, and the load-bearing gotchas |
 | CLAUDE.md | working conventions: verify with real renders, no agent quality verdicts, commit incrementally |
