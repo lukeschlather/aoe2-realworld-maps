@@ -142,6 +142,13 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--title", default=None)
+    ap.add_argument("--compare-run-id", default=None,
+                    help="a later run to show beside this one, phase by phase. "
+                         "This report's own numbers are the state of the "
+                         "pipeline when it was captured; a fix made *because* "
+                         "of them would otherwise be invisible in the only "
+                         "document that motivates it.")
+    ap.add_argument("--compare-label", default="after")
     args = ap.parse_args()
 
     run_root = REPO / "out" / "mod_capture" / args.run_id
@@ -188,6 +195,40 @@ def main() -> int:
     # A pass's real duration, from the phase medians rather than a guess.
     per_1000_h = grand_med * 1000 / 3600
     engine_1000_h = engine_med * 1000 / 3600
+
+    # -------------------------------------------------------- comparison
+    compare_html = ""
+    if args.compare_run_id:
+        cmp_path = (REPO / "out" / "mod_capture" / args.compare_run_id
+                    / "results.jsonl")
+        if not cmp_path.exists():
+            raise SystemExit(f"no results at {cmp_path}")
+        cmp_by_region = load(cmp_path)
+        cmp_recs = [r for recs in cmp_by_region.values() for r in recs]
+        rows = []
+        for key, label, who, _scope in PHASES:
+            a = stats([float(r["timing"].get(key, 0.0))
+                       for recs in by_region.values() for r in recs])
+            b = stats([float(r["timing"].get(key, 0.0)) for r in cmp_recs])
+            delta = b["med"] - a["med"]
+            cls = "win" if delta < -1 else ("loss" if delta > 1 else "same")
+            rows.append(
+                f"<tr><td>{esc(label)}</td>"
+                f"<td><span class='who {who}'>{who}</span></td>"
+                f"<td class='n'>{a['med']:.1f}</td><td class='n'>{b['med']:.1f}</td>"
+                f"<td class='n {cls}'>{delta:+.1f}</td></tr>")
+        compare_html = f"""
+  <h2>What measuring it changed</h2>
+  <p class="note">Unamortised phase medians, this run against
+    <code>{esc(args.compare_run_id)}</code> ({len(cmp_recs)} captures,
+    {len(cmp_by_region)} map(s)). Engine and parse times are not expected to
+    move; they are here as the control that says the two runs are
+    comparable at all.</p>
+  <div class="scroll"><table>
+    <tr><th>phase</th><th>whose</th><th>this run (s)</th>
+      <th>{esc(args.compare_label)} (s)</th><th>delta</th></tr>
+    {''.join(rows)}
+  </table></div>"""
 
     # ------------------------------------------------------- per region
     region_rows = []
@@ -285,6 +326,7 @@ def main() -> int:
         per_hour=f"{3600 / grand_med:.0f}" if grand_med else "0",
         sections="".join(sections),
         run_id=esc(args.run_id),
+        compare=compare_html,
     )
     out = reports / f"{stamp}_capture_latency_{args.run_id}.html"
     out.write_text(html, encoding="utf-8")
@@ -323,6 +365,7 @@ th {{ color:var(--dim); font-weight:600; font-size:.72rem; text-transform:upperc
 td.n {{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }}
 td.bar {{ width:45%; }}
 td.scope, .note {{ color:var(--dim); font-size:.78rem; }}
+td.win {{ color:#7ee787; }} td.loss {{ color:#ff7b72; }} td.same {{ color:var(--dim); }}
 .who {{ font-size:.7rem; padding:.1rem .4rem; border-radius:4px; }}
 .who.ours {{ background:#1f6feb33; color:#8ab4f8; }}
 .who.engine {{ background:#f0883e33; color:var(--accent); }}
@@ -383,6 +426,8 @@ footer {{ color:var(--dim); font-size:.78rem; margin-top:3rem; }}
     N=1. Observed end-to-end per sample (engine + save + parse, excluding
     the per-region phases): median {observed_med}s, range
     {observed_lo}–{observed_hi}s.</p>
+
+  {compare}
 
   <h2>Per map</h2>
   <div class="scroll"><table>
