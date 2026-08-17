@@ -272,6 +272,7 @@ def main():
             # the copy that matters is archived beside its capture.
             if rms_dir.exists():
                 shutil.rmtree(rms_dir)
+            regen_s = 0.0   # --from-git reads a committed script; nothing to build
             if args.from_git:
                 # Capture a committed script instead of regenerating one.
                 # Regeneration always reflects src/ as it stands, so it cannot
@@ -300,7 +301,8 @@ def main():
                 if r.returncode != 0:
                     print(f"  REGEN FAILED: {r.stderr[-800:]}")
                     continue
-                print(f"  regen: {time.time()-t0:.1f}s")
+                regen_s = time.time() - t0
+                print(f"  regen: {regen_s:.1f}s")
 
             rms_files = list(rms_dir.rglob("*.rms"))
             if len(rms_files) != 1:
@@ -330,8 +332,10 @@ def main():
             # ending the pass over a state a rebuild repairs. A disabled mod
             # silently substitutes the first stock script and the result
             # looks superficially right.
+            t_pre = time.time()
             ok, why = editor.ensure_ready(PLAYERS)
-            print(f"  preflight: {why}")
+            preflight_s = time.time() - t_pre
+            print(f"  preflight ({preflight_s:.1f}s): {why}")
             if not ok:
                 raise SystemExit(f"\nABORTING before {name}: {why}")
             started_pid = game_pid()
@@ -407,7 +411,7 @@ def main():
                 before = newest_scenario()
                 before_mtime = before.stat().st_mtime if before else 0
                 try:
-                    editor.generate_and_save(SCENARIO_DIR)
+                    cap = editor.generate_and_save(SCENARIO_DIR)
                 except Exception as e:
                     # Distinguish "the engine rejected this" from "the engine
                     # died". A crash *during* the click sequence used to abort
@@ -447,6 +451,7 @@ def main():
                 dest = archive_dir / f"sample_{sample_i:03d}.aoe2scenario"
                 shutil.copyfile(after, dest)
 
+                t_analyze = time.time()
                 try:
                     analysis = analyze_capture(dest, size=SIZE)
                     real_mask = scx_read.read_land_mask(dest)
@@ -469,6 +474,20 @@ def main():
                     "from_git": args.from_git,
                     "lon": lon, "lat": lat, "span_km": span, "north_deg": rot,
                     "sample_index": sample_i,
+                    # Per-phase, not one total: at the ~1000-generation goal
+                    # scale the only actionable question is which phase owns
+                    # the hours, and a single "captured+analyzed in Ns" cannot
+                    # answer it. regen_s is per REGION (the script is built
+                    # once and then sampled), so it is recorded on every
+                    # sample of that region rather than divided between them.
+                    "timing": {
+                        "regen_s": round(regen_s, 2),
+                        "preflight_s": round(preflight_s, 2),
+                        "generate_s": round(cap.generate_s, 2),
+                        "save_s": round(cap.save_s, 2),
+                        "analyze_s": round(time.time() - t_analyze, 2),
+                        "sample_total_s": round(time.time() - t1, 2),
+                    },
                     **analysis, "aesthetic": aesthetic, "fairness": fairness,
                 }
                 results_fh.write(json.dumps(record) + "\n")

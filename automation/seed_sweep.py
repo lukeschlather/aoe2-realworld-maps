@@ -87,7 +87,7 @@ def main():
             t0 = time.time()
             print(f"\n[seed_sweep] ({i + 1}/{args.n})")
             try:
-                after = editor.generate_and_save(SCENARIO_DIR)
+                after = editor.generate_and_save(SCENARIO_DIR).path
             except Exception as e:
                 print(f"[seed_sweep] iteration {i} FAILED: {e}")
                 continue

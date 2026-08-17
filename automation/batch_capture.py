@@ -79,7 +79,7 @@ def main():
         t0 = time.time()
         print(f"[batch_capture] ({i + 1}/{args.n}) ...")
         try:
-            after = editor.generate_and_save(SCENARIO_DIR)
+            after = editor.generate_and_save(SCENARIO_DIR).path
         except Exception as e:
             print(f"[batch_capture] iteration {i} FAILED: {e}")
             continue

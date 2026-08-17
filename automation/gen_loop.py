@@ -66,7 +66,7 @@ def main():
         raise RuntimeError(f"the editor is not usable: {why}")
 
     print(f"[gen_loop] generating and saving in the editor ({why})")
-    after = editor.generate_and_save(SCENARIO_DIR)
+    after = editor.generate_and_save(SCENARIO_DIR).path
 
     dest = outdir / f"{rms_path.stem}.aoe2scenario"
     shutil.copyfile(after, dest)

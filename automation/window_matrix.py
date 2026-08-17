@@ -115,7 +115,7 @@ def main():
             for i in range(done, N_SAMPLES):
                 t1 = time.time()
                 try:
-                    after = editor.generate_and_save(SCENARIO_DIR)
+                    after = editor.generate_and_save(SCENARIO_DIR).path
                 except Exception as e:
                     print(f"  sample {i}: FAILED ({e})")
                     continue

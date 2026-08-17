@@ -262,7 +262,7 @@ def main():
             for sample_i in range(done, args.n_samples):
                 t1 = time.time()
                 try:
-                    after = editor.generate_and_save(SCENARIO_DIR)
+                    after = editor.generate_and_save(SCENARIO_DIR).path
                 except Exception as e:
                     print(f"  sample {sample_i}: capture FAILED ({e})")
                     continue

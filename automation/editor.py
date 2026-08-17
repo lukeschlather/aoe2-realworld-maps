@@ -728,8 +728,26 @@ class CaptureFailed(RuntimeError):
     """One generate-and-save did not produce a scenario."""
 
 
-def generate_and_save(scenario_dir: Path) -> Path:
-    """One capture: generate a map, save it, return the file that appeared.
+@dataclass
+class Capture:
+    """Where one capture's wall-clock went, and what it produced.
+
+    Timed because the goal scale is ~1000 generations, and at that scale the
+    only useful question about a phase is how many hours of the pass it is.
+    Every harness gets this for free rather than each printing its own total,
+    which is all any of them had.
+    """
+    path: Path
+    generate_s: float
+    save_s: float
+
+    @property
+    def total_s(self) -> float:
+        return self.generate_s + self.save_s
+
+
+def generate_and_save(scenario_dir: Path) -> Capture:
+    """One capture: generate a map, save it, return what appeared and when.
 
     This is the whole of what the PowerShell driver did for every capture
     harness in this directory - ``Click-GenerateMapVerified``, click Menu,
@@ -745,10 +763,13 @@ def generate_and_save(scenario_dir: Path) -> Path:
     result = generate()
     if not result.ok:
         raise CaptureFailed(f"generate: {result.detail}")
+    t0 = time.time()
     saved = save(scenario_dir)
+    save_s = time.time() - t0
     if saved is None:
         raise CaptureFailed("save produced no new scenario file")
-    return saved
+    print(f"  capture: generate {result.seconds:.1f}s + save {save_s:.1f}s")
+    return Capture(saved, result.seconds, save_s)
 
 
 # ------------------------------------------------------------------ setup
