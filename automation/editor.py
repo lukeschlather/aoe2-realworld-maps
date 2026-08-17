@@ -340,6 +340,11 @@ VK_BACK = 0x08
 #: file browser is answered once per session and every later save is silent.
 SAVE_NAME = "rw_capture_slot"
 
+#: How many times ``save()`` will try to get the Menu overlay open. The Menu
+#: click intermittently fails to register, and waiting longer does not fix a
+#: click that never landed.
+MENU_TRIES = 3
+
 
 def type_text(text: str, clear: int = 40, hold: float = 0.02) -> None:
     """Type into whatever has keyboard focus, clearing it first.
@@ -647,14 +652,31 @@ def save(scenario_dir: Path, timeout: float = 30.0) -> Path | None:
     before_mtime = before.stat().st_mtime if before else 0.0
 
     reg = controls.load()
-    try:
-        controls.click("menu_button", reg)
-    except controls.NotThere as e:
-        print(f"  save: {e}")
-        return None
-    if not controls.wait_for("menu_save", timeout=8.0, controls=reg):
-        print("  save: the Menu overlay never appeared - not clicking, "
-              "because that coordinate is the map when the menu is closed")
+    # Opening the Menu has to be retried, not just waited on. The Menu click
+    # is one of the two that intermittently fail to register - the retired
+    # driver re-opened the menu and retried Save for exactly this reason, and
+    # not carrying that over was caught on the very first pass after the
+    # migration: capture 1 of a session saved, capture 2 reported "the Menu
+    # overlay never appeared" with the editor in a perfectly clean state
+    # afterwards (every panel control verified present, no dialog up), which
+    # is what a dropped click looks like and not what a stuck editor looks
+    # like. Re-clicking Menu is safe in a way that re-clicking Save is not:
+    # if the overlay *is* up this closes it and the next attempt reopens it,
+    # whereas Save's coordinate with no overlay up is the middle of the map.
+    for attempt in range(1, MENU_TRIES + 1):
+        try:
+            controls.click("menu_button", reg)
+        except controls.NotThere as e:
+            print(f"  save: {e}")
+            return None
+        if controls.wait_for("menu_save", timeout=8.0, controls=reg):
+            break
+        print(f"  save: the Menu overlay never appeared "
+              f"({attempt}/{MENU_TRIES}) - re-clicking Menu")
+    else:
+        print("  save: could not get the Menu overlay up - not clicking "
+              "where Save would be, because that coordinate is the map "
+              "when the menu is closed")
         return None
     try:
         controls.click("menu_save", reg)
