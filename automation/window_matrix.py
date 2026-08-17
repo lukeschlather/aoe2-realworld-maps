@@ -29,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import editor  # noqa: E402
 from rwmaps import install as install_mod  # noqa: E402
 from rwmaps.projection import MapWindow  # noqa: E402
+from runlog import RunLog  # noqa: E402
 
 SLOT_PATH = install_mod.scripts_dir() / "AA_rw_placeholder_tester.rms"
 SCENARIO_DIR = install_mod.find_profile() / "resources" / "_common" / "scenario"
@@ -70,13 +71,32 @@ def conditions_for(window_name: str) -> list[tuple[str, list[str]]]:
 
 
 def main():
-    ok, why = editor.ensure_ready(PLAYERS)
-    if not ok:
-        raise SystemExit(f"ABORTING: the editor is not usable: {why}")
-    print(f"editor ready: {why}")
-    t_start = time.time()
+    OUTROOT.mkdir(parents=True, exist_ok=True)
+    log = RunLog(OUTROOT, run_id="window_matrix")
+    log.attach_editor(editor)
     total_cells = sum(len(conditions_for(name)) for name, *_ in WINDOWS)
+    log.event("plan", f"{len(WINDOWS)} windows x conditions = "
+              f"{total_cells} cells x {N_SAMPLES} samples",
+              windows=[w[0] for w in WINDOWS], cells=total_cells,
+              n_samples=N_SAMPLES, size=SIZE, players=PLAYERS)
+
+    # Timed by hand, so this is ONE event: a timer writes its own, and a
+    # second explicit event of the same kind double-counts in any query that
+    # sums durations by kind.
+    t_pre = time.time()
+    ok, why = editor.ensure_ready(PLAYERS)
+    preflight_s = time.time() - t_pre
+    if not ok:
+        log.fail("preflight_failed", f"ABORT editor unusable: {why}", why=why,
+                 duration_s=round(preflight_s, 3))
+        log.close("aborted")
+        raise SystemExit(f"ABORTING: the editor is not usable: {why}")
+    log.ok("preflight", "editor ready", why=why,
+           duration_s=round(preflight_s, 3))
+
+    t_start = time.time()
     cell_i = 0
+    captured = 0
 
     for name, lon, lat, span, rot in WINDOWS:
         for cond_name, extra_args in conditions_for(name):
@@ -85,45 +105,70 @@ def main():
             cell_dir.mkdir(parents=True, exist_ok=True)
             rms_dir = cell_dir / "script"
 
-            print(f"\n[{cell_i}/{total_cells}] {name} / {cond_name}  "
-                  f"(elapsed {time.time()-t_start:.0f}s)")
+            log.event("cell_start", f"cell {cell_i}/{total_cells} {name}/{cond_name}",
+                      window=name, condition=cond_name, lon=lon, lat=lat,
+                      span_km=span, rotate=rot, extra_args=extra_args)
 
             gen_cmd = ["uv", "run", "rwmaps", f"{name}_{cond_name}",
                        f"--center={lon},{lat}", "--span-km", str(span),
                        "--rotate", str(rot),
                        "--size", str(SIZE), "--players", str(PLAYERS),
                        "--outdir", str(rms_dir), "--no-preview", *extra_args]
-            t0 = time.time()
-            r = subprocess.run(gen_cmd, cwd=REPO, capture_output=True, text=True)
+            t_regen = time.time()
+            r = subprocess.run(gen_cmd, cwd=REPO, capture_output=True,
+                               text=True)
+            regen_s = time.time() - t_regen
+            # rwmaps' own narration was being captured and thrown away; it
+            # reports the land fraction and coastline IoU of the script it
+            # just built, which is worth having beside the capture it made.
+            log.event("regen", None, window=name, condition=cond_name,
+                      command=" ".join(gen_cmd), returncode=r.returncode,
+                      stdout=r.stdout[-4000:], ok=r.returncode == 0,
+                      duration_s=round(regen_s, 3))
             if r.returncode != 0:
-                print(f"  REGEN FAILED: {r.stderr[-800:]}")
+                log.fail("regen_failed", f"  {name}/{cond_name}: REGEN FAILED",
+                         window=name, condition=cond_name,
+                         stderr=r.stderr[-2000:],
+                         duration_s=round(regen_s, 3))
                 continue
-            print(f"  regen: {time.time()-t0:.1f}s")
 
             rms_files = list(rms_dir.rglob("*.rms"))
             if len(rms_files) != 1:
-                print(f"  SKIP: expected 1 .rms, found {len(rms_files)}")
+                log.fail("slot_swap", f"  {name}/{cond_name}: SKIP expected 1 "
+                         f".rms, found {len(rms_files)}", window=name,
+                         condition=cond_name,
+                         found=[str(p) for p in rms_files])
                 continue
             shutil.copyfile(rms_files[0], SLOT_PATH)
 
             existing = sorted(cell_dir.glob("sample_*.aoe2scenario"))
             done = len(existing)
             if done >= N_SAMPLES:
-                print(f"  already have {done}/{N_SAMPLES}, skipping")
+                log.event("cell_skip", f"  {name}/{cond_name}: have "
+                          f"{done}/{N_SAMPLES}, skipping", window=name,
+                          condition=cond_name, have=done, want=N_SAMPLES)
                 continue
 
             for i in range(done, N_SAMPLES):
-                t1 = time.time()
                 try:
-                    after = editor.generate_and_save(SCENARIO_DIR).path
+                    cap = editor.generate_and_save(SCENARIO_DIR)
                 except Exception as e:
-                    print(f"  sample {i}: FAILED ({e})")
+                    log.fail("capture", f"  {name}/{cond_name} sample {i}: "
+                             f"FAILED", window=name, condition=cond_name,
+                             sample_index=i, error=str(e))
                     continue
                 dest = cell_dir / f"sample_{i:03d}.aoe2scenario"
-                shutil.copyfile(after, dest)
-                print(f"  sample {i}: captured in {time.time()-t1:.1f}s")
+                shutil.copyfile(cap.path, dest)
+                captured += 1
+                log.ok("capture", f"  {name}/{cond_name} sample {i}: captured",
+                       window=name, condition=cond_name, sample_index=i,
+                       file=str(dest), generate_s=round(cap.generate_s, 3),
+                       save_s=round(cap.save_s, 3))
 
-    print(f"\nDONE in {time.time()-t_start:.0f}s -> {OUTROOT}")
+    log.close(f"done {captured}/{total_cells * N_SAMPLES} captured",
+              captured=captured, expected=total_cells * N_SAMPLES,
+              outdir=str(OUTROOT), wall_s=round(time.time() - t_start, 1))
+    print(f"logs: {log.terse_path}  {log.json_path}")
 
 
 if __name__ == "__main__":

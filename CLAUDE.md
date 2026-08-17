@@ -92,3 +92,10 @@ or a coordinate.
   readings from UI shimmer.
 - Keep it fast — tune polling for responsiveness rather than padding with
   cautious sleeps.
+- **Log through `automation/runlog.py`, never `print`.** Every harness
+  writes a terse `log.txt` (for agents; no timestamps, no durations, so it
+  diffs cleanly) and a verbose `events.jsonl` (every duration, absolute
+  timestamps, failures as `ok: false`). Two lines to hook up: `RunLog(...)`
+  then `attach_editor(editor)`. Capture subprocesses rather than letting
+  them inherit stdout — a child printing past the logs is the recurring
+  way the terse log stops being the whole story.

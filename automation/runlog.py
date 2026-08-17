@@ -97,6 +97,19 @@ class RunLog:
             if self.echo:
                 print(terse, flush=True)
 
+    def attach_editor(self, editor_module) -> None:
+        """Send ``editor.py``'s narration into the JSON log, not stdout.
+
+        Every harness that drives the editor wants this and none of them
+        wants to think about it: the narration is per-click detail carrying
+        pids and durations, which is what a post-mortem needs and exactly
+        what the terse log excludes. Left unattached those lines reach
+        stdout and no log at all, which is how the terse log ends up an
+        incomplete account of its own run.
+        """
+        editor_module.SINK = lambda line: self.event("editor", None,
+                                                    line=line.strip())
+
     def ok(self, kind: str, terse: str, **fields) -> None:
         self.event(kind, terse, ok=True, **fields)
 
@@ -118,6 +131,13 @@ class RunLog:
         ``with log.timer("regen", region=name):`` - the duration lands in
         events.jsonl and nothing lands in the terse log, which is the usual
         want for a phase.
+
+        **One event per phase occurrence.** Do not follow a timer with an
+        explicit event of the same ``kind``: that writes the same duration
+        twice, and any query that sums durations by kind then double-counts
+        it. When a phase also needs a terse line, time it by hand and emit
+        one event carrying ``duration_s`` - see how the harnesses handle
+        preflight.
         """
         return Timer(self, kind, fields)
 

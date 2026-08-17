@@ -25,8 +25,10 @@ REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
+import editor  # noqa: E402
 import gen_loop  # noqa: E402
 from rwmaps import real_preview, scx_read  # noqa: E402
+from runlog import RunLog  # noqa: E402
 
 MIN_ISLAND = 20
 
@@ -43,15 +45,27 @@ def main():
     outdir = REPO / "out" / f"size240-{stamp}"
     outdir.mkdir(parents=True, exist_ok=True)
 
+    # One log for the whole batch, handed to gen_loop, rather than gen_loop
+    # opening one per capture and leaving three separate records of one run.
+    log = RunLog(outdir, run_id=f"size240-{stamp}")
+    log.attach_editor(editor)
+    gen_loop.LOG = log
+    log.event("plan", f"{len(VARIANTS)} variants at 240",
+              variants=[n for n, _ in VARIANTS])
+
+    captured = 0
     for i, (name, extra) in enumerate(VARIANTS, start=1):
-        print(f"\n[240] ({i}/{len(VARIANTS)}) {name} {extra}")
+        log.event("variant", f"variant {i}/{len(VARIANTS)} {name}",
+                  name=name, extra_args=extra)
         sys.argv = ["gen_loop.py", name, "--size", "240", "--players", "8",
                     "--outdir", str(outdir), *extra]
         try:
             dest = gen_loop.main()
-        except BaseException:
-            print(f"[240] {name} FAILED during generation:")
-            traceback.print_exc()
+        except BaseException as e:
+            # gen_loop already logged the failure with its cause; the
+            # traceback goes to the JSON log, not the terse one.
+            log.event("variant_failed", None, name=name, error=str(e),
+                      traceback=traceback.format_exc())
             continue
         mask = scx_read.read_land_mask(dest)
         tcs = scx_read.read_town_centers(dest)
@@ -59,9 +73,13 @@ def main():
             mask, tcs, dest.with_suffix(".png"),
             title=f"{name}  {mask.shape[1]}x{mask.shape[0]}  {len(tcs)} TCs (real engine)",
         )
-        print(f"[240] {name}: {len(tcs)} TCs -> {png}")
+        captured += 1
+        log.ok("variant_done", f"  {name}: {len(tcs)} TCs",
+               name=name, n_tcs=len(tcs), preview=str(png), file=str(dest))
 
-    print(f"[240] done. Output: {outdir}")
+    log.close(f"done {captured}/{len(VARIANTS)} captured", captured=captured,
+              expected=len(VARIANTS), outdir=str(outdir))
+    print(f"logs: {log.terse_path}  {log.json_path}")
 
 
 if __name__ == "__main__":

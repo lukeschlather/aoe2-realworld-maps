@@ -49,6 +49,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import editor  # noqa: E402
 from rwmaps import install as install_mod  # noqa: E402
+from runlog import RunLog  # noqa: E402
 from sample_analysis import analyze_capture  # noqa: E402
 
 SLOT_PATH = install_mod.scripts_dir() / "AA_rw_placeholder_tester.rms"
@@ -152,10 +153,6 @@ def parse_args():
 
 def main():
     args = parse_args()
-    ok, why = editor.ensure_ready(PLAYERS)
-    if not ok:
-        raise SystemExit(f"ABORTING: the editor is not usable: {why}")
-    print(f"editor ready: {why}")
     maps = STOCK_MAPS
     if args.maps:
         wanted = {m.strip() for m in args.maps.split(",")}
@@ -167,22 +164,46 @@ def main():
     outroot = REPO / "out" / "stock_capture" / args.run_id
     results_path = outroot / "results.jsonl"
     outroot.mkdir(parents=True, exist_ok=True)
+    log = RunLog(outroot, args.run_id)
+    log.attach_editor(editor)
+    log.event("plan", f"{len(maps)} stock maps x {args.n_samples} samples",
+              maps=[m[0] for m in maps], n_samples=args.n_samples, size=SIZE,
+              players=PLAYERS, stock_dir=str(STOCK_DIR))
+
+    # Timed by hand, so this is ONE event: a timer writes its own, and a
+    # second explicit event of the same kind double-counts in any query that
+    # sums durations by kind.
+    t_pre = time.time()
+    ok, why = editor.ensure_ready(PLAYERS)
+    preflight_s = time.time() - t_pre
+    if not ok:
+        log.fail("preflight_failed", f"ABORT editor unusable: {why}", why=why,
+                 duration_s=round(preflight_s, 3))
+        log.close("aborted")
+        raise SystemExit(f"ABORTING: the editor is not usable: {why}")
+    log.ok("preflight", "editor ready", why=why,
+           duration_s=round(preflight_s, 3))
+
     t_start = time.time()
+    captured = 0
 
     with results_path.open("a", encoding="utf-8") as results_fh:
         for map_i, (label, filename, rationale) in enumerate(maps, 1):
             done = already_done(results_path, label)
             if done >= args.n_samples:
-                print(f"[{map_i}/{len(maps)}] {label}: have {done}/{args.n_samples}, skipping")
+                log.event("map_skip", f"map {map_i}/{len(maps)} {label}: have "
+                          f"{done}/{args.n_samples}, skipping", map=label,
+                          have=done, want=args.n_samples)
                 continue
 
             src = STOCK_DIR / filename
             if not src.exists():
-                print(f"[{map_i}/{len(maps)}] {label}: MISSING {src}")
+                log.fail("map_missing", f"map {map_i}/{len(maps)} {label}: "
+                         f"MISSING {filename}", map=label, path=str(src))
                 continue
 
-            print(f"\n[{map_i}/{len(maps)}] {label}  ({filename}, "
-                  f"elapsed {time.time()-t_start:.0f}s)")
+            log.event("map_start", f"map {map_i}/{len(maps)} {label}",
+                      map=label, script=filename, rationale=rationale)
             # Copy verbatim. The slot is .rms even for a .rms2 source - per
             # STOCK_MAP_INVENTORY.md the extension is packaging history, not
             # a language difference.
@@ -192,21 +213,27 @@ def main():
             for sample_i in range(done, args.n_samples):
                 t1 = time.time()
                 try:
-                    after = editor.generate_and_save(SCENARIO_DIR).path
+                    cap = editor.generate_and_save(SCENARIO_DIR)
                 except Exception as e:
-                    print(f"  sample {sample_i}: capture FAILED ({e})")
+                    log.fail("capture", f"  {label} sample {sample_i}: capture "
+                             f"FAILED", map=label, sample_index=sample_i,
+                             error=str(e))
                     continue
 
                 archive_dir = map_dir / "raw"
                 archive_dir.mkdir(parents=True, exist_ok=True)
                 dest = archive_dir / f"sample_{sample_i:03d}.aoe2scenario"
-                shutil.copyfile(after, dest)
+                shutil.copyfile(cap.path, dest)
 
-                try:
-                    analysis = analyze_capture(dest, size=SIZE)
-                except Exception as e:
-                    print(f"  sample {sample_i}: ANALYSIS FAILED ({e})")
-                    continue
+                with log.timer("analyze", map=label, sample_index=sample_i):
+                    try:
+                        analysis = analyze_capture(dest, size=SIZE)
+                    except Exception as e:
+                        log.fail("analyze", f"  {label} sample {sample_i}: "
+                                 f"ANALYSIS FAILED", map=label,
+                                 sample_index=sample_i, error=str(e),
+                                 file=str(dest))
+                        continue
 
                 record = {
                     "map": label, "script": filename, "rationale": rationale,
@@ -214,13 +241,27 @@ def main():
                 }
                 results_fh.write(json.dumps(record) + "\n")
                 results_fh.flush()
+                captured += 1
                 counts = analysis["resources"]["per_player"]
-                print(f"  sample {sample_i}: {time.time()-t1:.1f}s "
-                      f"land={analysis['land_pct']}% tcs={analysis['n_tcs']} "
-                      f"any_zero={analysis['resources']['any_player_zero_of_a_kind']} "
-                      f"p1={counts.get('1')}")
+                # Stock maps take far longer to generate than ours (Arabia
+                # ~82s against ~3s), which is exactly the kind of thing the
+                # JSON log is for - and exactly the kind of number that would
+                # make the terse log unstable.
+                log.ok("sample",
+                       f"  {label} sample {sample_i}: land={analysis['land_pct']}% "
+                       f"tcs={analysis['n_tcs']} "
+                       f"any_zero={analysis['resources']['any_player_zero_of_a_kind']} "
+                       f"p1={counts.get('1')}",
+                       map=label, sample_index=sample_i, file=str(dest),
+                       land_pct=analysis["land_pct"], n_tcs=analysis["n_tcs"],
+                       generate_s=round(cap.generate_s, 3),
+                       save_s=round(cap.save_s, 3),
+                       sample_total_s=round(time.time() - t1, 3))
 
-    print(f"\nDONE in {time.time()-t_start:.0f}s -> {results_path}")
+    log.close(f"done {captured} captured", captured=captured,
+              expected=len(maps) * args.n_samples, results=str(results_path),
+              wall_s=round(time.time() - t_start, 1))
+    print(f"logs: {log.terse_path}  {log.json_path}")
 
 
 if __name__ == "__main__":

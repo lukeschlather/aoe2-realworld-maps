@@ -237,13 +237,7 @@ def main():
     log.event("plan", f"{len(regions)} regions x {args.n_samples} samples",
               regions=[n for n, _ in regions], n_samples=args.n_samples,
               from_git=args.from_git, region_set=str(args.region_set or ""))
-    # editor.py narrates every click it verifies, which is the right level of
-    # detail for a post-mortem and the wrong level for a short log - and it
-    # carries pids and durations, the two things the terse log excludes on
-    # purpose. Route it into the JSON log, where it is queryable and out of
-    # the way. Without this it would reach stdout and *only* stdout, leaving
-    # the terse log an incomplete account of its own run.
-    editor.SINK = lambda line: log.event("editor", None, line=line.strip())
+    log.attach_editor(editor)
 
     recoveries = 0
     # Build the editor rather than demanding someone else did. This used to
@@ -327,13 +321,19 @@ def main():
             else:
                 gen_cmd = ["uv", "run", "rwmaps", name, "--outdir", str(rms_dir),
                            "--no-preview", *extra_args, *args.extra]
-                with log.timer("regen", region=name) as t:
-                    r = subprocess.run(gen_cmd, cwd=REPO, capture_output=True,
-                                       text=True)
-                regen_s = t.seconds
+                t_regen = time.time()
+                r = subprocess.run(gen_cmd, cwd=REPO, capture_output=True,
+                                   text=True)
+                regen_s = time.time() - t_regen
+                # rwmaps' stdout was captured and discarded. It reports the
+                # land fraction and coastline IoU of the script it just built,
+                # which is the Python-side prediction the engine capture is
+                # then measured against - worth keeping beside it.
+                log.event("regen", None, region=name,
+                          command=" ".join(gen_cmd), returncode=r.returncode,
+                          stdout=r.stdout[-4000:], ok=r.returncode == 0,
+                          duration_s=round(regen_s, 3))
                 if r.returncode != 0:
-                    # A non-zero exit is not an exception, so the timer above
-                    # recorded this as ok. Say otherwise, under its own kind.
                     log.fail("regen_failed", f"  {name}: REGEN FAILED",
                              region=name, stderr=r.stderr[-2000:],
                              duration_s=round(regen_s, 3))

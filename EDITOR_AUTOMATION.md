@@ -216,16 +216,31 @@ identified as destabilising the editor.
 
 ## What a pass writes
 
-Three files under `out/mod_capture/<run-id>/`, for three different readers.
-All three append, because a pass is resumed by reusing its `--run-id` and
-truncating would destroy the record of the failure that made the resume
-necessary.
+**Every** harness in `automation/` writes these, in its own output
+directory, for three different readers. All of them append, because a pass
+is resumed by reusing its `--run-id` and truncating would destroy the
+record of the failure that made the resume necessary.
+
+| harness | where its logs land |
+|---|---|
+| `mod_capture.py` | `out/mod_capture/<run-id>/` |
+| `tuning_matrix.py` | `out/tuning_matrix/<run-id>/` |
+| `stock_capture.py` | `out/stock_capture/<run-id>/` |
+| `window_matrix.py` | `out/window_matrix/` |
+| `batch_capture.py`, `seed_sweep.py` | their `--outdir` |
+| `batch_240.py`, `batch_variants.py`, `batch_all_regions.py`, `batch_variants_retry.py` | their timestamped `out/<kind>-<stamp>/`, **one log for the whole batch** |
+| `gen_loop.py` | its own `out/loop-<stamp>/`, unless a caller set `gen_loop.LOG` |
+
+`gen_loop.main()` is called in a loop by the four `batch_*` wrappers, so it
+takes a caller's log when given one (`gen_loop.LOG = <RunLog>`) and opens
+its own only when run standalone. Without that, a 100-capture batch would
+leave 100 one-line logs instead of one record of the batch.
 
 | file | for | contains |
 |---|---|---|
 | `log.txt` | **an agent, or a person** | one short line per event, and **no timestamps or durations** — so two runs of the same pass diff cleanly and a grep stays exact. The same lines go to stdout, which adds only a closing pointer to these files |
 | `events.jsonl` | **queries about timing** | one JSON object per event: absolute timestamp, `elapsed_s` since the run started, and every phase duration. Failures included, marked `ok: false` |
-| `results.jsonl` | **analysis** | one record per *successful* sample: fairness, aesthetics, resolved geo, and that sample's timings. What the report builders read |
+| `results.jsonl` | **analysis** | one record per *successful* sample: fairness, aesthetics, resolved geo, and that sample's timings. What the report builders read. Not written by every harness — `batch_*` and `gen_loop` produce captures and previews, not analysis records |
 
 Times live only in the JSON, deliberately: a duration is the single most
 likely thing to differ between two otherwise identical runs, so keeping
@@ -244,14 +259,28 @@ jq -r 'select(.region=="Britain") | [.kind, .duration_s] | @tsv' \
 jq -c 'select(.ok==false)' out/mod_capture/<id>/events.jsonl
 ```
 
-`automation/runlog.py` is the writer and is reusable, but **only
-`mod_capture.py` is wired to it** — the other harnesses still just print.
+`automation/runlog.py` is the writer. Hooking up a harness is two lines —
+`log = RunLog(outroot, run_id)` then `log.attach_editor(editor)` — and every
+harness listed above has them, so **no harness prints anything except a
+closing pointer to its two logs**.
 
-`editor.py` narrates every click it verifies (`idle redness 100.6, pid
-34948`, `saved ... after 0.4s`). Those lines carry a pid and durations, so
-they go to `events.jsonl` under kind `editor` rather than into the terse
-log — set `editor.SINK` to a callable to redirect them, or leave it `None`
-and they print, which is what you want when running `editor.py` by hand.
+Three things used to bypass the logs entirely, printing to stdout and being
+kept nowhere. All three are closed, and all three are worth knowing about
+because anything new will hit the same wall:
+
+- **`editor.py`'s narration** (`idle redness 100.6, pid 34948`, `saved ...
+  after 0.4s`) carries a pid and durations, so it goes to `events.jsonl`
+  under kind `editor`. `attach_editor()` does that; leave `editor.SINK` as
+  `None` and it prints instead, which is what running `editor.py` by hand
+  wants.
+- **`rwmaps`' own narration** from the regen subprocess (`land 30.5%
+  coastline IoU 0.96 ...`). Every harness now captures the child rather
+  than letting it inherit stdout, and files it under kind `regen_cmd`.
+- **`AoE2ScenarioParser`'s status printing**, which is timestamped and
+  ANSI-coloured. Off at the library's own setting in `scx_read`.
+
+Only a subprocess's **stderr** still reaches the terminal directly, which is
+where an unexpected traceback belongs.
 
 ## Still open
 

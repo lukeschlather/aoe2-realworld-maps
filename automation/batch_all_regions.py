@@ -27,9 +27,11 @@ REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
+import editor  # noqa: E402
 import gen_loop  # noqa: E402
 from rwmaps import real_preview, scx_read  # noqa: E402
 from rwmaps.cli import REGIONS  # noqa: E402
+from runlog import RunLog  # noqa: E402
 
 
 def main():
@@ -42,9 +44,16 @@ def main():
     outdir = REPO / "out" / f"batch-{stamp}"
     outdir.mkdir(parents=True, exist_ok=True)
 
+    log = RunLog(outdir, run_id=f"batch-{stamp}")
+    log.attach_editor(editor)
+    gen_loop.LOG = log
+    log.event("plan", f"{len(REGIONS)} regions at {args.size}",
+              regions=list(REGIONS), size=args.size, players=args.players)
+
     results = []
     for i, region in enumerate(REGIONS, start=1):
-        print(f"\n[batch] ({i}/{len(REGIONS)}) {region}")
+        log.event("region_start", f"region {i}/{len(REGIONS)} {region}",
+                  region=region)
         sys.argv = [
             "gen_loop.py", region,
             "--region", region,
@@ -54,9 +63,9 @@ def main():
         ]
         try:
             dest = gen_loop.main()
-        except Exception:
-            print(f"[batch] {region} FAILED during generation:")
-            traceback.print_exc()
+        except Exception as e:
+            log.event("region_failed", None, region=region, phase="generation",
+                      error=str(e), traceback=traceback.format_exc())
             results.append((region, None, "generation failed"))
             continue
 
@@ -68,18 +77,20 @@ def main():
                 title=f"{region}  {args.size}x{args.size}  {args.players}p  "
                       f"{len(tcs)} TCs (real engine render)",
             )
-            print(f"[batch] {region}: {len(tcs)} TCs -> {png}")
+            log.ok("region_done", f"  {region}: {len(tcs)} TCs", region=region,
+                   n_tcs=len(tcs), preview=str(png), file=str(dest))
             results.append((region, png, f"{len(tcs)} TCs"))
-        except Exception:
-            print(f"[batch] {region} FAILED during render/analysis:")
-            traceback.print_exc()
+        except Exception as e:
+            log.fail("region_done", f"  {region}: render/analysis FAILED",
+                     region=region, phase="render", error=str(e),
+                     traceback=traceback.format_exc())
             results.append((region, None, "render failed"))
 
-    print("\n[batch] summary:")
-    for region, png, note in results:
-        print(f"  {region:20s} {note:20s} {png or ''}")
     ok = sum(1 for _, png, _ in results if png)
-    print(f"[batch] {ok}/{len(results)} succeeded. Output: {outdir}")
+    log.close(f"done {ok}/{len(results)} succeeded", captured=ok,
+              expected=len(results), outdir=str(outdir),
+              results=[{"region": r, "note": note} for r, _p, note in results])
+    print(f"logs: {log.terse_path}  {log.json_path}")
     return outdir
 
 

@@ -42,6 +42,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import editor  # noqa: E402
 from rwmaps import install as install_mod  # noqa: E402
+from runlog import RunLog  # noqa: E402
 from sample_analysis import analyze_capture  # noqa: E402
 
 SLOT_PATH = install_mod.scripts_dir() / "AA_rw_placeholder_tester.rms"
@@ -219,52 +220,99 @@ def parse_args():
 
 def main():
     args = parse_args()
-    ok, why = editor.ensure_ready(PLAYERS)
-    if not ok:
-        raise SystemExit(f"ABORTING: the editor is not usable: {why}")
-    print(f"editor ready: {why}")
     outroot = REPO / "out" / "tuning_matrix" / args.run_id
     results_path = outroot / "results.jsonl"
     outroot.mkdir(parents=True, exist_ok=True)
-    t_start = time.time()
+    log = RunLog(outroot, args.run_id)
+    log.attach_editor(editor)
+
     cells = [(wk, wt, lon, lat, span, rot, ck, extra)
              for wk, wt, lon, lat, span, rot in WINDOWS
              for ck, extra in conditions_for(wk, args.resolution_default)]
     total = len(cells)
+    log.event("plan", f"{total} cells x {args.n_samples} samples",
+              cells=total, n_samples=args.n_samples, size=SIZE,
+              players=PLAYERS, resolution_default=args.resolution_default)
+
+    # Timed by hand, so this is ONE event: a timer writes its own, and a
+    # second explicit event of the same kind double-counts in any query that
+    # sums durations by kind.
+    t_pre = time.time()
+    ok, why = editor.ensure_ready(PLAYERS)
+    preflight_s = time.time() - t_pre
+    if not ok:
+        log.fail("preflight_failed", f"ABORT editor unusable: {why}", why=why,
+                 duration_s=round(preflight_s, 3))
+        log.close("aborted")
+        raise SystemExit(f"ABORTING: the editor is not usable: {why}")
+    log.ok("preflight", "editor ready", why=why,
+           duration_s=round(preflight_s, 3))
+
+    t_start = time.time()
+    captured = 0
 
     with results_path.open("a", encoding="utf-8") as results_fh:
         for i, (win_key, win_title, lon, lat, span, rot, cond_key, extra_args) in enumerate(cells, 1):
             done = already_done(results_path, win_key, cond_key)
             if done >= args.n_samples:
-                print(f"[{i}/{total}] {win_key}/{cond_key}: already have {done}/{args.n_samples}, skipping")
+                log.event("cell_skip", f"cell {i}/{total} {win_key}/{cond_key}: "
+                          f"have {done}/{args.n_samples}, skipping",
+                          window=win_key, condition=cond_key, have=done,
+                          want=args.n_samples)
                 continue
 
-            print(f"\n[{i}/{total}] {win_key}/{cond_key}  (elapsed {time.time()-t_start:.0f}s)")
+            # extra_args, not resolve_params(extra_args): that helper resolves
+            # against this file's hardcoded PARAM_DEFAULTS, which no longer
+            # match the CLI's own defaults (it still says resolution 10m and
+            # overlap 1.0; rwmaps ships 50m and 0.85). It is kept because old
+            # reports were built with it, but writing it into a log meant for
+            # queries would be recording a known-wrong number. The arguments
+            # actually passed are the ground truth; build_latency_report.py
+            # resolves the full set from rwmaps's own parser.
+            log.event("cell_start", f"cell {i}/{total} {win_key}/{cond_key}",
+                      window=win_key, condition=cond_key, lon=lon, lat=lat,
+                      span_km=span, rotate=rot, extra_args=extra_args)
             cell_dir = outroot / win_key / cond_key
             rms_dir = outroot / "scripts" / win_key / cond_key
             gen_cmd = ["uv", "run", "rwmaps", f"{win_key}_{cond_key}",
                        f"--center={lon},{lat}", "--span-km", str(span), "--rotate", str(rot),
                        "--size", str(SIZE), "--players", str(PLAYERS),
                        "--outdir", str(rms_dir), "--no-preview", *extra_args]
-            t0 = time.time()
-            r = subprocess.run(gen_cmd, cwd=REPO, capture_output=True, text=True)
+            t_regen = time.time()
+            r = subprocess.run(gen_cmd, cwd=REPO, capture_output=True,
+                               text=True)
+            regen_s = time.time() - t_regen
+            # rwmaps' narration was captured and discarded; it reports the
+            # land fraction and coastline IoU of the script it just built.
+            log.event("regen", None, window=win_key, condition=cond_key,
+                      command=" ".join(gen_cmd), returncode=r.returncode,
+                      stdout=r.stdout[-4000:], ok=r.returncode == 0,
+                      duration_s=round(regen_s, 3))
             if r.returncode != 0:
-                print(f"  REGEN FAILED: {r.stderr[-800:]}")
+                log.fail("regen_failed", f"  {win_key}/{cond_key}: REGEN FAILED",
+                         window=win_key, condition=cond_key,
+                         stderr=r.stderr[-2000:],
+                         duration_s=round(regen_s, 3))
                 continue
-            print(f"  regen: {time.time()-t0:.1f}s")
 
             rms_files = list(rms_dir.rglob("*.rms"))
             if len(rms_files) != 1:
-                print(f"  SKIP: expected 1 .rms, found {len(rms_files)}")
+                log.fail("slot_swap", f"  {win_key}/{cond_key}: SKIP expected 1 "
+                         f".rms, found {len(rms_files)}", window=win_key,
+                         condition=cond_key,
+                         found=[str(p) for p in rms_files])
                 continue
             shutil.copyfile(rms_files[0], SLOT_PATH)
 
             for sample_i in range(done, args.n_samples):
                 t1 = time.time()
                 try:
-                    after = editor.generate_and_save(SCENARIO_DIR).path
+                    cap = editor.generate_and_save(SCENARIO_DIR)
                 except Exception as e:
-                    print(f"  sample {sample_i}: capture FAILED ({e})")
+                    log.fail("capture", f"  {win_key}/{cond_key} sample "
+                             f"{sample_i}: capture FAILED", window=win_key,
+                             condition=cond_key, sample_index=sample_i,
+                             error=str(e))
                     continue
 
                 # Persist the raw capture BEFORE analyzing - the game
@@ -276,13 +324,19 @@ def main():
                 archive_dir = cell_dir / "raw"
                 archive_dir.mkdir(parents=True, exist_ok=True)
                 dest = archive_dir / f"sample_{sample_i:03d}.aoe2scenario"
-                shutil.copyfile(after, dest)
+                shutil.copyfile(cap.path, dest)
 
-                try:
-                    analysis = analyze_capture(dest, size=SIZE)
-                except Exception as e:
-                    print(f"  sample {sample_i}: ANALYSIS FAILED ({e})")
-                    continue
+                with log.timer("analyze", window=win_key, condition=cond_key,
+                               sample_index=sample_i):
+                    try:
+                        analysis = analyze_capture(dest, size=SIZE)
+                    except Exception as e:
+                        log.fail("analyze", f"  {win_key}/{cond_key} sample "
+                                 f"{sample_i}: ANALYSIS FAILED",
+                                 window=win_key, condition=cond_key,
+                                 sample_index=sample_i, error=str(e),
+                                 file=str(dest))
+                        continue
 
                 record = {
                     "window": win_key, "window_title": win_title, "condition": cond_key,
@@ -291,12 +345,26 @@ def main():
                 }
                 results_fh.write(json.dumps(record) + "\n")
                 results_fh.flush()
-                print(f"  sample {sample_i}: captured+analyzed in {time.time()-t1:.1f}s "
-                      f"(landmasses={analysis['placement']['n_landmasses_with_a_player']}, "
-                      f"reachable={analysis['placement']['pairwise_land_reachable_fraction']}, "
-                      f"any_zero={analysis['resources']['any_player_zero_of_a_kind']})")
+                captured += 1
+                place = analysis["placement"]
+                log.ok("sample",
+                       f"  {win_key}/{cond_key} sample {sample_i}: "
+                       f"landmasses={place['n_landmasses_with_a_player']} "
+                       f"reachable={place['pairwise_land_reachable_fraction']} "
+                       f"any_zero="
+                       f"{analysis['resources']['any_player_zero_of_a_kind']}",
+                       window=win_key, condition=cond_key,
+                       sample_index=sample_i, file=str(dest),
+                       n_landmasses=place["n_landmasses_with_a_player"],
+                       reachable=place["pairwise_land_reachable_fraction"],
+                       generate_s=round(cap.generate_s, 3),
+                       save_s=round(cap.save_s, 3),
+                       sample_total_s=round(time.time() - t1, 3))
 
-    print(f"\nDONE in {time.time()-t_start:.0f}s -> {results_path}")
+    log.close(f"done {captured} captured", captured=captured,
+              expected=total * args.n_samples, results=str(results_path),
+              wall_s=round(time.time() - t_start, 1))
+    print(f"logs: {log.terse_path}  {log.json_path}")
 
 
 if __name__ == "__main__":

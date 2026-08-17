@@ -27,8 +27,10 @@ REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
+import editor  # noqa: E402
 import gen_loop  # noqa: E402
 from rwmaps import real_preview, scx_read  # noqa: E402
+from runlog import RunLog  # noqa: E402
 
 MIN_ISLAND = 20  # ~4.5x4.5 tiles - kills single/few-tile speckle, keeps
 
@@ -65,19 +67,26 @@ def main():
     outdir = REPO / "out" / f"variants-{stamp}"
     outdir.mkdir(parents=True, exist_ok=True)
 
+    log = RunLog(outdir, run_id=f"variants-{stamp}")
+    log.attach_editor(editor)
+    gen_loop.LOG = log
+    log.event("plan", f"{len(VARIANTS)} variants",
+              variants=[n for n, _ in VARIANTS])
+
     results = []
     for i, (name, extra) in enumerate(VARIANTS, start=1):
-        print(f"\n[variants] ({i}/{len(VARIANTS)}) {name} {extra}")
+        log.event("variant", f"variant {i}/{len(VARIANTS)} {name}",
+                  name=name, extra_args=extra)
         sys.argv = ["gen_loop.py", name, "--size", "220", "--players", "8",
                     "--outdir", str(outdir), *extra]
         try:
             dest = gen_loop.main()
-        except BaseException:
+        except BaseException as e:
             # BaseException, not Exception - argparse errors inside gen_loop's
             # own parser raise SystemExit, which isn't an Exception subclass
             # and would otherwise silently kill the rest of the batch.
-            print(f"[variants] {name} FAILED during generation:")
-            traceback.print_exc()
+            log.event("variant_failed", None, name=name, phase="generation",
+                      error=str(e), traceback=traceback.format_exc())
             results.append((name, None, "generation failed"))
             continue
 
@@ -88,18 +97,20 @@ def main():
                 mask, tcs, dest.with_suffix(".png"),
                 title=f"{name}  {mask.shape[1]}x{mask.shape[0]}  {len(tcs)} TCs (real engine)",
             )
-            print(f"[variants] {name}: {len(tcs)} TCs -> {png}")
+            log.ok("variant_done", f"  {name}: {len(tcs)} TCs", name=name,
+                   n_tcs=len(tcs), preview=str(png), file=str(dest))
             results.append((name, png, f"{len(tcs)} TCs"))
-        except Exception:
-            print(f"[variants] {name} FAILED during render/analysis:")
-            traceback.print_exc()
+        except Exception as e:
+            log.fail("variant_done", f"  {name}: render/analysis FAILED",
+                     name=name, phase="render", error=str(e),
+                     traceback=traceback.format_exc())
             results.append((name, None, "render failed"))
 
-    print("\n[variants] summary:")
-    for name, png, note in results:
-        print(f"  {name:24s} {note:20s} {png or ''}")
     ok = sum(1 for _, png, _ in results if png)
-    print(f"[variants] {ok}/{len(results)} succeeded. Output: {outdir}")
+    log.close(f"done {ok}/{len(results)} succeeded", captured=ok,
+              expected=len(results), outdir=str(outdir),
+              results=[{"name": n, "note": note} for n, _p, note in results])
+    print(f"logs: {log.terse_path}  {log.json_path}")
     return outdir
 
 
