@@ -19,16 +19,30 @@ will be cut from, with **no** forest, elevation, resources or start
 positions, and no engine RNG. They are not renders. For those, generate the
 window for real and capture it - see RENDER_PIPELINE.md.
 
-Three views per candidate:
+Two views per candidate, and **both are in the in-game orientation** -
+the grid turned counter-clockwise by ``thumbnail.ICON_ROTATION``, which is
+what the engine does to draw it. Up in these pictures is up in the game, and
+that is the only thing up is ever allowed to mean here.
 
-* **truth** - the real coastline the window samples, north-up.
-* **cover** - what 700 discs can actually approximate it with, north-up.
-  This is the shape that ships; the gap between it and truth is the
-  fidelity cost of the window.
-* **minimap** - the same cover, turned the way the game draws the grid
-  (counter-clockwise 45 degrees, see ``thumbnail.ICON_ROTATION``). This is
-  the view that matters; north is up in it when the window's ``--north`` is
-  0, which is the default.
+* **truth** - the real coastline the window samples.
+* **cover** - what 700 discs can actually approximate it with. This is the
+  shape that ships; the gap between it and truth is the fidelity cost of
+  the window.
+
+Where geographic north ends up is then a property of the window rather than
+of the picture, and it is exactly what ``--north`` sets: at ``--north 0``
+north is up on screen, at ``--north -45`` it is toward the upper left. The
+caption states it per candidate.
+
+This used to be wrong and the wrongness was subtle. ``truth`` and ``cover``
+were turned by ``north + ICON_ROTATION``, i.e. rendered with geographic
+north at the top of the image whatever the window's orientation - and
+described as "north up", a phrase that then meant something different from
+what ``--north`` means. At the shipped ``--north -45`` that sum is zero, so
+those two views showed the **raw grid, axis-aligned**, which is 45 degrees
+off anything a player ever sees. ``thumbnail.render`` already warned that
+showing the raw grid "was a way to be confidently wrong about which way a
+map faces"; this module was doing it in two of its three pictures.
 
 Usage:
     uv run python automation/window_candidates.py
@@ -287,6 +301,29 @@ CANDIDATES: list[Candidate] = [
               "the belts cut as real water instead. This one DOES change how "
               "land units move, and is the comparison, not the proposal",
               overrides={"min_water_width": 2}, presets=["zealand-funen-cut"]),
+
+    # --- which way is "a bit to the right"? --------------------------------
+    # At --north -45 north is toward the upper LEFT in game, so screen-right
+    # is SOUTHEAST and screen-left is NORTHWEST. Both are shown because the
+    # two do opposite things and the answer should be picked off pictures
+    # that are finally in the right orientation.
+    Candidate("shift", "cut @ 22,63 (baseline)", 22.0, 63.0, 2000, -45,
+              "the row this sweep is nudging",
+              overrides={"min_water_width": 2}, presets=["zealand-funen-cut"]),
+    Candidate("shift", "cut, screen-RIGHT a little (22.5,62.7)",
+              22.5, 62.7, 2000, -45,
+              "southeast. More land, less ocean",
+              overrides={"min_water_width": 2}, presets=["zealand-funen-cut"]),
+    Candidate("shift", "cut, screen-RIGHT more (23,62.5)", 23.0, 62.5, 2000, -45,
+              "southeast again - this is where the Baltic route SEVERS",
+              overrides={"min_water_width": 2}, presets=["zealand-funen-cut"]),
+    Candidate("shift", "cut, screen-LEFT a little (21.5,63.3)",
+              21.5, 63.3, 2000, -45,
+              "northwest. Less land, more ocean",
+              overrides={"min_water_width": 2}, presets=["zealand-funen-cut"]),
+    Candidate("shift", "cut, screen-LEFT more (21,63.6)", 21.0, 63.6, 2000, -45,
+              "northwest again",
+              overrides={"min_water_width": 2}, presets=["zealand-funen-cut"]),
 ]
 
 
@@ -318,6 +355,40 @@ def _pieces(binary: np.ndarray, floor: int, lon: np.ndarray, lat: np.ndarray,
             "lat": round(float(np.nanmean(lat[sel])), 1),
         })
     return sorted(out, key=lambda d: -d["tiles"])
+
+
+def _nav_width(water: np.ndarray, a: tuple[int, int],
+               b: tuple[int, int]) -> float:
+    """Widest disc that can travel from ``a`` to ``b`` through water, in tiles.
+
+    The bottleneck of a route, which is the thing "is there a way through"
+    cannot express: two seas can be one connected component and still be
+    joined by a single-tile thread. Binary search on clearance - keeping only
+    water at least ``r`` from land and asking whether ``a`` and ``b`` are
+    still connected there is exactly the question of whether a disc of radius
+    ``r`` fits the whole way.
+    """
+    dist = ndimage.distance_transform_edt(water)
+    lo, hi = 0.0, float(dist.max())
+    for _ in range(24):
+        mid = (lo + hi) / 2
+        lab, _n = ndimage.label(dist >= mid, structure=np.ones((3, 3), bool))
+        if lab[a] and lab[a] == lab[b]:
+            lo = mid
+        else:
+            hi = mid
+    return lo
+
+
+def _nearest_water(lon, lat, water, tlon: float, tlat: float):
+    d2 = np.where(water, (lon - tlon) ** 2 + ((lat - tlat) * 2.0) ** 2, np.inf)
+    return np.unravel_index(int(np.argmin(d2)), d2.shape)
+
+
+#: The two ends of the route that matters for Scandinavia: the Baltic, and
+#: the open Atlantic north-west of Norway.
+BALTIC_LONLAT = (19.0, 58.8)
+ATLANTIC_LONLAT = (2.0, 66.0)
 
 
 def _open_water(land: np.ndarray, lon: np.ndarray,
@@ -354,7 +425,10 @@ def _open_water(land: np.ndarray, lon: np.ndarray,
     dist = ndimage.distance_transform_edt(water)
     iy, ix = np.unravel_index(int(np.argmax(dist)), dist.shape)
     void_comp = int((labels == labels[iy, ix]).sum()) if n else 0
+    a = _nearest_water(lon, lat, water, *BALTIC_LONLAT)
+    b = _nearest_water(lon, lat, water, *ATLANTIC_LONLAT)
     return {
+        "nav_width_tiles": round(_nav_width(water, a, b), 2),
         "open_pct": round(open_tiles / land.size * 100, 1),
         "void_radius": round(float(dist.max()), 1),
         "void_lon": round(float(lon[iy, ix]), 1),
@@ -443,12 +517,15 @@ def screen(c: Candidate, outdir: Path) -> dict:
     # projection.MapWindow.tile_lonlat), so turning the grid counter-clockwise
     # by `rotate` puts it back at the top. At rotate 45 that is the same turn
     # the game itself applies, which is exactly why 45 is the north-up value.
-    grid_rotate = c.north + thumbnail.ICON_ROTATION
+    # One rotation, the engine's. Not `north + ICON_ROTATION`: that renders
+    # geographic north at the top of the image, which is a different frame
+    # from the one the map is played in, and at --north -45 it degenerates to
+    # the raw un-turned grid. See the module docstring.
     views = {
-        "truth": to_png(truth, grid_rotate, shallows=shallow_overlay),
-        "cover": to_png(cover, grid_rotate, shallows=shallow_overlay),
-        "minimap": to_png(cover, thumbnail.ICON_ROTATION,
-                          shallows=shallow_overlay),
+        "truth": to_png(truth, thumbnail.ICON_ROTATION,
+                        shallows=shallow_overlay),
+        "cover": to_png(cover, thumbnail.ICON_ROTATION,
+                        shallows=shallow_overlay),
     }
     slug = c.name.lower().replace(" ", "_").replace(",", "").replace("(", "").replace(")", "")
     paths = {}
@@ -490,9 +567,24 @@ GROUP_TITLES = {
     "new": "Proposed replacements",
     "scandinavia": "Scandinavia — less open sea",
     "connect": "Scandinavia — connecting the seas, and Denmark",
+    "shift": "Scandinavia — which way is “a bit to the right”?",
 }
 
 GROUP_BLURBS = {
+    "shift": (
+        "<code>zealand-funen-cut</code> at 22,63 nudged both ways, because "
+        "“right” is a screen direction and at <code>--north -45</code> "
+        "north is toward the upper left in game - which makes screen-right "
+        "<b>southeast</b> and screen-left <b>northwest</b>. The two do "
+        "opposite things, so guessing was not worth it.<br><br>"
+        "Read the <b>navigable width</b> row. The Baltic-to-Atlantic route is "
+        "already only about 1.4 tiles at its bottleneck, and moving southeast "
+        "makes it worse until it <b>severs completely at 23,62.5</b> - "
+        "southeast trades ocean for land (60.4% land at the baseline against "
+        "65.5% there). If the aim is a wider ocean at the thin parts, "
+        "screen-<i>left</i> is the direction, or widen the straits directly "
+        "with a bigger carved channel rather than by moving the window."
+    ),
     "connect": (
         "The second round of the Scandinavia work, which was numbers-only "
         "until now. Two asks: make the seas connect, and make the water "
@@ -583,23 +675,28 @@ def render_html(rows: list[dict], stamp: str, commit: str, data_dir: str) -> str
                   'render: only an engine capture shows what they become'
                   '</span></td></tr>')
         p = r["params"]
-        north_up = "yes" if r["north"] == 0 else "no"
+        # Where north points in the pictures above, said in words, because
+        # a signed degree count is the thing that keeps getting misread.
+        bearing = {0: "north is UP in game", -45: "north toward the UPPER LEFT",
+                   45: "north toward the UPPER RIGHT",
+                   90: "north to the RIGHT", -90: "north to the LEFT",
+                   180: "north is DOWN"}.get(
+            r["north"], f"north {r['north']:g}° clockwise from up")
         return f"""
     <article class="cand">
       <h3>{r['name']}</h3>
       {f'<p class="note">{r["note"]}</p>' if r["note"] else ''}
       <div class="views">
         <figure><img src="{r['b64']['truth']}" loading="lazy">
-          <figcaption>truth &mdash; north up</figcaption></figure>
+          <figcaption>real coastline &mdash; in-game orientation</figcaption></figure>
         <figure><img src="{r['b64']['cover']}" loading="lazy">
-          <figcaption>700-disc cover &mdash; north up</figcaption></figure>
-        <figure><img src="{r['b64']['minimap']}" loading="lazy">
-          <figcaption>in-game minimap orientation</figcaption></figure>
+          <figcaption>700-disc cover (this is what ships) &mdash;
+            in-game orientation</figcaption></figure>
       </div>
       <table class="facts">
         <tr><th>centre</th><td>{r['lon']}, {r['lat']}</td>
             <th>span</th><td>{r['span_km']:g} km ({r['km_per_tile']:.2f} km/tile)</td></tr>
-        <tr><th>north on screen</th><td>{r['north']:g}&deg; (north up in game: {north_up})</td>
+        <tr><th>north on screen</th><td>{r['north']:g}&deg; &mdash; {bearing}</td>
             <th>projection</th><td>{p['proj']}</td></tr>
         <tr><th>land</th><td>{r['land_fraction']*100:.1f}%</td>
             <th>cover IoU</th><td>{r['cover_iou']:.3f}
@@ -609,6 +706,13 @@ def render_html(rows: list[dict], stamp: str, commit: str, data_dir: str) -> str
         <tr><th>waterbodies</th><td colspan="3">{waters}
               <span class="dim">tiles enclosed, &ge;{WATERBODY_FLOOR}</span></td></tr>
         {feature_row}
+        <tr><th>navigable width</th><td colspan="3">
+              <b>{ow.get('nav_width_tiles', 0):.2f} tiles</b> from the Baltic
+              to the open Atlantic &mdash; the bottleneck of the route, in the
+              land mask. 0 means no way through at all.
+              <span class="dim">Shallows are navigable terrain the mask does
+              not model, so where a candidate carries them this is a LOWER
+              bound.</span></td></tr>
         <tr><th>open sea</th><td colspan="3">{ow['open_pct']:.1f}% of the map
               runs off the edge &middot; emptiest point <b>{ow['void_radius']:.0f}
               tiles</b> from land, at {ow['void_lon']:g}, {ow['void_lat']:g}

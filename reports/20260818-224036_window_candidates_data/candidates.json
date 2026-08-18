@@ -1,0 +1,1811 @@
+[
+  {
+    "group": "scandinavia",
+    "name": "Scand current NW (ships today)",
+    "lon": 16.0,
+    "lat": 62.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "the baseline every other row here is to be read against",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand current NW (ships today)\" --center=16.0,62.0 --span-km 2000 --north -45",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.5438368055555556,
+    "cover_iou": 0.9817577197149644,
+    "cover_misses_frac": 0.010407023144453312,
+    "landmasses": [
+      {
+        "tiles": 31179,
+        "lon": 22.0,
+        "lat": 61.0
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 5328,
+        "lon": 19.8,
+        "lat": 58.8
+      },
+      {
+        "tiles": 240,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 68,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 35.7,
+      "void_radius": 115.9,
+      "void_lon": -9.7,
+      "void_lat": 69.1,
+      "void_sea_tiles": 19433,
+      "void_sea_pct": 33.7
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_current_nw_ships_today__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_current_nw_ships_today__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand current, north-up",
+    "lon": 16.0,
+    "lat": 62.0,
+    "span_km": 2000,
+    "north": 0,
+    "note": "same window, north-up - Britain's fix came out of the north-up family, so the orientation is on the table too",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand current, north-up\" --center=16.0,62.0 --span-km 2000",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.5514756944444444,
+    "cover_iou": 0.9816955082151558,
+    "cover_misses_frac": 0.010609161026286793,
+    "landmasses": [
+      {
+        "tiles": 31615,
+        "lon": 21.8,
+        "lat": 60.5
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 5458,
+        "lon": 19.6,
+        "lat": 58.7
+      },
+      {
+        "tiles": 242,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 85,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 63,
+        "lon": 13.4,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 34.7,
+      "void_radius": 71.4,
+      "void_lon": -0.6,
+      "void_lat": 67.5,
+      "void_sea_tiles": 19765,
+      "void_sea_pct": 34.3
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_current_north-up__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_current_north-up__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand south 60N",
+    "lon": 16.0,
+    "lat": 60.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand south 60N\" --center=16.0,60.0 --span-km 2000 --north -45",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6124305555555556,
+    "cover_iou": 0.9828814370583101,
+    "cover_misses_frac": 0.010403673885928109,
+    "landmasses": [
+      {
+        "tiles": 35136,
+        "lon": 20.7,
+        "lat": 58.8
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 5405,
+        "lon": 19.7,
+        "lat": 58.8
+      },
+      {
+        "tiles": 234,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 66,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 28.8,
+      "void_radius": 97.3,
+      "void_lon": -7.6,
+      "void_lat": 67.3,
+      "void_sea_tiles": 16056,
+      "void_sea_pct": 27.9
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_south_60n__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_south_60n__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand south 58.5N",
+    "lon": 16.0,
+    "lat": 58.5,
+    "span_km": 2000,
+    "north": -45,
+    "note": "far enough south that the Baltic, not the Atlantic, is the map's main water",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand south 58.5N\" --center=16.0,58.5 --span-km 2000 --north -45",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6535069444444445,
+    "cover_iou": 0.9837563719922876,
+    "cover_misses_frac": 0.010520163646990065,
+    "landmasses": [
+      {
+        "tiles": 37494,
+        "lon": 19.7,
+        "lat": 57.1
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 5397,
+        "lon": 19.7,
+        "lat": 58.8
+      },
+      {
+        "tiles": 237,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 66,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 24.7,
+      "void_radius": 77.3,
+      "void_lon": -6.3,
+      "void_lat": 65.9,
+      "void_sea_tiles": 13767,
+      "void_sea_pct": 23.9
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_south_58.5n__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_south_58.5n__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand south 60N, north-up",
+    "lon": 16.0,
+    "lat": 60.0,
+    "span_km": 2000,
+    "north": 0,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand south 60N, north-up\" --center=16.0,60.0 --span-km 2000",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6147743055555556,
+    "cover_iou": 0.9811855091969494,
+    "cover_misses_frac": 0.011804241619835645,
+    "landmasses": [
+      {
+        "tiles": 34740,
+        "lon": 20.8,
+        "lat": 58.7
+      },
+      {
+        "tiles": 579,
+        "lon": -4.1,
+        "lat": 57.4
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 5429,
+        "lon": 19.6,
+        "lat": 58.7
+      },
+      {
+        "tiles": 238,
+        "lon": 31.4,
+        "lat": 60.9
+      },
+      {
+        "tiles": 84,
+        "lon": 35.5,
+        "lat": 61.6
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 28.3,
+      "void_radius": 53.3,
+      "void_lon": 2.7,
+      "void_lat": 66.9,
+      "void_sea_tiles": 16300,
+      "void_sea_pct": 28.3
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_south_60n_north-up__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_south_60n_north-up__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand east 20E",
+    "lon": 20.0,
+    "lat": 62.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand east 20E\" --center=20.0,62.0 --span-km 2000 --north -45",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6301215277777777,
+    "cover_iou": 0.9785043402064678,
+    "cover_misses_frac": 0.015456674473067917,
+    "landmasses": [
+      {
+        "tiles": 36204,
+        "lon": 23.8,
+        "lat": 60.7
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 5351,
+        "lon": 19.8,
+        "lat": 58.8
+      },
+      {
+        "tiles": 238,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 88,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 68,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 26.9,
+      "void_radius": 97.1,
+      "void_lon": -5.7,
+      "void_lat": 69.1,
+      "void_sea_tiles": 13166,
+      "void_sea_pct": 22.9
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_east_20e__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_east_20e__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand southeast 19,60",
+    "lon": 19.0,
+    "lat": 60.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand southeast 19,60\" --center=19.0,60.0 --span-km 2000 --north -45",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6847743055555555,
+    "cover_iou": 0.9813029874848607,
+    "cover_misses_frac": 0.01399487868569835,
+    "landmasses": [
+      {
+        "tiles": 39311,
+        "lon": 22.4,
+        "lat": 58.8
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 5345,
+        "lon": 19.8,
+        "lat": 58.8
+      },
+      {
+        "tiles": 243,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 89,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 65,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 21.4,
+      "void_radius": 87.7,
+      "void_lon": -4.6,
+      "void_lat": 67.3,
+      "void_sea_tiles": 11450,
+      "void_sea_pct": 19.9
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_southeast_1960__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_southeast_1960__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand 1700 south",
+    "lon": 16.0,
+    "lat": 60.0,
+    "span_km": 1700,
+    "north": -45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand 1700 south\" --center=16.0,60.0 --span-km 1700 --north -45",
+    "km_per_tile": 7.083333333333333,
+    "land_fraction": 0.6131944444444445,
+    "cover_iou": 0.9802570520572602,
+    "cover_misses_frac": 0.013165345413363533,
+    "landmasses": [
+      {
+        "tiles": 35238,
+        "lon": 19.5,
+        "lat": 59.4
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 7422,
+        "lon": 19.8,
+        "lat": 58.8
+      },
+      {
+        "tiles": 102,
+        "lon": 13.4,
+        "lat": 58.9
+      },
+      {
+        "tiles": 66,
+        "lon": 10.6,
+        "lat": 54.6
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 25.4,
+      "void_radius": 88.7,
+      "void_lon": -3.3,
+      "void_lat": 66.5,
+      "void_sea_tiles": 14291,
+      "void_sea_pct": 24.8
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_1700_south__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_1700_south__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand 1500 Baltic",
+    "lon": 17.0,
+    "lat": 59.0,
+    "span_km": 1500,
+    "north": -45,
+    "note": "compare 'Baltic' in the proposed-replacements group, which is the same idea at 19,59 north-up",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand 1500 Baltic\" --center=17.0,59.0 --span-km 1500 --north -45",
+    "km_per_tile": 6.25,
+    "land_fraction": 0.6756597222222223,
+    "cover_iou": 0.9767174401962789,
+    "cover_misses_frac": 0.01801223084433938,
+    "landmasses": [
+      {
+        "tiles": 38807,
+        "lon": 18.6,
+        "lat": 58.6
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 129,
+        "lon": 13.3,
+        "lat": 58.9
+      },
+      {
+        "tiles": 65,
+        "lon": 27.4,
+        "lat": 58.7
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 31.9,
+      "void_radius": 58.1,
+      "void_lon": 1.1,
+      "void_lat": 64.9,
+      "void_sea_tiles": 8683,
+      "void_sea_pct": 15.1
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_1500_baltic__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_1500_baltic__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand 1300 Baltic",
+    "lon": 16.5,
+    "lat": 58.5,
+    "span_km": 1300,
+    "north": -45,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand 1300 Baltic\" --center=16.5,58.5 --span-km 1300 --north -45",
+    "km_per_tile": 5.416666666666667,
+    "land_fraction": 0.6748263888888889,
+    "cover_iou": 0.9755361072726342,
+    "cover_misses_frac": 0.019243632621559044,
+    "landmasses": [
+      {
+        "tiles": 33341,
+        "lon": 15.7,
+        "lat": 57.7
+      },
+      {
+        "tiles": 5389,
+        "lon": 25.2,
+        "lat": 62.1
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 184,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 32.0,
+      "void_radius": 35.8,
+      "void_lon": 3.3,
+      "void_lat": 63.7,
+      "void_sea_tiles": 1731,
+      "void_sea_pct": 3.0
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_1300_baltic__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_1300_baltic__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand 1500 Baltic, north-up",
+    "lon": 17.0,
+    "lat": 59.0,
+    "span_km": 1500,
+    "north": 0,
+    "note": "",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand 1500 Baltic, north-up\" --center=17.0,59.0 --span-km 1500",
+    "km_per_tile": 6.25,
+    "land_fraction": 0.6824652777777778,
+    "cover_iou": 0.9779891716844609,
+    "cover_misses_frac": 0.01663698804375477,
+    "landmasses": [
+      {
+        "tiles": 39215,
+        "lon": 18.5,
+        "lat": 58.8
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 123,
+        "lon": 13.4,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 31.4,
+      "void_radius": 63.5,
+      "void_lon": -1.0,
+      "void_lat": 57.7,
+      "void_sea_tiles": 8277,
+      "void_sea_pct": 14.4
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_1500_baltic_north-up__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_1500_baltic_north-up__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand peninsula 1600",
+    "lon": 13.5,
+    "lat": 60.5,
+    "span_km": 1600,
+    "north": -45,
+    "note": "west enough to keep the Norwegian coast as the feature",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand peninsula 1600\" --center=13.5,60.5 --span-km 1600 --north -45",
+    "km_per_tile": 6.666666666666667,
+    "land_fraction": 0.5130902777777778,
+    "cover_iou": 0.9790437231759657,
+    "cover_misses_frac": 0.012011910401299317,
+    "landmasses": [
+      {
+        "tiles": 29459,
+        "lon": 17.9,
+        "lat": 60.3
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 117,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 48.5,
+      "void_radius": 103.0,
+      "void_lon": -4.7,
+      "void_lat": 66.6,
+      "void_sea_tiles": 19496,
+      "void_sea_pct": 33.8
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_peninsula_1600__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_peninsula_1600__cover.png"
+    }
+  },
+  {
+    "group": "scandinavia",
+    "name": "Scand Bothnia 1600",
+    "lon": 19.5,
+    "lat": 62.5,
+    "span_km": 1600,
+    "north": -45,
+    "note": "the Gulf of Bothnia as an enclosed inland sea",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"Scand Bothnia 1600\" --center=19.5,62.5 --span-km 1600 --north -45",
+    "km_per_tile": 6.666666666666667,
+    "land_fraction": 0.6739756944444445,
+    "cover_iou": 0.9790919339961054,
+    "cover_misses_frac": 0.01568738569331032,
+    "landmasses": [
+      {
+        "tiles": 38732,
+        "lon": 22.1,
+        "lat": 62.1
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 378,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 110,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 31.6,
+      "void_radius": 83.5,
+      "void_lon": -0.3,
+      "void_lat": 68.5,
+      "void_sea_tiles": 8090,
+      "void_sea_pct": 14.0
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/scandinavia/scand_bothnia_1600__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/scandinavia/scand_bothnia_1600__cover.png"
+    }
+  },
+  {
+    "group": "connect",
+    "name": "east 20E @ mww4 (as first screened)",
+    "lon": 20.0,
+    "lat": 62.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "reference. The Baltic is a 5,351-tile ENCLOSED lake here and the northern sea is a second, separate ocean",
+    "proj": "laea",
+    "overrides": {},
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 4,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"east 20E @ mww4 (as first screened)\" --center=20.0,62.0 --span-km 2000 --north -45",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6301215277777777,
+    "cover_iou": 0.9785043402064678,
+    "cover_misses_frac": 0.015456674473067917,
+    "landmasses": [
+      {
+        "tiles": 36204,
+        "lon": 23.8,
+        "lat": 60.7
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 5351,
+        "lon": 19.8,
+        "lat": 58.8
+      },
+      {
+        "tiles": 238,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 88,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 68,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 26.9,
+      "void_radius": 97.1,
+      "void_lon": -5.7,
+      "void_lat": 69.1,
+      "void_sea_tiles": 13166,
+      "void_sea_pct": 22.9
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/connect/east_20e_@_mww4_as_first_screened__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/connect/east_20e_@_mww4_as_first_screened__cover.png"
+    }
+  },
+  {
+    "group": "connect",
+    "name": "east 20E @ mww2",
+    "lon": 20.0,
+    "lat": 62.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "same window, width filter relaxed. In the raw coastline the Baltic and Atlantic are one 19,277-tile ocean; mww4 splits them. At 2 the Baltic reconnects - the north still does not",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"east 20E @ mww2\" --center=20.0,62.0 --span-km 2000 --north -45 --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6165451388888888,
+    "cover_iou": 0.9693407421885908,
+    "cover_misses_frac": 0.022470644552699013,
+    "landmasses": [
+      {
+        "tiles": 35428,
+        "lon": 23.9,
+        "lat": 60.7
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 247,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 105,
+        "lon": 35.4,
+        "lat": 61.6
+      },
+      {
+        "tiles": 76,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 1.41,
+      "open_pct": 37.1,
+      "void_radius": 98.1,
+      "void_lon": -5.7,
+      "void_lat": 69.1,
+      "void_sea_tiles": 19024,
+      "void_sea_pct": 33.0
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/connect/east_20e_@_mww2__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/connect/east_20e_@_mww2__cover.png"
+    }
+  },
+  {
+    "group": "connect",
+    "name": "20,62.5 @ mww2",
+    "lon": 20.0,
+    "lat": 62.5,
+    "span_km": 2000,
+    "north": -45,
+    "note": "smallest shift that makes every sea one navigable ocean",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"20,62.5 @ mww2\" --center=20.0,62.5 --span-km 2000 --north -45 --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.5894965277777777,
+    "cover_iou": 0.9690736688548505,
+    "cover_misses_frac": 0.02179355028714475,
+    "landmasses": [
+      {
+        "tiles": 33818,
+        "lon": 24.1,
+        "lat": 61.1
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 248,
+        "lon": 31.5,
+        "lat": 60.8
+      },
+      {
+        "tiles": 105,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 84,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 1.41,
+      "open_pct": 39.8,
+      "void_radius": 100.0,
+      "void_lon": -6.3,
+      "void_lat": 69.6,
+      "void_sea_tiles": 22941,
+      "void_sea_pct": 39.8
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/connect/2062.5_@_mww2__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/connect/2062.5_@_mww2__cover.png"
+    }
+  },
+  {
+    "group": "connect",
+    "name": "22,63 @ mww2",
+    "lon": 22.0,
+    "lat": 63.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "one ocean, and a void radius of 93 - slightly better than the 97 of the window this started from",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"22,63 @ mww2\" --center=22.0,63.0 --span-km 2000 --north -45 --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6040972222222222,
+    "cover_iou": 0.970658614402917,
+    "cover_misses_frac": 0.020749511438096332,
+    "landmasses": [
+      {
+        "tiles": 33566,
+        "lon": 25.8,
+        "lat": 61.5
+      },
+      {
+        "tiles": 1124,
+        "lon": 9.9,
+        "lat": 54.9
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 250,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 110,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 82,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 1.41,
+      "open_pct": 38.3,
+      "void_radius": 93.0,
+      "void_lon": -4.9,
+      "void_lat": 70.0,
+      "void_sea_tiles": 22024,
+      "void_sea_pct": 38.2
+    },
+    "feature_notes": [],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/connect/2263_@_mww2__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/connect/2263_@_mww2__cover.png"
+    }
+  },
+  {
+    "group": "connect",
+    "name": "22,63 @ mww2 + danish-straits",
+    "lon": 22.0,
+    "lat": 63.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "straits only: nothing about the land changes, the overlay shows where the SHALLOWS blocks go",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [
+      "danish-straits"
+    ],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"22,63 @ mww2 + danish-straits\" --center=22.0,63.0 --span-km 2000 --north -45 --feature-preset danish-straits --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6040972222222222,
+    "cover_iou": 0.970658614402917,
+    "cover_misses_frac": 0.020749511438096332,
+    "landmasses": [
+      {
+        "tiles": 33566,
+        "lon": 25.8,
+        "lat": 61.5
+      },
+      {
+        "tiles": 1124,
+        "lon": 9.9,
+        "lat": 54.9
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 250,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 110,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 82,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 1.41,
+      "open_pct": 38.3,
+      "void_radius": 93.0,
+      "void_lon": -4.9,
+      "void_lat": 70.0,
+      "void_sea_tiles": 22024,
+      "void_sea_pct": 38.2
+    },
+    "feature_notes": [
+      "channel Oeresund, Copenhagen-Malmoe 12.65,55.45->12.9,56.15 -> 13 shallows discs r=1.4t",
+      "channel Great Belt, Zealand-Funen 10.95,54.95->11.1,55.95 -> 17 shallows discs r=1.6t",
+      "channel Little Belt, Funen-Jutland 9.6,55.15->9.95,55.75 -> 11 shallows discs r=1.3t"
+    ],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/connect/2263_@_mww2_+_danish-straits__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/connect/2263_@_mww2_+_danish-straits__cover.png"
+    }
+  },
+  {
+    "group": "connect",
+    "name": "22,63 @ mww2 + zealand-funen",
+    "lon": 22.0,
+    "lat": 63.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "islands forced to land as well. Forcing island added only 17 tiles, because Denmark is already fused land here - whether these read as two islands is the open question",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [
+      "zealand-funen"
+    ],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"22,63 @ mww2 + zealand-funen\" --center=22.0,63.0 --span-km 2000 --north -45 --feature-preset zealand-funen --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6044618055555555,
+    "cover_iou": 0.9708829054477145,
+    "cover_misses_frac": 0.020277450670649396,
+    "landmasses": [
+      {
+        "tiles": 33583,
+        "lon": 25.8,
+        "lat": 61.5
+      },
+      {
+        "tiles": 1128,
+        "lon": 9.9,
+        "lat": 54.9
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 250,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 110,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 82,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 1.0,
+      "open_pct": 38.3,
+      "void_radius": 93.0,
+      "void_lon": -4.9,
+      "void_lat": 70.0,
+      "void_sea_tiles": 22003,
+      "void_sea_pct": 38.2
+    },
+    "feature_notes": [
+      "island Zealand at 11.8,55.55 r=5.8t -> land +17 tiles",
+      "island Funen at 10.35,55.3 r=3.8t -> land +4 tiles",
+      "channel Oeresund 12.65,55.45->12.9,56.15 -> 13 shallows discs r=1.4t",
+      "channel Great Belt 10.95,54.95->11.1,55.95 -> 17 shallows discs r=1.6t",
+      "channel Little Belt 9.6,55.15->9.95,55.75 -> 11 shallows discs r=1.3t"
+    ],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/connect/2263_@_mww2_+_zealand-funen__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/connect/2263_@_mww2_+_zealand-funen__cover.png"
+    }
+  },
+  {
+    "group": "connect",
+    "name": "22,63 @ mww2 + zealand-funen-cut",
+    "lon": 22.0,
+    "lat": 63.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "the belts cut as real water instead. This one DOES change how land units move, and is the comparison, not the proposal",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [
+      "zealand-funen-cut"
+    ],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"22,63 @ mww2 + zealand-funen-cut\" --center=22.0,63.0 --span-km 2000 --north -45 --feature-preset zealand-funen-cut --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6042708333333333,
+    "cover_iou": 0.9703260714794247,
+    "cover_misses_frac": 0.021059587427455038,
+    "landmasses": [
+      {
+        "tiles": 33577,
+        "lon": 25.8,
+        "lat": 61.5
+      },
+      {
+        "tiles": 1123,
+        "lon": 9.9,
+        "lat": 54.9
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 250,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 110,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 82,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 1.0,
+      "open_pct": 38.3,
+      "void_radius": 93.0,
+      "void_lon": -4.9,
+      "void_lat": 70.0,
+      "void_sea_tiles": 22009,
+      "void_sea_pct": 38.2
+    },
+    "feature_notes": [
+      "island Zealand at 11.8,55.55 r=5.8t -> land +17 tiles",
+      "island Funen at 10.35,55.3 r=3.8t -> land +4 tiles",
+      "water Oeresund cut at 12.75,55.85 r=1.3t -> land -3 tiles",
+      "water Great Belt cut at 11.0,55.45 r=1.4t -> land -3 tiles",
+      "water Little Belt cut at 9.75,55.45 r=1.2t -> land -5 tiles"
+    ],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/connect/2263_@_mww2_+_zealand-funen-cut__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/connect/2263_@_mww2_+_zealand-funen-cut__cover.png"
+    }
+  },
+  {
+    "group": "shift",
+    "name": "cut @ 22,63 (baseline)",
+    "lon": 22.0,
+    "lat": 63.0,
+    "span_km": 2000,
+    "north": -45,
+    "note": "the row this sweep is nudging",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [
+      "zealand-funen-cut"
+    ],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"cut @ 22,63 (baseline)\" --center=22.0,63.0 --span-km 2000 --north -45 --feature-preset zealand-funen-cut --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6042708333333333,
+    "cover_iou": 0.9703260714794247,
+    "cover_misses_frac": 0.021059587427455038,
+    "landmasses": [
+      {
+        "tiles": 33577,
+        "lon": 25.8,
+        "lat": 61.5
+      },
+      {
+        "tiles": 1123,
+        "lon": 9.9,
+        "lat": 54.9
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 250,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 110,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 82,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 1.0,
+      "open_pct": 38.3,
+      "void_radius": 93.0,
+      "void_lon": -4.9,
+      "void_lat": 70.0,
+      "void_sea_tiles": 22009,
+      "void_sea_pct": 38.2
+    },
+    "feature_notes": [
+      "island Zealand at 11.8,55.55 r=5.8t -> land +17 tiles",
+      "island Funen at 10.35,55.3 r=3.8t -> land +4 tiles",
+      "water Oeresund cut at 12.75,55.85 r=1.3t -> land -3 tiles",
+      "water Great Belt cut at 11.0,55.45 r=1.4t -> land -3 tiles",
+      "water Little Belt cut at 9.75,55.45 r=1.2t -> land -5 tiles"
+    ],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/shift/cut_@_2263_baseline__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/shift/cut_@_2263_baseline__cover.png"
+    }
+  },
+  {
+    "group": "shift",
+    "name": "cut, screen-RIGHT a little (22.5,62.7)",
+    "lon": 22.5,
+    "lat": 62.7,
+    "span_km": 2000,
+    "north": -45,
+    "note": "southeast. More land, less ocean",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [
+      "zealand-funen-cut"
+    ],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"cut, screen-RIGHT a little (22.5,62.7)\" --center=22.5,62.7 --span-km 2000 --north -45 --feature-preset zealand-funen-cut --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6325520833333333,
+    "cover_iou": 0.967258178651135,
+    "cover_misses_frac": 0.024591738712776177,
+    "landmasses": [
+      {
+        "tiles": 36360,
+        "lon": 25.5,
+        "lat": 61.1
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 249,
+        "lon": 31.4,
+        "lat": 60.9
+      },
+      {
+        "tiles": 103,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 84,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 1.0,
+      "open_pct": 35.4,
+      "void_radius": 86.5,
+      "void_lon": -4.0,
+      "void_lat": 69.7,
+      "void_sea_tiles": 20395,
+      "void_sea_pct": 35.4
+    },
+    "feature_notes": [
+      "island Zealand at 11.8,55.55 r=5.8t -> land +15 tiles",
+      "island Funen at 10.35,55.3 r=3.8t -> land +5 tiles",
+      "water Oeresund cut at 12.75,55.85 r=1.3t -> land +0 tiles",
+      "water Great Belt cut at 11.0,55.45 r=1.4t -> land -3 tiles",
+      "water Little Belt cut at 9.75,55.45 r=1.2t -> land -5 tiles"
+    ],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/shift/cut_screen-right_a_little_22.562.7__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/shift/cut_screen-right_a_little_22.562.7__cover.png"
+    }
+  },
+  {
+    "group": "shift",
+    "name": "cut, screen-RIGHT more (23,62.5)",
+    "lon": 23.0,
+    "lat": 62.5,
+    "span_km": 2000,
+    "north": -45,
+    "note": "southeast again - this is where the Baltic route SEVERS",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [
+      "zealand-funen-cut"
+    ],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"cut, screen-RIGHT more (23,62.5)\" --center=23.0,62.5 --span-km 2000 --north -45 --feature-preset zealand-funen-cut --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.6550347222222223,
+    "cover_iou": 0.9704691280109393,
+    "cover_misses_frac": 0.021865889212827987,
+    "landmasses": [
+      {
+        "tiles": 37644,
+        "lon": 25.7,
+        "lat": 60.9
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 251,
+        "lon": 31.5,
+        "lat": 60.8
+      },
+      {
+        "tiles": 100,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 80,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 33.2,
+      "void_radius": 86.0,
+      "void_lon": -3.3,
+      "void_lat": 69.6,
+      "void_sea_tiles": 12034,
+      "void_sea_pct": 20.9
+    },
+    "feature_notes": [
+      "island Zealand at 11.8,55.55 r=5.8t -> land +16 tiles",
+      "island Funen at 10.35,55.3 r=3.8t -> land +8 tiles",
+      "water Oeresund cut at 12.75,55.85 r=1.3t -> land -4 tiles",
+      "water Great Belt cut at 11.0,55.45 r=1.4t -> land -3 tiles",
+      "water Little Belt cut at 9.75,55.45 r=1.2t -> land -5 tiles"
+    ],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/shift/cut_screen-right_more_2362.5__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/shift/cut_screen-right_more_2362.5__cover.png"
+    }
+  },
+  {
+    "group": "shift",
+    "name": "cut, screen-LEFT a little (21.5,63.3)",
+    "lon": 21.5,
+    "lat": 63.3,
+    "span_km": 2000,
+    "north": -45,
+    "note": "northwest. Less land, more ocean",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [
+      "zealand-funen-cut"
+    ],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"cut, screen-LEFT a little (21.5,63.3)\" --center=21.5,63.3 --span-km 2000 --north -45 --feature-preset zealand-funen-cut --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.5774826388888888,
+    "cover_iou": 0.9682397807174353,
+    "cover_misses_frac": 0.022998526891741575,
+    "landmasses": [
+      {
+        "tiles": 32310,
+        "lon": 25.5,
+        "lat": 61.7
+      },
+      {
+        "tiles": 841,
+        "lon": 9.8,
+        "lat": 55.3
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 248,
+        "lon": 31.5,
+        "lat": 60.9
+      },
+      {
+        "tiles": 106,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 83,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 1.0,
+      "open_pct": 41.0,
+      "void_radius": 97.1,
+      "void_lon": -5.8,
+      "void_lat": 70.3,
+      "void_sea_tiles": 23566,
+      "void_sea_pct": 40.9
+    },
+    "feature_notes": [
+      "island Zealand at 11.8,55.55 r=5.8t -> land +19 tiles",
+      "island Funen at 10.35,55.3 r=3.8t -> land +6 tiles",
+      "water Oeresund cut at 12.75,55.85 r=1.3t -> land -3 tiles",
+      "water Great Belt cut at 11.0,55.45 r=1.4t -> land -3 tiles",
+      "water Little Belt cut at 9.75,55.45 r=1.2t -> land -5 tiles"
+    ],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/shift/cut_screen-left_a_little_21.563.3__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/shift/cut_screen-left_a_little_21.563.3__cover.png"
+    }
+  },
+  {
+    "group": "shift",
+    "name": "cut, screen-LEFT more (21,63.6)",
+    "lon": 21.0,
+    "lat": 63.6,
+    "span_km": 2000,
+    "north": -45,
+    "note": "northwest again",
+    "proj": "laea",
+    "overrides": {
+      "min_water_width": 2
+    },
+    "features": [],
+    "presets": [
+      "zealand-funen-cut"
+    ],
+    "params": {
+      "proj": "laea",
+      "size": 240,
+      "players": 8,
+      "resolution": "50m",
+      "min_water_width": 2,
+      "min_land_width": 3,
+      "min_island_tiles": 0,
+      "overlap": 0.85,
+      "max_radius": 12.0,
+      "lands": 700
+    },
+    "command": "uv run rwmaps \"cut, screen-LEFT more (21,63.6)\" --center=21.0,63.6 --span-km 2000 --north -45 --feature-preset zealand-funen-cut --min-water-width 2",
+    "km_per_tile": 8.333333333333334,
+    "land_fraction": 0.5538020833333334,
+    "cover_iou": 0.97105769827961,
+    "cover_misses_frac": 0.019718486472930185,
+    "landmasses": [
+      {
+        "tiles": 31599,
+        "lon": 24.9,
+        "lat": 61.8
+      },
+      {
+        "tiles": 128,
+        "lon": 44.8,
+        "lat": 67.9
+      }
+    ],
+    "waterbodies": [
+      {
+        "tiles": 252,
+        "lon": 31.4,
+        "lat": 60.9
+      },
+      {
+        "tiles": 105,
+        "lon": 35.5,
+        "lat": 61.6
+      },
+      {
+        "tiles": 84,
+        "lon": 13.3,
+        "lat": 58.9
+      }
+    ],
+    "open_water": {
+      "nav_width_tiles": 0.0,
+      "open_pct": 43.4,
+      "void_radius": 99.3,
+      "void_lon": -6.7,
+      "void_lat": 70.5,
+      "void_sea_tiles": 19501,
+      "void_sea_pct": 33.9
+    },
+    "feature_notes": [
+      "island Zealand at 11.8,55.55 r=5.8t -> land +14 tiles",
+      "island Funen at 10.35,55.3 r=3.8t -> land +8 tiles",
+      "water Oeresund cut at 12.75,55.85 r=1.3t -> land -4 tiles",
+      "water Great Belt cut at 11.0,55.45 r=1.4t -> land -3 tiles",
+      "water Little Belt cut at 9.75,55.45 r=1.2t -> land -3 tiles"
+    ],
+    "png": {
+      "truth": "reports/20260818-224036_window_candidates_data/shift/cut_screen-left_more_2163.6__truth.png",
+      "cover": "reports/20260818-224036_window_candidates_data/shift/cut_screen-left_more_2163.6__cover.png"
+    }
+  }
+]
