@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import install as install_mod
-from . import raster, rms, rms_land, rms_objects, terrain
+from . import features, raster, rms, rms_land, rms_objects, terrain
 from .analysis import (
     assign_teams,
     choose_ai_map_type,
@@ -279,6 +279,22 @@ def build_parser() -> argparse.ArgumentParser:
                            "straits/inlets too narrow to render reliably instead of "
                            "leaving their fate to per-generation RNG luck "
                            "(default 4, confirmed known-good)")
+    grid.add_argument("--feature", action="append", default=None, metavar="SPEC",
+                      dest="features",
+                      help="targeted geographic override, repeatable: "
+                           "kind:lon,lat,radius_km with kind one of "
+                           "island/water/shallows, or "
+                           "channel:lon1,lat1,lon2,lat2,width_km. Needed where "
+                           "the geography is smaller than a tile and no global "
+                           "width setting can recover it - the Oeresund is 4 km "
+                           "against 8.3 km/tile. 'shallows'/'channel' are "
+                           "passable by boats AND fordable by land units, so "
+                           "they add naval passage without removing a land "
+                           "route; 'water' cuts one. See rwmaps/features.py")
+    grid.add_argument("--feature-preset", action="append", default=None,
+                      metavar="NAME", dest="feature_presets",
+                      help="named set of --feature overrides, repeatable "
+                           "(danish-straits, zealand-funen, zealand-funen-cut)")
     grid.add_argument("--min-land-width", type=int, default=3,
                       help="erase land bridges/spits narrower than this many tiles "
                            "(morphological opening) - guards against a stray sliver "
@@ -324,6 +340,19 @@ def generate(args) -> dict:
             mask, min_water_width=args.min_water_width, min_land_width=args.min_land_width,
         )
         result.land_mask = mask
+
+    # Targeted overrides land here on purpose: after the width filters, so
+    # they cannot be closed back up, and before choose_starts, so a forced
+    # island can hold a start and a forced channel is not walked across.
+    feats = features.resolve(getattr(args, "features", None),
+                             getattr(args, "feature_presets", None))
+    shallow_patches: list = []
+    if feats:
+        mask, notes = features.apply_mask(mask, window, feats)
+        result.land_mask = mask
+        shallow_patches, shallow_notes = features.shallow_discs(window, feats)
+        for line in notes + shallow_notes:
+            print(f"[rwmaps] feature: {line}", file=sys.stderr)
 
     # Scale the working radius with the map: on a 255 grid a 20-tile radius is
     # a much smaller share of the map than it is on a 168.
@@ -388,6 +417,7 @@ def generate(args) -> dict:
         # instead of scattered map-wide and never reaching them.
         mask=mask if not args.legacy_resources else None,
         islands_out=islands,
+        shallows=shallow_patches or None,
         # Painting the player lands with a placeholder is what makes the
         # per-player forest addressable; without that pass they must stay
         # ordinary land or the placeholder would never be cleaned up.

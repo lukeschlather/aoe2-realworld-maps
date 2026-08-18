@@ -235,6 +235,7 @@ def build_land_generation(
     player_terrain: str | None = None,
     mask: np.ndarray | None = None,
     islands_out: list[Island] | None = None,
+    shallows: list[Disc] | None = None,
 ) -> str:
     """Render the ``<LAND_GENERATION>`` section.
 
@@ -311,4 +312,29 @@ def build_land_generation(
                         tiles=max(1, int(round(area * scale))),
                         clumping_factor=clumping_factor)
         )
+
+    # Shallows go last: create_land blocks paint in order, and these are
+    # meant to cut across coastline that has already been laid down.
+    #
+    # They reuse COASTLINE_LAND_ID rather than taking ids of their own. A
+    # fresh id per patch would add dozens of zones, and starting_resources
+    # and huntable are keyed on zone distance - see the note in _land_block.
+    # Sharing the coastline's id adds none.
+    #
+    # clumping_factor 1 keeps a channel a channel. The coastline default of
+    # 8 deliberately makes ragged organic blobs, which along a strait means
+    # a chain that pinches shut somewhere - and a strait that closes
+    # anywhere is not a strait.
+    if shallows:
+        parts.append(
+            f"/* {len(shallows)} shallows patches: passable by boats AND "
+            f"fordable by land units, so these add naval passage without "
+            f"removing any land route */"
+        )
+        for d in shallows:
+            parts.append(
+                _land_block(d, size, "SHALLOWS", land_id=COASTLINE_LAND_ID,
+                            tiles=max(1, int(round(math.pi * d.radius ** 2))),
+                            clumping_factor=1)
+            )
     return "\n".join(parts) + "\n"
