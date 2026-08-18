@@ -56,7 +56,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
 
-from rwmaps import raster, rms_land, thumbnail  # noqa: E402
+from rwmaps import features, raster, rms_land, thumbnail  # noqa: E402
 from rwmaps.cli import lands_for_size  # noqa: E402
 from rwmaps.projection import MapWindow  # noqa: E402
 
@@ -99,6 +99,12 @@ class Candidate:
     proj: str = "laea"
     #: Overrides onto SHIPPED, for a candidate that needs a non-default knob.
     overrides: dict = field(default_factory=dict)
+    #: ``features.parse`` specs, and/or preset names, applied to this window.
+    #: Mask kinds (island/water) change the pictures; shallows and channels
+    #: are RMS-stage and are drawn as an OVERLAY, clearly labelled - see the
+    #: note on SHALLOW_MARK.
+    features: list = field(default_factory=list)
+    presets: list = field(default_factory=list)
 
     @property
     def params(self) -> dict:
@@ -117,6 +123,10 @@ class Candidate:
             parts.append(f"--north {self.north:g}")
         if p["proj"] != "laea":
             parts.append(f"--proj {p['proj']}")
+        for name in self.presets:
+            parts.append(f"--feature-preset {name}")
+        for spec in self.features:
+            parts.append(f"--feature {spec}")
         for flag, key in (("--overlap", "overlap"),
                           ("--min-water-width", "min_water_width"),
                           ("--min-land-width", "min_land_width"),
@@ -239,6 +249,44 @@ CANDIDATES: list[Candidate] = [
               "west enough to keep the Norwegian coast as the feature"),
     Candidate("scandinavia", "Scand Bothnia 1600", 19.5, 62.5, 1600, -45,
               "the Gulf of Bothnia as an enclosed inland sea"),
+
+    # --- connecting the seas, and Denmark ---------------------------------
+    # The second round, which had no pictures until now: min-water-width is
+    # what landlocks the Baltic, and the northern sea needs a shift.
+    Candidate("connect", "east 20E @ mww4 (as first screened)",
+              20.0, 62.0, 2000, -45,
+              "reference. The Baltic is a 5,351-tile ENCLOSED lake here and "
+              "the northern sea is a second, separate ocean"),
+    Candidate("connect", "east 20E @ mww2", 20.0, 62.0, 2000, -45,
+              "same window, width filter relaxed. In the raw coastline the "
+              "Baltic and Atlantic are one 19,277-tile ocean; mww4 splits "
+              "them. At 2 the Baltic reconnects - the north still does not",
+              overrides={"min_water_width": 2}),
+    Candidate("connect", "20,62.5 @ mww2", 20.0, 62.5, 2000, -45,
+              "smallest shift that makes every sea one navigable ocean",
+              overrides={"min_water_width": 2}),
+    Candidate("connect", "22,63 @ mww2", 22.0, 63.0, 2000, -45,
+              "one ocean, and a void radius of 93 - slightly better than the "
+              "97 of the window this started from",
+              overrides={"min_water_width": 2}),
+    # Denmark. The islands are mask kinds and change these pictures; the
+    # straits are shallows and are only an overlay - see SHALLOW_MARK.
+    Candidate("connect", "22,63 @ mww2 + danish-straits",
+              22.0, 63.0, 2000, -45,
+              "straits only: nothing about the land changes, the overlay "
+              "shows where the SHALLOWS blocks go",
+              overrides={"min_water_width": 2}, presets=["danish-straits"]),
+    Candidate("connect", "22,63 @ mww2 + zealand-funen",
+              22.0, 63.0, 2000, -45,
+              "islands forced to land as well. Forcing island added only 17 "
+              "tiles, because Denmark is already fused land here - whether "
+              "these read as two islands is the open question",
+              overrides={"min_water_width": 2}, presets=["zealand-funen"]),
+    Candidate("connect", "22,63 @ mww2 + zealand-funen-cut",
+              22.0, 63.0, 2000, -45,
+              "the belts cut as real water instead. This one DOES change how "
+              "land units move, and is the comparison, not the proposal",
+              overrides={"min_water_width": 2}, presets=["zealand-funen-cut"]),
 ]
 
 
@@ -324,10 +372,34 @@ def _open_water(land: np.ndarray, lon: np.ndarray,
 #: map.
 OFFMAP = (26, 26, 26)
 
+#: Shallows are painted on top of the mask pictures in this colour.
+#:
+#: They are an OVERLAY and not a render. Shallows never enter the land mask -
+#: they are create_land blocks the engine paints at generation time - so this
+#: shows *where the blocks go*, not what the engine will make of them. The
+#: repo has been burned once by a Python preview being taken for validation,
+#: so: judging whether Zealand and Funen read as two islands needs a real
+#: capture, and this picture cannot answer it.
+SHALLOW_MARK = (120, 200, 230)
 
-def to_png(mask: np.ndarray, rotate_ccw: float, px: int = 300) -> Image.Image:
-    """Minimap-style land/water picture, turned ``rotate_ccw`` degrees."""
-    img = Image.fromarray(thumbnail.terrain_rgb(mask))
+
+def _esc(s) -> str:
+    return (str(s).replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;"))
+
+
+def to_png(mask: np.ndarray, rotate_ccw: float, px: int = 300,
+           shallows: np.ndarray | None = None) -> Image.Image:
+    """Minimap-style land/water picture, turned ``rotate_ccw`` degrees.
+
+    ``shallows`` is stamped on afterwards in ``SHALLOW_MARK`` - an overlay,
+    not part of the mask. See that constant.
+    """
+    rgb = thumbnail.terrain_rgb(mask)
+    if shallows is not None and shallows.any():
+        rgb = rgb.copy()
+        rgb[shallows] = SHALLOW_MARK
+    img = Image.fromarray(rgb)
     if rotate_ccw % 360:
         img = img.rotate(rotate_ccw, expand=True, resample=Image.BICUBIC,
                          fillcolor=OFFMAP)
@@ -351,6 +423,17 @@ def screen(c: Candidate, outdir: Path) -> dict:
     truth = raster.simplify_features(result.land_mask,
                                      min_water_width=p["min_water_width"],
                                      min_land_width=p["min_land_width"])
+    # Same order the CLI uses: mask overrides after the width filters, so
+    # they cannot be closed back up.
+    feature_notes: list[str] = []
+    shallow_overlay = None
+    if c.features or c.presets:
+        feats = features.resolve(c.features or None, c.presets or None)
+        truth, notes = features.apply_mask(truth, window, feats)
+        discs, snotes = features.shallow_discs(window, feats)
+        feature_notes = notes + snotes
+        if discs:
+            shallow_overlay = rms_land.rasterize_discs(discs, p["size"])
     discs = rms_land.cover_mask(truth, p["lands"], max_radius=p["max_radius"],
                                 overlap=p["overlap"])
     cover = rms_land.rasterize_discs(discs, p["size"])
@@ -362,9 +445,10 @@ def screen(c: Candidate, outdir: Path) -> dict:
     # the game itself applies, which is exactly why 45 is the north-up value.
     grid_rotate = c.north + thumbnail.ICON_ROTATION
     views = {
-        "truth": to_png(truth, grid_rotate),
-        "cover": to_png(cover, grid_rotate),
-        "minimap": to_png(cover, thumbnail.ICON_ROTATION),
+        "truth": to_png(truth, grid_rotate, shallows=shallow_overlay),
+        "cover": to_png(cover, grid_rotate, shallows=shallow_overlay),
+        "minimap": to_png(cover, thumbnail.ICON_ROTATION,
+                          shallows=shallow_overlay),
     }
     slug = c.name.lower().replace(" ", "_").replace(",", "").replace("(", "").replace(")", "")
     paths = {}
@@ -385,6 +469,7 @@ def screen(c: Candidate, outdir: Path) -> dict:
         "landmasses": _pieces(truth, LANDMASS_FLOOR, lon, lat),
         "waterbodies": _pieces(~truth, WATERBODY_FLOOR, lon, lat, drop_edge=True),
         "open_water": _open_water(truth, lon, lat),
+        "feature_notes": feature_notes,
         "png": paths,
         "b64": {k: b64(v) for k, v in views.items()},
     }
@@ -404,9 +489,33 @@ GROUP_TITLES = {
     "britain": "Britain",
     "new": "Proposed replacements",
     "scandinavia": "Scandinavia — less open sea",
+    "connect": "Scandinavia — connecting the seas, and Denmark",
 }
 
 GROUP_BLURBS = {
+    "connect": (
+        "The second round of the Scandinavia work, which was numbers-only "
+        "until now. Two asks: make the seas connect, and make the water "
+        "around Copenhagen passable by boats. They turn out to have "
+        "<b>one</b> root cause - <code>--min-water-width 4</code> seals the "
+        "Danish straits, which both landlocks the Baltic into an enclosed "
+        "5,351-tile lake and removes the only route past Copenhagen. In the "
+        "raw coastline the Baltic and the Atlantic are a single 19,277-tile "
+        "ocean. Compare the first two rows: same window, filter at 4 then "
+        "at 2.<br><br>"
+        "The northern sea is a genuine window problem rather than a filter "
+        "one, and needs a shift north - 20,62.5 is the smallest that works, "
+        "22,63 keeps a slightly better void radius.<br><br>"
+        "<b>The shallows in these pictures are an overlay, not a render.</b> "
+        "Shallows never enter the land mask - they are "
+        "<code>create_land</code> blocks the engine paints at generation "
+        "time - so the pale blue marks show <i>where the blocks go</i> and "
+        "nothing about what the engine makes of them. Whether Zealand and "
+        "Funen end up reading as two recognisable islands cannot be "
+        "answered from this page; it needs a real capture. Note also that "
+        "forcing <code>island</code> there adds only 17 tiles, because "
+        "Denmark is already one fused landmass at this scale."
+    ),
     "scandinavia": (
         "Asked for: <b>somewhat</b> less water, with the coastline still "
         "clearly defined - the same trade that turned Britain's north-up "
@@ -464,6 +573,15 @@ def render_html(rows: list[dict], stamp: str, commit: str, data_dir: str) -> str
         masses = fmt(r["landmasses"][:5])
         waters = fmt(r["waterbodies"][:6])
         ow = r["open_water"]
+        fnotes = r.get("feature_notes") or []
+        feature_row = ""
+        if fnotes:
+            feature_row = (
+                '<tr><th>features</th><td colspan="3">'
+                + "<br>".join(_esc(n) for n in fnotes)
+                + ' <span class="dim">&mdash; shallows are an overlay, not a '
+                  'render: only an engine capture shows what they become'
+                  '</span></td></tr>')
         p = r["params"]
         north_up = "yes" if r["north"] == 0 else "no"
         return f"""
@@ -490,6 +608,7 @@ def render_html(rows: list[dict], stamp: str, commit: str, data_dir: str) -> str
               <span class="dim">tiles, &ge;{LANDMASS_FLOOR}</span></td></tr>
         <tr><th>waterbodies</th><td colspan="3">{waters}
               <span class="dim">tiles enclosed, &ge;{WATERBODY_FLOOR}</span></td></tr>
+        {feature_row}
         <tr><th>open sea</th><td colspan="3">{ow['open_pct']:.1f}% of the map
               runs off the edge &middot; emptiest point <b>{ow['void_radius']:.0f}
               tiles</b> from land, at {ow['void_lon']:g}, {ow['void_lat']:g}
