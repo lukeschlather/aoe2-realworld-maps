@@ -1,10 +1,17 @@
 # RW Maps
 
-This has a mod "Real World Maps" which includes a bunch of RW maps. Eight
-ship right now: Black Sea, Britain, Chesapeake Bay, Cramped Italy, Greece,
-Italy, Salish Sea, Scandinavia. Japan, Caribbean and New Zealand were
-retired 2026-08-15 - unrecognisable projections, and measurably short on
-stone, wood and land besides.
+This has a mod "Real World Maps" which includes a bunch of RW maps. Ten
+ship right now: Black Sea, Britain, Chesapeake Bay, Cramped Italy, Great
+Britain N, Greece, Italy, Michigan, Salish Sea, Scandinavia. Japan,
+Caribbean and New Zealand were retired 2026-08-15 - unrecognisable
+projections, and measurably short on stone, wood and land besides.
+
+Michigan and Great Britain N were added 2026-08-17 from the candidate
+report (`reports/20260816-210117_candidate_report_candidates_n2.html`) and
+are the only two that have **not** had an N=10 real-engine pass yet - they
+were picked by eye off an N=2 breadth sweep. They also ship north-up
+(`--north 0`) rather than with the north-toward-upper-left view the other
+eight use, because that is the orientation they were judged in.
 
 All the code is vibecoded by Claude Sonnet, for some reason we ended up with code both in automation/ and src/rwmaps/ and there are even some tests in tests.
 

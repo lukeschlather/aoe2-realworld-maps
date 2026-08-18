@@ -151,6 +151,14 @@ FOREST_SPLIT = ["--forest-clumps", "36", "--forest-alt", "PINE_FOREST",
 #: for most places (see the window-candidate report).
 NW = ["--north", "-45"]
 
+#: North-up. Identical to omitting the flag (0 is the default), stated out
+#: loud for the same reason NW is: orientation is a per-region choice now,
+#: and a region that ships north-up did so deliberately rather than by
+#: inheriting a default. The two regions taken from the 2026-08-16
+#: candidate report are north-up because that is the orientation they were
+#: judged in - see reports/20260816-210117_candidate_report_candidates_n2.html.
+NORTH_UP = ["--north", "0"]
+
 MOD_REGIONS = [
     ("Salish Sea", ["--center=-122.9,48.15", "--span-km", "260",
                      "--overlap", "0.85", "--min-water-width", "5", "--min-land-width", "3", *NW]),
@@ -165,6 +173,29 @@ MOD_REGIONS = [
     ("Chesapeake Bay", ["--region", "chesapeake", *NW]),
     ("Black Sea", ["--region", "blacksea", *NW]),
     ("Scandinavia", ["--region", "scandinavia", *NW]),
+    # --- added 2026-08-17 from the candidate report -----------------------
+    # Both were picked by eye from the N=2 candidate pass, so the numbers
+    # below are what that pass measured (2 samples - breadth, not a
+    # verdict), not a fairness claim. Neither has had an N=10 pass yet.
+    #
+    # "GL Michigan-Huron" in the report, renamed on request. Salish Sea's
+    # consolidation widths (5/3), which is where PUGET-style windows have
+    # been verified. Measured: 78.8% land, 8 TCs, coastline IoU 0.892 -
+    # the highest IoU of the Great Lakes candidates.
+    ("Michigan", ["--center=-85.0,44.5", "--span-km", "1200",
+                  "--overlap", "0.85", "--min-water-width", "5",
+                  "--min-land-width", "3", *NORTH_UP]),
+    # "Britain northup France" in the report: the shipped Britain window at
+    # the same 1300 km span with the centre pushed 2 degrees south, which
+    # trades open sea for enough of the continent to hold two TCs. Measured
+    # in the report against the un-shifted north-up window: the water
+    # between northern Britain and the map edge drops 45 -> 16 tiles while
+    # staying open (so Britain is still an island), Ireland keeps 32 tiles
+    # of clearance, the Channel stays 8 wide, and the continental patch
+    # grows 6,041 -> 10,809 tiles. Engine capture: 35.2% land, 8 TCs, IoU
+    # 0.848. Ships alongside "Britain" rather than replacing it.
+    ("Great Britain N", ["--center=-3.0,52.5", "--span-km", "1300",
+                         *FOREST_SPLIT, *NORTH_UP]),
 ]
 
 
