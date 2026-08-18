@@ -196,6 +196,49 @@ CANDIDATES: list[Candidate] = [
     Candidate("new", "Adriatic", 16.5, 43.0, 1100, 0),
     Candidate("new", "Denmark", 10.0, 56.3, 1000, 0),
     Candidate("new", "Ireland", -8.0, 53.3, 900, 0),
+
+    # --- Scandinavia: less open sea, coastline still legible --------------
+    # Asked for 2026-08-17: the shipped window has a big empty sea, and the
+    # fix wanted is the one that worked for Britain - keep the coastline
+    # readable, trade dead water for land, by moving the window rather than
+    # by changing any raster knob. Every row below is the shipped raster
+    # pipeline; only centre, span and orientation vary.
+    #
+    # The shipped window is 2000 km at 16,62 with north toward the upper
+    # left. Its dead water is the Norwegian Sea / North Atlantic off the
+    # west and north-west coast: unlike the Baltic and the Gulf of Bothnia,
+    # which are bounded by land on every side, that corner runs straight
+    # off the map.
+    Candidate("scandinavia", "Scand current NW (ships today)", 16.0, 62.0, 2000, -45,
+              "the baseline every other row here is to be read against"),
+    Candidate("scandinavia", "Scand current, north-up", 16.0, 62.0, 2000, 0,
+              "same window, north-up - Britain's fix came out of the "
+              "north-up family, so the orientation is on the table too"),
+    # Push south, which is exactly Britain's fix: swap Arctic Norway and
+    # open Atlantic for Denmark, the north German plain and Poland.
+    Candidate("scandinavia", "Scand south 60N", 16.0, 60.0, 2000, -45),
+    Candidate("scandinavia", "Scand south 58.5N", 16.0, 58.5, 2000, -45,
+              "far enough south that the Baltic, not the Atlantic, is the "
+              "map's main water"),
+    Candidate("scandinavia", "Scand south 60N, north-up", 16.0, 60.0, 2000, 0),
+    # Push east instead: drop the Atlantic entirely and gain Finland and
+    # Karelia. Risks the fjord coastline, which is the most recognisable
+    # thing about the region.
+    Candidate("scandinavia", "Scand east 20E", 20.0, 62.0, 2000, -45),
+    Candidate("scandinavia", "Scand southeast 19,60", 19.0, 60.0, 2000, -45),
+    # Tighten the span as well as moving it, so the enclosed seas fill the
+    # map instead of the ocean.
+    Candidate("scandinavia", "Scand 1700 south", 16.0, 60.0, 1700, -45),
+    Candidate("scandinavia", "Scand 1500 Baltic", 17.0, 59.0, 1500, -45,
+              "compare 'Baltic' in the proposed-replacements group, which "
+              "is the same idea at 19,59 north-up"),
+    Candidate("scandinavia", "Scand 1300 Baltic", 16.5, 58.5, 1300, -45),
+    Candidate("scandinavia", "Scand 1500 Baltic, north-up", 17.0, 59.0, 1500, 0),
+    # Keep the fjords deliberately, and pay for them by cropping tighter.
+    Candidate("scandinavia", "Scand peninsula 1600", 13.5, 60.5, 1600, -45,
+              "west enough to keep the Norwegian coast as the feature"),
+    Candidate("scandinavia", "Scand Bothnia 1600", 19.5, 62.5, 1600, -45,
+              "the Gulf of Bothnia as an enclosed inland sea"),
 ]
 
 
@@ -227,6 +270,50 @@ def _pieces(binary: np.ndarray, floor: int, lon: np.ndarray, lat: np.ndarray,
             "lat": round(float(np.nanmean(lat[sel])), 1),
         })
     return sorted(out, key=lambda d: -d["tiles"])
+
+
+def _open_water(land: np.ndarray, lon: np.ndarray,
+                lat: np.ndarray) -> dict:
+    """The sea that runs off the edge of the map, and how empty it gets.
+
+    ``waterbodies`` deliberately drops every edge-touching component,
+    because it exists to count lakes and enclosed seas. That leaves the
+    open ocean - the thing a player actually complains about when a window
+    has "a big empty sea" - completely unmeasured, and land% cannot stand
+    in for it: a window can be half water and read fine if the water is
+    channels and fjords, or read badly if the same water is one dead
+    corner.
+
+    Two facts, both plain measurements:
+
+    * ``open_pct`` - how much of the map is water connected to an edge.
+    * ``void_radius`` - the distance from the emptiest water tile to the
+      nearest land, in tiles. This is the radius of the largest circle of
+      pure sea that fits on the map, i.e. how far a boat can get from
+      anything at all. A fjord coastline scores low here however much
+      water it has; one open basin scores high. ``void_lon``/``void_lat``
+      say *which* sea that is, because the fix for a void in the Norwegian
+      Sea is a different window from the fix for one in the Baltic.
+
+    Neither is a verdict and neither has a threshold. They are here so a
+    row can be compared against the window that ships today.
+    """
+    water = ~land
+    labels, n = ndimage.label(water, structure=np.ones((3, 3), bool))
+    edge = (set(labels[0].tolist()) | set(labels[-1].tolist())
+            | set(labels[:, 0].tolist()) | set(labels[:, -1].tolist())) - {0}
+    open_tiles = int(np.isin(labels, list(edge)).sum()) if edge else 0
+    dist = ndimage.distance_transform_edt(water)
+    iy, ix = np.unravel_index(int(np.argmax(dist)), dist.shape)
+    void_comp = int((labels == labels[iy, ix]).sum()) if n else 0
+    return {
+        "open_pct": round(open_tiles / land.size * 100, 1),
+        "void_radius": round(float(dist.max()), 1),
+        "void_lon": round(float(lon[iy, ix]), 1),
+        "void_lat": round(float(lat[iy, ix]), 1),
+        "void_sea_tiles": void_comp,
+        "void_sea_pct": round(void_comp / land.size * 100, 1),
+    }
 
 
 #: Painted outside the grid when a view is turned. Deliberately NOT
@@ -297,6 +384,7 @@ def screen(c: Candidate, outdir: Path) -> dict:
         "cover_misses_frac": rms_land.interior_holes(cover, truth),
         "landmasses": _pieces(truth, LANDMASS_FLOOR, lon, lat),
         "waterbodies": _pieces(~truth, WATERBODY_FLOOR, lon, lat, drop_edge=True),
+        "open_water": _open_water(truth, lon, lat),
         "png": paths,
         "b64": {k: b64(v) for k, v in views.items()},
     }
@@ -315,9 +403,32 @@ GROUP_TITLES = {
     "greatlakes": "Great Lakes",
     "britain": "Britain",
     "new": "Proposed replacements",
+    "scandinavia": "Scandinavia — less open sea",
 }
 
 GROUP_BLURBS = {
+    "scandinavia": (
+        "Asked for: <b>somewhat</b> less water, with the coastline still "
+        "clearly defined - the same trade that turned Britain's north-up "
+        "window into <code>Great Britain N</code>, where pushing the centre "
+        "2 degrees south swapped open sea for enough of the continent to "
+        "hold two town centres without closing the water that makes Britain "
+        "an island. Nothing here changes a raster knob; only centre, span "
+        "and orientation move.<br><br>"
+        "<b>Land%</b> is the wrong column to read for this and is kept only "
+        "for continuity: the shipped Scandinavia window is already 52.6% "
+        "land in the engine, more than Britain's 29.3%, so its problem was "
+        "never the amount of water. The two columns that speak to it are "
+        "<b>open sea%</b> - water connected to the map edge, i.e. ocean "
+        "that runs off the map rather than a bounded sea - and <b>void "
+        "radius</b>, the distance in tiles from the emptiest water tile to "
+        "the nearest land. A fjord or archipelago coast can hold a lot of "
+        "water at a small void radius; one dead basin cannot. The Baltic "
+        "and the Gulf of Bothnia are bounded on every side, so a window "
+        "that leans on them keeps its water and loses the emptiness.<br><br>"
+        "Neither column is a threshold or a score. Read every row against "
+        "the first one, which is what ships today, and judge the pictures."
+    ),
     "greatlakes": (
         "Asked for: more recognisable, and north up. <b>Waterbodies</b> is the "
         "column that speaks to the first - it lists every enclosed water body "
@@ -352,6 +463,7 @@ def render_html(rows: list[dict], stamp: str, commit: str, data_dir: str) -> str
             for d in ps) or "&mdash;"
         masses = fmt(r["landmasses"][:5])
         waters = fmt(r["waterbodies"][:6])
+        ow = r["open_water"]
         p = r["params"]
         north_up = "yes" if r["north"] == 0 else "no"
         return f"""
@@ -378,6 +490,12 @@ def render_html(rows: list[dict], stamp: str, commit: str, data_dir: str) -> str
               <span class="dim">tiles, &ge;{LANDMASS_FLOOR}</span></td></tr>
         <tr><th>waterbodies</th><td colspan="3">{waters}
               <span class="dim">tiles enclosed, &ge;{WATERBODY_FLOOR}</span></td></tr>
+        <tr><th>open sea</th><td colspan="3">{ow['open_pct']:.1f}% of the map
+              runs off the edge &middot; emptiest point <b>{ow['void_radius']:.0f}
+              tiles</b> from land, at {ow['void_lon']:g}, {ow['void_lat']:g}
+              &middot; that sea is {ow['void_sea_tiles']:,} tiles
+              ({ow['void_sea_pct']:.1f}% of the map)
+              <span class="dim">&mdash; measurements, not thresholds</span></td></tr>
         <tr><th>grid</th><td colspan="3">{p['size']}&times;{p['size']},
               {p['players']} players, {p['lands']} discs, overlap {p['overlap']},
               max radius {p['max_radius']:g}, {p['resolution']} coastline,
@@ -388,7 +506,12 @@ def render_html(rows: list[dict], stamp: str, commit: str, data_dir: str) -> str
     </article>"""
 
     sections = []
-    for group in ("greatlakes", "britain", "new"):
+    # Iterate the registry, not a hardcoded tuple. A group added to
+    # CANDIDATES and GROUP_TITLES but missing from that tuple was screened,
+    # written to candidates.json and given its PNGs, and then silently left
+    # out of the HTML - a 2.7 KB report after a clean "13 candidates" run
+    # and exit 0, which is the worst possible way for this to fail.
+    for group in GROUP_TITLES:
         got = [r for r in rows if r["group"] == group]
         if not got:
             continue
