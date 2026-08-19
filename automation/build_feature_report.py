@@ -262,19 +262,30 @@ def main() -> int:
             return np.unravel_index(int(np.nanargmin(d2)), d2.shape)
 
         lab, _n = ndimage.label(land, structure=np.ones((3, 3), bool))
+        wlab, _wn = ndimage.label(walk, structure=np.ones((3, 3), bool))
+        sizes = {i: int((lab == i).sum()) for i in range(1, _n + 1)}
+        mainland = max(sizes, key=sizes.get) if sizes else 0
+        # Walkable components the mainland reaches. Compared as SETS rather
+        # than by sampling one tile: an island's own centre tile is often
+        # forest or water, and a single-tile probe then reports "n/a" for a
+        # ford that is plainly there.
+        main_w = set(np.unique(wlab[(lab == mainland) & walk]).tolist()) - {0}
         probe_rows = []
         for label, plon, plat in PROBES:
             y, x = tile(plon, plat)
             piece = int(lab[y, x])
-            size = int((lab == piece).sum()) if piece else 0
+            size = sizes.get(piece, 0)
             if not piece:
                 verdict, cls = "water", "water"
-            elif size >= MAINLAND_TILES:
+            elif piece == mainland:
                 verdict, cls = f"part of the mainland ({size:,} t)", "bad"
             else:
-                verdict, cls = f"SEPARATE island, {size:,} tiles", "good"
+                comps = set(np.unique(wlab[(lab == piece) & walk]).tolist()) - {0}
+                ford = "fordable from the mainland" if (comps & main_w)                     else "boat only"
+                verdict = f"SEPARATE island, {size:,} tiles &middot; {ford}"
+                cls = "good"
             probe_rows.append(
-                f"<tr><td>{esc(label)}</td><td class='{cls}'>{esc(verdict)}</td></tr>")
+                f"<tr><td>{esc(label)}</td><td class='{cls}'>{verdict}</td></tr>")
 
         a, b = tile(*ATLANTIC, sail), tile(*BALTIC, sail)
         slab, _s = ndimage.label(sail, structure=np.ones((3, 3), bool))

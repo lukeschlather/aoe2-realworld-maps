@@ -468,6 +468,22 @@ def why_not_there(name: str, pid: str | None) -> str:
     return "unsettled"
 
 
+def wait_for_foreground(timeout: float = 180.0, poll: float = 3.0) -> bool:
+    """Wait for the game to be the window receiving input.
+
+    Its own separate function because "not foreground" is the one preflight
+    failure that is not about the editor at all - it means somebody is using
+    the machine, or that another window was raised over the game - and the
+    correct response is to wait, not to touch anything.
+    """
+    t0 = time.time()
+    while time.time() - t0 < timeout:
+        if is_foreground():
+            return True
+        time.sleep(poll)
+    return False
+
+
 def click_when_ready(name: str, tries: int = 20, pause: float = 0.25,
                      pid: str | None = None) -> bool:
     """Verify, wait, verify again - and never click on a guess.
@@ -1027,6 +1043,25 @@ def ensure_ready(players: int = 8, tries: int = 3) -> tuple[bool, str]:
                         return True, why
         else:
             why = f"pid={game_pid()}, mods disabled={mods_off()}"
+
+        # "Not foreground" is not a broken editor. It means somebody is using
+        # the machine, or a window was raised over the game, and rebuilding is
+        # actively the wrong answer: the walk it runs starts from the main
+        # menu, so with the editor already up it looks for 'editors', does not
+        # find it - because it genuinely is not on that screen - and aborts a
+        # pass whose editor was fine the whole time. Measured: a 5-sample pass
+        # died exactly this way with the editor idle at the Generate button
+        # and every mod enabled, 90 minutes after the previous pass left it in
+        # perfect shape. Try focusing it, then wait; only then rebuild.
+        if "not foreground" in why:
+            _say("  the game is not foreground - focusing and waiting rather "
+                 "than rebuilding an editor that may be fine", flush=True)
+            focus_game()
+            if wait_for_foreground():
+                ok, why = preflight()
+                if ok:
+                    return True, why
+            continue
         _say(f"  editor not ready ({why}) - rebuilding ({attempt}/{tries})",
               flush=True)
         if not (recover() and setup(players)):
