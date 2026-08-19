@@ -316,31 +316,91 @@ class GenResult:
     detail: str
 
 
-def generate(timeout: float = 300.0, poll: float = 0.5) -> GenResult:
-    """Click Generate and watch the button until it comes back."""
+def generate(timeout: float = 300.0, poll: float = 0.5,
+             start_grace: float = 5.0, click_tries: int = 3) -> GenResult:
+    """Click Generate and watch the button until it comes back.
+
+    The click is RETRIED if generation never starts, which is the whole
+    reason this is not three lines. Measured: the button greys 1.1-1.4s
+    after a click that registers, every time. So a click with nothing
+    happening 5s later did not register - and the old version of this
+    function waited out the entire 300s timeout before saying so. A pass
+    died exactly that way: the click at 23:24:40 never landed, redness sat
+    at idle 100.6 for five minutes, and the only reason it was noticed was
+    a human remarking that the CPU was oddly flat.
+
+    ``save()`` already knew this about the Menu click and re-clicked it -
+    "the retired driver re-opened the menu and retried Save for exactly
+    this reason" - and Generate was left with a single blind attempt.
+
+    **Why a click gets swallowed.** The user's read, and it fits better than
+    "the click was dropped": an editor panel such as **Terrain** was open, so
+    the first click went to dismissing that rather than to Generate. Verified
+    shape on the very next run - click 1 did nothing, click 2 generated in
+    54.6s.
+
+    Two blind spots make that invisible from here, and neither is fixed by
+    this function:
+
+    * ``is_foreground()`` only reads the *window title*, so it cannot tell
+      which tab or panel the editor is showing. A game that is foreground and
+      on the wrong panel looks identical to one ready to generate.
+    * ``redness(GENERATE_BOX)`` samples a fixed rectangle. It cannot
+      distinguish "the Generate button, idle" from "whatever else is reddish
+      at those coordinates", so the idle reading is not proof the button is
+      even on screen.
+
+    The retry papers over both cheaply and provably. A real fix would verify
+    the Generate control is present before clicking - ``controls.py`` and
+    ``locate("generate map")`` can both do it - at the cost of a screen read
+    per generation, which is why it is not done unconditionally here.
+
+    Re-clicking is safe here precisely because it is gated on *not having
+    started*: idle redness means no generation is in flight, so there is
+    nothing to interrupt or double up.
+
+    ``seconds`` is measured from the click that actually took effect, not
+    from the first one, so a retry does not inflate the generation time the
+    latency work reads. ``clicks`` says whether that happened.
+    """
     pid = game_pid()
     if pid is None:
         return GenResult(False, 0.0, "game not running")
     idle = redness()
     _say(f"idle redness {idle:.1f}, pid {pid}", flush=True)
-    click(*GENERATE_BTN)
+
     t0 = time.time()
+    click(*GENERATE_BTN)
+    clicks, last_click = 1, time.time()
     started = False
     while time.time() - t0 < timeout:
         time.sleep(poll)
         if game_pid() != pid:
-            return GenResult(False, time.time() - t0,
+            return GenResult(False, time.time() - last_click,
                              f"GAME DIED {time.time()-t0:.1f}s in "
                              f"(generation had {'' if started else 'NOT '}started)")
         r = redness()
         if not started and r < idle - BUSY_DROP:
             started = True
-            _say(f"  generating at {time.time()-t0:.1f}s (redness {r:.1f})",
-                  flush=True)
+            _say(f"  generating at {time.time()-last_click:.1f}s "
+                  f"(redness {r:.1f}, click {clicks})", flush=True)
         elif started and r > idle - IDLE_RETURN:
-            return GenResult(True, time.time() - t0, "button returned to red")
+            return GenResult(True, time.time() - last_click,
+                             f"button returned to red"
+                             f"{'' if clicks == 1 else f' after {clicks} clicks'}")
+        elif not started and time.time() - last_click > start_grace:
+            if clicks >= click_tries:
+                return GenResult(
+                    False, time.time() - t0,
+                    f"generation never started after {clicks} clicks - the "
+                    f"button stayed idle, so the clicks are not registering")
+            _say(f"  nothing happening {time.time()-last_click:.1f}s after "
+                  f"click {clicks} - re-clicking Generate", flush=True)
+            click(*GENERATE_BTN)
+            clicks, last_click = clicks + 1, time.time()
     return GenResult(False, time.time() - t0,
                      "timed out" + ("" if started else " - never started"))
+
 
 
 def press(vk: int, hold: float = 0.05) -> None:
