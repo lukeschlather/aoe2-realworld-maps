@@ -46,6 +46,7 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -65,13 +66,32 @@ CONDITIONS: list[tuple[str, list[str]]] = [
 
 
 def main() -> None:
-    out = REPO / "out" / "scand_feature_set.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(CONDITIONS, indent=2), encoding="utf-8")
-    for name, args in CONDITIONS:
-        print(f"{name:18s} {' '.join(args)}")
-    print(f"\n{len(CONDITIONS)} conditions -> {out}")
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--only", default=None, metavar="NAME",
+                    help="write just this one condition, to its own file. For "
+                         "deepening one condition while leaving the others at "
+                         "the count they already have: mod_capture resumes "
+                         "per-region, so a region absent from the set is "
+                         "simply not touched.")
+    cli = ap.parse_args()
 
+    conds = CONDITIONS
+    if cli.only:
+        conds = [c for c in CONDITIONS if c[0].lower() == cli.only.lower()]
+        if not conds:
+            raise SystemExit(f"unknown condition {cli.only!r}; known: "
+                             + ", ".join(n for n, _ in CONDITIONS))
+    # Condition names already start with "Scand", so do not prefix it again -
+    # that produced out/scand_scand_shallows_only.json.
+    slug = cli.only.lower().replace(" ", "_") if cli.only else ""
+    stem = "scand_feature_set" if not cli.only else f"{slug}_only"
+    out = REPO / "out" / f"{stem}.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(conds, indent=2), encoding="utf-8")
+    for name, extra in conds:
+        print(f"{name:18s} {' '.join(extra)}")
+    print()
+    print(f"{len(conds)} condition(s) -> {out}")
 
 if __name__ == "__main__":
     main()
