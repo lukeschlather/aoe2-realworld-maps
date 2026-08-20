@@ -3,9 +3,11 @@
 Nothing here invents a parameter set. Every preset is read out of a record
 this project already wrote:
 
-* **shipped** - ``build_mod.MOD_REGIONS``, which really was the parameter
-  record for the 11 shipped maps; what it lacked was a date, a commit and a
-  link to the captures.
+* **shipped** - ``MOD_REGIONS_AT_IMPORT`` below, the hand-edited list
+  ``build_mod.MOD_REGIONS`` held until 2026-08-19. It really was the
+  parameter record for the 10 shipped maps; what it lacked was a date, a
+  commit and a link to the captures. Frozen here as an import fixture -
+  ``build_mod.py`` reads ``status: shipped`` out of the registry now.
 * **retired** - the argv the retired regions were actually captured with,
   read off ``results.jsonl`` (``build_mod.RETIRED_REGIONS`` names them but
   no longer carries their args).
@@ -188,16 +190,84 @@ def north_of(row: dict) -> float:
 # sources
 # --------------------------------------------------------------------------
 
+
+#: The hand-edited shipping list ``build_mod.MOD_REGIONS`` held until
+#: 2026-08-19, frozen here as the fixture the registry was reconstructed
+#: from. **Nothing reads it to decide what ships** - ``build_mod.py`` reads
+#: ``status: shipped`` out of ``presets/`` now. It stays so that deleting
+#: ``presets/`` and re-importing reproduces the same 10 shipped presets
+#: rather than silently producing none, and so the exact list that was
+#: shipping on the day of the switch is on the record.
+#:
+#: Verbatim, including the two constants it composed:
+#: FOREST_SPLIT = --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3
+#: NW = --north -45 ; NORTH_UP = --north 0
+MOD_REGIONS_AT_IMPORT = [
+    ("Salish Sea", ["--center=-122.9,48.15", "--span-km", "260", "--overlap",
+                    "0.85", "--min-water-width", "5", "--min-land-width", "3",
+                    "--north", "-45"]),
+    ("Cramped Italy", ["--region", "italy", "--north", "-45"]),
+    ("Italy", ["--region", "italy", "--spread-starts", "--north", "-45"]),
+    ("Britain", ["--region", "britain", "--forest-clumps", "36",
+                 "--forest-alt", "PINE_FOREST", "--forest-spacing", "3",
+                 "--north", "-45"]),
+    ("Greece", ["--region", "greece", "--forest-clumps", "36", "--forest-alt",
+                "PINE_FOREST", "--forest-spacing", "3", "--forest-percent",
+                "14", "--north", "-45"]),
+    ("Chesapeake Bay", ["--region", "chesapeake", "--north", "-45"]),
+    ("Black Sea", ["--region", "blacksea", "--north", "-45"]),
+    ("Scandinavia", ["--region", "scandinavia", "--north", "-45"]),
+    ("Michigan", ["--center=-85.0,44.5", "--span-km", "1200", "--overlap",
+                  "0.85", "--min-water-width", "5", "--min-land-width", "3",
+                  "--north", "0"]),
+    ("Great Britain N", ["--center=-3.0,52.5", "--span-km", "1300",
+                         "--forest-clumps", "36", "--forest-alt",
+                         "PINE_FOREST", "--forest-spacing", "3",
+                         "--north", "0"]),
+]
+
+#: Per-region notes transcribed from the comments MOD_REGIONS carried, so
+#: the reasoning travels with the preset instead of with the list. Only
+#: applied to a preset that has no note yet.
+SHIPPED_NOTES = {
+    "Salish Sea": "the original hand-verified data point. Overrides "
+        "consolidation width to victoria_recenter's verified 5/3 (cell "
+        "0a8509cf) rather than the 4/3 default.",
+    "Italy": "--spread-starts, so players spread across Sardinia/Corsica/"
+        "Tunisia and the peninsula instead of only the mainland's far "
+        "corners - see MOD_STATUS.md for the crowding investigation.",
+    "Cramped Italy": "all 8 players crowded onto the single connected "
+        "mainland/France/Balkans landmass - the original, unmodified "
+        "behaviour, shipped alongside Italy rather than replaced by it.",
+    "Britain": "forest split across two terrain types so it stops fusing "
+        "into one mass (FOREST_SPLIT). Britain pays no wood for it.",
+    "Greece": "FOREST_SPLIT plus --forest-percent 14, because the second "
+        "forest block under-places; nets out at 23% wood against 25%.",
+    "Michigan": "\"GL Michigan-Huron\" in the 2026-08-16 candidate report, "
+        "renamed on request. Salish Sea's consolidation widths (5/3). "
+        "Measured there: 78.8% land, 8 TCs, IoU 0.892 - the highest IoU of "
+        "the Great Lakes candidates. No N=10 pass yet.",
+    "Great Britain N": "\"Britain northup France\" in the 2026-08-16 "
+        "candidate report: the shipped Britain window at the same 1300 km "
+        "span, centre 2 degrees south, trading open sea for enough "
+        "continent to hold two TCs. Water north of Britain drops 45 -> 16 "
+        "tiles while staying open; Ireland keeps 32 tiles of clearance; the "
+        "Channel stays 8 wide; the continental patch grows 6,041 -> 10,809 "
+        "tiles. Capture: 35.2% land, 8 TCs, IoU 0.848. No N=10 pass yet.",
+}
+
+
 def shipped_presets() -> list[Preset]:
     import build_mod
     out = []
-    for name, extra in build_mod.MOD_REGIONS:
+    for name, extra in MOD_REGIONS_AT_IMPORT:
         rms = (REPO / "mod" / build_mod.MOD_NAME / "resources" / "_common"
                / "random-map-scripts" / build_mod.shipped_filename(name))
         origin = {"source": "automation/build_mod.py:MOD_REGIONS",
                   "shipped_filename": build_mod.shipped_filename(name)}
         origin.update(file_history(rms))
-        p = Preset.create(name, name, extra, status="shipped", origin=origin)
+        p = Preset.create(name, name, extra, status="shipped", origin=origin,
+                          note=SHIPPED_NOTES.get(name, ""))
         if rms.is_file():
             p.record_build(Build(
                 sha256=sha256_file(rms), bytes=rms.stat().st_size,

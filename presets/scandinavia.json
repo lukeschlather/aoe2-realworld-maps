@@ -86,7 +86,8 @@
    "paths": [
     "mod/Real World Maps/resources/_common/random-map-scripts/RW Scandinavia.rms",
     "out/mod_capture/latency_4regions/scripts/Scandinavia/20260817-203524/scandinavia_240.rms",
-    "reports/capture_latency_data_latency_4regions/Scandinavia/Scandinavia.rms"
+    "reports/capture_latency_data_latency_4regions/Scandinavia/Scandinavia.rms",
+    "out/rms_cache/scandinavia-891bc88e/scandinavia.rms"
    ],
    "command": "uv run rwmaps 'Scandinavia' --region scandinavia --north -45",
    "summary": {

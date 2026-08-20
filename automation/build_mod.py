@@ -1,40 +1,40 @@
-"""Build the installable "Real World Maps" mod - just .rms scripts, no
-engine time, cheap to (re)build - plus a debug variant that additionally
-carries the AA_rw_placeholder_tester slot this project's tuning automation
-(tuning_matrix.py et al) depends on to work around the Scenario Editor's
-list-widget crash bug (see TUNING_STATUS.md / RENDER_PIPELINE.md).
+"""Build the installable "Real World Maps" mod from the preset registry -
+plus a debug variant that additionally carries the AA_rw_placeholder_tester
+slot this project's tuning automation (tuning_matrix.py et al) depends on to
+work around the Scenario Editor's list-widget crash bug (see
+TUNING_STATUS.md / RENDER_PIPELINE.md).
 
-Every region here relies on rwmaps's own known-good defaults (resolution
-50m, overlap 0.85, min-water/land-width 4/3, clumping-factor 8 - see the
-comment above --resolution in src/rwmaps/cli.py) EXCEPT Salish Sea, which
-overrides consolidation width to victoria_recenter's own verified value
-(5/3, cell 0a8509cf) since that's a specific already-verified-good data
-point rather than the general-purpose default.
+**What ships is ``presets/*.json`` with ``status: shipped``.** There is no
+hand-edited region list here any more. Adding a map to the mod is
+``preset_cli.py promote``; the parameters, the window, the captures that
+justified it and the date it was promoted all live in the one record.
 
-All regions have been through an N=10-per-region real-engine capture pass
-(reports/20260809-052633_mod_report_sysa_n10.html). Salish Sea was the
-original hand-verified data point; the rest were a first cut picked for
-geographic variety, verified/fixed since. Three of that cut were retired on
-2026-08-15 - see RETIRED_REGIONS below.
+**A build is reused, never rebuilt for its own sake.** Each preset records
+the ``.rms`` it has been built into, by sha256, with every place a copy was
+last seen. If one of those copies is still on disk and still hashes to what
+was recorded, that file ships as-is: the map that ships is then provably the
+map the engine was measured on, and a full rebuild costs seconds instead of
+~70s per region of choose_starts annealing. Only a preset with no surviving
+build generates, and what it generates is recorded so the next build reuses
+it.
 
-Italy ships as two variants: "Cramped Italy" (all 8 players crowded onto
-the single connected mainland/France/Balkans landmass - the original,
-unmodified behavior) and "Italy" (`--spread-starts`, spreading players
-across Sardinia/Corsica/Tunisia and the Italian peninsula itself instead of
-just the mainland's far corners - see MOD_STATUS.md for the full
-investigation).
+That is deliberately a *content* claim rather than a freshness claim. A
+cached build was made by an older ``src/``, and it is not upgraded when
+``src/`` changes - because a script that has been through the engine is
+worth more than a script that is merely current. Pass ``--rebuild`` when the
+point is to pick up a generation change; then capture the result before
+trusting it.
 
-A full build is ~8 regions x ~70s of choose_starts annealing, so roughly
-10 minutes - far too slow to sit inside an edit/generate/capture loop. Pass
-``--regions`` to rebuild just the ones you are working on: that skips the
-wipe and overwrites only those scripts in place, leaving the other regions'
-scripts alone. ``--placeholder`` then drops the region you care about into
-the AA_rw_placeholder_tester slot the capture automation drives, so a
-single-map iteration is one build command and one install.
+The one edit a shipped copy gets is its first line: the header comment
+carries the map name, so a preset promoted under a new name has that line
+rewritten and nothing else. Measured, not assumed - shipped
+"RW Great Britain N.rms" and the script captured as "Britain northup
+France" differ in exactly that line.
 
 Usage:
     uv run python automation/build_mod.py
-    uv run python automation/build_mod.py --regions "Salish Sea" --placeholder "Salish Sea"
+    uv run python automation/build_mod.py --presets salish-sea --placeholder salish-sea
+    uv run python automation/build_mod.py --rebuild greece
     uv run python automation/build_mod.py --list
 """
 
@@ -52,10 +52,17 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
 import build_thumbnails  # noqa: E402
+from rwmaps.presets import Build, Preset, Registry, sha256_file, utc_now  # noqa: E402
+from runlog import git_commit  # noqa: E402
 
 MOD_NAME = "Real World Maps"
 DEBUG_MOD_NAME = "Real World Maps (Debug)"
 PLACEHOLDER_SLOT = "AA_rw_placeholder_tester.rms"
+
+#: Where a freshly generated build is kept so the next build can reuse it.
+#: Working data (gitignored): the durable record is the sha256 in the
+#: preset, and losing the cache costs a regeneration, not a fact.
+BUILD_CACHE = REPO / "out" / "rms_cache"
 
 #: prefixed onto every shipped script's filename (the in-game "Random Map
 #: location" list shows the filename verbatim) so they all sort together
@@ -103,28 +110,12 @@ SHIPPED_PREFIX = "RW "
 #: window is redeemable by tuning, and at 240 tiles the two look
 #: interchangeable anyway. Do not revisit these two; pick chunkier targets.
 #:
-#: The windows stay in ``cli.REGIONS`` - that dict is a library of starting
-#: points, not a shipping list. Replacements are being chosen from the
-#: window-candidate report.
+#: They are ``status: retired`` presets now, so their parameters, their
+#: captures and this reasoning stay joined up instead of the reasoning
+#: living here and the parameters being lost.
 RETIRED_REGIONS = ("Japan", "Caribbean", "New Zealand")
 
 
-def shipped_filename(name: str) -> str:
-    return f"{SHIPPED_PREFIX}{name}.rms"
-
-
-#: (display name, extra rwmaps CLI args beyond the name itself).
-#:
-#: `--tight-resources` was dropped from all six regions that carried it
-#: (2026-08-08). It existed to backstop `land_and_water_resources.inc`'s
-#: silent placement failures by adding a second, closer set of gold/stone/
-#: deer/boar on top of the ones that vanished. Resources now come from
-#: System A (see `src/rwmaps/rms_objects.py`), which retries a placement
-#: that does not fit rather than dropping it, so the backstop has nothing
-#: left to back up - it would simply double-place. RESOURCE_TEMPLATES.md is
-#: explicit that the modern tuning *replaces* this rather than stacking
-#: with it. Per-region resource flavor is now a `ResourceFlavor` choice, not
-#: a CLI flag.
 #: More woods, kept apart. A single forest terrain has no spacing against
 #: itself, so its clumps fuse: asking Greece for 36 clumps instead of 12
 #: gave it FEWER woods (21 against 28) with 61% of the wood in the largest.
@@ -140,63 +131,58 @@ def shipped_filename(name: str) -> str:
 #:
 #: and no start on either map is walled, sealed or tight in 48 starts,
 #: against Britain's France player sitting on one corridor at 87% blocked.
+#:
+#: Kept here as the recipe for *new* presets. The presets that use it carry
+#: it in their own argv.
 FOREST_SPLIT = ["--forest-clumps", "36", "--forest-alt", "PINE_FOREST",
                 "--forest-spacing", "3"]
 
-#: Every shipped region generates with north toward the upper left - the
-#: engine's uncorrected view - which is what they have always looked like.
-#: Before 2026-08-16 that was the default and went unwritten; orientation is
-#: screen-space now and 0 means north-up, so it has to be said out loud.
-#: This is a knob to revisit per region, not a law: north-up reads better
-#: for most places (see the window-candidate report).
+#: North toward the upper left - the engine's uncorrected view, and what
+#: every region shipped before 2026-08-16 looks like. Orientation is
+#: screen-space now and 0 means north-up, so a region that ships this way
+#: says so out loud in its argv. This is a knob to revisit per region, not a
+#: law: north-up reads better for most places (see the window-candidate
+#: report).
 NW = ["--north", "-45"]
 
-#: North-up. Identical to omitting the flag (0 is the default), stated out
-#: loud for the same reason NW is: orientation is a per-region choice now,
-#: and a region that ships north-up did so deliberately rather than by
-#: inheriting a default. The two regions taken from the 2026-08-16
-#: candidate report are north-up because that is the orientation they were
-#: judged in - see reports/20260816-210117_candidate_report_candidates_n2.html.
+#: North-up. Identical to omitting the flag, stated out loud for the same
+#: reason NW is. The regions taken from the 2026-08-16 candidate report are
+#: north-up because that is the orientation they were judged in - see
+#: reports/20260816-210117_candidate_report_candidates_n2.html.
 NORTH_UP = ["--north", "0"]
 
-MOD_REGIONS = [
-    ("Salish Sea", ["--center=-122.9,48.15", "--span-km", "260",
-                     "--overlap", "0.85", "--min-water-width", "5", "--min-land-width", "3", *NW]),
-    ("Cramped Italy", ["--region", "italy", *NW]),
-    ("Italy", ["--region", "italy", "--spread-starts", *NW]),
-    # Britain and Greece split their forest across two terrain types so it
-    # stops fusing into one mass - see FOREST_SPLIT below. Britain pays no
-    # wood for it; Greece needs its budget raised to 14 because the second
-    # block under-places, which nets out at 23% wood against 25% before.
-    ("Britain", ["--region", "britain", *FOREST_SPLIT, *NW]),
-    ("Greece", ["--region", "greece", *FOREST_SPLIT, "--forest-percent", "14", *NW]),
-    ("Chesapeake Bay", ["--region", "chesapeake", *NW]),
-    ("Black Sea", ["--region", "blacksea", *NW]),
-    ("Scandinavia", ["--region", "scandinavia", *NW]),
-    # --- added 2026-08-17 from the candidate report -----------------------
-    # Both were picked by eye from the N=2 candidate pass, so the numbers
-    # below are what that pass measured (2 samples - breadth, not a
-    # verdict), not a fairness claim. Neither has had an N=10 pass yet.
-    #
-    # "GL Michigan-Huron" in the report, renamed on request. Salish Sea's
-    # consolidation widths (5/3), which is where PUGET-style windows have
-    # been verified. Measured: 78.8% land, 8 TCs, coastline IoU 0.892 -
-    # the highest IoU of the Great Lakes candidates.
-    ("Michigan", ["--center=-85.0,44.5", "--span-km", "1200",
-                  "--overlap", "0.85", "--min-water-width", "5",
-                  "--min-land-width", "3", *NORTH_UP]),
-    # "Britain northup France" in the report: the shipped Britain window at
-    # the same 1300 km span with the centre pushed 2 degrees south, which
-    # trades open sea for enough of the continent to hold two TCs. Measured
-    # in the report against the un-shifted north-up window: the water
-    # between northern Britain and the map edge drops 45 -> 16 tiles while
-    # staying open (so Britain is still an island), Ireland keeps 32 tiles
-    # of clearance, the Channel stays 8 wide, and the continental patch
-    # grows 6,041 -> 10,809 tiles. Engine capture: 35.2% land, 8 TCs, IoU
-    # 0.848. Ships alongside "Britain" rather than replacing it.
-    ("Great Britain N", ["--center=-3.0,52.5", "--span-km", "1300",
-                         *FOREST_SPLIT, *NORTH_UP]),
-]
+
+def shipped_filename(name: str) -> str:
+    return f"{SHIPPED_PREFIX}{name}.rms"
+
+
+def shipped_presets(registry: Registry | None = None) -> list[Preset]:
+    reg = registry or Registry(REPO).load()
+    return sorted((p for p in reg.presets.values() if p.status == "shipped"),
+                  key=lambda p: p.name)
+
+
+def shipped_regions(registry: Registry | None = None
+                    ) -> list[tuple[str, list[str]]]:
+    """``[(display name, rwmaps argv), ...]`` for everything that ships.
+
+    The shape ``MOD_REGIONS`` used to have, kept as a function so the
+    capture harnesses and report builders that iterate the shipping list do
+    not each have to know about the registry.
+    """
+    return [(p.name, list(p.argv)) for p in shipped_presets(registry)]
+
+
+def retitle(text: str, name: str) -> str:
+    """The script with its header title line set to ``name``.
+
+    ``rms._HEADER`` opens ``/* <title>``; that is the only place the map
+    name appears, which is why a build is reusable across a rename.
+    """
+    lines = text.splitlines(True)
+    if lines and lines[0].startswith("/*"):
+        lines[0] = f"/* {name}\n"
+    return "".join(lines)
 
 
 def write_info(mod_root: Path, title: str, description: str) -> None:
@@ -209,63 +195,115 @@ def write_info(mod_root: Path, title: str, description: str) -> None:
     }), encoding="utf-8")
 
 
+def generate(preset: Preset) -> tuple[Path | None, str, str]:
+    """Build ``preset`` into the cache. ``(path, stdout, stderr)``."""
+    out = BUILD_CACHE / preset.id
+    if out.exists():
+        shutil.rmtree(out)
+    out.mkdir(parents=True, exist_ok=True)
+    cmd = ["uv", "run", "rwmaps", preset.name, "--outdir", str(out),
+           "--no-preview", *preset.argv]
+    r = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
+    if r.returncode != 0:
+        return None, r.stdout, r.stderr
+    # rwmaps writes into a timestamped subdir per invocation.
+    found = list(out.rglob("*.rms"))
+    if len(found) != 1:
+        return None, r.stdout, f"expected 1 .rms, found {len(found)}"
+    return found[0], r.stdout, r.stderr
+
+
+def _summary_from_stdout(text: str) -> dict:
+    import preset_import
+    return preset_import.parse_rwmaps_stdout(text)
+
+
 def _parse_args():
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--regions", nargs="+", metavar="NAME", default=None,
-                   help="rebuild only these regions, in place, leaving the "
-                        "rest of the mod untouched. Names as in --list.")
-    p.add_argument("--placeholder", metavar="NAME", default=None,
-                   help="region to copy into the AA_rw_placeholder_tester "
-                        "slot. Defaults to whichever region built first.")
-    p.add_argument("--list", action="store_true", help="list region names and exit")
+    p.add_argument("--presets", "--regions", nargs="+", metavar="LABEL",
+                   default=None, dest="presets",
+                   help="build only these presets, in place, leaving the rest "
+                        "of the mod untouched. Labels or display names.")
+    p.add_argument("--rebuild", nargs="*", metavar="LABEL", default=None,
+                   help="regenerate rather than reuse - all shipped presets "
+                        "with no argument, or just the named ones. Use when "
+                        "the point is to pick up a generation change; the "
+                        "result has not been through the engine.")
+    p.add_argument("--placeholder", metavar="LABEL", default=None,
+                   help="preset to copy into the AA_rw_placeholder_tester "
+                        "slot. Defaults to whichever built first.")
+    p.add_argument("--list", action="store_true",
+                   help="list what ships, and where each one's build stands")
     return p.parse_args()
-
-
-def _select(names: list[str] | None) -> list[tuple[str, list[str]]]:
-    """MOD_REGIONS entries matching ``names``, case-insensitively."""
-    if not names:
-        return MOD_REGIONS
-    by_lower = {n.lower(): (n, extra) for n, extra in MOD_REGIONS}
-    chosen, unknown = [], []
-    for want in names:
-        hit = by_lower.get(want.lower())
-        if hit is None:
-            unknown.append(want)
-        else:
-            chosen.append(hit)
-    if unknown:
-        known = ", ".join(n for n, _ in MOD_REGIONS)
-        sys.exit(f"unknown region(s): {unknown}\nknown regions: {known}")
-    return chosen
 
 
 def main():
     args = _parse_args()
-    if args.list:
-        for name, extra in MOD_REGIONS:
-            print(f"{name:<16} {' '.join(extra)}")
-        return
-    regions = _select(args.regions)
-    partial = args.regions is not None
+    reg = Registry(REPO).load()
+    shipped = shipped_presets(reg)
+    if not shipped:
+        sys.exit("nothing has status 'shipped' in presets/ - promote something "
+                 "with automation/preset_cli.py promote <label>")
 
-    tmp_out = REPO / "out" / "mod_build"
-    if tmp_out.exists():
-        shutil.rmtree(tmp_out)
-    tmp_out.mkdir(parents=True)
+    if args.list:
+        for p in shipped:
+            hit = p.find_build(REPO)
+            where = "reuse " + hit[1].name if hit else "GENERATE (no build on disk)"
+            print(f"{p.label:22s} {p.name:18s} {p.n_captured:3d} caps  "
+                  f"{where}\n{'':22s} {' '.join(p.argv)}")
+        return
+
+    selected = shipped
+    partial = args.presets is not None
+    if partial:
+        selected = [reg.get(k) for k in args.presets]
+        not_shipped = [p.label for p in selected if p.status != "shipped"]
+        if not_shipped:
+            sys.exit(f"not shipped: {not_shipped}. promote them first "
+                     f"(preset_cli.py promote <label>) so the mod's contents "
+                     f"and the registry cannot disagree.")
+
+    force_all = args.rebuild is not None and not args.rebuild
+    force = {reg.get(k).label for k in (args.rebuild or [])}
+
+    # Resolve every reusable build BEFORE anything is wiped, and copy it
+    # into the cache. Two paths a build is recorded at are not stable: the
+    # shipped copy in mod/, which a full build deletes on the line below,
+    # and a capture run's scripts/ dir, which mod_capture clears when that
+    # run-id is resumed. Resolving after the wipe silently turned the cache
+    # into a 70-second regeneration for exactly the maps it was meant to
+    # serve.
+    plan: list[tuple[Preset, Path | None, Build | None]] = []
+    for preset in selected:
+        if force_all or preset.label in force:
+            plan.append((preset, None, None))
+            continue
+        hit = preset.find_build(REPO)
+        if not hit:
+            plan.append((preset, None, None))
+            continue
+        build, path = hit
+        cached = BUILD_CACHE / preset.id / f"{preset.label}.rms"
+        if path.resolve() != cached.resolve():
+            cached.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, cached)
+            rel = cached.resolve().relative_to(REPO.resolve()).as_posix()
+            if rel not in build.paths:
+                build.paths.append(rel)
+                reg.save(preset)
+        plan.append((preset, cached, build))
 
     main_root = REPO / "mod" / MOD_NAME
     debug_root = REPO / "mod" / DEBUG_MOD_NAME
-    # Full rebuild each time - mod/ is regenerated from MOD_REGIONS, not
-    # hand-edited, so stale filenames (e.g. from before SHIPPED_PREFIX was
-    # added) must not linger alongside the newly-prefixed ones. A --regions
-    # build is the deliberate exception: it is an iteration aid, so it
-    # overwrites its own scripts and leaves every other file in place.
+    # Full rebuild wipes: mod/ is generated from the registry, not
+    # hand-edited, so a stale filename (a map promoted under an old name)
+    # must not linger beside the current one. A --presets build is the
+    # deliberate exception - it is an iteration aid.
     if not partial:
-        if main_root.exists():
-            shutil.rmtree(main_root)
-        if debug_root.exists():
-            shutil.rmtree(debug_root)
+        for root in (main_root, debug_root):
+            if root.exists():
+                shutil.rmtree(root)
     main_scripts = main_root / "resources" / "_common" / "random-map-scripts"
     debug_scripts = debug_root / "resources" / "_common" / "random-map-scripts"
     main_scripts.mkdir(parents=True, exist_ok=True)
@@ -277,54 +315,68 @@ def main():
                "Same maps as 'Real World Maps', plus the AA_rw_placeholder_tester "
                "slot this project's tuning automation swaps candidate scripts into.")
 
-    first_rms = None
-    placeholder_rms = None
+    commit = git_commit()
+    first_src = None
+    placeholder_src = None
     failures = []
-    for name, extra in regions:
-        region_out = tmp_out / name
-        cmd = ["uv", "run", "rwmaps", name, "--outdir", str(region_out),
-               "--no-preview", *extra]
-        print(f"generating {name}: {' '.join(cmd)}")
-        r = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
-        if r.returncode != 0:
-            print(f"  FAILED: {r.stderr[-800:]}")
-            failures.append(name)
-            continue
-        rms_files = list(region_out.rglob("*.rms"))
-        if len(rms_files) != 1:
-            print(f"  SKIP: expected 1 .rms, found {len(rms_files)}")
-            failures.append(name)
-            continue
-        dest_main = main_scripts / shipped_filename(name)
-        shutil.copyfile(rms_files[0], dest_main)
-        shutil.copyfile(rms_files[0], debug_scripts / shipped_filename(name))
-        if first_rms is None:
-            first_rms = rms_files[0]
-        if args.placeholder and name.lower() == args.placeholder.lower():
-            placeholder_rms = rms_files[0]
-        print(f"  -> {dest_main}")
+    reused = built = 0
+    for preset, src, build in plan:
+        if src is not None:
+            reused += 1
+            print(f"{preset.label}: reuse {build.sha256[:10]} built "
+                  f"{build.built_utc[:10]} at {build.src_commit} ({src})")
+        else:
+            print(f"{preset.label}: generating ...")
+            src, stdout, stderr = generate(preset)
+            if src is None:
+                print(f"  FAILED: {stderr[-800:]}")
+                failures.append(preset.label)
+                continue
+            build = preset.record_build(Build(
+                sha256=sha256_file(src), bytes=src.stat().st_size,
+                src_commit=commit, built_utc=utc_now(),
+                paths=[src.resolve().relative_to(REPO.resolve()).as_posix()],
+                command=f"uv run rwmaps {preset.name!r} " + " ".join(preset.argv),
+                summary=_summary_from_stdout(stdout)))
+            reg.save(preset)
+            built += 1
+            print(f"  {build.sha256[:10]} {build.summary}")
 
-    if args.placeholder and placeholder_rms is None:
+        text = retitle(src.read_text(encoding="ascii"), preset.name)
+        dest = main_scripts / shipped_filename(preset.name)
+        # newline="\n": the engine's RMS parser needs unix line endings
+        # (see rms.write_rms), and this path writes text on Windows.
+        dest.write_text(text, encoding="ascii", newline="\n")
+        (debug_scripts / shipped_filename(preset.name)).write_text(
+            text, encoding="ascii", newline="\n")
+        if first_src is None:
+            first_src = dest
+        if args.placeholder and preset.label in (
+                args.placeholder, reg.get(args.placeholder).label):
+            placeholder_src = dest
+        print(f"  -> {dest}")
+
+    if args.placeholder and placeholder_src is None:
         sys.exit(f"--placeholder {args.placeholder!r} did not build - it must "
-                 f"be one of the regions this run generated")
-    slot_src = placeholder_rms or first_rms
+                 f"be one of the presets this run built")
+    slot_src = placeholder_src or first_src
     if slot_src:
         shutil.copyfile(slot_src, debug_scripts / PLACEHOLDER_SLOT)
-        why = "requested" if placeholder_rms else "whatever generated first"
+        why = "requested" if placeholder_src else "whatever built first"
         print(f"  -> {debug_scripts / PLACEHOLDER_SLOT} (placeholder slot, "
-              f"content = {why}, currently {slot_src.parent.name})")
+              f"content = {why}, currently {slot_src.name})")
 
-    shutil.rmtree(tmp_out)
     # The map-selection screen shows <script>.png from beside the script, and
     # a full build has just wiped both mod roots, so the icons have to be
     # redrawn here or the maps ship with the game's generic image. Engine-free
     # and a few seconds for the whole mod.
     build_thumbnails.write_icons()
     if failures:
-        print(f"\nFAILED regions (not in either mod): {failures}")
-    print(f"\ndone - {len(regions) - len(failures)}/{len(regions)} regions in "
-          f"mod/{MOD_NAME}/ and mod/{DEBUG_MOD_NAME}/"
-          + (" (partial build - other regions left as they were)" if partial else ""))
+        print(f"\nFAILED (not in either mod): {failures}")
+    print(f"\ndone - {len(selected) - len(failures)}/{len(selected)} maps in "
+          f"mod/{MOD_NAME}/ and mod/{DEBUG_MOD_NAME}/ "
+          f"({reused} reused, {built} generated)"
+          + (" (partial build - other maps left as they were)" if partial else ""))
 
 
 if __name__ == "__main__":

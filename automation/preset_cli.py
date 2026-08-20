@@ -382,7 +382,9 @@ def main() -> int:
     p.add_argument("--status", default="candidate", choices=sorted(STATUS_ORDER))
     p.add_argument("--note", default="")
     p.add_argument("argv", nargs=argparse.REMAINDER,
-                   help="rwmaps flags, after a literal --")
+                   help="rwmaps flags, after a literal --. Everything from "
+                        "here on is passed through verbatim, so --status and "
+                        "--note have to come BEFORE the label")
     p.set_defaults(fn=cmd_new)
 
     p = sub.add_parser("region-set", help="write a mod_capture --region-set file")

@@ -1,7 +1,6 @@
 """Real-engine capture pass over the shipped "Real World Maps" mod: for
-each of the 10 regions in build_mod.py's MOD_REGIONS, generate its script
-once (using the exact args that ship, no drift) and capture N=10 real
-engine samples - enough N for the fairness stats this project's earlier
+each preset with ``status: shipped``, generate its script once (using the
+exact args that ship, no drift) and capture N=10 real engine samples - enough N for the fairness stats this project's earlier
 research phases deliberately skipped (see TUNING_STATUS.md /
 [[feedback-verification-and-automation]]: N=1-2 was fine for breadth-over-
 parameters exploration, not for a fairness claim).
@@ -43,8 +42,9 @@ from rwmaps import scx_read  # noqa: E402
 from rwmaps.cli import REGIONS  # noqa: E402
 from rwmaps.projection import north_from_legacy_rotate  # noqa: E402
 from aesthetic_metrics import cached_true_mask_geo, compute_metrics_from_truth  # noqa: E402
-from build_mod import (DEBUG_MOD_NAME, MOD_NAME, MOD_REGIONS,  # noqa: E402
-                       shipped_filename)
+from build_mod import (DEBUG_MOD_NAME, MOD_NAME,  # noqa: E402
+                       shipped_filename, shipped_regions)
+from rwmaps.presets import Preset, Registry  # noqa: E402
 import editor  # noqa: E402
 from frame_server import snapshot_ring  # noqa: E402
 from rwmaps.fairness import profile_capture  # noqa: E402
@@ -193,6 +193,12 @@ def parse_args():
                          "this is what makes 'did this change break the "
                          "engine' answerable with the engine rather than by "
                          "reading the diff. Recorded per sample.")
+    p.add_argument("--presets", nargs="+", metavar="LABEL", default=None,
+                    help="capture these presets from the registry instead of "
+                         "what ships. The forward path: a preset exists, with "
+                         "a hash and a window, before any engine time is spent "
+                         "on it, so every sample this pass writes joins back "
+                         "to it exactly rather than by matching argv strings.")
     p.add_argument("--region-set", type=Path, default=None,
                     help="JSON file of [[name, [rwmaps args...]], ...] to "
                          "capture INSTEAD of build_mod.MOD_REGIONS. This is "
@@ -220,8 +226,15 @@ def main():
         # Not printed: the plan event below carries region_set, and stdout is
         # meant to be exactly the terse log, nothing more.
         pass
+    elif args.presets:
+        reg = Registry(REPO).load()
+        # Keyed by LABEL, not display name: labels are unique and
+        # filesystem-safe, display names collide (two Scandinavia windows
+        # under one name is exactly how a capture ends up filed under
+        # another map's geometry).
+        source = [(p.label, list(p.argv)) for p in reg.select(args.presets)]
     else:
-        source = MOD_REGIONS
+        source = shipped_regions()
     regions = source
     if args.regions:
         wanted = {r.strip() for r in args.regions.split(",")}
@@ -275,6 +288,17 @@ def main():
                 continue
 
             lon, lat, span, rot = resolve_geo(extra_args)
+            # Resolve the preset identity once per region and stamp it into
+            # every sample. Recovering it afterwards means matching argv
+            # strings against a registry, which works and is fragile - argv
+            # spellings drift, display names get reused. A hash in the row
+            # does not.
+            try:
+                _p = Preset.create(name, name, [*extra_args, *args.extra])
+                params_hash, preset_id = _p.params_hash, _p.id
+            except Exception as e:
+                params_hash = preset_id = None
+                log.event("preset_unresolved", None, region=name, error=str(e))
             log.event("region_start", f"region {region_i}/{len(regions)} {name}",
                       region=name, index=region_i, of=len(regions),
                       lon=lon, lat=lat, span_km=span, north_deg=rot,
@@ -538,6 +562,7 @@ def main():
 
                 record = {
                     "region": name, "extra_args": extra_args, "ai_map_type": ai_type,
+                    "preset_params_hash": params_hash, "preset_id": preset_id,
                     "from_git": args.from_git,
                     "lon": lon, "lat": lat, "span_km": span, "north_deg": rot,
                     "sample_index": sample_i,

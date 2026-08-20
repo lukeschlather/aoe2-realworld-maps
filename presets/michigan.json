@@ -92,7 +92,8 @@
     "mod/Real World Maps/resources/_common/random-map-scripts/RW Michigan.rms",
     "out/mod_capture/candidates_n2/scripts/Michigan/20260815-232136/michigan_240.rms",
     "reports/20260816-023454_candidate_report_data_candidates_n2/Michigan/Michigan.rms",
-    "reports/20260816-210117_candidate_report_data_candidates_n2/Michigan/Michigan.rms"
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Michigan/Michigan.rms",
+    "out/rms_cache/michigan-6f0dcafb/michigan.rms"
    ],
    "command": "uv run rwmaps 'Michigan' --center=-85.0,44.5 --span-km 1200 --overlap 0.85 --min-water-width 5 --min-land-width 3 --north 0",
    "summary": {

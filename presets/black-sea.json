@@ -82,7 +82,8 @@
    "src_commit": "a9d5dfd",
    "built_utc": "2026-08-15T22:41:47Z",
    "paths": [
-    "mod/Real World Maps/resources/_common/random-map-scripts/RW Black Sea.rms"
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Black Sea.rms",
+    "out/rms_cache/black-sea-2cea5a60/black-sea.rms"
    ],
    "command": "uv run rwmaps 'Black Sea' --region blacksea --north -45",
    "summary": {

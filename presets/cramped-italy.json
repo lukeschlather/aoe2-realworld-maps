@@ -84,7 +84,8 @@
    "src_commit": "a9d5dfd",
    "built_utc": "2026-08-15T22:32:11Z",
    "paths": [
-    "mod/Real World Maps/resources/_common/random-map-scripts/RW Cramped Italy.rms"
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Cramped Italy.rms",
+    "out/rms_cache/cramped-italy-6b282918/cramped-italy.rms"
    ],
    "command": "uv run rwmaps 'Cramped Italy' --region italy --north -45",
    "summary": {

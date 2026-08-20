@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import json  # noqa: E402
 
-from build_mod import MOD_REGIONS  # noqa: E402
+from build_mod import shipped_regions  # noqa: E402
 from mod_capture import resolve_geo  # noqa: E402
 
 RESOURCE_KINDS = ["gold", "stone", "forage", "sheep", "deer", "boar"]
@@ -274,7 +274,8 @@ def main():
     by_region = load_records(results_path)
     sections = []
     total_captured = 0
-    for name, extra_args in MOD_REGIONS:
+    shipped = shipped_regions()
+    for name, extra_args in shipped:
         records = sorted(by_region.get(name, []), key=lambda r: r["sample_index"])
         sample_indices = [r["sample_index"] for r in records]
         rms_relpath, scenario_relpaths = archive_region_files(matrix_out, data_dir, name, sample_indices)
@@ -295,7 +296,7 @@ def main():
         generated_at=generated_at,
         commit=git_commit(),
         total_captured=total_captured,
-        total_expected=len(MOD_REGIONS) * 10,
+        total_expected=len(shipped) * 10,
     )
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(html, encoding="utf-8")

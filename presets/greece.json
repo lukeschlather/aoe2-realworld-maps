@@ -95,7 +95,8 @@
     "mod/Real World Maps/resources/_common/random-map-scripts/RW Greece.rms",
     "out/mod_capture/latency_4regions/scripts/Greece/20260817-202852/greece_240.rms",
     "reports/capture_latency_data_latency_4regions/Greece/Greece.rms",
-    "out/mod_capture/save_fix_check/scripts/Greece/20260817-204501/greece_240.rms"
+    "out/mod_capture/save_fix_check/scripts/Greece/20260817-204501/greece_240.rms",
+    "out/rms_cache/greece-f8371010/greece.rms"
    ],
    "command": "uv run rwmaps 'Greece' --region greece --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --forest-percent 14 --north -45",
    "summary": {

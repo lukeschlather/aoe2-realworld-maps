@@ -83,7 +83,8 @@
    "built_utc": "2026-08-15T22:39:59Z",
    "paths": [
     "mod/Real World Maps/resources/_common/random-map-scripts/RW Chesapeake Bay.rms",
-    "out/mod_capture/placeholder_fix_xcheck/scripts/Chesapeake Bay/20260815-103602/chesapeake_bay_240.rms"
+    "out/mod_capture/placeholder_fix_xcheck/scripts/Chesapeake Bay/20260815-103602/chesapeake_bay_240.rms",
+    "out/rms_cache/chesapeake-bay-90facec1/chesapeake-bay.rms"
    ],
    "command": "uv run rwmaps 'Chesapeake Bay' --region chesapeake --north -45",
    "summary": {

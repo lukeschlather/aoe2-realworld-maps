@@ -93,7 +93,8 @@
    "src_commit": "6c9b972",
    "built_utc": "2026-08-18T09:21:36Z",
    "paths": [
-    "mod/Real World Maps/resources/_common/random-map-scripts/RW Great Britain N.rms"
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Great Britain N.rms",
+    "out/rms_cache/great-britain-n-0399a5ec/great-britain-n.rms"
    ],
    "command": "uv run rwmaps 'Great Britain N' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0",
    "summary": {

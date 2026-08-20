@@ -90,7 +90,8 @@
    "built_utc": "2026-08-15T22:30:18Z",
    "paths": [
     "mod/Real World Maps/resources/_common/random-map-scripts/RW Salish Sea.rms",
-    "out/mod_capture/latency_4regions/scripts/Salish Sea/20260817-201538/salish_sea_240.rms"
+    "out/mod_capture/latency_4regions/scripts/Salish Sea/20260817-201538/salish_sea_240.rms",
+    "out/rms_cache/salish-sea-b79d5526/salish-sea.rms"
    ],
    "command": "uv run rwmaps 'Salish Sea' --center=-122.9,48.15 --span-km 260 --overlap 0.85 --min-water-width 5 --min-land-width 3 --north -45",
    "summary": {
