@@ -160,6 +160,54 @@ def game_is_running() -> bool:
     return game_pid() is not None
 
 
+#: A real 240x240 capture is ~100 KB. Anything this small is the game's Save
+#: still in flight, not a map.
+MIN_SCENARIO_BYTES = 20_000
+
+
+def archive_when_settled(src: Path, dest: Path, *, tries: int = 60,
+                         pause: float = 0.25) -> bool:
+    """Copy ``src`` once the game has finished writing it.
+
+    The Save dialog closing is not the same event as the file being complete.
+    Measured 2026-08-19: a pass archived a 128-byte ``sample_000`` and lost
+    the sample to "Error -5 while decompressing data: incomplete or truncated
+    stream" - the copy caught the file mid-write, and the only sign was an
+    analysis failure two steps later, which reads like a bad map rather than
+    a bad read.
+
+    So: wait for the size to stop changing, refuse anything implausibly
+    small, and check the copy came out the same size as the source. Two equal
+    reads rather than one, on the same principle as everything else in this
+    harness - a single read straight after a click gets a transient.
+    """
+    last = -1
+    stable = 0
+    for _ in range(tries):
+        try:
+            size = src.stat().st_size
+        except OSError:
+            size = -1
+        if size >= MIN_SCENARIO_BYTES and size == last:
+            stable += 1
+            if stable >= 2:
+                try:
+                    shutil.copyfile(src, dest)
+                except PermissionError:
+                    time.sleep(pause)
+                    continue
+                # The source can still grow between the stat and the copy, so
+                # the copy itself is checked rather than assumed.
+                if dest.stat().st_size == src.stat().st_size >= MIN_SCENARIO_BYTES:
+                    return True
+                stable = 0
+        else:
+            stable = 0
+        last = size
+        time.sleep(pause)
+    return False
+
+
 def newest_scenario():
     files = sorted(SCENARIO_DIR.glob("*.aoe2scenario"), key=lambda p: p.stat().st_mtime)
     return files[-1] if files else None
@@ -537,7 +585,13 @@ def main():
                 archive_dir = region_dir / "raw"
                 archive_dir.mkdir(parents=True, exist_ok=True)
                 dest = archive_dir / f"sample_{sample_i:03d}.aoe2scenario"
-                shutil.copyfile(after, dest)
+                if not archive_when_settled(after, dest):
+                    log.fail("archive", f"  {name} sample {sample_i}: the "
+                             f"capture never finished being written",
+                             region=name, sample_index=sample_i,
+                             src=str(after), bytes=after.stat().st_size)
+                    sample_i += 1
+                    continue
 
                 t_analyze = time.time()
                 try:

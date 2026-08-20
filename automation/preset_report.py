@@ -31,6 +31,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import base64
+import hashlib
 import html
 import json
 import shutil
@@ -116,6 +118,56 @@ def turned_preview(preview_b64: str, shallow=None, px: int = 300) -> str:
     img.save(buf, format="PNG")
     return ("data:image/png;base64,"
             + base64.b64encode(buf.getvalue()).decode())
+
+
+#: Rendered utility views, keyed by scenario and size. A scenario parse is
+#: ~4.5s and the ownership walk another second or two, so a 50-sample report
+#: would spend minutes redrawing pictures that cannot have changed - the
+#: capture is a file on disk and this render is a pure function of it.
+VISUAL_CACHE = REPO / "out" / "utility_cache"
+
+
+def capture_visual(scenario_rel: str, px: int = 720) -> str:
+    """The **utility + forest** render of a captured sample, as a data URI.
+
+    The default visual for a fairness report as of 2026-08-19, chosen from
+    the seven-way comparison in
+    ``reports/20260819-211625_render_treatments_all.html``. It shows what the
+    older analysis render never did: forest, tree objects and fords. Resource
+    dots keep the old render's colours and are sized in FINAL pixels - the
+    first version sized them in internal pixels, which came out around 1.5 px
+    in the finished diamond and could not be read against the woods at all.
+
+    Returns "" when the scenario is not on disk, so the caller can fall back
+    to the preview stored in results.jsonl.
+    """
+    if not scenario_rel:
+        return ""
+    path = REPO / scenario_rel
+    if not path.is_file():
+        return ""
+    VISUAL_CACHE.mkdir(parents=True, exist_ok=True)
+    key = hashlib.sha256(f"{scenario_rel}|{px}".encode()).hexdigest()[:16]
+    cached = VISUAL_CACHE / f"utility-{key}.png"
+    if not (cached.is_file() and cached.stat().st_mtime >= path.stat().st_mtime):
+        from rwmaps import render_styles
+        import sample_analysis
+        scene = render_styles.scene_from_scenario(path)
+        owner = {}
+        if scene.tcs:
+            walks = {pl: sample_analysis.land_path_distance(
+                         scene.land, (int(y), int(x)))
+                     for pl, x, y in scene.tcs}
+            for kind, x, y in scene.resources:
+                best_p, best_d = None, float("inf")
+                for pl, dist in walks.items():
+                    dd = dist[int(y), int(x)]
+                    if dd < best_d:
+                        best_d, best_p = dd, pl
+                owner[(kind, x, y)] = best_p if best_d <= 30.0 else None
+        render_styles.utility(scene, px=px, resource_owner=owner).save(cached)
+    return ("data:image/png;base64,"
+            + base64.b64encode(cached.read_bytes()).decode())
 
 
 def requests_shallows(preset: Preset) -> bool:
@@ -592,7 +644,12 @@ def preset_card(p: Preset, samples: list[tuple[str, dict, dict]],
     for run, s, row, scen in samples:
         raw = row.get("preview_png_b64")
         shallows = shallow_mask(scen) if wants_shallows else None
-        img = turned_preview(raw, shallows) if raw else ""
+        # Utility + forest by default; the stored preview is the fallback for
+        # a sample whose scenario has been cleaned out of out/.
+        img = capture_visual(scen)
+        fallback = not img
+        if fallback:
+            img = turned_preview(raw, shallows) if raw else ""
         n_shallow = int(shallows.sum()) if shallows is not None else None
         f = s.get("fairness") or {}
         med = f.get("median") or {}
@@ -600,6 +657,8 @@ def preset_card(p: Preset, samples: list[tuple[str, dict, dict]],
             "<div class='sample'>"
             + (f"<img src='{img}' alt=''>" if img else
                "<div class='cap'>preview not in results.jsonl</div>")
+            + ("<div class='cap'>scenario gone - stored analysis preview, "
+               "no forest</div>" if fallback else "")
             + (f"<div class='cap'>{n_shallow:,} SHALLOWS tiles in the capture"
                "</div>" if n_shallow else
                ("<div class='cap'>the script asks for no shallows</div>"
@@ -749,6 +808,14 @@ def main() -> int:
  come from <code>out/resource_baseline.json</code>; Arabia is the reference
  and is held out of the stock band rather than averaged into it. Counts are
  resources, not objects. Nothing here is a score.</p>
+<p class="lead">Pictures are the <b>utility + forest</b> render, drawn from
+ the captured scenario: forest terrain in dark forest green, tree objects on
+ top of it, fords in their own colour because they are neither land nor sea,
+ every land resource dotted in the colour of whoever can walk to it first,
+ and TC rings. They are 720&nbsp;px files shown small - zoom in. Where a
+ scenario has been cleaned out of <code>out/</code> a panel falls back to the
+ analysis preview stored in <code>results.jsonl</code>, which has no forest
+ in it, and says so.</p>
 <p class="lead">Every picture is in the <b>in-game orientation</b> - the
  grid turned counter-clockwise by <code>thumbnail.ICON_ROTATION</code>, the
  same turn the engine applies. Up is up in the game and nothing else; the

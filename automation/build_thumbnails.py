@@ -1,10 +1,24 @@
 """Render every shipped map's thumbnail: the in-game icon, and a gallery.
 
-Cheap and engine-free: each image is drawn from the shipped ``.rms`` itself
-(see ``rwmaps.thumbnail``), so it always matches what is in
-``mod/Real World Maps/`` and a full rebuild takes seconds. They show land,
-water, the shoreline band and the script's pinned player starts - not
-forest, elevation or objects, which the engine rolls at generation time.
+**The shipped icon is the Atlas treatment, drawn from a captured
+scenario** (``rwmaps.render_styles.icon_atlas``) - chosen 2026-08-19 from
+the seven-way comparison in
+``reports/20260819-211625_render_treatments_all.html``. That means an icon
+shows the map's woods and its real Town Centres, which is what a player is
+choosing between; the cost is that it needs a capture of that preset on
+disk. A script with no capture on record falls back to the old
+``.rms``-derived icon, and says so.
+
+No border: the game draws its own frame round the icon on the Select
+Location screen, and the tan diamond ``thumbnail.render_icon`` painted sat
+inside it as a second one. Markers are half the stock 34 px, which at
+8 players stopped them being the first thing the eye lands on.
+
+The **gallery** is still drawn from the shipped ``.rms`` itself
+(``rwmaps.thumbnail``), engine-free, so it always matches what is in
+``mod/Real World Maps/``: land, water, the shoreline band and the script's
+pinned starts - not forest, elevation or objects, which the engine rolls at
+generation time.
 
 Two outputs, because they are read in different places:
 
@@ -38,7 +52,9 @@ from urllib.parse import quote
 REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
 
+from rwmaps import render_styles as rs  # noqa: E402
 from rwmaps import thumbnail  # noqa: E402
+from rwmaps.presets import Registry  # noqa: E402
 
 SCRIPTS_SUBDIR = Path("resources") / "_common" / "random-map-scripts"
 #: Both mod roots build_mod.py maintains; the debug one carries the extra
@@ -61,19 +77,60 @@ INGAME_PROOF = DEFAULT_OUT / "ingame_select_location.png"
 MINIMAP_PROOF = DEFAULT_OUT / "ingame_minimap_britain.png"
 
 
-def write_icons(roots=MOD_ROOTS, quiet: bool = False) -> int:
+#: Rendered icons, keyed by preset id and the capture they came from. A
+#: build wipes mod/ and calls this again, and a scenario parse is ~4.5s, so
+#: without this a 20-second mod build spent another 45 on redrawing icons
+#: that had not changed.
+ICON_CACHE = REPO / "out" / "icon_cache"
+
+
+def _capture_for(preset) -> Path | None:
+    live = [REPO / s for c in preset.captures for s in c.scenarios
+            if (REPO / s).is_file()]
+    return max(live, key=lambda q: q.stat().st_mtime) if live else None
+
+
+def _atlas_icon(preset, scen: Path, px: int) -> "object":
+    from PIL import Image
+    ICON_CACHE.mkdir(parents=True, exist_ok=True)
+    cached = ICON_CACHE / f"{preset.id}-{scen.stem}-{px}.png"
+    if cached.is_file() and cached.stat().st_mtime >= scen.stat().st_mtime:
+        return Image.open(cached)
+    scene = rs.scene_from_scenario(scen, name=preset.name)
+    img = rs.icon_atlas(scene, px=px)
+    img.save(cached)
+    return img
+
+
+def write_icons(roots=MOD_ROOTS, quiet: bool = False,
+                px: int = thumbnail.ICON_PX) -> int:
     """Write ``<stem>.png`` beside every script in each mod root.
 
     Called by ``build_mod.py`` after a build, since a full build wipes the
     mod directories - an icon left behind for a renamed script would show up
     against nothing, and a script with no icon gets the game's generic one.
     """
-    written = 0
+    from build_mod import shipped_filename
+
+    reg = Registry(REPO).load()
+    by_file = {shipped_filename(pr.name): pr for pr in reg.presets.values()
+               if pr.status == "shipped"}
+    written = fell_back = 0
     for root in roots:
         scripts = root / SCRIPTS_SUBDIR
         if not scripts.is_dir():
             continue
         for path in sorted(scripts.glob("*.rms")):
+            preset = by_file.get(path.name)
+            scen = _capture_for(preset) if preset else None
+            if scen is not None:
+                _atlas_icon(preset, scen, px).save(path.with_suffix(".png"))
+                written += 1
+                continue
+            # No capture for this script - the debug mod's placeholder slot,
+            # or a map promoted but never captured. The old script-derived
+            # icon still draws land and water, which beats the game's
+            # generic image.
             try:
                 script = thumbnail.parse_script(path)
             except ValueError as exc:
@@ -81,13 +138,16 @@ def write_icons(roots=MOD_ROOTS, quiet: bool = False) -> int:
                 continue
             thumbnail.save_icon(script, path.with_suffix(".png"))
             written += 1
+            fell_back += 1
         # Icons for scripts that no longer exist are dead weight in the mod.
         for stale in sorted(scripts.glob("*.png")):
             if not stale.with_suffix(".rms").exists():
                 stale.unlink()
                 print(f"  removed stale icon {stale.name}")
     if not quiet:
-        print(f"  {written} in-game icons written beside their scripts")
+        note = (f" ({fell_back} from the .rms - no capture on disk)"
+                if fell_back else "")
+        print(f"  {written} in-game icons written beside their scripts{note}")
     return written
 
 

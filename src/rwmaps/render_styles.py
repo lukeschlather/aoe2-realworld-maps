@@ -341,10 +341,28 @@ U_PLAYER = [(230, 80, 70), (90, 150, 230), (235, 190, 60), (80, 200, 130),
 U_UNCLAIMED = (150, 150, 150)
 
 
-def utility(scene: Scene, px: int = 360, scale: int = 3,
+def final_scale(px: int, size: int, scale: int) -> float:
+    """Internal pixels per one final pixel.
+
+    A mark drawn before the turn is resampled twice - the rotation grows the
+    canvas to ``size*scale*sqrt(2)``, then everything is resized to ``px`` -
+    so a radius chosen in internal pixels is not the radius anybody sees. The
+    resource dots were sized that way and came out at about 1.5 px in the
+    finished picture, which is why they stopped being legible against the
+    forest. Sizes go through here now: they are chosen in FINAL pixels and
+    converted back.
+    """
+    return size * scale * math.sqrt(2) / px
+
+
+def utility(scene: Scene, px: int = 720, scale: int = 3,
             resource_owner=None) -> Image.Image:
     """Everything at once: coast, depth, fords, **forest**, trees, resources
     dotted by owner, TC rings.
+
+    The default is 720 px, not 360: this is the picture a fairness report is
+    read from, and per-player resource dots have to survive being looked at
+    closely. A report displays it smaller and lets it be zoomed.
 
     ``resource_owner`` is ``{(kind, x, y): player or None}`` if the caller
     has already walked the distances (``sample_analysis`` does). Without it
@@ -366,23 +384,27 @@ def utility(scene: Scene, px: int = 360, scale: int = 3,
 
     img = upscale(base, scale)
     d = ImageDraw.Draw(img)
-    draw_trees(img, scene, scale, TREE_GREEN, radius=1.3)
+    k = final_scale(px, scene.size, scale)
+    draw_trees(img, scene, scale, TREE_GREEN, radius=1.6 * k)
 
+    # The old analysis render's dot and ring sizes, restored in the units
+    # they are actually read in.
+    dot = max(2.0, 2.6 * k)
     for kind, x, y in scene.resources:
         who = (resource_owner or {}).get((kind, x, y), "none")
         color = (U_PLAYER[(who - 1) % len(U_PLAYER)]
                  if isinstance(who, int) else U_UNCLAIMED)
-        r = max(2, int(0.9 * scale))
-        d.ellipse([x * scale - r, y * scale - r, x * scale + r, y * scale + r],
+        d.ellipse([x * scale - dot, y * scale - dot,
+                   x * scale + dot, y * scale + dot],
                   fill=color, outline=(10, 10, 10))
+    ring = max(4.0, 6.0 * k)
     for player, x, y in scene.tcs:
-        r = max(4, int(2.6 * scale))
         cx, cy = x * scale, y * scale
-        d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=(0, 0, 0),
-                  width=max(2, scale // 2 + 2))
-        d.ellipse([cx - r, cy - r, cx + r, cy + r],
+        d.ellipse([cx - ring, cy - ring, cx + ring, cy + ring],
+                  outline=(0, 0, 0), width=max(2, round(1.6 * k)))
+        d.ellipse([cx - ring, cy - ring, cx + ring, cy + ring],
                   outline=U_PLAYER[(player - 1) % len(U_PLAYER)],
-                  width=max(1, scale // 2))
+                  width=max(1, round(1.1 * k)))
     return turn(img, px)
 
 
@@ -418,26 +440,12 @@ def style_minimap(scene: Scene, px: int = 360, scale: int = 3) -> Image.Image:
                          width=max(3, px // 70))
 
 
-def style_atlas(scene: Scene, px: int = 360, scale: int = 3) -> Image.Image:
-    """**Atlas.** A printed map: hypsometric land tint, an offshore gradient,
-    a thin ink coastline, and only as much shading as keeps it from looking
-    flat.
+def atlas_base(scene: Scene, grain: bool = True) -> np.ndarray:
+    """The Atlas treatment's tile-resolution RGB, without marks or frame.
 
-    Everything here is derived from the capture's own geometry - the land
-    tint and the sea gradient are both distance to the coast, smoothed. The
-    treatment that started in this slot hillshaded that same field hard, and
-    it did not work: distance-to-shore has a near-constant gradient inland,
-    so shading it lights the coast and nothing else, which comes out as a rim
-    glow rather than terrain. Faking hills would have meant inventing
-    elevation the capture does not contain, so the answer was to stop
-    pretending to relief and tint by height band instead, the way an atlas
-    does.
-
-    Beach is blended toward the ground it sits on. The engine paints a
-    one-tile beach ring round every islet and inlet, and at full contrast
-    that ring survives the turn and the downsample as a drawn outline -
-    which is the single artefact that made three of these treatments look
-    like each other.
+    Shared by ``style_atlas`` (the report panel) and ``icon_atlas`` (what
+    ships), so the icon on the map-selection screen cannot drift from the
+    picture the treatment was chosen from.
     """
     land = scene.land
     d = ndimage.distance_transform_edt(land).astype(np.float32)
@@ -469,13 +477,84 @@ def style_atlas(scene: Scene, px: int = 360, scale: int = 3) -> Image.Image:
     a = np.asarray(base).astype(np.float32)
     a = np.where(land[..., None], a * (0.82 + 0.36 * shade)[..., None], a)
     base = np.clip(a, 0, 255).astype(np.uint8)
-    texture(base, np.ones(scene.grid.shape, bool), _rng(scene), 4)
+    if grain:
+        texture(base, np.ones(scene.grid.shape, bool), _rng(scene), 4)
+    return base
 
+
+def style_atlas(scene: Scene, px: int = 360, scale: int = 3) -> Image.Image:
+    """**Atlas.** A printed map: hypsometric land tint, an offshore gradient,
+    a thin ink coastline, and only as much shading as keeps it from looking
+    flat.
+
+    Everything here is derived from the capture's own geometry - the land
+    tint and the sea gradient are both distance to the coast, smoothed. The
+    treatment that started in this slot hillshaded that same field hard, and
+    it did not work: distance-to-shore has a near-constant gradient inland,
+    so shading it lights the coast and nothing else, which comes out as a rim
+    glow rather than terrain. Faking hills would have meant inventing
+    elevation the capture does not contain, so the answer was to stop
+    pretending to relief and tint by height band instead, the way an atlas
+    does.
+
+    Beach is blended toward the ground it sits on. The engine paints a
+    one-tile beach ring round every islet and inlet, and at full contrast
+    that ring survives the turn and the downsample as a drawn outline -
+    which is the single artefact that made three of these treatments look
+    like each other.
+    """
+    base = atlas_base(scene)
     img = upscale(base, scale)
     draw_trees(img, scene, scale, (44, 82, 44), radius=1.2)
     tc_diamonds(img, scene, scale, outline=(28, 26, 22),
                 half_px=max(4, round(scene.size * scale / 100)))
     return vignette(turn(img, px, fill=(226, 224, 214)), 0.22)
+
+
+#: The stock map icons draw a player marker 34 px across on a 420 px icon
+#: (see ``thumbnail.render_icon``). The shipped icon uses HALF that: at 34 px
+#: the markers crowd an 8-player map and are the first thing the eye lands
+#: on, ahead of the geography they are sitting on.
+ICON_MARKER_PX = 17.0
+
+
+def icon_atlas(scene: Scene, px: int = thumbnail.ICON_PX,
+               supersample: int = 2) -> Image.Image:
+    """The shipped map-selection icon: Atlas, no border, small markers.
+
+    No border on purpose - the game draws its own frame round the icon on
+    the Select Location screen, and ``thumbnail.render_icon``'s tan diamond
+    sat inside it as a second one.
+
+    Geometry follows ``render_icon`` exactly, because that is what makes the
+    markers come out as diamonds square to the finished icon: the grid is
+    drawn axis-aligned at ``px/sqrt(2)`` a side, marks go on before the
+    turn, and the turn grows the canvas back to ``px``.
+    """
+    side = round(px / math.sqrt(2)) * supersample
+    # No grain in the icon. Per-tile noise is invisible at 420 px and it
+    # triples the PNG - 200 KB an icon against 70 - and 21 icons ship inside
+    # the mod the game has to load.
+    base = atlas_base(scene, grain=False)
+    # RGBA, and it matters: outside the diamond has to stay transparent. The
+    # stock icons are RGBA and the game composites them over its own frame,
+    # so a flattened icon ships black triangles in all four corners.
+    img = Image.fromarray(base).convert("RGBA").resize((side, side),
+                                                       Image.NEAREST)
+
+    tile = side / scene.size
+    draw_trees(img, scene, tile, (44, 82, 44), radius=1.15)
+    half = max(2.0, ICON_MARKER_PX / math.sqrt(2) / 2 * supersample)
+    d = ImageDraw.Draw(img)
+    for player, x, y in scene.tcs:
+        cx, cy = x * tile, y * tile
+        c = thumbnail.AOE_PLAYER_COLORS[(player - 1) % 8]
+        d.rectangle([cx - half, cy - half, cx + half, cy + half],
+                    fill=c, outline=(20, 18, 14), width=max(1, round(half / 3)))
+
+    img = img.rotate(thumbnail.ICON_ROTATION, expand=True,
+                     resample=Image.BILINEAR, fillcolor=(0, 0, 0, 0))
+    return img.resize((px, px), Image.LANCZOS)
 
 
 def style_parchment(scene: Scene, px: int = 360, scale: int = 3) -> Image.Image:
