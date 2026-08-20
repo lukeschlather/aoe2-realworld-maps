@@ -267,6 +267,23 @@ def main():
     force_all = args.rebuild is not None and not args.rebuild
     force = {reg.get(k).label for k in (args.rebuild or [])}
 
+    # Two shipped presets under one display name write the same filename, and
+    # the second one wins in silence. That is exactly what promoting a
+    # replacement looks like before the old one is retired - the likeliest
+    # way to lose a map is to ship it - so it is an error rather than a
+    # last-write.
+    by_file: dict[str, list[str]] = {}
+    for p in shipped:
+        by_file.setdefault(shipped_filename(p.name), []).append(p.label)
+    clashes = {f: labels for f, labels in by_file.items() if len(labels) > 1}
+    if clashes:
+        lines = "\n".join(f"  {f}: {', '.join(labels)}"
+                          for f, labels in sorted(clashes.items()))
+        sys.exit("two shipped presets would write the same script:\n" + lines
+                 + "\n\nretire the one being replaced (preset_cli.py retire "
+                   "<label> --why ...) or ship the new one under a different "
+                   "--name.")
+
     # Resolve every reusable build BEFORE anything is wiped, and copy it
     # into the cache. Two paths a build is recorded at are not stable: the
     # shipped copy in mod/, which a full build deletes on the line below,
