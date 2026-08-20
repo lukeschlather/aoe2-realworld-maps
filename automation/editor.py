@@ -1035,6 +1035,20 @@ def setup(players: int = 8) -> bool:
             _say("could not get from the Editors menu into a new scenario")
             return False
 
+    # Everything from here on is a FIXED-COORDINATE click - the one part of
+    # this file that does not locate and confirm its control - so it is only
+    # safe while the game owns the input. Seen 2026-08-20: with a Steam chat
+    # window on top, AppActivate could not take the foreground and this walk
+    # clicked on anyway, into whatever was there. The menu walk above cannot
+    # do that (it verifies each screen), which is why the guard belongs here.
+    if not is_foreground():
+        _say("  waiting for the game to own the input before the blind "
+             "coordinate clicks - they would land in whatever is on top")
+        focus_game()
+        if not wait_for_foreground():
+            _say("  the game never came to the foreground - not clicking")
+            return False
+
     _say(f"players -> {players}")
     click(*PLAYERS_TAB)
     time.sleep(3)
@@ -1121,9 +1135,37 @@ def ensure_ready(players: int = 8, tries: int = 3) -> tuple[bool, str]:
                 ok, why = preflight()
                 if ok:
                     return True, why
-            continue
+            # Only go round again while the machine is still in use. Once the
+            # game IS foreground, preflight is complaining about something
+            # else - and this branch used to swallow that: "not foreground"
+            # is the FIRST thing preflight checks, so a wrong selector behind
+            # a lost focus never got as far as the rebuild, and a pass spent
+            # all three attempts waiting for a window that was already there.
+            # Measured on run ``britain_ramsey``.
+            if "not foreground" in why:
+                continue
         _say(f"  editor not ready ({why}) - rebuilding ({attempt}/{tries})",
               flush=True)
+        # ``setup`` walks from the MAIN MENU, so a rebuild with the editor
+        # already up looks for 'editors', does not find it, and aborts the
+        # pass - and ``recover`` returns "game already running" without
+        # doing anything about it, because from its point of view a running
+        # game with mods on is healthy. That is the state a person leaves
+        # behind: measured on run ``britain_ramsey``, the editor was open and
+        # perfectly usable with the Random Map selector left on
+        # "RW Brit Shallows N" from a hand-driven session, and the pass died
+        # with "could not rebuild the editor" after 335s of trying.
+        #
+        # Nothing in the editor puts the selector back - the placeholder is
+        # picked up by sorting first (``AA_``) on a fresh editor, not by a
+        # click - so a restart is the repair, and it is cheap next to a lost
+        # pass. Only quit when the game is up and modded; the crash paths in
+        # ``recover`` want the process as they find it.
+        if game_pid() is not None and not mods_off():
+            _say("  the editor is up but not usable, and setup() starts from "
+                 "the main menu - closing the game so the rebuild has one",
+                 flush=True)
+            _quit()
         if not (recover() and setup(players)):
             return False, "could not rebuild the editor"
     return preflight()
