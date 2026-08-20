@@ -1,6 +1,6 @@
 {
  "label": "great-britain-n-crossings-ramsey",
- "name": "Great Britain N Crossings Ramsey",
+ "name": "Great Britain N",
  "argv": [
   "--center=-3.0,52.5",
   "--span-km",
@@ -76,15 +76,17 @@
  },
  "window_hash": "7100e31a99021c99838d5f372a0e07f8152de94233758e215d1c61966d4c7795",
  "params_hash": "67e67b01e3299657e19d93cbe161f45e3701f7e42da8a8b5d7d2764abed889c8",
- "status": "candidate",
- "note": "great-britain-n-crossings-wide plus the Ramsey Sound connector. On this window the wide St George's line's Welsh end is itself in water 1.0 tile offshore and St Davids is 1.4 t offshore, so the connector is doing more work here than on the south-up window.",
+ "status": "shipped",
+ "note": "Great Britain N with the fords, including the Ramsey Sound connector. This is the window the connector matters most on: the wide St George's line's Welsh end is itself water 1.0 tile offshore here, and without the connector that ford shut in 2 of 3 samples. 3 of 3 fords open on every sample of run britain_ramsey. Supersedes the fordless great-britain-n preset.",
  "origin": {
   "source": "automation/preset_cli.py new",
   "created": "2026-08-20T17:09:07Z",
   "also_known_as": [
-   "great-britain-n-crossings-ramsey"
+   "great-britain-n-crossings-ramsey",
+   "Great Britain N Crossings Ramsey"
   ],
-  "imported": "2026-08-20T18:14:47Z"
+  "imported": "2026-08-20T18:14:47Z",
+  "promoted": "2026-08-20T20:24:03Z"
  },
  "builds": [
   {
@@ -93,7 +95,8 @@
    "src_commit": "9a7e762",
    "built_utc": "2026-08-20T18:06:33Z",
    "paths": [
-    "out/mod_capture/britain_ramsey/scripts/great-britain-n-crossings-ramsey/20260820-180433/great_britain_n_crossings_ramsey_240.rms"
+    "out/mod_capture/britain_ramsey/scripts/great-britain-n-crossings-ramsey/20260820-180433/great_britain_n_crossings_ramsey_240.rms",
+    "out/rms_cache/great-britain-n-crossings-ramsey-67e67b01/great-britain-n-crossings-ramsey.rms"
    ],
    "command": "uv run rwmaps great-britain-n-crossings-ramsey --outdir C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\mod_capture\\britain_ramsey\\scripts\\great-britain-n-crossings-ramsey --no-preview --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0 --feature-preset britain-crossings-ramsey",
    "summary": {
@@ -102,6 +105,19 @@
     "starts": 8,
     "min_separation": 46.0,
     "verdict": "unfair"
+   }
+  },
+  {
+   "sha256": "dcfce4a9c0045fdde61ab393a540796178dd13fe1c0122568f7311f0181a6b66",
+   "bytes": 222496,
+   "src_commit": "9a7e762",
+   "built_utc": "2026-08-20T18:06:33Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Great Britain N.rms"
+   ],
+   "command": "uv run rwmaps 'Great Britain N' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0 --feature-preset britain-crossings-ramsey",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
    }
   }
  ],

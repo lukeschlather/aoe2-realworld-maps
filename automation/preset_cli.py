@@ -348,6 +348,28 @@ def cmd_retire(args) -> int:
     return 0
 
 
+def cmd_demote(args) -> int:
+    """Take a preset out of the mod without calling it retired.
+
+    ``retire`` means withdrawn on merit and kept for its evidence, which is
+    the wrong label for a preset that only shipped so it could be generated
+    by hand and compared - it goes back to being a candidate, which is what
+    it is. The distinction is the whole point of the status field: a reader
+    should be able to tell "we tried this and it was worse" from "this was
+    never judged".
+    """
+    reg = load()
+    p = reg.get(args.preset)
+    was = p.status
+    p.status = "candidate"
+    p.origin["demoted"] = utc_now()
+    if args.why:
+        p.note = args.why
+    reg.save(p)
+    print(f"{p.label}: {was} -> candidate. {p.note}")
+    return 0
+
+
 def cmd_note(args) -> int:
     reg = load()
     p = reg.get(args.preset)
@@ -504,6 +526,12 @@ def main() -> int:
     p.add_argument("preset")
     p.add_argument("--why", required=True)
     p.set_defaults(fn=cmd_retire)
+
+    p = sub.add_parser("demote", help="back to candidate - out of the mod, "
+                                      "but not retired")
+    p.add_argument("preset")
+    p.add_argument("--why", default="")
+    p.set_defaults(fn=cmd_demote)
 
     p = sub.add_parser("note", help="set a preset's note")
     p.add_argument("preset")

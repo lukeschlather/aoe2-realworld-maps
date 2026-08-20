@@ -246,15 +246,16 @@ are committed; `britain-crossings-anchored` is the answer.
   That is the `bc0bc20` lesson applied forward, and it was still not enough
   twice over.
 - **Run `britain_crossings` (18 km, N=3 per window)**
-  `reports/20260820-023109…` superseded by the regenerated
-  `20260820-024754_crossing_report_britain_crossings.html`. SHALLOWS render -
+  `reports/20260820-131814_crossing_report_britain_crossings.html`
+  (regenerated 13:18 with the trees-and-fish visual and the shallows
+  passability stated rather than hedged). SHALLOWS render -
   579-656 tiles - so the mechanism works. Dover 6/6, North Channel 4/6,
   St George's 4/6. Measured with water as the only barrier and again with
   forest: the two agreed in all 18 checks, so what shuts a chain is water.
   The model had said all three were continuous with 2.4 tiles to spare; it
   stamps clean discs and the engine grows ragged ones.
 - **Run `britain_crossings_wide` (24 km)**
-  `reports/20260820-024701_crossing_report_britain_crossings_wide.html`.
+  `reports/20260820-131919_crossing_report_britain_crossings_wide.html`.
   Chosen on `base_size`, which `_land_block` sets to `round(radius * 0.35)`:
   18 km gives 1 (a 3x3 seed) and 24 km gives 2 (5x5), so consecutive seeds
   abut before any growth. North Channel 4/6 -> **6/6**. St George's stayed at
@@ -272,7 +273,7 @@ are committed; `britain-crossings-anchored` is the answer.
   "land within a radius" passes a disc 1 tile offshore, which is exactly the
   failing case.
 - **Run `britain_crossings_anchored`**
-  `reports/20260820-031519_crossing_report_britain_crossings_anchored.html`.
+  `reports/20260820-132013_crossing_report_britain_crossings_anchored.html`.
   St George's moved to -4.90,51.95 / -6.60,52.30. **18 of 18 fords open**,
   Ireland to France on foot in all six, one dominant walkable piece of
   12,821-17,493 tiles. 8 TCs and unchanged TC separation every sample, IoU
@@ -341,12 +342,12 @@ chain was continuous and still joined nothing.
   longer line to Haverfordwest scored 51/61 and was rejected - it floods that
   much more of Pembrokeshire into lagoon for no better anchor.
 - **Run `britain_ramsey` (N=3 per window)**
-  `reports/20260820-111452_crossing_report_britain_ramsey.html`. **18 of 18
+  `reports/20260820-132109_crossing_report_britain_ramsey.html`. **18 of 18
   fords open**, St George's included on all six. 913-985 shallows tiles
   against the wide preset's 812-915, IoU 0.793-0.848 against 0.797-0.847 - no
   fidelity cost for the extra chain.
 - **The baseline failure reproduced, on the regenerated wide report**
-  `reports/20260820-102447_crossing_report_britain_crossings_wide.html`:
+  `reports/20260820-131919_crossing_report_britain_crossings_wide.html`:
   St George's SHUT in 2 of 6, both on `great-britain-n`, which is the window
   whose Welsh end is offshore. On `britain` it was open 3/3 - which is why
   hand play mostly saw it work.
@@ -379,3 +380,53 @@ chain was continuous and still joined nothing.
   aesthetic metrics. `save()` types `rw_capture_slot`, so a capture under any
   other name did not come from our slot, and every capture here is 240x240;
   either check now aborts the pass.
+
+## 2026-08-20 (evening) - the fords are the Britain maps now
+
+**Shallows carry both kinds of unit, and that is settled** - confirmed in
+game by the user. Land units ford terrain 4 and ships sail it, which is what
+`features.py` has said since the Danish straits and what the crossing report
+was hedging against: it printed every sea route twice, "shallows sailable"
+and "shallows blocking", because nothing on disk here had measured it. That
+hedge is gone. One sea row, shallows counted as sailable, and the open
+question this file left at the end of run `britain_crossings_anchored` -
+whether a fleet in the Irish Sea is trapped - is answered: it is not, the
+chains add land routes without closing boat routes. All four crossing
+reports were regenerated (13:18-13:21), which also gives them the
+trees-and-fish visual; the superseded copies are deleted rather than kept.
+
+**The Strait of Dover has never shut.** Tallied across all four runs, 24
+samples:
+
+| run                 | North Channel | St George's | Dover |
+|---------------------|---------------|-------------|-------|
+| `britain_crossings` (18 km) | 4/6    | 4/6         | 6/6   |
+| `britain_crossings_wide`    | 6/6    | 4/6         | 6/6   |
+| `britain_crossings_anchored`| 6/6    | 6/6         | 6/6   |
+| `britain_ramsey`            | 6/6    | 6/6         | 6/6   |
+
+The strait that ever shut is St George's, and both preset changes that fixed
+it - moving the line inland (`anchored`) or fording Ramsey Sound (`ramsey`) -
+are 18 of 18. Dover's chain is identical in all four.
+
+**The shipping list changed** (`preset_cli.py promote` / `demote` / `retire`,
+`build_mod.py`, `install_mod.py --all`; 10/10 maps, 10 reused, 0 generated):
+
+| map               | was                | now                                |
+|-------------------|--------------------|------------------------------------|
+| `Britain`         | `britain`          | `britain-crossings-ramsey`         |
+| `Great Britain N` | `great-britain-n`  | `great-britain-n-crossings-ramsey` |
+
+`ramsey` over `anchored` because it keeps the St George's line on the real
+strait instead of moving both ends inland, and costs fewer shallows tiles
+(913-985 against 996-1050). Both ship a build hash-verified against the
+`britain_ramsey` captures.
+
+The four maps added this morning so the radii could be compared by hand -
+`Brit Shallows`, `Brit LShallows`, `Brit Shallows N`, `Brit LShallows N` -
+are **demoted, not retired**: they were never judged worse, they were
+shipped to be looked at. That distinction is what the new
+`preset_cli.py demote` is for; `retire` means withdrawn on merit and would
+have filed them as failures. The fordless `britain` and `great-britain-n`
+presets *are* retired, with their captures kept - they are the baseline
+every crossing report compares IoU against.

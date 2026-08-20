@@ -7142,6 +7142,187 @@ create_land
   clumping_factor                8
   land_id                       1
 }
+/* 18 shallows patches: passable by boats AND fordable by land units, so these add naval passage without removing any land route */
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 36 47
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 37 47
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 38 47
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 39 47
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 40 47
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 38 72
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 37 72
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 36 71
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 35 71
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 34 70
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 33 69
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 32 69
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 73 78
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 74 79
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 75 79
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 76 80
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 38 72
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
+create_land
+{
+  terrain_type                  SHALLOWS
+  land_position                 39 73
+  base_size                     2
+  number_of_tiles               62
+  other_zone_avoidance_distance 0
+  clumping_factor                1
+  land_id                       1
+}
 
 
 <TERRAIN_GENERATION>

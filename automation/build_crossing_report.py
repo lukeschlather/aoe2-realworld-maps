@@ -40,16 +40,14 @@ once with **water as the only barrier** (``land | SHALLOWS``) and once with
 are choppable. If the two disagree, the crossing is there and something can
 be done about it; if both say shut, the chain pinched.
 
-**The naval question is reported both ways on purpose.** This project's
-``land_mask`` reads shallows as sea, so every "a boat can get through"
-number it has ever produced *assumed* ships enter shallows rather than
-measuring it - including the Baltic-to-Kattegat claim from run
-``scand_feat``. Whether AoE2 lets a ship into terrain 4 is not settled by
-anything on disk here, and it is load-bearing for the Strait of Dover: if
-ships are blocked, a chain across the Channel severs a naval route while
-adding a land one. So each crossing gets two rows - the sea route with
-shallows counted as water, and with shallows counted as blocking - and the
-difference between them is exactly the exposure.
+**Shallows carry both kinds of unit, and that is settled** - confirmed in
+game 2026-08-20, and it is what ``features.py`` has said since the Danish
+straits were built: land units ford terrain 4 and ships sail it. So a chain
+of shallows is purely additive. Laid across water it adds a land route
+without taking the sea route away, which is exactly why it is the tool used
+here and why ``water`` is not. The sea row below is therefore one reading,
+with shallows counted as sailable, and no crossing on this map severs a
+naval route to add a land one.
 
 Pictures are the **utility** render off the capture itself - coast, depth,
 forest, trees, resource dots by owner, fish and whales as white dots -
@@ -211,8 +209,12 @@ def main() -> int:
         land = cap.land_mask       # shallows read as sea
         walk = cap.walkable_mask   # shallows are fords
         shallow = grid == SHALLOWS_ID
-        sail_with = ~land                  # shallows sailable
-        sail_without = ~land & ~shallow    # shallows block ships
+        # Shallows are sailable, so the sea mask is simply "not land" -
+        # which is what ``land_mask`` already gives, since it reads shallows
+        # as sea. Reported as one reading: this used to be given both ways,
+        # against the possibility that ships could not enter terrain 4, and
+        # they can.
+        sail_with = ~land
 
         window = MapWindow.from_center("laea", rec["lon"], rec["lat"],
                                        rec["span_km"], land.shape[0],
@@ -306,17 +308,12 @@ def main() -> int:
             (sa, salon, salat), (sb, sblon, sblat) = c["sea"]
             p, q = tile(salon, salat, sail_with), tile(sblon, sblat, sail_with)
             ok_w, w_w = joined(sail_with, p, q)
-            ok_n, w_n = joined(sail_without, p, q)
-            same = ok_w == ok_n
             rows_html.append(
                 f"<tr><th class='sub'>&hookrightarrow; sail {esc(sa)} "
                 f"&rarr; {esc(sb)}</th>"
-                f"<td class='{'water' if same else 'bad'}'>"
-                f"shallows sailable: {'YES' if ok_w else 'NO'}"
-                + (f" ({w_w:.2f} t)" if ok_w else "")
-                + f" &middot; shallows blocking: {'YES' if ok_n else 'NO'}"
-                + (f" ({w_n:.2f} t)" if ok_n else "")
-                + ("" if same else " &mdash; <b>this route depends on it</b>")
+                f"<td class='{'water' if ok_w else 'bad'}'>"
+                f"{'OPEN' if ok_w else 'NO ROUTE'}"
+                + (f" &middot; {w_w:.2f} t at the narrowest" if ok_w else "")
                 + "</td></tr>")
 
         (en, elon, elat), (fn, flon, flat) = END_TO_END
@@ -422,13 +419,16 @@ code {{ font-family:ui-monospace,Consolas,monospace; font-size:.85em; }}
 <h1>The British Isles crossings, in the engine</h1>
 <p class="meta">Generated {generated_at} &middot; commit <code>{commit}</code>
   &middot; run-id <code>{run_id}</code> &middot; {n} real captures</p>
-<p class="lede">Three chains of shallows, laid across the North Channel, St
-  George's Channel and the Strait of Dover, to join the three landmasses both
-  Britain windows put on the map. Every number is read off the captured
+<p class="lede">Chains of shallows across the British Isles' straits &mdash;
+  the North Channel, St George's Channel and the Strait of Dover &mdash; to
+  join the three landmasses both Britain windows put on the map. A preset may
+  lay others: the <code>ramsey</code> pair adds a connector across Ramsey
+  Sound, which is not a strait and so has no row of its own, and shows up
+  here as extra shallows in the St George's crop.
+  Every number is read off the captured
   <code>.aoe2scenario</code>. <span class="key"></span>is SHALLOWS (terrain
   4), checkerboarded because shallows are the one terrain that is
-  <b>both</b>: land units ford them, and this project's masks read them as
-  sea.</p>
+  <b>both</b>: land units ford them and ships sail them.</p>
 <p class="lede">Each ford is measured <b>at its own strait</b>, inside the
   crop shown beside it, by component sets rather than probe tiles - a
   whole-map test says YES whenever any one of the three crossings is open,
@@ -436,10 +436,11 @@ code {{ font-family:ui-monospace,Consolas,monospace; font-size:.85em; }}
   a barrier, and with <b>forest too</b>. Water is hard, trees are choppable,
   so a disagreement means the crossing is there and can be cleared, while
   both saying SHUT means the chain pinched.</p>
-<p class="lede">Each crossing also carries a sea row given <b>both ways</b> -
-  shallows sailable and shallows blocking - because nothing measured in this
-  project settles which one AoE2 does, and for the Strait of Dover the answer
-  decides whether a naval route was severed to add a land one.</p>
+<p class="lede">Each crossing also carries its <b>sea</b> row, because a
+  chain of shallows is meant to be purely additive: shallows are sailable, so
+  a ford laid across a strait adds a land route <i>without</i> closing the
+  boat route through it. That row is the check on it - not an open question,
+  which is how this report used to put it.</p>
 {cards}
 """
 

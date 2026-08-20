@@ -71,8 +71,8 @@
  },
  "window_hash": "09499b8ea1187c0c91ad389c9011cb1786090585e58e4c55a1906c565f115d37",
  "params_hash": "9ac1483dcd85c90dc23608fef373b736c91857509f55c459b199403d117c387f",
- "status": "shipped",
- "note": "forest split across two terrain types so it stops fusing into one mass (FOREST_SPLIT). Britain pays no wood for it.",
+ "status": "retired",
+ "note": "Superseded 2026-08-20 by britain-crossings-ramsey, which is this window with the three fords and the Ramsey Sound connector: same coastline, same parameters, plus land routes between Ireland, Britain and the continent. Kept for its 8 captures - it is the fordless baseline every crossing report compares IoU against.",
  "origin": {
   "source": "automation/build_mod.py:MOD_REGIONS",
   "shipped_filename": "RW Britain.rms",
@@ -81,7 +81,8 @@
   "first_commit": "953032d",
   "first_commit_date": "2026-07-31",
   "also_known_as": [],
-  "imported": "2026-08-20T00:51:55Z"
+  "imported": "2026-08-20T00:51:55Z",
+  "retired": "2026-08-20T20:24:37Z"
  },
  "builds": [
   {

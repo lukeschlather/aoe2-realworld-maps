@@ -72,8 +72,8 @@
  },
  "window_hash": "7100e31a99021c99838d5f372a0e07f8152de94233758e215d1c61966d4c7795",
  "params_hash": "0399a5ecaa454e9e1928c740f4fe89df54446077bf1cad45261f3c3c9a6bffc5",
- "status": "shipped",
- "note": "\"Britain northup France\" in the 2026-08-16 candidate report: the shipped Britain window at the same 1300 km span, centre 2 degrees south, trading open sea for enough continent to hold two TCs. Water north of Britain drops 45 -> 16 tiles while staying open; Ireland keeps 32 tiles of clearance; the Channel stays 8 wide; the continental patch grows 6,041 -> 10,809 tiles. Capture: 35.2% land, 8 TCs, IoU 0.848. No N=10 pass yet.",
+ "status": "retired",
+ "note": "Superseded 2026-08-20 by great-britain-n-crossings-ramsey, this window with the fords. Kept for its captures as the fordless baseline.",
  "origin": {
   "source": "automation/build_mod.py:MOD_REGIONS",
   "shipped_filename": "RW Great Britain N.rms",
@@ -84,7 +84,8 @@
   "also_known_as": [
    "Britain northup France"
   ],
-  "imported": "2026-08-20T00:51:55Z"
+  "imported": "2026-08-20T00:51:55Z",
+  "retired": "2026-08-20T20:24:41Z"
  },
  "builds": [
   {

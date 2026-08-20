@@ -1,6 +1,6 @@
 {
  "label": "britain-crossings-ramsey",
- "name": "Britain Crossings Ramsey",
+ "name": "Britain",
  "argv": [
   "--region",
   "britain",
@@ -75,15 +75,17 @@
  },
  "window_hash": "09499b8ea1187c0c91ad389c9011cb1786090585e58e4c55a1906c565f115d37",
  "params_hash": "777b38077d5d13479a3c25738c173328004a90462dd93b2c195cb8bcf11743d4",
- "status": "candidate",
- "note": "britain-crossings-wide plus a fourth shallows chain across Ramsey Sound (-5.32,51.87 to -5.05,51.84 at 24 km), so the St George's ford's Welsh end is joined to Pembrokeshire even when the engine leaves a fragment - read in game as Ramsey Island - detached off St Davids Head. Everything else identical to britain-crossings-wide.",
+ "status": "shipped",
+ "note": "Britain with the fords: shallows across the North Channel, St George's Channel and the Strait of Dover, plus the Ramsey Sound connector that gives the St George's Welsh end solid ground to land on. 18 of 18 fords open on run britain_ramsey (N=3 per window); the versions without the connector shut St George's in 2 of 6. Supersedes the fordless britain preset.",
  "origin": {
   "source": "automation/preset_cli.py new",
   "created": "2026-08-20T17:09:03Z",
   "also_known_as": [
-   "britain-crossings-ramsey"
+   "britain-crossings-ramsey",
+   "Britain Crossings Ramsey"
   ],
-  "imported": "2026-08-20T18:14:47Z"
+  "imported": "2026-08-20T18:14:47Z",
+  "promoted": "2026-08-20T20:23:58Z"
  },
  "builds": [
   {
@@ -92,7 +94,8 @@
    "src_commit": "9a7e762",
    "built_utc": "2026-08-20T17:58:04Z",
    "paths": [
-    "out/mod_capture/britain_ramsey/scripts/britain-crossings-ramsey/20260820-175618/britain_crossings_ramsey_240.rms"
+    "out/mod_capture/britain_ramsey/scripts/britain-crossings-ramsey/20260820-175618/britain_crossings_ramsey_240.rms",
+    "out/rms_cache/britain-crossings-ramsey-777b3807/britain-crossings-ramsey.rms"
    ],
    "command": "uv run rwmaps britain-crossings-ramsey --outdir C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\mod_capture\\britain_ramsey\\scripts\\britain-crossings-ramsey --no-preview --region britain --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north -45 --feature-preset britain-crossings-ramsey",
    "summary": {
@@ -101,6 +104,19 @@
     "starts": 8,
     "min_separation": 32.0,
     "verdict": "unfair"
+   }
+  },
+  {
+   "sha256": "23387103cae9b1e2ef7550b03a90bbaeeb642291e2b76bc1dfb6e8af1149d127",
+   "bytes": 222026,
+   "src_commit": "9a7e762",
+   "built_utc": "2026-08-20T17:58:04Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Britain.rms"
+   ],
+   "command": "uv run rwmaps 'Britain' --region britain --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north -45 --feature-preset britain-crossings-ramsey",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
    }
   }
  ],
