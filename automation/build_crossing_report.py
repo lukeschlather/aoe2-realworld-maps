@@ -51,9 +51,14 @@ adding a land one. So each crossing gets two rows - the sea route with
 shallows counted as water, and with shallows counted as blocking - and the
 difference between them is exactly the exposure.
 
-Pictures are the stored capture render, turned to the in-game orientation,
-with shallows checkerboarded on; the helpers come from
-``build_feature_report`` so there is one copy of the rotation arithmetic.
+Pictures are the **utility** render off the capture itself - coast, depth,
+forest, trees, resource dots by owner, fish and whales as white dots -
+turned to the in-game orientation with shallows checkerboarded on. The
+helpers come from ``build_feature_report`` so there is one copy of the
+rotation arithmetic, and the render from ``capture_render`` so every report
+draws a sample the same way. The stored ``preview_png_b64`` is a fallback
+for a row whose scenario has been cleaned up: it has no trees and no fish,
+and on a coastline map those are most of what a reader is looking for.
 
 Usage:
     uv run python automation/build_crossing_report.py --run-id britain_crossings
@@ -327,7 +332,8 @@ def main() -> int:
         wsizes = sorted((int((wlab == i).sum()) for i in range(1, wn + 1)),
                         reverse=True)[:4]
 
-        turned_img, (pscale, _), _ = turned(rec["preview_png_b64"], shallow)
+        turned_img, (pscale, _), _ = turned(rec["preview_png_b64"], shallow,
+                                            scenario=scx)
         crops = "".join(
             f"""<figure><img src="{b64(crop_at(turned_img, tile(*c['crop']),
                                                pscale, land.shape[0],

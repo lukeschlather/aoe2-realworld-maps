@@ -126,6 +126,11 @@ class Scene:
     trees: list[tuple[float, float]]
     tcs: list[tuple[int, float, float]]
     resources: list[tuple[str, float, float]]
+    #: Fish and whales. Kept apart from ``resources`` the same way
+    #: ``scx_read.Capture`` keeps them apart - a different economy, and the
+    #: ownership walk that colours the land dots is a *walk*, which does not
+    #: reach them.
+    water_resources: list[tuple[str, float, float]] = field(default_factory=list)
     source: str = ""
     unknown_ids: dict[int, int] = field(default_factory=dict)
 
@@ -160,6 +165,7 @@ def scene_from_scenario(path: str | Path, name: str = "") -> Scene:
         name=name or path.stem, size=cap.terrain.shape[0], grid=cap.terrain,
         cls=cls, trees=[(x, y) for _k, x, y in cap.trees],
         tcs=cap.town_centers, resources=cap.resources,
+        water_resources=cap.water_resources,
         source=str(path), unknown_ids=unknown,
     )
 
@@ -265,6 +271,42 @@ def draw_trees(img: Image.Image, scene: Scene, scale: float, color,
         d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color)
 
 
+#: Fish, deep fish and whales. White, because nothing else on the utility
+#: view is: the land dots are player colours and grey, the sea is blue, so a
+#: white dot on water can only be one thing.
+WATER_FOOD = (248, 248, 248)
+
+#: Dot size per kind, as a fraction of the land resource dot, because a
+#: generated map carries several hundred deep fish and only ~120 shore fish.
+#: Drawn all at one size, the deep-water lattice came out as a starfield that
+#: buried the coastline the picture is read for - measured on
+#: ``britain_crossings_wide`` sample 0: 379 deep fish, 126 shore.
+#:
+#: The order is what a start actually cares about. Shore fish are dockable
+#: immediately and get the full dot; deep fish need a fishing ship and are
+#: mostly open-water filler, so they get a small one; a whale is 1,000 food
+#: against a shore fish's 225 and gets the big one.
+WATER_FOOD_SIZE = {"shore_fish": 1.0, "deep_fish": 0.55, "whale": 1.6}
+
+
+def draw_water_food(img: Image.Image, scene: Scene, scale: float,
+                    dot: float) -> None:
+    """Fish and whales, as white dots on the water.
+
+    Drawn without an ownership colour on purpose. The land dots are coloured
+    by who can *walk* to a resource first, and no walk reaches a fish - a
+    dock and a fishing ship do. Colouring them by nearest TC would state a
+    claim the game does not support.
+    """
+    d = ImageDraw.Draw(img)
+    for kind, x, y in scene.water_resources:
+        r = dot * WATER_FOOD_SIZE.get(kind, 1.0)
+        cx, cy = x * scale, y * scale
+        # No outline under ~2 px: a dark ring on a 1.5 px dot is the dot.
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=WATER_FOOD,
+                  outline=(10, 10, 10) if r >= 2.0 else None)
+
+
 def diamond_frame(img: Image.Image, border, outline, width: int = 6) -> Image.Image:
     """The tan-over-dark edge the stock map icons carry."""
     out = img.convert("RGB")
@@ -356,9 +398,15 @@ def final_scale(px: int, size: int, scale: int) -> float:
 
 
 def utility(scene: Scene, px: int = 720, scale: int = 3,
-            resource_owner=None) -> Image.Image:
+            resource_owner=None, turned: bool = True) -> Image.Image:
     """Everything at once: coast, depth, fords, **forest**, trees, resources
-    dotted by owner, TC rings.
+    dotted by owner, **fish and whales as white dots**, TC rings.
+
+    ``turned=False`` returns the picture still square to the tile grid, at
+    ``size * scale`` px, for a caller that has its own transform to apply -
+    the strait crops in ``build_feature_report`` follow tiles through the
+    rotation by hand, so they need the unturned image and the tile scale, not
+    a finished diamond.
 
     The default is 720 px, not 360: this is the picture a fairness report is
     read from, and per-player resource dots have to survive being looked at
@@ -397,6 +445,7 @@ def utility(scene: Scene, px: int = 720, scale: int = 3,
         d.ellipse([x * scale - dot, y * scale - dot,
                    x * scale + dot, y * scale + dot],
                   fill=color, outline=(10, 10, 10))
+    draw_water_food(img, scene, scale, dot)
     ring = max(4.0, 6.0 * k)
     for player, x, y in scene.tcs:
         cx, cy = x * scale, y * scale
@@ -405,7 +454,7 @@ def utility(scene: Scene, px: int = 720, scale: int = 3,
         d.ellipse([cx - ring, cy - ring, cx + ring, cy + ring],
                   outline=U_PLAYER[(player - 1) % len(U_PLAYER)],
                   width=max(1, round(1.1 * k)))
-    return turn(img, px)
+    return turn(img, px) if turned else img
 
 
 # --------------------------------------------------------------------------

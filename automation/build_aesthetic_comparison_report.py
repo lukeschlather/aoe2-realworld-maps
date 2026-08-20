@@ -37,6 +37,7 @@ from rwmaps import scx_read  # noqa: E402
 from tuning_matrix import WINDOWS, conditions_for, resolve_params  # noqa: E402
 from build_tuning_report import cell_id  # noqa: E402
 from aesthetic_metrics import compute_metrics  # noqa: E402
+import capture_render  # noqa: E402
 
 RUN_ID = "res_default_sweep"
 RESULTS_PATH = REPO / "out" / "tuning_matrix" / RUN_ID / "results.jsonl"
@@ -154,7 +155,7 @@ def condition_card(win_key: str, cond_key: str, resolved: dict, highlight: set,
 
     return f'''<div class="card">
         <h4>{rid_html} <span class="cid">{cid}</span></h4>
-        <img src="{rec['preview_png_b64']}" alt="real engine capture" loading="lazy">
+        <img src="{capture_render.data_uri(scenario_path) or rec['preview_png_b64']}" alt="real engine capture" loading="lazy">
         {metrics_html}
         {params_table(resolved, highlight)}
         <p class="cond-sub">{link_html}</p>

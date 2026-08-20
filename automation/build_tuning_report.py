@@ -36,6 +36,7 @@ REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(Path(__file__).parent))
 
 from tuning_matrix import WINDOWS, conditions_for, PARAM_DEFAULTS, resolve_params  # noqa: E402
+import capture_render  # noqa: E402
 
 MATRIX_OUT = REPO / "out" / "tuning_matrix"
 RESULTS_PATH = MATRIX_OUT / "results.jsonl"
@@ -156,6 +157,10 @@ def sample_card(rec: dict, scenario_relpath: str | None) -> str:
         scenario_link = f'<a class="filelink" href="{scenario_relpath}">{filename}</a>'
     else:
         scenario_link = '<span class="filelink missing-link">.aoe2scenario missing</span>'
+    # Trees and fish whenever the archived capture is there; the stored
+    # preview has neither and was retired as a report visual on 2026-08-20.
+    visual = (capture_render.data_uri(REPO / "reports" / scenario_relpath)
+              if scenario_relpath else "") or rec["preview_png_b64"]
     return f'''
     <div class="sample">
         <div class="facts">
@@ -172,7 +177,7 @@ def sample_card(rec: dict, scenario_relpath: str | None) -> str:
             {resource_table(resources['per_player'])}
             <div class="fact-row">{scenario_link}</div>
         </div>
-        <img src="{rec['preview_png_b64']}" alt="real engine capture" loading="lazy">
+        <img src="{visual}" alt="real engine capture" loading="lazy">
     </div>'''
 
 

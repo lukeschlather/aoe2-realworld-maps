@@ -39,6 +39,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from rwmaps.cli import build_parser  # noqa: E402
+import capture_render  # noqa: E402
 
 #: Phases, in the order they run, and whether the time is ours or the game's.
 #: "ours" is the only column an engineering decision can move.
@@ -272,7 +273,10 @@ def main() -> int:
                             f"{name.replace(' ', '_')}/{scx_name}'>.aoe2scenario</a>")
             a = r["aesthetic"]
             t = r["timing"]
-            img = r.get("preview_png_b64", "")
+            # Trees and fish off the capture; the stored preview is the
+            # fallback for a sample whose scenario is gone.
+            img = (capture_render.data_uri(src)
+                   or r.get("preview_png_b64", ""))
             cards.append(
                 f"<figure><img src='{img}' alt='{esc(name)} sample {i}'>"
                 f"<figcaption>"

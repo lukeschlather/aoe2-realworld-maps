@@ -55,6 +55,7 @@ from rwmaps import resource_value as rv  # noqa: E402
 
 from candidate_set import CANDIDATES  # noqa: E402
 import resource_compare  # noqa: E402
+import capture_render  # noqa: E402
 
 #: Same floors the pre-generation screen used, so a captured map's structure
 #: can be read against the truth mask it was cut from.
@@ -398,8 +399,11 @@ def main() -> None:
         rms_rel, scen = archive(run_out, data_dir, name, idx)
         structs = {}
         for r in recs:
-            r["_preview"] = turned_preview(r["preview_png_b64"])
             src = data_dir / name / f"{name}__s{r['sample_index']:03d}.aoe2scenario"
+            # Trees and fish off the archived capture, the stored preview
+            # only when it is missing.
+            r["_preview"] = (capture_render.data_uri(src, px=420)
+                             or turned_preview(r["preview_png_b64"]))
             structs[r["sample_index"]] = (structure_of(src) if src.exists()
                                           else {"landmasses": [], "waterbodies": [],
                                                 "land_pct": r["land_pct"]})

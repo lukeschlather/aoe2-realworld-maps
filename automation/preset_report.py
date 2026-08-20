@@ -32,7 +32,6 @@ from __future__ import annotations
 
 import argparse
 import base64
-import hashlib
 import html
 import json
 import shutil
@@ -120,54 +119,28 @@ def turned_preview(preview_b64: str, shallow=None, px: int = 300) -> str:
             + base64.b64encode(buf.getvalue()).decode())
 
 
-#: Rendered utility views, keyed by scenario and size. A scenario parse is
-#: ~4.5s and the ownership walk another second or two, so a 50-sample report
-#: would spend minutes redrawing pictures that cannot have changed - the
-#: capture is a file on disk and this render is a pure function of it.
-VISUAL_CACHE = REPO / "out" / "utility_cache"
-
-
 def capture_visual(scenario_rel: str, px: int = 720) -> str:
-    """The **utility + forest** render of a captured sample, as a data URI.
+    """The **utility** render of a captured sample, as a data URI.
 
     The default visual for a fairness report as of 2026-08-19, chosen from
     the seven-way comparison in
     ``reports/20260819-211625_render_treatments_all.html``. It shows what the
-    older analysis render never did: forest, tree objects and fords. Resource
-    dots keep the old render's colours and are sized in FINAL pixels - the
-    first version sized them in internal pixels, which came out around 1.5 px
-    in the finished diamond and could not be read against the woods at all.
+    older analysis render never did: forest, tree objects, fords, and - since
+    2026-08-20 - fish and whales as white dots. Resource dots keep the old
+    render's colours and are sized in FINAL pixels; the first version sized
+    them in internal pixels, which came out around 1.5 px in the finished
+    diamond and could not be read against the woods at all.
+
+    The render itself, and its cache, live in ``capture_render`` now, because
+    every report wants the same picture and there is no reason for each to
+    grow its own copy of the ownership walk.
 
     Returns "" when the scenario is not on disk, so the caller can fall back
     to the preview stored in results.jsonl.
     """
-    if not scenario_rel:
-        return ""
-    path = REPO / scenario_rel
-    if not path.is_file():
-        return ""
-    VISUAL_CACHE.mkdir(parents=True, exist_ok=True)
-    key = hashlib.sha256(f"{scenario_rel}|{px}".encode()).hexdigest()[:16]
-    cached = VISUAL_CACHE / f"utility-{key}.png"
-    if not (cached.is_file() and cached.stat().st_mtime >= path.stat().st_mtime):
-        from rwmaps import render_styles
-        import sample_analysis
-        scene = render_styles.scene_from_scenario(path)
-        owner = {}
-        if scene.tcs:
-            walks = {pl: sample_analysis.land_path_distance(
-                         scene.land, (int(y), int(x)))
-                     for pl, x, y in scene.tcs}
-            for kind, x, y in scene.resources:
-                best_p, best_d = None, float("inf")
-                for pl, dist in walks.items():
-                    dd = dist[int(y), int(x)]
-                    if dd < best_d:
-                        best_d, best_p = dd, pl
-                owner[(kind, x, y)] = best_p if best_d <= 30.0 else None
-        render_styles.utility(scene, px=px, resource_owner=owner).save(cached)
-    return ("data:image/png;base64,"
-            + base64.b64encode(cached.read_bytes()).decode())
+    import capture_render
+
+    return capture_render.data_uri(scenario_rel, px=px)
 
 
 def requests_shallows(preset: Preset) -> bool:

@@ -37,6 +37,7 @@ import json  # noqa: E402
 
 from build_mod import shipped_regions  # noqa: E402
 from mod_capture import resolve_geo  # noqa: E402
+import capture_render  # noqa: E402
 
 RESOURCE_KINDS = ["gold", "stone", "forage", "sheep", "deer", "boar"]
 
@@ -187,6 +188,10 @@ def sample_card(rec: dict, scenario_relpath: str | None) -> str:
         scenario_link = f'<a class="filelink" href="{scenario_relpath}">{filename}</a>'
     else:
         scenario_link = '<span class="filelink missing-link">.aoe2scenario missing</span>'
+    # Trees and fish whenever the capture is still there; the stored preview
+    # has neither and was retired as a report visual on 2026-08-20.
+    visual = (capture_render.data_uri(REPO / "reports" / scenario_relpath)
+              if scenario_relpath else "") or rec["preview_png_b64"]
     return f'''
     <div class="sample">
         <div class="facts">
@@ -210,7 +215,7 @@ def sample_card(rec: dict, scenario_relpath: str | None) -> str:
             {resource_table(resources['per_player'])}
             <div class="fact-row">{scenario_link}</div>
         </div>
-        <img src="{rec['preview_png_b64']}" alt="real engine capture" loading="lazy">
+        <img src="{visual}" alt="real engine capture" loading="lazy">
     </div>'''
 
 

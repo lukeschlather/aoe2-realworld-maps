@@ -61,6 +61,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from rwmaps import scx_read, thumbnail  # noqa: E402
+import capture_render  # noqa: E402
 from rwmaps.projection import MapWindow  # noqa: E402
 
 #: SHALLOWS terrain, the one this report exists to look for.
@@ -160,16 +161,29 @@ def _rotated_size(w: int, h: int, deg: float) -> tuple[int, int]:
     return int(round(w * c + h * s_)), int(round(w * s_ + h * c))
 
 
-def turned(preview_b64: str, shallow: np.ndarray,
-           px: int = 320) -> tuple[Image.Image, tuple[float, float], float]:
-    """The stored capture render, shallows marked, in the in-game orientation.
+def turned(preview_b64: str, shallow: np.ndarray, px: int = 320,
+           scenario=None) -> tuple[Image.Image, tuple[float, float], float]:
+    """The capture render, shallows marked, in the in-game orientation.
 
     Mirrors ``build_candidate_report.turned_preview`` for the turn itself.
     Returns the image plus the scale and rotated geometry the crop needs, so
     the crop cannot use a different transform than the picture.
+
+    ``scenario`` is the capture this row came from. Given one, the picture is
+    ``capture_render.grid_image`` - the utility treatment, with forest, trees
+    and fish in it - and ``preview_b64`` is only the fallback for a row whose
+    scenario is no longer on disk. The stored preview was retired as a report
+    visual on 2026-08-20: it has no trees and no fish, and on a coastline map
+    those are most of what a reader is looking for.
+
+    The utility render comes back grid-aligned on purpose. The crops below
+    follow tiles through the rotation by hand, so a finished diamond would
+    leave them nothing to measure against.
     """
-    raw = base64.b64decode(preview_b64.split(",", 1)[-1])
-    img = Image.open(io.BytesIO(raw)).convert("RGB")
+    img = capture_render.grid_image(scenario)
+    if img is None:
+        raw = base64.b64decode(preview_b64.split(",", 1)[-1])
+        img = Image.open(io.BytesIO(raw)).convert("RGB")
     w, h = img.size
     scale = w / shallow.shape[0]
 
@@ -299,7 +313,8 @@ def main() -> int:
                         reverse=True)[:4]
 
         dy, dx = tile(*DENMARK)
-        turned_img, (pscale, _), _ = turned(rec["preview_png_b64"], shallow)
+        turned_img, (pscale, _), _ = turned(rec["preview_png_b64"], shallow,
+                                            scenario=scx)
         cards.append(f"""
     <article>
       <h3>{esc(name)} <span class="dim">sample {si}</span></h3>
