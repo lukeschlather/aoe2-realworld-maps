@@ -30,6 +30,14 @@ Three kinds, and the distinction between the last two is the whole point:
     the right tool for the Danish straits: Denmark stays walkable exactly as
     it is now, and boats can still get from the Baltic to the Kattegat.
 
+The last two run in both directions, and the second direction is worth
+stating because it is not obvious from the name. Laid across *land*, a
+channel of shallows adds a sea route - the Danish straits. Laid across
+*water*, the same block adds a **land** route: a ford across a strait that
+is otherwise a boat crossing, joining two landmasses for land units without
+removing the sea route through it either. ``britain-crossings`` is that use.
+Both are purely additive, which is the property ``water`` does not have.
+
 ``water`` and ``shallows`` are therefore not interchangeable, and
 ``WATER_SHALLOW`` (terrain 1, the blue shore water) is a third thing again -
 passable by boats and *not* fordable, so it would change land movement just
@@ -179,6 +187,49 @@ PRESETS: dict[str, list[Feature]] = {
         Feature("water", 12.75, 55.85, 11, "Oeresund cut"),
         Feature("water", 11.00, 55.45, 12, "Great Belt cut"),
         Feature("water", 9.75, 55.45, 10, "Little Belt cut"),
+    ],
+    # Shallows used the other way round: fords across three straits, so land
+    # units can walk between the three landmasses both Britain windows put on
+    # the map. Both ship as three separate pieces today - Britain+Wales+
+    # Scotland, Ireland, and the continent - and nothing joins them.
+    #
+    # Where each line goes, and why it is not the textbook narrowest point:
+    #
+    # * **North Channel**, Larne to the Rhins of Galloway, ~44 km. The real
+    #   narrowest is Torr Head to the Mull of Kintyre at ~21 km, but Kintyre
+    #   is a 37-tile island on the ``britain`` window and open water on
+    #   ``great-britain-n``, so a ford to it joins nothing to anything.
+    # * **St George's Channel**, St Davids Head to Carnsore Point, ~79 km.
+    #   This is the long one and it is the one the request named; there is no
+    #   shorter Wales-to-Ireland line.
+    # * **Strait of Dover**, Kent to Cap Gris-Nez, ~34 km.
+    #
+    # 18 km radius (3.3 tiles at 5.42 km/tile) is chosen on the continuity
+    # margin, not on width. Modelled in *script* space - discs quantised
+    # through ``to_land_position`` first, which is what the full-sound
+    # Oeresund got wrong - by ``automation/crossing_model.py``:
+    #
+    # | radius | shallows over water | worst overlap between neighbours |
+    # |--------|---------------------|----------------------------------|
+    # | 15 km  | 189 t               | 5.5 - 4.2 = **1.3 tiles**        |
+    # | 18 km  | 246 t               | 6.6 - 4.2 = 2.4 tiles            |
+    # | 21 km  | 274 t               | 7.8 - 5.0 = 2.8 tiles            |
+    #
+    # All three connect on paper. 15 km leaves 1.3 tiles of overlap where the
+    # quantiser is least kind, and the engine grows these lands organically
+    # rather than stamping the disc, so a 1.3-tile overlap is where a chain
+    # pinches shut. 21 km buys 0.4 tiles more margin for 28 more tiles of
+    # shallows. All three chains come out continuous on both windows at 18.
+    #
+    # Paper only. The engine decides whether a villager can walk it.
+    "britain-crossings": [
+        Feature("channel", -5.95, 54.85, 18, "North Channel, Larne-Galloway",
+                lon2=-4.95, lat2=54.85),
+        Feature("channel", -5.25, 51.88, 18,
+                "St George's Channel, Pembrokeshire-Wexford",
+                lon2=-6.45, lat2=52.22),
+        Feature("channel", 1.20, 51.15, 18, "Strait of Dover, Kent-Gris-Nez",
+                lon2=1.70, lat2=50.85),
     ],
 }
 

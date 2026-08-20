@@ -1,0 +1,107 @@
+{
+ "label": "great-britain-n-crossings",
+ "name": "Great Britain N Crossings",
+ "argv": [
+  "--center=-3.0,52.5",
+  "--span-km",
+  "1300",
+  "--forest-clumps",
+  "36",
+  "--forest-alt",
+  "PINE_FOREST",
+  "--forest-spacing",
+  "3",
+  "--north",
+  "0",
+  "--feature-preset",
+  "britain-crossings"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -3.0,
+  "lat": 52.5,
+  "span_km": 1300.0,
+  "north_deg": 0.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": [
+   "britain-crossings"
+  ],
+  "features": null,
+  "forest_alt": [
+   "PINE_FOREST"
+  ],
+  "forest_clumping_factor": null,
+  "forest_clumps": 36,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": 3,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": 0.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -3.0,
+   "lat": 52.5,
+   "span_km": 1300.0,
+   "north_deg": 0.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "7100e31a99021c99838d5f372a0e07f8152de94233758e215d1c61966d4c7795",
+ "params_hash": "678698ace3ee2f5476910e86a07e5d735d269de53fd47a526ee884c2e9b2e2b6",
+ "status": "candidate",
+ "note": "Great Britain N, with the britain-crossings fords: shallows across the North Channel, St George's Channel and the Strait of Dover, so land units can walk between Britain, Ireland and the continent. Everything else identical to the shipped Great Britain N preset. Paper model (crossing_model.py): all three chains continuous, the three landmasses become one 21,536-tile piece, 246 shallows tiles laid over water.",
+ "origin": {
+  "source": "automation/preset_cli.py new",
+  "created": "2026-08-20T08:53:30Z"
+ },
+ "builds": [
+  {
+   "sha256": "0294a837332f40eae238c53e4ab2c7e5f6daa3933e55c28aa3ba639e21347b70",
+   "bytes": 223040,
+   "src_commit": "1c8a259",
+   "built_utc": "2026-08-20T08:56:25Z",
+   "paths": [
+    "out/rms_cache/great-britain-n-crossings-678698ac/20260820-085513/great_britain_n_crossings_240.rms"
+   ],
+   "command": "uv run rwmaps 'Great Britain N Crossings' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0 --feature-preset britain-crossings",
+   "summary": {
+    "land_pct": 37.6,
+    "script_iou": 0.97,
+    "starts": 8,
+    "min_separation": 46.0,
+    "verdict": "unfair"
+   }
+  }
+ ],
+ "captures": [],
+ "legacy_notes": [],
+ "id": "great-britain-n-crossings-678698ac"
+}
