@@ -1,6 +1,6 @@
 {
  "label": "great-britain-n-crossings",
- "name": "Great Britain N Crossings",
+ "name": "Brit Shallows N",
  "argv": [
   "--center=-3.0,52.5",
   "--span-km",
@@ -76,15 +76,17 @@
  },
  "window_hash": "7100e31a99021c99838d5f372a0e07f8152de94233758e215d1c61966d4c7795",
  "params_hash": "678698ace3ee2f5476910e86a07e5d735d269de53fd47a526ee884c2e9b2e2b6",
- "status": "candidate",
+ "status": "shipped",
  "note": "Great Britain N, with the britain-crossings fords: shallows across the North Channel, St George's Channel and the Strait of Dover, so land units can walk between Britain, Ireland and the continent. Everything else identical to the shipped Great Britain N preset. Paper model (crossing_model.py): all three chains continuous, the three landmasses become one 21,536-tile piece, 246 shallows tiles laid over water.",
  "origin": {
   "source": "automation/preset_cli.py new",
   "created": "2026-08-20T08:53:30Z",
   "also_known_as": [
-   "great-britain-n-crossings"
+   "great-britain-n-crossings",
+   "Great Britain N Crossings"
   ],
-  "imported": "2026-08-20T09:33:16Z"
+  "imported": "2026-08-20T09:33:16Z",
+  "promoted": "2026-08-20T16:44:05Z"
  },
  "builds": [
   {
@@ -93,7 +95,8 @@
    "src_commit": "1c8a259",
    "built_utc": "2026-08-20T08:56:25Z",
    "paths": [
-    "out/rms_cache/great-britain-n-crossings-678698ac/20260820-085513/great_britain_n_crossings_240.rms"
+    "out/rms_cache/great-britain-n-crossings-678698ac/20260820-085513/great_britain_n_crossings_240.rms",
+    "out/rms_cache/great-britain-n-crossings-678698ac/great-britain-n-crossings.rms"
    ],
    "command": "uv run rwmaps 'Great Britain N Crossings' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0 --feature-preset britain-crossings",
    "summary": {
@@ -119,6 +122,19 @@
     "starts": 8,
     "min_separation": 46.0,
     "verdict": "unfair"
+   }
+  },
+  {
+   "sha256": "5a08cf06bc8856a2a73c32b4326a0d83f6b2f12e0c34725c0c29b51453d720de",
+   "bytes": 223030,
+   "src_commit": "1c8a259",
+   "built_utc": "2026-08-20T08:56:25Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Brit Shallows N.rms"
+   ],
+   "command": "uv run rwmaps 'Brit Shallows N' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0 --feature-preset britain-crossings",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
    }
   }
  ],

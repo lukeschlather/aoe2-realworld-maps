@@ -1,6 +1,6 @@
 {
  "label": "britain-crossings",
- "name": "Britain Crossings",
+ "name": "Brit Shallows",
  "argv": [
   "--region",
   "britain",
@@ -75,15 +75,17 @@
  },
  "window_hash": "09499b8ea1187c0c91ad389c9011cb1786090585e58e4c55a1906c565f115d37",
  "params_hash": "05cb0af0ef03931f70e81bbd1c62c05e5994ea86e79b34a935ce813bc2afa17c",
- "status": "candidate",
+ "status": "shipped",
  "note": "Britain, with the britain-crossings fords: shallows across the North Channel, St George's Channel and the Strait of Dover, so land units can walk between Britain, Ireland and the continent. Everything else identical to the shipped Britain preset. Paper model (crossing_model.py): all three chains continuous, the three landmasses become one 16,171-tile piece, 269 shallows tiles laid over water.",
  "origin": {
   "source": "automation/preset_cli.py new",
   "created": "2026-08-20T08:53:17Z",
   "also_known_as": [
-   "britain-crossings"
+   "britain-crossings",
+   "Britain Crossings"
   ],
-  "imported": "2026-08-20T09:33:16Z"
+  "imported": "2026-08-20T09:33:16Z",
+  "promoted": "2026-08-20T16:43:53Z"
  },
  "builds": [
   {
@@ -92,7 +94,8 @@
    "src_commit": "1c8a259",
    "built_utc": "2026-08-20T08:54:50Z",
    "paths": [
-    "out/rms_cache/britain-crossings-05cb0af0/20260820-085345/britain_crossings_240.rms"
+    "out/rms_cache/britain-crossings-05cb0af0/20260820-085345/britain_crossings_240.rms",
+    "out/rms_cache/britain-crossings-05cb0af0/britain-crossings.rms"
    ],
    "command": "uv run rwmaps 'Britain Crossings' --region britain --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north -45 --feature-preset britain-crossings",
    "summary": {
@@ -118,6 +121,19 @@
     "starts": 8,
     "min_separation": 32.0,
     "verdict": "unfair"
+   }
+  },
+  {
+   "sha256": "f86a0174a1326f80afe6007349b6c53bedad491deab44ec5d3d1f392c9368605",
+   "bytes": 223100,
+   "src_commit": "1c8a259",
+   "built_utc": "2026-08-20T08:54:50Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Brit Shallows.rms"
+   ],
+   "command": "uv run rwmaps 'Brit Shallows' --region britain --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north -45 --feature-preset britain-crossings",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
    }
   }
  ],
