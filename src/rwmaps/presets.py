@@ -239,6 +239,12 @@ class Capture:
     #: it, so a reader needs it to find the rows again.
     region: str = ""
     captured_utc: str = ""
+    #: When the run started, in the local time it was started in (from the
+    #: run_start event). Kept beside the UTC stamp because a session that
+    #: ran late in the evening Pacific lands on the next UTC day, and a
+    #: history that files it a day later than the work does not match
+    #: anything a person remembers.
+    started_local: str = ""
     commit: str = "unknown"
     #: How ``commit`` was established. Runs before ``runlog`` (2026-08-17)
     #: recorded none of their own, so theirs is HEAD-at-the-date - a weaker
@@ -366,6 +372,8 @@ class Preset:
                                             capture.captured_utc)
                 existing.report = existing.report or capture.report
                 existing.region = existing.region or capture.region
+                existing.started_local = (existing.started_local
+                                          or capture.started_local)
                 if existing.commit_source == "unknown":
                     existing.commit_source = capture.commit_source
                 return existing

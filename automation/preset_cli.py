@@ -66,8 +66,13 @@ def body_hash(path: Path) -> str:
     return hashlib.sha256("".join(text[1:]).encode()).hexdigest()
 
 
+def capture_date(c) -> str:
+    """The day the run happened, in the time zone it happened in."""
+    return (c.started_local or c.captured_utc or "")[:10]
+
+
 def last_capture(p: Preset) -> str:
-    dates = [c.captured_utc[:10] for c in p.captures if c.captured_utc]
+    dates = [capture_date(c) for c in p.captures if capture_date(c)]
     return max(dates) if dates else "-"
 
 
@@ -131,7 +136,7 @@ def cmd_show(args) -> int:
 
         print(f"\n  captures ({p.n_captured} samples in {len(p.captures)} runs)")
         for c in sorted(p.captures, key=lambda c: c.captured_utc):
-            print(f"    {c.run_id:24s} n={c.n_samples:<3d} {c.captured_utc[:10]} "
+            print(f"    {c.run_id:24s} n={c.n_samples:<3d} {capture_date(c)} "
                   f"commit {c.commit} ({c.commit_source})")
             if c.report:
                 print(f"      report    {c.report}")
@@ -350,6 +355,36 @@ def cmd_note(args) -> int:
 
 # --------------------------------------------------------------------------
 
+def cmd_history(args) -> int:
+    """Every capture run on record, oldest first.
+
+    The project's record of when map work happened used to be the git log
+    and whatever a report's filename said. This is the other half: which
+    engine passes ran, on what, at which commit, and what came out.
+    """
+    reg = load()
+    runs: dict[str, dict] = {}
+    for p in reg.presets.values():
+        for c in p.captures:
+            d = runs.setdefault(c.run_id, {
+                "date": capture_date(c), "n": 0, "labels": [],
+                "commit": c.commit, "report": c.report, "results": c.results})
+            d["n"] += c.n_samples
+            d["labels"].append(p.label)
+            d["report"] = d["report"] or c.report
+    print(f"{'date':11s} {'run-id':26s} {'N':>4s} {'commit':9s} presets")
+    for run, d in sorted(runs.items(), key=lambda kv: (kv[1]["date"], kv[0])):
+        print(f"{d['date']:11s} {run:26s} {d['n']:4d} {d['commit']:9s} "
+              f"{len(d['labels'])}")
+        if args.verbose:
+            print(f"{'':12s}{', '.join(sorted(d['labels']))}")
+            if d["report"]:
+                print(f"{'':12s}report: {d['report']}")
+    total = sum(d["n"] for d in runs.values())
+    print(f"\n{len(runs)} runs, {total} captured samples")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__,
@@ -371,6 +406,10 @@ def main() -> int:
     p = sub.add_parser("window", help="presets sharing this one's window")
     p.add_argument("preset")
     p.set_defaults(fn=cmd_window)
+
+    p = sub.add_parser("history", help="every capture run, oldest first")
+    p.add_argument("-v", "--verbose", action="store_true")
+    p.set_defaults(fn=cmd_history)
 
     p = sub.add_parser("audit", help="artifact facts: shipped vs captured, "
                                      "missing copies, promotable now")

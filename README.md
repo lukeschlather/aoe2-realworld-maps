@@ -38,26 +38,42 @@ Other hypotheses for why it was crashing:
 ## Operating it
 
 ```sh
-uv run python automation/build_mod.py --list      # regions and their flags
+# what ships, and whether each map has a build to reuse or must generate
+uv run python automation/build_mod.py --list
 
-# one region, ~2 min (a full rebuild is ~10: 8 regions x ~70s of annealing)
-uv run python automation/build_mod.py --regions "Salish Sea" --placeholder "Salish Sea"
+# a full build is ~20s now: a preset ships the exact script the engine was
+# measured on, so nothing re-anneals unless there is no build on disk.
+uv run python automation/build_mod.py
+uv run python automation/build_mod.py --presets salish-sea --placeholder salish-sea
 uv run python automation/install_mod.py --all
+
+# the record: one JSON per map, window + resolved parameters + builds +
+# captures. See PRESETS.md.
+uv run python automation/preset_cli.py list
+uv run python automation/preset_cli.py show scandinavia
+uv run python automation/preset_cli.py audit      # is what ships what was captured?
+uv run python automation/preset_cli.py history    # every capture run, oldest first
+uv run python automation/preset_import.py         # fold new runs into the registry
+
+# a report over any set of presets, across runs, with no engine time
+uv run python automation/preset_report.py --presets scandinavia scand-shift-10
 
 # map-selection icons + the reports/ gallery, engine-free, ~12s for the mod.
 # build_mod.py already calls this; run it alone after editing the renderer.
 uv run python automation/build_thumbnails.py
 
 # capture needs the game running, Scenario Editor, AA_rw_placeholder_tester,
-# Huge [240], 8 players. It aborts immediately if the game is not up.
+# Huge [240], 8 players. It rebuilds that state rather than demanding it.
 uv run python automation/mod_capture.py --run-id <id> --n-samples 1
+uv run python automation/mod_capture.py --run-id <id> --presets korea florida
 
 uv run python automation/compare_starts.py --stock benchmarks --mod <id>
 uv run python automation/neutral_supply.py --mod <id> --detail
 uv run pytest tests -q
 ```
 
-`mod/` is generated, never hand-edited. The lobby Map Size must be `Huge
+`mod/` is generated from `presets/*.json` with `status: shipped`, never
+hand-edited; adding a map to it is `preset_cli.py promote`. The lobby Map Size must be `Huge
 [240]` - land areas are absolute tile counts, so the wrong size breaks the
 map rather than shrinking it.
 
@@ -72,6 +88,8 @@ Live:
 
 | doc | what it is |
 |---|---|
+| **PRESETS.md** | **one record per map: window, complete resolved parameters, every build, every capture.** What ships, how a candidate gets promoted, and why a cached build is reused rather than regenerated |
+| HISTORY.md | what was done and when, session by session, with the runs and reports each produced |
 | **GENERATION.md** | **how generation works, end to end - start here.** Its *Islands* section holds the island design rules: shore is unbuildable, adjacent rocks are one island, gold/stone are worth a transport trip and a small copse is not |
 | RESOURCE_TEMPLATES.md | the two stock resource systems, and their measured budgets. Authoritative on resources |
 | STOCK_MAP_INVENTORY.md | what stock scripts are on disk; script name vs UI name |

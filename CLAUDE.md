@@ -1,8 +1,28 @@
 # Working conventions for this repo
 
 Concepts (fairness, aesthetics, how to change things) are in
-`README_AGENTS.md`. The mechanism is `GENERATION.md`. This file is only the
-conventions.
+`README_AGENTS.md`. The mechanism is `GENERATION.md`. The record system is
+`PRESETS.md`. This file is only the conventions.
+
+## The unit of record is a preset
+
+Every map is one `presets/<label>.json`: the window, the **complete resolved
+parameter set**, every `.rms` it has been built into (by sha256), and every
+engine capture of those. Never re-specify a map anywhere else — no new
+condition-set module, no hand-edited shipping list.
+
+- **After any capture pass, run `automation/preset_import.py`.** It is
+  idempotent, and it is what keeps a run from being a folder nobody can join
+  back to a parameter set.
+- **A preset before engine time, not after.** `preset_cli.py new` (or
+  `mod_capture --presets`) so the samples carry the preset's hash.
+- **Promote, don't re-specify.** `preset_cli.py promote` flips a status and
+  `build_mod.py` ships the exact script the engine was measured on. A
+  cached build is reused on *content*, never refreshed for being old —
+  `--rebuild` is deliberate, and what it produces has not been captured yet.
+- **Every path in the registry is a last known location, not a promise.**
+  Storage is index-only: the registry is committed, the artifacts stay in
+  `out/`. `preset_cli.py audit` says what is still there.
 
 ## Verification
 
@@ -67,11 +87,19 @@ lower-fidelity workaround — as long as the direction is sound.
 - **Never publish as Artifacts.** Reports are local HTML committed to
   `reports/` (self-contained, base64 previews), data in
   `reports/<name>_data/`. Gitignored `out/` is working data only.
+- **A report over a chosen set of maps is `preset_report.py`, and costs no
+  engine time** — the samples, previews and fairness profiles of every past
+  run are already on disk. Don't propose a capture pass to answer a question
+  the existing captures answer. A builder keyed to one `--run-id` cannot
+  compare across passes; that is what made this look expensive.
 
 ## Git
 
 Commit incrementally as work happens, split by logical unit — not one lump
 at the end.
+
+Record work as it happens too: a session's entry in `HISTORY.md`, dated,
+naming the run-ids and reports it produced.
 
 ## UI automation
 

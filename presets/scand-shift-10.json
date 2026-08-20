@@ -103,6 +103,7 @@
    "n_samples": 2,
    "region": "Scand shift 10",
    "captured_utc": "2026-08-19T06:48:07Z",
+   "started_local": "2026-08-18T23:33:03.704-07:00",
    "commit": "8eff8f9",
    "commit_source": "run_start event",
    "results": "out/mod_capture/scand_shift/results.jsonl",

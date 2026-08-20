@@ -9,6 +9,9 @@ Written 2026-08-10. Where a number here is a default it was read out of the
 code, not remembered - the code is authoritative and the file/function is
 cited so a stale line here is checkable in one grep.
 
+Which parameter sets have actually been built and captured is not here
+either: that is one record per map in `presets/*.json` (`PRESETS.md`).
+
 **Related docs, and what each is for:**
 
 | doc | what it is | status |

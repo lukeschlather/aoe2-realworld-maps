@@ -107,6 +107,7 @@
    "n_samples": 2,
    "region": "Michigan",
    "captured_utc": "2026-08-16T00:35:20Z",
+   "started_local": "",
    "commit": "afeda38",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
    "results": "out/mod_capture/candidates_n2/results.jsonl",

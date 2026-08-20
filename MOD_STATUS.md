@@ -1,5 +1,13 @@
 # Mod status
 
+> **The shipping list moved, 2026-08-19.** `build_mod.MOD_REGIONS` no longer
+> exists: what ships is `presets/*.json` with `status: shipped`, and each
+> map's parameters, builds, captures and promotion date live in its own
+> record. See `PRESETS.md`, and `HISTORY.md` for when each of the events
+> below happened. The per-region reasoning MOD_REGIONS carried was
+> transcribed onto the presets themselves; the list as it stood on the day
+> of the switch is frozen in `preset_import.MOD_REGIONS_AT_IMPORT`.
+
 > **SUPERSEDED IN PART - read `RESOURCE_TEMPLATES.md` and
 > `STOCK_MAP_INVENTORY.md` first.** This document is from 2026-08-01. Later
 > work (2026-08-07/08) established facts that invalidate several of its

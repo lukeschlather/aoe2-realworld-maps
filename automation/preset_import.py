@@ -510,6 +510,7 @@ def capture_presets(rows: dict[str, list[dict]], meta: dict[str, dict]
             cap = Capture(
                 run_id=run, region=region, n_samples=len(grp),
                 captured_utc=info["captured_utc"], commit=info["commit"],
+                started_local=info.get("started", ""),
                 results=info["results"], report=report_for(run),
                 samples=[summarize_row(r) for r in
                          sorted(grp, key=lambda r: r.get("sample_index") or 0)],

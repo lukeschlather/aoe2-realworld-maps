@@ -103,6 +103,7 @@
    "n_samples": 2,
    "region": "Scand cut",
    "captured_utc": "2026-08-19T01:09:31Z",
+   "started_local": "2026-08-18T18:00:23.941-07:00",
    "commit": "1663138",
    "commit_source": "run_start event",
    "results": "out/mod_capture/scand_feat/results.jsonl",
