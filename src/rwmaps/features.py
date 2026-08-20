@@ -276,6 +276,52 @@ PRESETS: dict[str, list[Feature]] = {
         Feature("channel", 1.20, 51.15, 24, "Strait of Dover, Kent-Gris-Nez",
                 lon2=1.70, lat2=50.85),
     ],
+    # ``britain-crossings-wide`` with the St George's line moved, because 24 km
+    # fixed the North Channel (4/6 -> 6/6 open) and Dover held at 6/6, while
+    # St George's stayed at 4/6 - and stayed broken on the *same window both
+    # times*, which is variance ruled out.
+    #
+    # It was never a radius problem. Both ends of that line sit offshore, one
+    # window each:
+    #
+    # | endpoint         | britain | great-britain-n |
+    # |------------------|---------|-----------------|
+    # | Welsh -5.25,51.88| land    | **water**       |
+    # | Irish -6.45,52.22| **water** | land          |
+    #
+    # and the crossing failed on whichever window its offshore end was on.
+    # The North Channel and Dover endpoints are land on both, which is exactly
+    # why those two work. The mechanism is worse than a plain gap: shallows are
+    # painted last, over the coastline, so an end disc centred a tile off a
+    # headland overlaps it in a thin crescent and then *converts the crescent
+    # to shallows*, cutting the tip off the landmass rather than joining to it.
+    # Measured on run ``britain_crossings_wide``: Pembrokeshire's coast left as
+    # 25-, 5- and 5-tile fragments with Britain proper 4.1 tiles beyond. A
+    # wider radius makes this worse, which is why 24 km did not help.
+    #
+    # So the ends move inland instead. Chosen on how much of the end disc
+    # lands on a >=500-tile landmass - ``crossing_model.py`` reports it now,
+    # and the two crossings that work in the engine score 30-48 of 61:
+    #
+    # | line                          | britain     | great-britain-n |
+    # |-------------------------------|-------------|-----------------|
+    # | old -5.25,51.88 / -6.45,52.22 | 1t offshore | 1t offshore     |
+    # | -4.90,51.95 / -6.60,52.30     | 46 / 37     | 44 / 45         |
+    #
+    # Both ends 0 tiles offshore on both windows, with fatter overlaps than
+    # Dover's 30/61. Further inland scores higher still (-4.70/-6.75 reaches
+    # 56/61 and 61/61) and is not taken: an end disc entirely inland turns 61
+    # tiles of Wales or Wexford into a shallow lagoon, and the point is a
+    # strait, not a flooded county.
+    "britain-crossings-anchored": [
+        Feature("channel", -5.95, 54.85, 24, "North Channel, Larne-Galloway",
+                lon2=-4.95, lat2=54.85),
+        Feature("channel", -4.90, 51.95, 24,
+                "St George's Channel, Pembrokeshire-Wexford",
+                lon2=-6.60, lat2=52.30),
+        Feature("channel", 1.20, 51.15, 24, "Strait of Dover, Kent-Gris-Nez",
+                lon2=1.70, lat2=50.85),
+    ],
 }
 
 

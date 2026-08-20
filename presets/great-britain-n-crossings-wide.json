@@ -81,7 +81,10 @@
  "origin": {
   "source": "automation/preset_cli.py new",
   "created": "2026-08-20T09:23:41Z",
-  "imported": "2026-08-20T09:33:16Z"
+  "imported": "2026-08-20T09:33:16Z",
+  "also_known_as": [
+   "great-britain-n-crossings-wide"
+  ]
  },
  "builds": [
   {
@@ -100,9 +103,183 @@
     "min_separation": 46.0,
     "verdict": "unfair"
    }
+  },
+  {
+   "sha256": "88f1948a3cea91b1c4f497429391f77e97d89cb1aa36fb4fdf88891fc3e017d1",
+   "bytes": 221977,
+   "src_commit": "3d3c991",
+   "built_utc": "2026-08-20T09:36:34Z",
+   "paths": [
+    "out/mod_capture/britain_crossings_wide/scripts/great-britain-n-crossings-wide/20260820-093503/great_britain_n_crossings_wide_240.rms"
+   ],
+   "command": "uv run rwmaps great-britain-n-crossings-wide --outdir C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\mod_capture\\britain_crossings_wide\\scripts\\great-britain-n-crossings-wide --no-preview --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0 --feature-preset britain-crossings-wide",
+   "summary": {
+    "land_pct": 37.6,
+    "script_iou": 0.97,
+    "starts": 8,
+    "min_separation": 46.0,
+    "verdict": "unfair"
+   }
   }
  ],
- "captures": [],
+ "captures": [
+  {
+   "run_id": "britain_crossings_wide",
+   "n_samples": 3,
+   "region": "great-britain-n-crossings-wide",
+   "captured_utc": "2026-08-20T09:41:32Z",
+   "started_local": "2026-08-20T02:27:54.359-07:00",
+   "commit": "3d3c991",
+   "commit_source": "run_start event",
+   "results": "out/mod_capture/britain_crossings_wide/results.jsonl",
+   "report": "reports/20260820-024701_crossing_report_britain_crossings_wide.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8251,
+     "preserved_fraction": 1.0,
+     "land_pct": 34.9,
+     "n_tcs": 8,
+     "min_tc_separation": 47.2,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.32,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 13.5,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 7,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1636.0,
+      "land_exclusive_min": 1335,
+      "wood_exclusive_median": 270.5,
+      "neutral_total": 67,
+      "forest_share_of_land": 0.172
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8331,
+     "preserved_fraction": 1.0,
+     "land_pct": 35.2,
+     "n_tcs": 8,
+     "min_tc_separation": 47.2,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.32,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 14.5,
+       "stone": 13.5,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 1,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1509.0,
+      "land_exclusive_min": 1334,
+      "wood_exclusive_median": 314.5,
+      "neutral_total": 61,
+      "forest_share_of_land": 0.176
+     }
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.8474,
+     "preserved_fraction": 1.0,
+     "land_pct": 35.2,
+     "n_tcs": 8,
+     "min_tc_separation": 47.2,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.32,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 16.0,
+       "stone": 12.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 2,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1691.5,
+      "land_exclusive_min": 1350,
+      "wood_exclusive_median": 286.0,
+      "neutral_total": 54,
+      "forest_share_of_land": 0.172
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/britain_crossings_wide/great-britain-n-crossings-wide/raw/sample_000.aoe2scenario",
+    "out/mod_capture/britain_crossings_wide/great-britain-n-crossings-wide/raw/sample_001.aoe2scenario",
+    "out/mod_capture/britain_crossings_wide/great-britain-n-crossings-wide/raw/sample_002.aoe2scenario"
+   ]
+  }
+ ],
  "legacy_notes": [],
  "id": "great-britain-n-crossings-wide-ec93b0bf"
 }

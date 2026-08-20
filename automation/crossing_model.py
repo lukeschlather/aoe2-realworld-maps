@@ -88,8 +88,36 @@ def script_space(discs, size: int) -> np.ndarray:
     return out
 
 
-def quantised_chain(window, f: features.Feature, size: int):
-    """Per-channel continuity: the step between quantised centres, vs 2r."""
+#: A land piece smaller than this is an islet, not a side of a strait.
+MIN_LANDMASS_TILES = 500
+
+
+def quantised_chain(window, f: features.Feature, size: int, mask=None):
+    """Per-channel continuity, and whether the ends land on real ground.
+
+    Two ways a chain fails, and the second one cost a capture pass before it
+    was checked here at all:
+
+    * **It gaps.** ``land_position`` is integer percent, so centres quantise
+      to 2.39-tile steps at 240 and consecutive discs can end up further
+      apart than they are wide.
+    * **Its end disc eats the land it was aiming at.** Shallows are painted
+      last, over the coastline, so an end disc centred offshore at the tip of
+      a headland overlaps that headland in a thin crescent - and then
+      *converts the crescent to shallows*, cutting the tip off the landmass
+      instead of joining to it. Measured on run ``britain_crossings_wide``:
+      the St George's line, aimed 1 tile off Pembrokeshire, left the Welsh
+      coastal tiles as 25-, 5- and 5-tile fragments with Britain proper 4.1
+      tiles beyond, and the ford read SHUT. A wider radius makes this worse,
+      not better. The same line has its Irish end in water on ``britain``.
+
+    So the end check is not "is there land within a radius" - a disc 1 tile
+    offshore passes that and still fails. It reports, per end, the distance
+    to the nearest land piece of at least ``MIN_LANDMASS_TILES`` (the only
+    kind worth joining) and **how many tiles of the end disc actually fall on
+    one**. A thin overlap is the failure signature; an end sitting inland has
+    a fat one and nothing to sever.
+    """
     chain = features._channel_discs(window, f)
     if chain is None:
         return None
@@ -101,8 +129,33 @@ def quantised_chain(window, f: features.Feature, size: int):
              for a, b in zip(pos, pos[1:]) if a != b]
     r = chain[0][2]
     biggest = max(steps) if steps else 0.0
-    return {"discs": len(chain), "distinct": len(set(pos)), "radius_t": r,
-            "max_step": biggest, "continuous": biggest <= 2.0 * r}
+    out = {"discs": len(chain), "distinct": len(set(pos)), "radius_t": r,
+           "max_step": biggest, "continuous": biggest <= 2.0 * r,
+           "ends": None}
+    if mask is not None:
+        lab, n = ndimage.label(mask, structure=np.ones((3, 3), bool))
+        big = np.zeros_like(mask)
+        for i in range(1, n + 1):
+            piece = lab == i
+            if int(piece.sum()) >= MIN_LANDMASS_TILES:
+                big |= piece
+        dist = ndimage.distance_transform_edt(~big)
+        yy, xx = np.ogrid[:size, :size]
+        ends = []
+        for y, x in ((chain[0][0], chain[0][1]), (chain[-1][0], chain[-1][1])):
+            iy, ix = int(round(y)), int(round(x))
+            disc = ((yy - iy) ** 2 + (xx - ix) ** 2) <= r ** 2
+            ends.append({"offshore_t": float(dist[iy, ix]),
+                         "on_land": int((disc & big).sum()),
+                         "disc_tiles": int(disc.sum())})
+        out["ends"] = ends
+        # Both conditions, because either alone lets a known failure through:
+        # 1 tile offshore passes any radius-sized distance test, and a fat
+        # overlap on the wrong side of a 1-tile gap is still a gap.
+        out["anchored"] = all(e["offshore_t"] == 0.0
+                              and e["on_land"] >= 0.25 * e["disc_tiles"]
+                              for e in ends)
+    return out
 
 
 def model(name: str, argv: list[str]) -> dict:
@@ -137,7 +190,7 @@ def model(name: str, argv: list[str]) -> dict:
         for f in feats:
             if f.kind == "channel":
                 chains.append((f.note or f"{f.lon},{f.lat}",
-                               quantised_chain(window, f, size)))
+                               quantised_chain(window, f, size, mask)))
 
     lands = args.lands or cli.lands_for_size(size)
     discs = rms_land.cover_mask(mask, lands, max_radius=args.max_radius,
@@ -191,6 +244,13 @@ def report(m: dict) -> None:
               f"distinct positions, r={ch['radius_t']:.1f}t, max step "
               f"{ch['max_step']:.1f}t vs 2r={2 * ch['radius_t']:.1f}t "
               f"-> {verdict}")
+        if ch.get("ends") is not None:
+            where = " / ".join(
+                f"{e['offshore_t']:.0f}t offshore, {e['on_land']}/"
+                f"{e['disc_tiles']} of the end disc on a "
+                f">={MIN_LANDMASS_TILES}t landmass" for e in ch["ends"])
+            print(f"{'':4s}ends: {where} -> "
+                  + ("anchored" if ch["anchored"] else "*** BAD END ***"))
     print(f"  {'anchor':14s} {'tile':>10s}  {'piece, no shallows':>22s}"
           f"  {'with shallows':>22s}")
     for a, d in m["anchors"].items():

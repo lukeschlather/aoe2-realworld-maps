@@ -1,0 +1,108 @@
+{
+ "label": "great-britain-n-crossings-anchored",
+ "name": "Great Britain N Crossings Anchored",
+ "argv": [
+  "--center=-3.0,52.5",
+  "--span-km",
+  "1300",
+  "--forest-clumps",
+  "36",
+  "--forest-alt",
+  "PINE_FOREST",
+  "--forest-spacing",
+  "3",
+  "--north",
+  "0",
+  "--feature-preset",
+  "britain-crossings-anchored"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -3.0,
+  "lat": 52.5,
+  "span_km": 1300.0,
+  "north_deg": 0.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": [
+   "britain-crossings-anchored"
+  ],
+  "features": null,
+  "forest_alt": [
+   "PINE_FOREST"
+  ],
+  "forest_clumping_factor": null,
+  "forest_clumps": 36,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": 3,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": 0.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -3.0,
+   "lat": 52.5,
+   "span_km": 1300.0,
+   "north_deg": 0.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "7100e31a99021c99838d5f372a0e07f8152de94233758e215d1c61966d4c7795",
+ "params_hash": "0af76900a7da1fdf05bfe2191a7aaac640dc0fda167c1a78e0fe5edec175e3ec",
+ "status": "candidate",
+ "note": "Great Britain N with britain-crossings-anchored: North Channel and Dover at 24 km as verified in run britain_crossings_wide (6/6 each), and the St George's line moved inland at both ends. Its old Welsh endpoint sat in water on this window, so the crossing failed here at both 18 km and 24 km.",
+ "origin": {
+  "source": "automation/preset_cli.py new",
+  "created": "2026-08-20T09:55:56Z",
+  "imported": "2026-08-20T10:00:54Z"
+ },
+ "builds": [
+  {
+   "sha256": "e7bc6841b5caf1fa708597b4ee595a9e0f68f99d710c513542ce8fb7acb55f75",
+   "bytes": 222515,
+   "src_commit": "c6be764",
+   "built_utc": "2026-08-20T09:59:51Z",
+   "paths": [
+    "out/rms_cache/great-britain-n-crossings-anchored-0af76900/20260820-095809/great_britain_n_crossings_anchored_240.rms"
+   ],
+   "command": "uv run rwmaps 'Great Britain N Crossings Anchored' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0 --feature-preset britain-crossings-anchored",
+   "summary": {
+    "land_pct": 37.6,
+    "script_iou": 0.97,
+    "starts": 8,
+    "min_separation": 46.0,
+    "verdict": "unfair"
+   }
+  }
+ ],
+ "captures": [],
+ "legacy_notes": [],
+ "id": "great-britain-n-crossings-anchored-0af76900"
+}

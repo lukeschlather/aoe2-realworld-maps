@@ -8,8 +8,10 @@ straits to **join** landmasses, so for each crossing,
 * is the strait crossable on foot at that strait, and
 * how wide is the crossing at its pinch?
 
-Both are measured **inside a box around the strait**, by component sets.
-Getting that wrong is easy and this file did, on the first run:
+Both are measured **inside a corridor around that strait** - the tiles
+within a set distance of the chain's own centreline - by component sets.
+Getting the locality right took three tries, and each wrong answer was
+plausible:
 
 * An unrestricted connectivity test answers a different question. With
   three crossings on one map, Ireland reaches France whenever *any* of them
@@ -18,7 +20,19 @@ Getting that wrong is easy and this file did, on the first run:
   the narrowest point anywhere along it - usually a forest pinch inland -
   not the width of the crossing.
 * A pair of probe tiles lands wherever it lands. One anchor fell inside a
-  forest-enclosed pocket and reported no route across a ford that was open.
+  forest-enclosed pocket and reported no route across a ford that was open;
+  another snapped to a one-tile islet instead of the continent. Hence
+  component sets - the set of passable components touching each side.
+* Locality is measured in a **stadium around the chain's own centreline**
+  rather than a square around its midpoint. The two agreed on every sample
+  measured, so this is not a bug fix - a square is just the wrong shape for
+  a 25-tile diagonal chain and would eventually clip one. Worth recording
+  that the square was *suspected* of a false SHUT on St George's Channel and
+  cleared: unrestricted, that chain's ground component does touch Ireland
+  and Britain, but only because the North Channel joins them, which is
+  exactly the whole-map confusion above. The SHUT was real - the chain's
+  Welsh end disc sat a tile offshore, ate the tip of Pembrokeshire into
+  shallows, and left Britain proper 4.1 tiles beyond it.
 
 Each crossing is measured twice, and the pair is the interesting part:
 once with **water as the only barrier** (``land | SHALLOWS``) and once with
@@ -108,12 +122,29 @@ def _feature_args(argv: list[str]) -> tuple[list[str], list[str]]:
     return specs, presets
 
 
-def _box(shape, a, b, half: int) -> np.ndarray:
-    """A square window centred between the two ends of one channel."""
-    cy, cx = (a[0] + b[0]) // 2, (a[1] + b[1]) // 2
-    out = np.zeros(shape, dtype=bool)
-    out[max(0, cy - half):cy + half, max(0, cx - half):cx + half] = True
-    return out
+def _corridor(shape, a, b, half: int) -> np.ndarray:
+    """Tiles within ``half`` of the segment ``a``-``b``: the strait, locally.
+
+    A square centred on the chain midpoint was the obvious thing and it was
+    wrong. On the 20-tile St George's chain the corridor from the shallows to
+    Wales runs out past the corner of that square, so the component test
+    reported SHUT on a ford that was open - measured: unrestricted, the same
+    chain's ground component touches Ireland, Britain and the continent in
+    all three samples. A stadium around the line clips the rest of the map
+    without clipping the crossing.
+    """
+    ys, xs = np.ogrid[:shape[0], :shape[1]]
+    ay, ax = float(a[0]), float(a[1])
+    by, bx = float(b[0]), float(b[1])
+    vy, vx = by - ay, bx - ax
+    vv = vy * vy + vx * vx
+    if vv == 0:
+        t = np.zeros(shape)
+    else:
+        t = np.clip(((ys - ay) * vy + (xs - ax) * vx) / vv, 0.0, 1.0)
+    dy = (ys - ay) - t * vy
+    dx = (xs - ax) - t * vx
+    return (dy * dy + dx * dx) <= float(half) ** 2
 
 
 def _ford(passable, llab, pa: int, pb: int, eight, tile, f):
@@ -134,6 +165,14 @@ def _ford(passable, llab, pa: int, pb: int, eight, tile, f):
         return True, float("nan")
     return True, nav_width(comp, tile(f.lon, f.lat, ta),
                            tile(f.lon2, f.lat2, tb))
+
+
+def _e2e(passable, llab, pa: int, pb: int, eight) -> bool:
+    """Do the two landmasses share any passable component at all?"""
+    lab, _n = ndimage.label(passable, structure=eight)
+    ca = set(np.unique(lab[(llab == pa) & passable]).tolist()) - {0}
+    cb = set(np.unique(lab[(llab == pb) & passable]).tolist()) - {0}
+    return bool(ca & cb)
 
 
 #: The end-to-end question the three crossings add up to.
@@ -232,8 +271,9 @@ def main() -> int:
             (an, alon, alat), (bn, blon, blat) = c["land"]
             pa = int(llab[tile(alon, alat, big)])
             pb = int(llab[tile(blon, blat, big)])
-            local = _box(walk.shape, tile(f.lon, f.lat), tile(f.lon2, f.lat2),
-                         c["half_tiles"]) if f is not None else None
+            local = _corridor(walk.shape, tile(f.lon, f.lat),
+                              tile(f.lon2, f.lat2),
+                              c["half_tiles"]) if f is not None else None
             verdicts = []
             for tag, passable in (("water only", land | shallow),
                                   ("forest too", walk)):
@@ -276,7 +316,12 @@ def main() -> int:
 
         (en, elon, elat), (fn, flon, flat) = END_TO_END
         e, f = tile(elon, elat, footing), tile(flon, flat, footing)
-        ok_e2e, _ = joined(walk, e, f)
+        # Component sets here as well: a probe pair put France in the smaller
+        # of two walkable pieces and reported NO on a sample whose three fords
+        # were all open.
+        pe = int(llab[tile(elon, elat, big)])
+        pf = int(llab[tile(flon, flat, big)])
+        ok_e2e = _e2e(walk, llab, pe, pf, eight)
         lsizes = sorted((int((llab == i).sum()) for i in range(1, ln + 1)),
                         reverse=True)[:4]
         wsizes = sorted((int((wlab == i).sum()) for i in range(1, wn + 1)),

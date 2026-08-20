@@ -1,0 +1,107 @@
+{
+ "label": "britain-crossings-anchored",
+ "name": "Britain Crossings Anchored",
+ "argv": [
+  "--region",
+  "britain",
+  "--forest-clumps",
+  "36",
+  "--forest-alt",
+  "PINE_FOREST",
+  "--forest-spacing",
+  "3",
+  "--north",
+  "-45",
+  "--feature-preset",
+  "britain-crossings-anchored"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -3.0,
+  "lat": 54.5,
+  "span_km": 1300.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": [
+   "britain-crossings-anchored"
+  ],
+  "features": null,
+  "forest_alt": [
+   "PINE_FOREST"
+  ],
+  "forest_clumping_factor": null,
+  "forest_clumps": 36,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": 3,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -3.0,
+   "lat": 54.5,
+   "span_km": 1300.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "09499b8ea1187c0c91ad389c9011cb1786090585e58e4c55a1906c565f115d37",
+ "params_hash": "c75a60f12149aa45da138e698f9e609da7897f148653044ca5ac7741b3d43c10",
+ "status": "candidate",
+ "note": "Britain with britain-crossings-anchored: North Channel and Dover at 24 km as verified in run britain_crossings_wide (6/6 each), and the St George's line moved inland at both ends. Its old endpoints sat offshore one window each, and an end disc a tile off a headland eats the headland into shallows instead of joining to it - which is why 24 km did not fix that crossing.",
+ "origin": {
+  "source": "automation/preset_cli.py new",
+  "created": "2026-08-20T09:55:52Z",
+  "imported": "2026-08-20T10:00:54Z"
+ },
+ "builds": [
+  {
+   "sha256": "ea999f96f6f47a50b170fca454dd36d13993e43d11969d2dff0cd08994313f99",
+   "bytes": 222312,
+   "src_commit": "c6be764",
+   "built_utc": "2026-08-20T09:58:01Z",
+   "paths": [
+    "out/rms_cache/britain-crossings-anchored-c75a60f1/20260820-095615/britain_crossings_anchored_240.rms"
+   ],
+   "command": "uv run rwmaps 'Britain Crossings Anchored' --region britain --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north -45 --feature-preset britain-crossings-anchored",
+   "summary": {
+    "land_pct": 30.5,
+    "script_iou": 0.96,
+    "starts": 8,
+    "min_separation": 32.0,
+    "verdict": "unfair"
+   }
+  }
+ ],
+ "captures": [],
+ "legacy_notes": [],
+ "id": "britain-crossings-anchored-c75a60f1"
+}
