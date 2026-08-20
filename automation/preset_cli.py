@@ -143,6 +143,9 @@ def cmd_show(args) -> int:
             print(f"      results   {c.results}")
             live = sum(1 for s in c.scenarios if _exists(s))
             print(f"      scenarios {live}/{len(c.scenarios)} still on disk")
+            if args.scenarios:
+                for s in c.scenarios:
+                    print(f"        {'ok ' if _exists(s) else 'GONE'} {s}")
             for s in c.samples:
                 f = s.get("fairness") or {}
                 med = f.get("median") or {}
@@ -401,6 +404,9 @@ def main() -> int:
 
     p = sub.add_parser("show", help="everything about one preset")
     p.add_argument("presets", nargs="+")
+    p.add_argument("-s", "--scenarios", action="store_true",
+                   help="list every captured .aoe2scenario path, and whether "
+                        "it is still there")
     p.set_defaults(fn=cmd_show)
 
     p = sub.add_parser("window", help="presets sharing this one's window")
