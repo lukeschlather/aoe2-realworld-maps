@@ -72,7 +72,7 @@
   "source": "out/mod_capture/scand_feat/results.jsonl (run scand_feat)",
   "kind": "capture",
   "also_known_as": [],
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z"
  },
  "builds": [
   {
@@ -97,6 +97,7 @@
   {
    "run_id": "scand_feat",
    "n_samples": 2,
+   "region": "Scand plain",
    "captured_utc": "2026-08-19T01:09:31Z",
    "commit": "1663138",
    "commit_source": "run_start event",

@@ -233,6 +233,11 @@ class Capture:
     """One engine capture of a build: N samples under one run-id."""
     run_id: str
     n_samples: int
+    #: The display name this run filed the samples under. Not always the
+    #: preset's current name: a run captures under whatever name the
+    #: condition set used, and promotion renames. results.jsonl is keyed by
+    #: it, so a reader needs it to find the rows again.
+    region: str = ""
     captured_utc: str = ""
     commit: str = "unknown"
     #: How ``commit`` was established. Runs before ``runlog`` (2026-08-17)
@@ -360,6 +365,9 @@ class Preset:
                 existing.captured_utc = max(existing.captured_utc,
                                             capture.captured_utc)
                 existing.report = existing.report or capture.report
+                existing.region = existing.region or capture.region
+                if existing.commit_source == "unknown":
+                    existing.commit_source = capture.commit_source
                 return existing
         self.captures.append(capture)
         return capture

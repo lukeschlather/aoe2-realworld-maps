@@ -70,7 +70,7 @@
   "source": "out/mod_capture/cand_smoke/results.jsonl (run cand_smoke)",
   "kind": "capture",
   "also_known_as": [],
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z"
  },
  "builds": [
   {
@@ -93,6 +93,7 @@
   {
    "run_id": "cand_smoke",
    "n_samples": 1,
+   "region": "Korea",
    "captured_utc": "2026-08-15T23:20:58Z",
    "commit": "e05eba1",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -138,8 +139,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 144.5,
       "neutral_total": 52,
       "forest_share_of_land": 0.233
@@ -153,6 +154,7 @@
   {
    "run_id": "candidates_n2",
    "n_samples": 2,
+   "region": "Korea",
    "captured_utc": "2026-08-16T00:35:20Z",
    "commit": "afeda38",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -198,8 +200,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 164.5,
       "neutral_total": 56,
       "forest_share_of_land": 0.24
@@ -244,8 +246,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 152.5,
       "neutral_total": 47,
       "forest_share_of_land": 0.223

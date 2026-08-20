@@ -74,7 +74,7 @@
  "window_hash": "f1587ca156d2843dfef05def29479a0e35161435d86f66ea1db75391cbd1fa29",
  "params_hash": "f83710109cfaea046aa012eb551be2abc9e6c96db58137b699211a0a413075bd",
  "status": "shipped",
- "note": "",
+ "note": "FOREST_SPLIT plus --forest-percent 14, because the second forest block under-places; nets out at 23% wood against 25%.",
  "origin": {
   "source": "automation/build_mod.py:MOD_REGIONS",
   "shipped_filename": "RW Greece.rms",
@@ -83,14 +83,14 @@
   "first_commit": "953032d",
   "first_commit_date": "2026-07-31",
   "also_known_as": [],
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z"
  },
  "builds": [
   {
    "sha256": "3fc5e7691e592aba9b0b177473e4f061c70c6095afea4ca3ac2c7a4608354e26",
    "bytes": 216852,
    "src_commit": "a9d5dfd",
-   "built_utc": "2026-08-15T22:38:25Z",
+   "built_utc": "2026-08-20T00:46:18Z",
    "paths": [
     "mod/Real World Maps/resources/_common/random-map-scripts/RW Greece.rms",
     "out/mod_capture/latency_4regions/scripts/Greece/20260817-202852/greece_240.rms",
@@ -108,6 +108,7 @@
   {
    "run_id": "latency_4regions",
    "n_samples": 3,
+   "region": "Greece",
    "captured_utc": "2026-08-17T20:42:18Z",
    "commit": "6fd1eb1",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -262,6 +263,7 @@
   {
    "run_id": "save_fix_check",
    "n_samples": 3,
+   "region": "Greece",
    "captured_utc": "2026-08-17T20:51:58Z",
    "commit": "6fd1eb1",
    "commit_source": "HEAD at the run's date (pre-runlog run)",

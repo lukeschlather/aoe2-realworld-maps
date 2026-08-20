@@ -72,7 +72,7 @@
  "window_hash": "09499b8ea1187c0c91ad389c9011cb1786090585e58e4c55a1906c565f115d37",
  "params_hash": "9ac1483dcd85c90dc23608fef373b736c91857509f55c459b199403d117c387f",
  "status": "shipped",
- "note": "",
+ "note": "forest split across two terrain types so it stops fusing into one mass (FOREST_SPLIT). Britain pays no wood for it.",
  "origin": {
   "source": "automation/build_mod.py:MOD_REGIONS",
   "shipped_filename": "RW Britain.rms",
@@ -81,14 +81,14 @@
   "first_commit": "953032d",
   "first_commit_date": "2026-07-31",
   "also_known_as": [],
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z"
  },
  "builds": [
   {
    "sha256": "32d40602771a570a90498c305d6d8de00e3c4627379deee099bfa7bf6bd54ba6",
    "bytes": 217088,
    "src_commit": "a9d5dfd",
-   "built_utc": "2026-08-15T22:36:31Z",
+   "built_utc": "2026-08-20T00:46:18Z",
    "paths": [
     "mod/Real World Maps/resources/_common/random-map-scripts/RW Britain.rms",
     "out/mod_capture/latency_4regions/scripts/Britain/20260817-202230/britain_240.rms",
@@ -106,6 +106,7 @@
   {
    "run_id": "latency_4regions",
    "n_samples": 3,
+   "region": "Britain",
    "captured_utc": "2026-08-17T20:42:18Z",
    "commit": "6fd1eb1",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -260,6 +261,7 @@
   {
    "run_id": "placeholder_fix_britain",
    "n_samples": 5,
+   "region": "Britain",
    "captured_utc": "2026-08-15T10:12:24Z",
    "commit": "0a53034",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -305,8 +307,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 211.0,
       "neutral_total": 54,
       "forest_share_of_land": 0.214
@@ -351,8 +353,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 171.5,
       "neutral_total": 43,
       "forest_share_of_land": 0.21
@@ -397,8 +399,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 177.5,
       "neutral_total": 71,
       "forest_share_of_land": 0.207
@@ -443,8 +445,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 178.5,
       "neutral_total": 51,
       "forest_share_of_land": 0.207
@@ -489,8 +491,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 210.5,
       "neutral_total": 43,
       "forest_share_of_land": 0.206

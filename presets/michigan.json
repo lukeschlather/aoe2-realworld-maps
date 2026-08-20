@@ -71,7 +71,7 @@
  "window_hash": "4513992af36ebb4171b11c34ee8f3bf3642edfb68311b48c1982f3723f478edc",
  "params_hash": "6f0dcafb437949ea139e499ae10504885c47d75d403b3bf4bbf5d9cd36f94d6e",
  "status": "shipped",
- "note": "",
+ "note": "\"GL Michigan-Huron\" in the 2026-08-16 candidate report, renamed on request. Salish Sea's consolidation widths (5/3). Measured there: 78.8% land, 8 TCs, IoU 0.892 - the highest IoU of the Great Lakes candidates. No N=10 pass yet.",
  "origin": {
   "source": "automation/build_mod.py:MOD_REGIONS",
   "shipped_filename": "RW Michigan.rms",
@@ -80,14 +80,14 @@
   "first_commit": "953032d",
   "first_commit_date": "2026-07-31",
   "also_known_as": [],
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z"
  },
  "builds": [
   {
    "sha256": "d141baab0c67137d2a35654c81335f0203f75ee85231ca020cb2f37ab12d40bf",
    "bytes": 216987,
    "src_commit": "6c9b972",
-   "built_utc": "2026-08-18T09:20:30Z",
+   "built_utc": "2026-08-20T00:46:18Z",
    "paths": [
     "mod/Real World Maps/resources/_common/random-map-scripts/RW Michigan.rms",
     "out/mod_capture/candidates_n2/scripts/Michigan/20260815-232136/michigan_240.rms",
@@ -105,6 +105,7 @@
   {
    "run_id": "candidates_n2",
    "n_samples": 2,
+   "region": "Michigan",
    "captured_utc": "2026-08-16T00:35:20Z",
    "commit": "afeda38",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -150,8 +151,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 218.5,
       "neutral_total": 129,
       "forest_share_of_land": 0.14
@@ -196,8 +197,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 230.0,
       "neutral_total": 125,
       "forest_share_of_land": 0.139

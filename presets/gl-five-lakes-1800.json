@@ -76,7 +76,7 @@
   "source": "out/mod_capture/candidates_n2/results.jsonl (run candidates_n2)",
   "kind": "capture",
   "also_known_as": [],
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z"
  },
  "builds": [
   {
@@ -98,6 +98,7 @@
   {
    "run_id": "candidates_n2",
    "n_samples": 2,
+   "region": "GL five lakes 1800",
    "captured_utc": "2026-08-16T00:35:20Z",
    "commit": "afeda38",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -143,8 +144,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 247.5,
       "neutral_total": 104,
       "forest_share_of_land": 0.13
@@ -189,8 +190,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 241.5,
       "neutral_total": 107,
       "forest_share_of_land": 0.132

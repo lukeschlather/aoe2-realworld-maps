@@ -76,7 +76,7 @@
   "source": "out/mod_capture/scand_shift/results.jsonl (run scand_shift)",
   "kind": "capture",
   "also_known_as": [],
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z"
  },
  "builds": [
   {
@@ -101,6 +101,7 @@
   {
    "run_id": "scand_shift",
    "n_samples": 2,
+   "region": "Scand shift 20",
    "captured_utc": "2026-08-19T06:48:07Z",
    "commit": "8eff8f9",
    "commit_source": "run_start event",

@@ -64,7 +64,7 @@
  "window_hash": "9d39b85eccaddf012c05b752d3257aeb32caae4f21f7a56dc5a359d13d1678d9",
  "params_hash": "6b2829180fdda50b6fdae366111f2e73bf67957447fad60cacefbfa5417d2f3a",
  "status": "shipped",
- "note": "",
+ "note": "all 8 players crowded onto the single connected mainland/France/Balkans landmass - the original, unmodified behaviour, shipped alongside Italy rather than replaced by it.",
  "origin": {
   "source": "automation/build_mod.py:MOD_REGIONS",
   "shipped_filename": "RW Cramped Italy.rms",
@@ -75,14 +75,14 @@
   "also_known_as": [
    "Italy"
   ],
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z"
  },
  "builds": [
   {
    "sha256": "26cec3409f62c82efefe48fb8ec4119fe98a4b5d36a200158b35a52cf843a39e",
    "bytes": 216740,
    "src_commit": "a9d5dfd",
-   "built_utc": "2026-08-15T22:32:11Z",
+   "built_utc": "2026-08-20T00:46:18Z",
    "paths": [
     "mod/Real World Maps/resources/_common/random-map-scripts/RW Cramped Italy.rms",
     "out/rms_cache/cramped-italy-6b282918/cramped-italy.rms"
@@ -137,6 +137,7 @@
   {
    "run_id": "full_pass",
    "n_samples": 10,
+   "region": "Italy",
    "captured_utc": "2026-08-01T05:18:15Z",
    "commit": "8626b77",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -270,6 +271,7 @@
   {
    "run_id": "head_n1",
    "n_samples": 1,
+   "region": "Cramped Italy",
    "captured_utc": "2026-08-12T15:06:37Z",
    "commit": "bf74321",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -315,8 +317,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 165.5,
       "neutral_total": 117,
       "forest_share_of_land": 0.228
@@ -330,6 +332,7 @@
   {
    "run_id": "islands_n2",
    "n_samples": 2,
+   "region": "Cramped Italy",
    "captured_utc": "2026-08-10T17:49:01Z",
    "commit": "8fb61da",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -375,8 +378,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 136.5,
       "neutral_total": 120,
       "forest_share_of_land": 0.226
@@ -421,8 +424,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 181.5,
       "neutral_total": 136,
       "forest_share_of_land": 0.23
@@ -437,6 +440,7 @@
   {
    "run_id": "sysa_n10",
    "n_samples": 10,
+   "region": "Cramped Italy",
    "captured_utc": "2026-08-09T05:24:03Z",
    "commit": "e1b6e01",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -482,8 +486,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 176.5,
       "neutral_total": null,
       "forest_share_of_land": 0.229
@@ -528,8 +532,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 195.0,
       "neutral_total": null,
       "forest_share_of_land": 0.23
@@ -574,8 +578,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 194.0,
       "neutral_total": null,
       "forest_share_of_land": 0.224
@@ -620,8 +624,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 191.5,
       "neutral_total": null,
       "forest_share_of_land": 0.23
@@ -666,8 +670,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 202.5,
       "neutral_total": null,
       "forest_share_of_land": 0.226
@@ -712,8 +716,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 198.5,
       "neutral_total": null,
       "forest_share_of_land": 0.228
@@ -758,8 +762,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 207.5,
       "neutral_total": null,
       "forest_share_of_land": 0.229
@@ -804,8 +808,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 191.0,
       "neutral_total": null,
       "forest_share_of_land": 0.229
@@ -850,8 +854,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 168.5,
       "neutral_total": null,
       "forest_share_of_land": 0.227
@@ -896,8 +900,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 184.5,
       "neutral_total": null,
       "forest_share_of_land": 0.226

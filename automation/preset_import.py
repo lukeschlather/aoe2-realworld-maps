@@ -160,8 +160,16 @@ def summarize_row(row: dict) -> dict:
     }
     if fair:
         counts = {k: [p["counts"].get(k, 0) for p in per.values()] for k in KINDS}
-        land = [(p.get("land") or {}).get("land_exclusive", 0) for p in per.values()]
-        wood = [(p.get("wood") or {}).get("forest_exclusive", 0) for p in per.values()]
+        # Absent, not zero. Per-player land landed in the model on
+        # 2026-08-16, so every capture before that has no land figure at
+        # all - and defaulting it to 0 put a hard "this map gives a player
+        # no land" into the record for maps whose land was simply never
+        # measured. It then dragged the median of a mixed-vintage preset to
+        # zero, which is the one number a land comparison must not invent.
+        land = [v for v in ((p.get("land") or {}).get("land_exclusive")
+                            for p in per.values()) if v is not None]
+        wood = [v for v in ((p.get("wood") or {}).get("forest_exclusive")
+                            for p in per.values()) if v is not None]
         out["fairness"] = {
             "ownership_radius": fair.get("ownership_radius"),
             "median": {k: _median(v) for k, v in counts.items()},
@@ -169,9 +177,9 @@ def summarize_row(row: dict) -> dict:
             "players_without_any": {
                 k: (fair.get("spread", {}).get(k, {}) or {}).get("n_players_without_any")
                 for k in KINDS},
-            "land_exclusive_median": _median(land),
+            "land_exclusive_median": _median(land) if land else None,
             "land_exclusive_min": min(land) if land else None,
-            "wood_exclusive_median": _median(wood),
+            "wood_exclusive_median": _median(wood) if wood else None,
             "neutral_total": fair.get("neutral_total"),
             "forest_share_of_land": (fair.get("forest") or {}).get("share_of_land"),
         }
@@ -500,7 +508,7 @@ def capture_presets(rows: dict[str, list[dict]], meta: dict[str, dict]
                         "kind": "capture"})
             scen = scenarios_for(run, region)
             cap = Capture(
-                run_id=run, n_samples=len(grp),
+                run_id=run, region=region, n_samples=len(grp),
                 captured_utc=info["captured_utc"], commit=info["commit"],
                 results=info["results"], report=report_for(run),
                 samples=[summarize_row(r) for r in
@@ -534,6 +542,33 @@ def capture_presets(rows: dict[str, list[dict]], meta: dict[str, dict]
 # --------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------
+
+def attach_cache(reg: Registry) -> int:
+    """Attach anything sitting in ``out/rms_cache/<preset id>/``.
+
+    build_mod's cache is named by preset id, so a rebuilt registry can find
+    its builds again instead of regenerating them. The sha256 is recomputed
+    here, not trusted from the name: the point of the cache is that the
+    script it holds is the one that was measured.
+    """
+    cache = REPO / "out" / "rms_cache"
+    if not cache.is_dir():
+        return 0
+    by_id = {p.id: p for p in reg.presets.values()}
+    n = 0
+    for d in sorted(cache.iterdir()):
+        preset = by_id.get(d.name)
+        if preset is None or not d.is_dir():
+            continue
+        for rms in sorted(d.glob("*.rms")):
+            preset.record_build(Build(
+                sha256=sha256_file(rms), bytes=rms.stat().st_size,
+                built_utc=mtime_utc(rms), paths=[rel(rms)],
+                summary={"note": "build cache (out/rms_cache), written by "
+                                 "build_mod"}))
+            n += 1
+    return n
+
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
@@ -577,6 +612,10 @@ def main() -> int:
             else:
                 new += 1
         print(f"  {label:14s} {len(batch):4d} records -> {new} new, {merged} merged")
+
+    n_cache = attach_cache(reg)
+    if n_cache:
+        print(f"  build cache     {n_cache} scripts in out/rms_cache attached")
 
     n_built = sum(1 for p in reg.presets.values() if p.builds)
     n_cap = sum(1 for p in reg.presets.values() if p.captures)

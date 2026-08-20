@@ -71,7 +71,7 @@
  "window_hash": "66cabcbe656e0e0154571edfff991e30b234aec2855ed50b31b8c8005a031a7c",
  "params_hash": "b79d552648b9ac671b67256938a9cb5c44aadeea214dd104767042e3a9e9f382",
  "status": "shipped",
- "note": "",
+ "note": "the original hand-verified data point. Overrides consolidation width to victoria_recenter's verified 5/3 (cell 0a8509cf) rather than the 4/3 default.",
  "origin": {
   "source": "automation/build_mod.py:MOD_REGIONS",
   "shipped_filename": "RW Salish Sea.rms",
@@ -80,14 +80,14 @@
   "first_commit": "953032d",
   "first_commit_date": "2026-07-31",
   "also_known_as": [],
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z"
  },
  "builds": [
   {
    "sha256": "cb910d5bdf26ca99d7ae34ea02404c7738dd900c8df154ad9b3edb69929c52c7",
    "bytes": 217004,
    "src_commit": "a9d5dfd",
-   "built_utc": "2026-08-15T22:30:18Z",
+   "built_utc": "2026-08-20T00:46:18Z",
    "paths": [
     "mod/Real World Maps/resources/_common/random-map-scripts/RW Salish Sea.rms",
     "out/mod_capture/latency_4regions/scripts/Salish Sea/20260817-201538/salish_sea_240.rms",
@@ -198,6 +198,7 @@
   {
    "run_id": "full_pass",
    "n_samples": 10,
+   "region": "Salish Sea",
    "captured_utc": "2026-08-01T05:18:15Z",
    "commit": "8626b77",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -331,6 +332,7 @@
   {
    "run_id": "head_n1",
    "n_samples": 1,
+   "region": "Salish Sea",
    "captured_utc": "2026-08-12T15:06:37Z",
    "commit": "bf74321",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -376,8 +378,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 263.5,
       "neutral_total": 104,
       "forest_share_of_land": 0.153
@@ -391,6 +393,7 @@
   {
    "run_id": "island_v1",
    "n_samples": 1,
+   "region": "Salish Sea",
    "captured_utc": "2026-08-10T09:33:50Z",
    "commit": "e7f21f7",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -436,8 +439,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 251.0,
       "neutral_total": 535,
       "forest_share_of_land": 0.15
@@ -451,6 +454,7 @@
   {
    "run_id": "islands_n2",
    "n_samples": 2,
+   "region": "Salish Sea",
    "captured_utc": "2026-08-10T17:49:01Z",
    "commit": "8fb61da",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -496,8 +500,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 224.5,
       "neutral_total": 107,
       "forest_share_of_land": 0.148
@@ -542,8 +546,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 217.5,
       "neutral_total": 95,
       "forest_share_of_land": 0.149
@@ -558,6 +562,7 @@
   {
    "run_id": "latency_4regions",
    "n_samples": 3,
+   "region": "Salish Sea",
    "captured_utc": "2026-08-17T20:42:18Z",
    "commit": "6fd1eb1",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -712,6 +717,7 @@
   {
    "run_id": "neutral_v1",
    "n_samples": 1,
+   "region": "Salish Sea",
    "captured_utc": "2026-08-10T09:23:16Z",
    "commit": "e7f21f7",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -757,8 +763,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 248.0,
       "neutral_total": 333,
       "forest_share_of_land": 0.15
@@ -772,6 +778,7 @@
   {
    "run_id": "place_v1",
    "n_samples": 1,
+   "region": "Salish Sea",
    "captured_utc": "2026-08-09T07:15:07Z",
    "commit": "7c5542e",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -817,8 +824,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 206.0,
       "neutral_total": null,
       "forest_share_of_land": 0.149
@@ -832,6 +839,7 @@
   {
    "run_id": "smoke_n1",
    "n_samples": 1,
+   "region": "Salish Sea",
    "captured_utc": "2026-08-12T06:46:51Z",
    "commit": "4e38bf1",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -877,8 +885,8 @@
        "boar": 0,
        "small_game": 2
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 196.5,
       "neutral_total": 353,
       "forest_share_of_land": 0.142
@@ -892,6 +900,7 @@
   {
    "run_id": "sysa_n10",
    "n_samples": 10,
+   "region": "Salish Sea",
    "captured_utc": "2026-08-09T05:24:03Z",
    "commit": "e1b6e01",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -937,8 +946,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 247.5,
       "neutral_total": null,
       "forest_share_of_land": 0.152
@@ -983,8 +992,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 233.0,
       "neutral_total": null,
       "forest_share_of_land": 0.15
@@ -1029,8 +1038,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 235.0,
       "neutral_total": null,
       "forest_share_of_land": 0.149
@@ -1075,8 +1084,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 219.5,
       "neutral_total": null,
       "forest_share_of_land": 0.147
@@ -1121,8 +1130,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 249.5,
       "neutral_total": null,
       "forest_share_of_land": 0.154
@@ -1167,8 +1176,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 232.5,
       "neutral_total": null,
       "forest_share_of_land": 0.149
@@ -1213,8 +1222,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 248.5,
       "neutral_total": null,
       "forest_share_of_land": 0.15
@@ -1259,8 +1268,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 231.5,
       "neutral_total": null,
       "forest_share_of_land": 0.151
@@ -1305,8 +1314,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 228.0,
       "neutral_total": null,
       "forest_share_of_land": 0.15
@@ -1351,8 +1360,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 267.5,
       "neutral_total": null,
       "forest_share_of_land": 0.15
@@ -1375,6 +1384,7 @@
   {
    "run_id": "trees_v1",
    "n_samples": 2,
+   "region": "Salish Sea",
    "captured_utc": "2026-08-11T01:31:42Z",
    "commit": "ad218b2",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -1420,8 +1430,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 254.0,
       "neutral_total": 192,
       "forest_share_of_land": 0.148
@@ -1466,8 +1476,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 237.5,
       "neutral_total": 147,
       "forest_share_of_land": 0.149

@@ -69,7 +69,8 @@
  "origin": {
   "source": "out/mod_capture/full_pass_v2/results.jsonl (run full_pass_v2)",
   "kind": "capture",
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z",
+  "also_known_as": []
  },
  "builds": [
   {
@@ -91,6 +92,7 @@
   {
    "run_id": "full_pass_v2",
    "n_samples": 10,
+   "region": "Caribbean",
    "captured_utc": "2026-08-02T02:52:56Z",
    "commit": "a52553e",
    "commit_source": "HEAD at the run's date (pre-runlog run)",

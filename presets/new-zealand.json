@@ -68,7 +68,7 @@
  "origin": {
   "source": "captured argv (build_mod.RETIRED_REGIONS keeps only the names)",
   "also_known_as": [],
-  "imported": "2026-08-20T00:35:55Z"
+  "imported": "2026-08-20T00:51:55Z"
  },
  "builds": [
   {
@@ -116,6 +116,7 @@
   {
    "run_id": "full_pass",
    "n_samples": 10,
+   "region": "New Zealand",
    "captured_utc": "2026-08-01T05:18:15Z",
    "commit": "8626b77",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -249,6 +250,7 @@
   {
    "run_id": "head_n1",
    "n_samples": 1,
+   "region": "New Zealand",
    "captured_utc": "2026-08-12T15:06:37Z",
    "commit": "bf74321",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -294,8 +296,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 21.0,
       "neutral_total": 18,
       "forest_share_of_land": 0.063
@@ -309,6 +311,7 @@
   {
    "run_id": "islands_n2",
    "n_samples": 2,
+   "region": "New Zealand",
    "captured_utc": "2026-08-10T17:49:01Z",
    "commit": "8fb61da",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -354,8 +357,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 25.0,
       "neutral_total": 9,
       "forest_share_of_land": 0.076
@@ -400,8 +403,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 20.0,
       "neutral_total": 6,
       "forest_share_of_land": 0.077
@@ -416,6 +419,7 @@
   {
    "run_id": "sysa_n10",
    "n_samples": 10,
+   "region": "New Zealand",
    "captured_utc": "2026-08-09T05:24:03Z",
    "commit": "e1b6e01",
    "commit_source": "HEAD at the run's date (pre-runlog run)",
@@ -461,8 +465,8 @@
        "boar": 2,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 42.5,
       "neutral_total": null,
       "forest_share_of_land": 0.068
@@ -507,8 +511,8 @@
        "boar": 1,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 33.0,
       "neutral_total": null,
       "forest_share_of_land": 0.065
@@ -553,8 +557,8 @@
        "boar": 1,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 31.0,
       "neutral_total": null,
       "forest_share_of_land": 0.053
@@ -599,8 +603,8 @@
        "boar": 2,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 30.5,
       "neutral_total": null,
       "forest_share_of_land": 0.074
@@ -645,8 +649,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 32.0,
       "neutral_total": null,
       "forest_share_of_land": 0.066
@@ -691,8 +695,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 30.5,
       "neutral_total": null,
       "forest_share_of_land": 0.073
@@ -737,8 +741,8 @@
        "boar": 1,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 36.0,
       "neutral_total": null,
       "forest_share_of_land": 0.069
@@ -783,8 +787,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 44.5,
       "neutral_total": null,
       "forest_share_of_land": 0.07
@@ -829,8 +833,8 @@
        "boar": 0,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 23.5,
       "neutral_total": null,
       "forest_share_of_land": 0.04
@@ -875,8 +879,8 @@
        "boar": 1,
        "small_game": 8
       },
-      "land_exclusive_median": 0.0,
-      "land_exclusive_min": 0,
+      "land_exclusive_median": null,
+      "land_exclusive_min": null,
       "wood_exclusive_median": 44.0,
       "neutral_total": null,
       "forest_share_of_land": 0.073
