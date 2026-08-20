@@ -37,6 +37,7 @@ import shutil
 import sys
 from collections import defaultdict
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -57,6 +58,110 @@ KIND_LABEL = {"gold": "gold", "stone": "stone", "forage": "forage",
 
 def esc(x) -> str:
     return html.escape(str(x))
+
+
+# --------------------------------------------------------------------------
+# pictures
+# --------------------------------------------------------------------------
+
+#: SHALLOWS. Both a sea tile and a land tile - boats sail them, land units
+#: ford them - so they are drawn as a checkerboard of the render's own two
+#: colours rather than as a third colour that would imply a third thing.
+#: Same treatment, and the same reasoning, as build_feature_report.py.
+SHALLOWS_ID = 4
+SHALLOW_CHECKER = ((40, 84, 140), (86, 112, 66))
+OFFMAP = (17, 21, 26)
+
+
+def turned_preview(preview_b64: str, shallow=None, px: int = 300) -> str:
+    """The stored capture render, in the **in-game orientation**.
+
+    ``sample_analysis`` stores the render axis-aligned to the tile grid,
+    which is 45 degrees off anything a player ever sees. The engine draws
+    the grid turned counter-clockwise by ``thumbnail.ICON_ROTATION``, and
+    that turn is the only view in which "up" means anything - a strait
+    running up-left on screen is a strait running north, and judging a
+    window in the raw grid is how this project once described pictures as
+    "north up" that were 45 degrees out (see window_candidates.py).
+
+    ``shallow`` is a grid-space boolean mask read off the capture. It has to
+    be painted BEFORE the turn, while tile coordinates still mean something,
+    and it cannot come from the stored render at all: ``read_land_mask``
+    counts shallows as sea, so the render never had them.
+    """
+    import base64
+    import io
+
+    import numpy as np
+    from PIL import Image
+
+    from rwmaps import thumbnail
+
+    raw = base64.b64decode(preview_b64.split(",", 1)[-1])
+    img = Image.open(io.BytesIO(raw)).convert("RGB")
+    if shallow is not None and shallow.any():
+        scale = img.size[0] / shallow.shape[0]
+        a = np.asarray(img).copy()
+        k = max(1, int(round(scale)))
+        for y, x in zip(*np.nonzero(shallow)):
+            a[int(y * scale):int(y * scale) + k,
+              int(x * scale):int(x * scale) + k] = \
+                SHALLOW_CHECKER[(int(y) + int(x)) % 2]
+        img = Image.fromarray(a)
+    if thumbnail.ICON_ROTATION % 360:
+        img = img.rotate(thumbnail.ICON_ROTATION, expand=True,
+                         resample=Image.BICUBIC, fillcolor=OFFMAP)
+    img = img.resize((px, px), Image.LANCZOS)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return ("data:image/png;base64,"
+            + base64.b64encode(buf.getvalue()).decode())
+
+
+def requests_shallows(preset: Preset) -> bool:
+    """Whether this preset's script can produce SHALLOWS at all.
+
+    Read off the built script - a `terrain_type SHALLOWS` block - not off the
+    parameters, because that is the thing the engine acts on. Shipped
+    Scandinavia's script contains zero such blocks; the shift-15 script
+    contains 41. So for a preset whose script never asks, parsing its
+    captures to count shallows is ~4.5s per sample spent confirming a zero,
+    and the honest label is "the script asks for none" rather than a count
+    that reads as a measurement.
+    """
+    hit = preset.find_build(REPO)
+    if hit:
+        try:
+            return "SHALLOWS" in hit[1].read_text(encoding="ascii",
+                                                  errors="replace")
+        except Exception:
+            pass
+    return bool(preset.params.get("feature_presets")
+                or preset.params.get("features"))
+
+
+@lru_cache(maxsize=None)
+def shallow_mask(scenario_rel: str):
+    """SHALLOWS in a captured scenario, or None if it is not on disk.
+
+    Read off the capture, never off the script that asked for them: whether
+    the engine placed a shallows patch is exactly the question, and the
+    script only records the request.
+
+    Cached, and worth being: parsing a scenario is ~1.5s, so calling this
+    once for the picture and again for the count turned a seconds-long
+    report into a minutes-long one for no new information.
+    """
+    if not scenario_rel:
+        return None
+    path = REPO / scenario_rel
+    if not path.is_file():
+        return None
+    try:
+        from rwmaps import scx_read
+        return scx_read.read_terrain_grid(path) == SHALLOWS_ID
+    except Exception:
+        return None
 
 
 def fmt(x, nd=1) -> str:
@@ -105,6 +210,7 @@ def samples_for(preset: Preset, rows_by_file: dict[str, list[dict]]
     fairness profile. Both, so the report is as rich as the data still
     present and no poorer than the registry.
     """
+    import re
     out = []
     for cap in sorted(preset.captures, key=lambda c: c.captured_utc):
         rows = rows_by_file.get(cap.results, [])
@@ -112,8 +218,17 @@ def samples_for(preset: Preset, rows_by_file: dict[str, list[dict]]
         for r in rows:
             if r.get("region") == (cap.region or preset.name):
                 by_index[r.get("sample_index")] = r
+        # Scenario paths carry their sample index in the filename, in one of
+        # two spellings depending on which harness archived them
+        # (sample_003 in out/, ...__s003 in a report data dir).
+        scen = {}
+        for path in cap.scenarios:
+            m = re.search(r"s(?:ample_)?(\d+)", Path(path).stem)
+            if m:
+                scen[int(m.group(1))] = path
         for s in cap.samples:
-            out.append((cap.run_id, s, by_index.get(s.get("sample_index"), {})))
+            i = s.get("sample_index")
+            out.append((cap.run_id, s, by_index.get(i, {}), scen.get(i, "")))
     return out
 
 
@@ -281,14 +396,25 @@ def preset_card(p: Preset, samples: list[tuple[str, dict, dict]],
                if c.report else "") + "</li>")
 
     tiles = []
-    for run, s, row in samples:
-        img = row.get("preview_png_b64")
+    wants_shallows = requests_shallows(p)
+    for run, s, row, scen in samples:
+        raw = row.get("preview_png_b64")
+        shallows = shallow_mask(scen) if wants_shallows else None
+        img = turned_preview(raw, shallows) if raw else ""
+        n_shallow = int(shallows.sum()) if shallows is not None else None
         f = s.get("fairness") or {}
         med = f.get("median") or {}
         tiles.append(
             "<div class='sample'>"
             + (f"<img src='{img}' alt=''>" if img else
                "<div class='cap'>preview not in results.jsonl</div>")
+            + (f"<div class='cap'>{n_shallow:,} SHALLOWS tiles in the capture"
+               "</div>" if n_shallow else
+               ("<div class='cap'>the script asks for no shallows</div>"
+                if not wants_shallows else
+                ("<div class='cap'>shallows requested, none in the capture"
+                 "</div>" if shallows is not None else
+                 "<div class='cap'>scenario gone - shallows unknown</div>")))
             + f"<div class='cap'>{esc(run)} s{s.get('sample_index')} &middot; "
               f"IoU {fmt(s.get('iou_10m'), 3)} &middot; land "
               f"{fmt(s.get('land_pct'))}% &middot; {s.get('n_tcs')} TCs "
@@ -400,7 +526,7 @@ def main() -> int:
 
     compare = []
     for p in presets:
-        agg = aggregate([s for _run, s, _row in per_preset[p.label]])
+        agg = aggregate([s for _run, s, _row, _scen in per_preset[p.label]])
         compare.append(("", f"{p.name}  [{p.label}]", agg))
     if not args.no_stock:
         for cohort, name, agg in stock_rows():
@@ -427,6 +553,16 @@ def main() -> int:
  come from <code>out/resource_baseline.json</code>; Arabia is the reference
  and is held out of the stock band rather than averaged into it. Counts are
  resources, not objects. Nothing here is a score.</p>
+<p class="lead">Every picture is in the <b>in-game orientation</b> - the
+ grid turned counter-clockwise by <code>thumbnail.ICON_ROTATION</code>, the
+ same turn the engine applies. Up is up in the game and nothing else; the
+ stored render is axis-aligned to the tile grid, which is 45 degrees off
+ anything a player sees. <b>SHALLOWS</b> are drawn as a checkerboard of the
+ render's own sea and land colours, because they are both - boats sail them,
+ land units ford them - and they are read off the captured
+ <code>.aoe2scenario</code>, not off the script that asked for them. Where a
+ capture has been deleted the tile says so rather than implying none were
+ placed.</p>
 <h2>Side by side</h2>
 {compare_table(compare)}
 <h2>Presets</h2>
