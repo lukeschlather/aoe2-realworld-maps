@@ -161,6 +161,27 @@ The descriptions are **argparse's own help strings**, read off
 those strings carry the measurement behind a default, and a second copy
 written for reports would drift from the first.
 
+## How a map is drawn
+
+Two renders, two jobs, chosen 2026-08-19 from a seven-way comparison over 18
+maps (`reports/20260819-211625_render_treatments_all.html`,
+`automation/render_treatments.py`):
+
+- **Fairness reports use `utility`** - coast, depth, fords, **forest** in
+  dark green, tree objects, every land resource dotted in its owner's colour,
+  TC rings. Drawn from the capture, 720 px, shown small and zoomable. Marks
+  are sized in *final* pixels: sized in internal pixels they came out around
+  1.5 px after the turn and the downsample, which is how a resource dot stops
+  being legible without anything looking broken.
+- **The shipped map-selection icon uses `icon_atlas`** - hypsometric land
+  tint, offshore gradient, ink coastline, Town Centres and trees only. No
+  border, because the game frames the icon itself. Markers at half the stock
+  34 px. It needs a capture of that preset on disk; without one,
+  `build_thumbnails` falls back to the old `.rms`-derived icon and says so.
+
+Both are `src/rwmaps/render_styles.py`, and both are turned by
+`thumbnail.ICON_ROTATION` - the diamond is the only orientation anybody sees.
+
 ## Reading history back
 
 Reconstruction from records written against older code needed three

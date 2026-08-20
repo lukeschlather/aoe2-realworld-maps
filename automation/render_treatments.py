@@ -10,10 +10,9 @@ scenario so the comparison is between *treatments* and nothing else:
 2. **utility** - the same idea plus the thing it never drew: forest, in dark
    forest green, and tree objects on top of it. Wood is the resource a start
    lives or dies by and it was the only one with no mark on the picture.
-3. **mod icon** - the treatment the shipped maps use on the map-selection
-   screen (``thumbnail.render_icon``), fed by the capture rather than by the
-   ``.rms``, so this column differs from the shipped icon only in where its
-   terrain came from.
+3. **previous icon treatment** - what the maps shipped with until
+   2026-08-19 (``thumbnail.render_icon``), fed by the capture rather than by
+   the ``.rms``. Superseded by Atlas: see ``render_styles.icon_atlas``.
 4-7. **four new thumbnail treatments** - Town Centres and trees only, since
    a resource dot is information the player does not have yet. See
    ``rwmaps/render_styles.py``.
@@ -150,7 +149,8 @@ def treatments_for(scene: rs.Scene, px: int) -> list[tuple[str, str, Image.Image
     out = [("existing", "Existing analysis", existing),
            ("utility", "Utility + forest",
             rs.utility(scene, px=px, resource_owner=owner)),
-           ("mod-icon", "Shipped mod icon", rs.mod_icon_from_scene(scene, px=px))]
+           ("mod-icon", "Previous icon treatment",
+            rs.mod_icon_from_scene(scene, px=px))]
     for key, title, _why, fn in rs.AESTHETIC_TREATMENTS:
         out.append((key, title, fn(scene, px=px)))
     return out
@@ -246,10 +246,12 @@ def main() -> int:
          "start lives or dies by, and it was the only one with no mark on "
          "the picture. Fords are drawn as their own colour, since they are "
          "neither land nor sea."),
-        ("Shipped mod icon", "The treatment the maps ship with today "
-         "(thumbnail.render_icon), fed by this capture instead of by the "
-         ".rms. Land and water and player diamonds only - which is all the "
-         "script can know, because forest and objects are engine RNG."),
+        ("Previous icon treatment", "What the maps shipped with until "
+         "2026-08-19 (thumbnail.render_icon), fed by this capture instead of "
+         "by the .rms. Land and water and player diamonds only - which is "
+         "all the script can know, because forest and objects are engine "
+         "RNG. Superseded: the shipped icon is Atlas now, without the tan "
+         "border and with markers at half this size."),
     ] + [(t, why) for _k, t, why, _fn in rs.AESTHETIC_TREATMENTS]
 
     legend = "".join(f"<tr><td>{esc(t)}</td><td>{esc(w)}</td></tr>"
