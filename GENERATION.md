@@ -357,13 +357,18 @@ trees against those ids.
 its own `MOD_REGIONS` list, which is where each region's CLI flags live.
 
 ```sh
-uv run python automation/build_mod.py --list          # region names + their flags
+uv run python automation/build_mod.py --list   # what ships; reuse or generate
 
-# full rebuild: 8 regions x ~70s of annealing, ~10 minutes
+# full rebuild: ~20s. Every map ships a build already on disk, hash-verified
+# against the script the engine was measured on - nothing re-anneals.
 uv run python automation/build_mod.py
 
-# one region, in place, other regions untouched: ~2 minutes
-uv run python automation/build_mod.py --regions "Salish Sea" --placeholder "Salish Sea"
+# one map, in place, the rest untouched
+uv run python automation/build_mod.py --presets salish-sea --placeholder salish-sea
+
+# regenerate rather than reuse - ~70s of annealing per map, and the result
+# has not been through the engine yet
+uv run python automation/build_mod.py --rebuild salish-sea
 
 uv run python automation/install_mod.py --all
 ```
