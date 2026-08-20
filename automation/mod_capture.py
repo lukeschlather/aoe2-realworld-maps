@@ -593,6 +593,46 @@ def main():
                     sample_i += 1
                     continue
 
+                # Is this file our map at all? Two free checks, before any
+                # analysis, because the way this fails is silent and the
+                # error it eventually raises names none of it.
+                #
+                # Measured on run ``britain_ramsey``: the editor had been
+                # left mid-``setup`` by an interrupted pass - Blank Map,
+                # "Small (3 player) [144]" - and preflight passed it, because
+                # preflight can see the mod state and the selector template
+                # and nothing else. Six samples generated stock Arabia at
+                # 144x144, saved under the editor's own default name, and the
+                # only symptom was "operands could not be broadcast together
+                # with shapes (144,144) (240,240)" out of the aesthetic
+                # metrics - a message about the wrong subject entirely.
+                #
+                # ``save()`` types SAVE_NAME into the file browser, so a
+                # capture that lands under any other name did not come from
+                # our slot; and the grid is 240 in every configuration this
+                # project captures.
+                if after.stem != editor.SAVE_NAME:
+                    log.fail("wrong_slot",
+                             f"  *** {name} sample {sample_i}: the editor "
+                             f"saved {after.name}, not {editor.SAVE_NAME}"
+                             f".aoe2scenario - it generated something other "
+                             f"than {SLOT_PATH.name}. The editor is "
+                             f"misconfigured, not the script; close the game "
+                             f"and rerun so setup() runs.",
+                             region=name, sample_index=sample_i,
+                             saved=after.name, expected=editor.SAVE_NAME)
+                    raise SystemExit(2)
+                grid_n = int(scx_read.read_terrain_grid(dest).shape[0])
+                if grid_n != SIZE:
+                    log.fail("wrong_size",
+                             f"  *** {name} sample {sample_i}: the capture is "
+                             f"{grid_n}x{grid_n}, not {SIZE}x{SIZE} - the "
+                             f"editor's Map Size is not Huge [{SIZE}]. Close "
+                             f"the game and rerun so setup() runs.",
+                             region=name, sample_index=sample_i,
+                             grid=grid_n, expected=SIZE)
+                    raise SystemExit(2)
+
                 t_analyze = time.time()
                 try:
                     analysis = analyze_capture(dest, size=SIZE)
