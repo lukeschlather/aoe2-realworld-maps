@@ -58,6 +58,11 @@ uv run python automation/preset_import.py         # fold new runs into the regis
 # a report over any set of presets, across runs, with no engine time
 uv run python automation/preset_report.py --presets scandinavia scand-shift-10
 
+# seven ways to draw the same capture - a utility view that finally shows
+# forest, the shipped icon treatment, and four stylised thumbnails. Every
+# shipped map, every stock benchmark, side by side. No engine time.
+uv run python automation/render_treatments.py
+
 # map-selection icons + the reports/ gallery, engine-free, ~12s for the mod.
 # build_mod.py already calls this; run it alone after editing the renderer.
 uv run python automation/build_thumbnails.py
