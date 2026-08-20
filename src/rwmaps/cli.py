@@ -294,7 +294,12 @@ def build_parser() -> argparse.ArgumentParser:
     grid.add_argument("--feature-preset", action="append", default=None,
                       metavar="NAME", dest="feature_presets",
                       help="named set of --feature overrides, repeatable "
-                           "(danish-straits, zealand-funen, zealand-funen-cut)")
+                           "(danish-straits, zealand-funen, "
+                           "zealand-funen-sound, zealand-funen-cut). The "
+                           "table in features.py is append-only: a name is "
+                           "part of a map's parameters, the coordinates "
+                           "behind it are not, so a fix goes in under a new "
+                           "name rather than editing an old one")
     grid.add_argument("--min-land-width", type=int, default=3,
                       help="erase land bridges/spits narrower than this many tiles "
                            "(morphological opening) - guards against a stray sliver "

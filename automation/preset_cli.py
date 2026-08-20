@@ -36,6 +36,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
 from rwmaps.presets import Preset, Registry, sha256_file, utc_now  # noqa: E402
+from runlog import git_commit  # noqa: E402
 
 STATUS_ORDER = {"shipped": 0, "candidate": 1, "screened": 2, "retired": 3}
 
@@ -388,6 +389,52 @@ def cmd_history(args) -> int:
     return 0
 
 
+def cmd_build(args) -> int:
+    """Generate a preset's script and record the build - no engine, no mod.
+
+    The gap this fills: build_mod only builds what ships, so a candidate's
+    script could only be produced as a side effect of a capture pass. That
+    put ~70s of annealing and any generation failure *inside* the pass, where
+    it costs editor time and shows up as a skipped region. Building here
+    first means the capture pass starts from a script that exists, is
+    recorded by sha256, and can be diffed against the last one.
+    """
+    import build_mod
+    reg = load()
+    for key in args.presets:
+        p = reg.get(key)
+        hit = None if args.force else p.find_build(REPO)
+        if hit:
+            build, path = hit
+            print(f"{p.label}: already built {build.sha256[:10]} "
+                  f"({path}) - --force to build again")
+            continue
+        print(f"{p.label}: generating ...")
+        src, stdout, stderr = build_mod.generate(p)
+        if src is None:
+            print("  FAILED")
+            print(stderr[-1500:])
+            return 1
+        from rwmaps.presets import Build, sha256_file, utc_now as _now
+        import preset_import
+        build = p.record_build(Build(
+            sha256=sha256_file(src), bytes=src.stat().st_size,
+            src_commit=git_commit(), built_utc=_now(),
+            paths=[src.resolve().relative_to(REPO.resolve()).as_posix()],
+            command=f"uv run rwmaps {p.name!r} " + " ".join(p.argv),
+            summary=preset_import.parse_rwmaps_stdout(stdout)))
+        reg.save(p)
+        print(f"  {build.sha256[:10]}  {build.bytes:,} B  {build.summary}")
+        print(f"  {build.paths[-1]}")
+        # What the script asks the engine for, counted in the script rather
+        # than assumed from the flags: a feature preset that resolved to
+        # nothing on this window is silent otherwise.
+        text = src.read_text(encoding="ascii", errors="replace")
+        blocks = text.count("terrain_type                  SHALLOWS")
+        print(f"  SHALLOWS blocks in the script: {blocks}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__,
@@ -412,6 +459,13 @@ def main() -> int:
     p = sub.add_parser("window", help="presets sharing this one's window")
     p.add_argument("preset")
     p.set_defaults(fn=cmd_window)
+
+    p = sub.add_parser("build", help="generate a preset's script into the "
+                                     "build cache and record it")
+    p.add_argument("presets", nargs="+")
+    p.add_argument("--force", action="store_true",
+                   help="build again even if a build is already on disk")
+    p.set_defaults(fn=cmd_build)
 
     p = sub.add_parser("history", help="every capture run, oldest first")
     p.add_argument("-v", "--verbose", action="store_true")

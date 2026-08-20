@@ -131,6 +131,45 @@ PRESETS: dict[str, list[Feature]] = {
         Feature("channel", 9.60, 55.15, 11, "Little Belt",
                 lon2=9.95, lat2=55.75),
     ],
+    # ``zealand-funen`` with the Oeresund running the WHOLE length of the
+    # sound. The one in that preset starts at 55.45, and the sound opens to
+    # the Baltic at about 55.25 - Drogden and Falsterbo - so it stopped
+    # short and left Zealand joined to Scania at the southern end. Measured
+    # on the land mask with the shallows carved out, i.e. the same view the
+    # capture's land-piece list takes:
+    #
+    # | window            | zealand-funen        | this preset          |
+    # |-------------------|----------------------|----------------------|
+    # | baseline 21.5,63.8| Zealand mainland     | Zealand mainland     |
+    # | south 10 tiles    | Zealand mainland     | **Zealand 135 t**    |
+    # | south 15 tiles    | Zealand mainland     | **Zealand 135 t**    |
+    # | south 20 tiles    | Zealand mainland     | **Zealand 135 t**    |
+    #
+    # Funen separates either way (45 tiles, which is its real area at 69
+    # km2/tile). 135 tiles is Zealand with Lolland and Falster fused onto
+    # it, which is what that archipelago looks like at 8.3 km/tile.
+    #
+    # It does nothing for the baseline window, where Denmark sits closer to
+    # the edge - so this is a fix for the southward-shifted family, not a
+    # strict improvement everywhere. Paper measurement; an engine capture is
+    # what decides whether the engine renders the band it is asked for.
+    #
+    # A NEW NAME rather than an edit to ``zealand-funen``, and that is a
+    # rule: **entries here are append-only.** A preset name is part of a
+    # preset's argv and therefore of its ``params_hash``, but the
+    # coordinates behind the name are not - so editing this table in place
+    # would silently change what an already-captured record means while its
+    # hash went on claiming the parameters had not moved.
+    "zealand-funen-sound": [
+        Feature("island", 11.80, 55.55, 48, "Zealand"),
+        Feature("island", 10.35, 55.30, 32, "Funen"),
+        Feature("channel", 12.55, 55.25, 12, "Oeresund, whole sound",
+                lon2=12.95, lat2=56.20),
+        Feature("channel", 10.95, 54.95, 13, "Great Belt",
+                lon2=11.10, lat2=55.95),
+        Feature("channel", 9.60, 55.15, 11, "Little Belt",
+                lon2=9.95, lat2=55.75),
+    ],
     # As above but the belts are cut as real water, so Zealand and Funen are
     # islands you need a boat to reach. This DOES change land movement, and
     # is here as the comparison rather than the recommendation.
