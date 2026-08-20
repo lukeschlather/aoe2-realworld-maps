@@ -230,3 +230,66 @@ variant that was going to ship instead
   from the header comment - scand_shift" now. The other nine shipped scripts
   came out byte-identical to before.
 
+## 2026-08-20 (later) - fords across the British Isles
+
+Three engine passes, 18 captures, to make one feature work. All three reports
+are committed; `britain-crossings-anchored` is the answer.
+
+- **The shallows facility, used the other way round.** A channel laid across
+  *land* adds a sea route, which is what the Danish straits use it for. Laid
+  across *water* the same `create_land` of SHALLOWS adds a **land** route,
+  because shallows are fordable. `britain-crossings` is three of them - North
+  Channel, St George's Channel, Strait of Dover - so land units can walk
+  between the three landmasses both Britain windows put on the map.
+- **`automation/crossing_model.py`** predicts a chain on paper, carving discs
+  where the *script* puts them rather than where `features.py` computes them.
+  That is the `bc0bc20` lesson applied forward, and it was still not enough
+  twice over.
+- **Run `britain_crossings` (18 km, N=3 per window)**
+  `reports/20260820-023109…` superseded by the regenerated
+  `20260820-024754_crossing_report_britain_crossings.html`. SHALLOWS render -
+  579-656 tiles - so the mechanism works. Dover 6/6, North Channel 4/6,
+  St George's 4/6. Measured with water as the only barrier and again with
+  forest: the two agreed in all 18 checks, so what shuts a chain is water.
+  The model had said all three were continuous with 2.4 tiles to spare; it
+  stamps clean discs and the engine grows ragged ones.
+- **Run `britain_crossings_wide` (24 km)**
+  `reports/20260820-024701_crossing_report_britain_crossings_wide.html`.
+  Chosen on `base_size`, which `_land_block` sets to `round(radius * 0.35)`:
+  18 km gives 1 (a 3x3 seed) and 24 km gives 2 (5x5), so consecutive seeds
+  abut before any growth. North Channel 4/6 -> **6/6**. St George's stayed at
+  4/6, failing on the same window both times.
+- **It was never the radius.** Both ends of the St George's line sat
+  offshore, one window each - Welsh end in water on `great-britain-n`, Irish
+  end in water on `britain` - and the crossing failed on whichever window its
+  offshore end was on. Shallows paint last, over the coastline, so an end disc
+  a tile off a headland overlaps it in a thin crescent and then converts the
+  crescent to shallows, cutting the tip off instead of joining to it.
+  Pembrokeshire came out as 25-, 5- and 5-tile fragments with Britain proper
+  4.1 tiles beyond. A wider radius makes that worse, which is why 24 km did
+  not help. `crossing_model.py` checks it now: per end, distance to the
+  nearest >=500-tile landmass *and* how much of the end disc lands on one -
+  "land within a radius" passes a disc 1 tile offshore, which is exactly the
+  failing case.
+- **Run `britain_crossings_anchored`**
+  `reports/20260820-031519_crossing_report_britain_crossings_anchored.html`.
+  St George's moved to -4.90,51.95 / -6.60,52.30. **18 of 18 fords open**,
+  Ireland to France on foot in all six, one dominant walkable piece of
+  12,821-17,493 tiles. 8 TCs and unchanged TC separation every sample, IoU
+  0.809-0.851 against shipped baselines of 0.805-0.848 - no fidelity cost.
+  Cost is 996-1,050 shallows tiles, 1.7-1.8% of the map.
+- **Open, and it decides whether these ship: can a ship enter terrain 4?**
+  Both Irish Sea exits are spanned by shallows in all six captures. If ships
+  are blocked the Irish Sea is an enclosed lake and a fleet built there is
+  trapped; Dover survives either way. Nothing here settles it, because
+  `land_mask` reads shallows as sea *by construction* - the same assumption
+  under the Baltic-to-Kattegat claim from run `scand_feat`. The report prints
+  both readings per route.
+- **A metric that cannot see a ford.** `sample_analysis.analyze_capture` reads
+  `land_mask`, so all 18 captures report `landmasses=3` and
+  `reachable=0.29/0.32`, identical to the shipped baselines, on maps where a
+  villager walks Ireland to France. Left alone rather than quietly changed: it
+  would move a metric under 400+ recorded samples.
+
+Both presets stay `candidate`; neither shipped map is touched.
+
