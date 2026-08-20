@@ -322,6 +322,66 @@ PRESETS: dict[str, list[Feature]] = {
         Feature("channel", 1.20, 51.15, 24, "Strait of Dover, Kent-Gris-Nez",
                 lon2=1.70, lat2=50.85),
     ],
+    # ``britain-crossings-wide`` plus a fourth chain, because the way the
+    # St George's crossing fails in game is not the way the model expected.
+    #
+    # Played, not measured: several generations of both wide windows produced
+    # Wales joined to Ireland every time but one, and the one break was on the
+    # *18 km* preset, where a small island had appeared off St Davids Head -
+    # Ramsey Island, which usually merges into Britain - and the ford ran to
+    # that island instead of to Britain. So the chain was continuous and still
+    # joined nothing: its Welsh end landed on a 1-tile-wide offshore fragment.
+    #
+    # The mask agrees that this end has nothing solid to hold onto. Measured
+    # on both windows at 5.417 km/tile, before any shallows are painted:
+    #
+    # | point                      | britain        | great-britain-n |
+    # |----------------------------|----------------|-----------------|
+    # | Ramsey Island -5.34,51.865 | water, 1.0t off| water, 2.2t off |
+    # | St Davids     -5.27,51.882 | Britain        | water, 1.4t off |
+    # | wide Welsh end -5.25,51.88 | Britain        | water, 1.0t off |
+    # | Solva         -5.19,51.87  | Britain        | Britain         |
+    #
+    # There is no separate Ramsey piece in the mask - Ramsey is *water* here,
+    # and the island in the game comes out of the disc cover and the engine's
+    # organic land growth. Either way the cure is the same and it is the one
+    # the anchored preset takes from the other side: give that end something
+    # to be joined to. Rather than move the line inland, this keeps the wide
+    # line where it is and lays a short connector from the water off Ramsey
+    # to solid Pembrokeshire, so whatever the engine leaves detached out
+    # there - island, headland fragment, or nothing at all - is forded back
+    # to Britain.
+    #
+    # -5.32,51.87 to -5.05,51.84 at 24 km, chosen on the same two numbers the
+    # anchored preset was, with the seaward end deliberately offshore:
+    #
+    # | line                        | positions | max step | inland end on Britain |
+    # |-----------------------------|-----------|----------|-----------------------|
+    # | -5.34,51.865 / -5.15,51.86  | 1 (a blob)| -        | 27/61                 |
+    # | **-5.32,51.87 / -5.05,51.84**| 2        | 2.8/2.0t | **35/61, 38/61**      |
+    # | -5.36,51.88 / -4.95,51.81   | 3         | 5.0/2.0t | 51/61, 45/61          |
+    #
+    # The first is one disc after ``land_position`` quantising, which is not a
+    # chain. The third reaches Haverfordwest and floods that much more of
+    # Pembrokeshire into lagoon for no better anchor than the second already
+    # has - 35/61 and 38/61 beat the Strait of Dover's 30/61, and Dover is
+    # 6/6 in the engine. Paper cost: 358 shallows tiles over water against
+    # the wide preset's 340.
+    #
+    # Paper only, again. The question this preset exists to answer is whether
+    # Wales is ever left off, and only the engine answers it.
+    "britain-crossings-ramsey": [
+        Feature("channel", -5.95, 54.85, 24, "North Channel, Larne-Galloway",
+                lon2=-4.95, lat2=54.85),
+        Feature("channel", -5.25, 51.88, 24,
+                "St George's Channel, Pembrokeshire-Wexford",
+                lon2=-6.45, lat2=52.22),
+        Feature("channel", 1.20, 51.15, 24, "Strait of Dover, Kent-Gris-Nez",
+                lon2=1.70, lat2=50.85),
+        Feature("channel", -5.32, 51.87, 24,
+                "Ramsey Sound, St Davids-Pembrokeshire",
+                lon2=-5.05, lat2=51.84),
+    ],
 }
 
 

@@ -1,0 +1,88 @@
+{
+ "label": "britain-crossings-ramsey",
+ "name": "Britain Crossings Ramsey",
+ "argv": [
+  "--region",
+  "britain",
+  "--forest-clumps",
+  "36",
+  "--forest-alt",
+  "PINE_FOREST",
+  "--forest-spacing",
+  "3",
+  "--north",
+  "-45",
+  "--feature-preset",
+  "britain-crossings-ramsey"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -3.0,
+  "lat": 54.5,
+  "span_km": 1300.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": [
+   "britain-crossings-ramsey"
+  ],
+  "features": null,
+  "forest_alt": [
+   "PINE_FOREST"
+  ],
+  "forest_clumping_factor": null,
+  "forest_clumps": 36,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": 3,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -3.0,
+   "lat": 54.5,
+   "span_km": 1300.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "09499b8ea1187c0c91ad389c9011cb1786090585e58e4c55a1906c565f115d37",
+ "params_hash": "777b38077d5d13479a3c25738c173328004a90462dd93b2c195cb8bcf11743d4",
+ "status": "candidate",
+ "note": "britain-crossings-wide plus a fourth shallows chain across Ramsey Sound (-5.32,51.87 to -5.05,51.84 at 24 km), so the St George's ford's Welsh end is joined to Pembrokeshire even when the engine leaves a fragment - read in game as Ramsey Island - detached off St Davids Head. Everything else identical to britain-crossings-wide.",
+ "origin": {
+  "source": "automation/preset_cli.py new",
+  "created": "2026-08-20T17:09:03Z"
+ },
+ "builds": [],
+ "captures": [],
+ "legacy_notes": [],
+ "id": "britain-crossings-ramsey-777b3807"
+}

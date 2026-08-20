@@ -1,0 +1,89 @@
+{
+ "label": "great-britain-n-crossings-ramsey",
+ "name": "Great Britain N Crossings Ramsey",
+ "argv": [
+  "--center=-3.0,52.5",
+  "--span-km",
+  "1300",
+  "--forest-clumps",
+  "36",
+  "--forest-alt",
+  "PINE_FOREST",
+  "--forest-spacing",
+  "3",
+  "--north",
+  "0",
+  "--feature-preset",
+  "britain-crossings-ramsey"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -3.0,
+  "lat": 52.5,
+  "span_km": 1300.0,
+  "north_deg": 0.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": [
+   "britain-crossings-ramsey"
+  ],
+  "features": null,
+  "forest_alt": [
+   "PINE_FOREST"
+  ],
+  "forest_clumping_factor": null,
+  "forest_clumps": 36,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": 3,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": 0.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -3.0,
+   "lat": 52.5,
+   "span_km": 1300.0,
+   "north_deg": 0.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "7100e31a99021c99838d5f372a0e07f8152de94233758e215d1c61966d4c7795",
+ "params_hash": "67e67b01e3299657e19d93cbe161f45e3701f7e42da8a8b5d7d2764abed889c8",
+ "status": "candidate",
+ "note": "great-britain-n-crossings-wide plus the Ramsey Sound connector. On this window the wide St George's line's Welsh end is itself in water 1.0 tile offshore and St Davids is 1.4 t offshore, so the connector is doing more work here than on the south-up window.",
+ "origin": {
+  "source": "automation/preset_cli.py new",
+  "created": "2026-08-20T17:09:07Z"
+ },
+ "builds": [],
+ "captures": [],
+ "legacy_notes": [],
+ "id": "great-britain-n-crossings-ramsey-67e67b01"
+}
