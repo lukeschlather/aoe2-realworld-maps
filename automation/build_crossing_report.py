@@ -5,13 +5,26 @@ Sibling of ``build_feature_report.py``, which asks the Danish question -
 This asks the opposite one: three chains of shallows were laid across three
 straits to **join** landmasses, so for each crossing,
 
-* is there a **walking** route from one side to the other, and
-* how wide is it at its narrowest?
+* is the strait crossable on foot at that strait, and
+* how wide is the crossing at its pinch?
 
-Both come off ``walkable_mask``, which treats SHALLOWS as the ford it is.
-The bottleneck matters more than the yes/no: a route one tile wide is a
-route the engine happened to leave open, not a crossing, and it is the
-number that says whether the radius has margin or got lucky.
+Both are measured **inside a box around the strait**, by component sets.
+Getting that wrong is easy and this file did, on the first run:
+
+* An unrestricted connectivity test answers a different question. With
+  three crossings on one map, Ireland reaches France whenever *any* of them
+  is open, so the whole-map test said YES six times out of six while two of
+  the three fords were shut. And ``nav_width`` over a whole route returns
+  the narrowest point anywhere along it - usually a forest pinch inland -
+  not the width of the crossing.
+* A pair of probe tiles lands wherever it lands. One anchor fell inside a
+  forest-enclosed pocket and reported no route across a ford that was open.
+
+Each crossing is measured twice, and the pair is the interesting part:
+once with **water as the only barrier** (``land | SHALLOWS``) and once with
+**forest counted too** (``walkable_mask``). Water is a hard barrier; trees
+are choppable. If the two disagree, the crossing is there and something can
+be done about it; if both say shut, the chain pinched.
 
 **The naval question is reported both ways on purpose.** This project's
 ``land_mask`` reads shallows as sea, so every "a boat can get through"
@@ -50,7 +63,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from build_feature_report import (SHALLOWS_ID, b64, crop_at, esc,  # noqa: E402
                                   git_commit, nav_width, turned, whole)
-from rwmaps import scx_read  # noqa: E402
+from rwmaps import features, scx_read  # noqa: E402
 from rwmaps.projection import MapWindow  # noqa: E402
 
 #: One row per crossing: the two land anchors that have to end up joined,
@@ -73,6 +86,55 @@ CROSSINGS = [
      "sea": (("English Channel", 0.90, 50.30), ("North Sea", 2.60, 51.85)),
      "crop": (1.45, 51.05), "half_tiles": 24},
 ]
+
+#: A land piece smaller than this is an islet, not a side of a strait.
+MIN_LANDMASS_TILES = 500
+
+
+def _feature_args(argv: list[str]) -> tuple[list[str], list[str]]:
+    """``(--feature specs, --feature-preset names)`` out of a recorded argv.
+
+    Read off the capture rather than hard-coded, so the report works for any
+    radius variant of the crossings without a second copy of the coordinates
+    that could disagree with the one the engine was given.
+    """
+    specs, presets = [], []
+    it = iter(argv)
+    for a in it:
+        if a == "--feature":
+            specs.append(next(it, ""))
+        elif a == "--feature-preset":
+            presets.append(next(it, ""))
+    return specs, presets
+
+
+def _box(shape, a, b, half: int) -> np.ndarray:
+    """A square window centred between the two ends of one channel."""
+    cy, cx = (a[0] + b[0]) // 2, (a[1] + b[1]) // 2
+    out = np.zeros(shape, dtype=bool)
+    out[max(0, cy - half):cy + half, max(0, cx - half):cx + half] = True
+    return out
+
+
+def _ford(passable, llab, pa: int, pb: int, eight, tile, f):
+    """Is the strait crossable inside this box, and how wide at the pinch?
+
+    Component SETS, not probe tiles: the set of passable components that
+    touch side A, against the set that touches side B.
+    """
+    lab, _n = ndimage.label(passable, structure=eight)
+    ca = set(np.unique(lab[(llab == pa) & passable]).tolist()) - {0}
+    cb = set(np.unique(lab[(llab == pb) & passable]).tolist()) - {0}
+    shared = ca & cb
+    if not shared:
+        return False, 0.0
+    comp = np.isin(lab, list(shared))
+    ta, tb = comp & (llab == pa), comp & (llab == pb)
+    if not (ta.any() and tb.any()):
+        return True, float("nan")
+    return True, nav_width(comp, tile(f.lon, f.lat, ta),
+                           tile(f.lon2, f.lat2, tb))
+
 
 #: The end-to-end question the three crossings add up to.
 END_TO_END = (("Ireland", -7.70, 53.20), ("France", 2.35, 48.86))
@@ -123,6 +185,20 @@ def main() -> int:
         wlab, wn = ndimage.label(walk, structure=eight)
         llab, ln = ndimage.label(land, structure=eight)
 
+        # An anchor has to be snapped onto a tile that is *walkable* and on a
+        # landmass worth the name, not merely onto the nearest land. Snapping
+        # to land alone gets this wrong two ways, both of them measured on
+        # this run: Britain's own inland anchor lands on forest, which is
+        # land and is not walkable, so a single-tile probe reported "no
+        # route" across a ford that plainly worked; and Calais snapped onto a
+        # one-tile islet 1 tile offshore instead of the continent.
+        big = np.zeros_like(land)
+        for i in range(1, ln + 1):
+            piece = llab == i
+            if int(piece.sum()) >= MIN_LANDMASS_TILES:
+                big |= piece
+        footing = walk & big
+
         def joined(mask, a, b):
             """(connected?, bottleneck tiles) for a route from a to b."""
             lab, _n = ndimage.label(mask, structure=eight)
@@ -130,17 +206,57 @@ def main() -> int:
                 return False, 0.0
             return True, nav_width(mask, a, b)
 
+        # The ford has to be measured AT THE STRAIT, in a box around it, and
+        # by component sets rather than by a pair of probe tiles. Both
+        # corrections were forced by getting it wrong on run
+        # britain_crossings:
+        #
+        # * Whole-map connectivity answers a different question. With three
+        #   crossings on the map, Ireland reaches France whenever ANY of them
+        #   is open, so an unrestricted test said YES six times out of six
+        #   while two of the three fords were shut. And ``nav_width`` over a
+        #   whole route returns the narrowest point anywhere along it -
+        #   typically a forest pinch inland - not the width of the crossing.
+        # * A single probe tile lands wherever it lands. One anchor fell in a
+        #   forest-enclosed pocket and reported "no route" across a ford that
+        #   was open.
+        #
+        # So: components inside the box, the set touching each side, and the
+        # answer is whether those sets intersect.
+        feats = [f for f in features.resolve(
+                     *_feature_args(rec.get("extra_args") or []))
+                 if f.kind == "channel"]
         rows_html = []
         for c in CROSSINGS:
+            f = next((f for f in feats if f.note.startswith(c["label"])), None)
             (an, alon, alat), (bn, blon, blat) = c["land"]
-            a, b = tile(alon, alat, land), tile(blon, blat, land)
-            ok, width = joined(walk, a, b)
+            pa = int(llab[tile(alon, alat, big)])
+            pb = int(llab[tile(blon, blat, big)])
+            local = _box(walk.shape, tile(f.lon, f.lat), tile(f.lon2, f.lat2),
+                         c["half_tiles"]) if f is not None else None
+            verdicts = []
+            for tag, passable in (("water only", land | shallow),
+                                  ("forest too", walk)):
+                if local is None:
+                    verdicts.append((tag, None, 0.0))
+                    continue
+                ok, width = _ford(passable & local, llab, pa, pb, eight,
+                                  tile, f)
+                verdicts.append((tag, ok, width))
+            agree = len({v[1] for v in verdicts}) == 1
+            body = " &middot; ".join(
+                f"{tag}: {'OPEN' if ok else 'SHUT' if ok is not None else 'n/a'}"
+                + (f" <b>{w:.2f} t</b>" if ok else "")
+                for tag, ok, w in verdicts)
+            allok = all(v[1] for v in verdicts)
             rows_html.append(
-                f"<tr><th>{esc(c['label'])} &mdash; walk {esc(an)} "
+                f"<tr><th>{esc(c['label'])} &mdash; ford {esc(an)} "
                 f"&rarr; {esc(bn)}</th>"
-                f"<td class='{'good' if ok else 'bad'}'>"
-                f"{'YES' if ok else 'NO'}"
-                + (f" &middot; narrowest <b>{width:.2f} tiles</b>" if ok else "")
+                f"<td class='{'good' if allok else 'bad'}'>{body}"
+                + ("" if agree else " &mdash; <b>trees, not water</b>")
+                + (f" <span class='dim'>&middot; "
+                   f"{int((shallow & local).sum())} shallows tiles in the "
+                   f"crop</span>" if local is not None else "")
                 + "</td></tr>")
             (sa, salon, salat), (sb, sblon, sblat) = c["sea"]
             p, q = tile(salon, salat, sail_with), tile(sblon, sblat, sail_with)
@@ -159,8 +275,8 @@ def main() -> int:
                 + "</td></tr>")
 
         (en, elon, elat), (fn, flon, flat) = END_TO_END
-        e, f = tile(elon, elat, land), tile(flon, flat, land)
-        ok_e2e, w_e2e = joined(walk, e, f)
+        e, f = tile(elon, elat, footing), tile(flon, flat, footing)
+        ok_e2e, _ = joined(walk, e, f)
         lsizes = sorted((int((llab == i).sum()) for i in range(1, ln + 1)),
                         reverse=True)[:4]
         wsizes = sorted((int((wlab == i).sum()) for i in range(1, wn + 1)),
@@ -193,8 +309,9 @@ def main() -> int:
               end</span></th>
             <td class="{'good' if ok_e2e else 'bad'}">
               {'YES' if ok_e2e else 'NO'}
-              {f'&middot; narrowest <b>{w_e2e:.2f} tiles</b>' if ok_e2e else ''}
-              </td></tr>
+              <span class="dim">&mdash; whichever fords are open; no width,
+                because the pinch on a route this long is a forest belt
+                inland and not a crossing</span></td></tr>
         {''.join(rows_html)}
         <tr><th>largest land pieces <span class="dim">shallows read as
               sea</span></th>
@@ -261,10 +378,14 @@ code {{ font-family:ui-monospace,Consolas,monospace; font-size:.85em; }}
   4), checkerboarded because shallows are the one terrain that is
   <b>both</b>: land units ford them, and this project's masks read them as
   sea.</p>
-<p class="lede">The <b>narrowest</b> figure is the point of the whole
-  report. A route that exists at 1 tile is a route the engine left open by
-  accident; the radius was picked to leave margin, and this says whether it
-  did. Each crossing also carries a sea row given <b>both ways</b> -
+<p class="lede">Each ford is measured <b>at its own strait</b>, inside the
+  crop shown beside it, by component sets rather than probe tiles - a
+  whole-map test says YES whenever any one of the three crossings is open,
+  which is not the question. It is measured twice: with <b>water only</b> as
+  a barrier, and with <b>forest too</b>. Water is hard, trees are choppable,
+  so a disagreement means the crossing is there and can be cleared, while
+  both saying SHUT means the chain pinched.</p>
+<p class="lede">Each crossing also carries a sea row given <b>both ways</b> -
   shallows sailable and shallows blocking - because nothing measured in this
   project settles which one AoE2 does, and for the Strait of Dover the answer
   decides whether a naval route was severed to add a land one.</p>

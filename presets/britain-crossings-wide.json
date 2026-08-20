@@ -1,0 +1,190 @@
+{
+ "label": "britain-crossings-wide",
+ "name": "Britain Crossings Wide",
+ "argv": [
+  "--region",
+  "britain",
+  "--forest-clumps",
+  "36",
+  "--forest-alt",
+  "PINE_FOREST",
+  "--forest-spacing",
+  "3",
+  "--north",
+  "-45",
+  "--feature-preset",
+  "britain-crossings-wide"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -3.0,
+  "lat": 54.5,
+  "span_km": 1300.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": [
+   "britain-crossings-wide"
+  ],
+  "features": null,
+  "forest_alt": [
+   "PINE_FOREST"
+  ],
+  "forest_clumping_factor": null,
+  "forest_clumps": 36,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": 3,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -3.0,
+   "lat": 54.5,
+   "span_km": 1300.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "09499b8ea1187c0c91ad389c9011cb1786090585e58e4c55a1906c565f115d37",
+ "params_hash": "9e8222a63868eee2c5d2083a2eeb58df8e2305933fa5dbbbd589a3ab253bdea9",
+ "status": "candidate",
+ "note": "Britain with britain-crossings-wide: the same three fords at 24 km instead of 18. The 18 km pass (run britain_crossings, N=3) left the North Channel shut in 2 of 3 samples on this window; 24 km takes base_size from 1 to 2, so each block lays a solid 5x5 seed and consecutive seeds abut before the engine grows anything.",
+ "origin": {
+  "source": "automation/preset_cli.py new",
+  "created": "2026-08-20T09:23:38Z",
+  "also_known_as": [
+   "britain-crossings-wide"
+  ],
+  "imported": "2026-08-20T09:33:16Z"
+ },
+ "builds": [
+  {
+   "sha256": "1841c74732646adc872f2ad80bf42e8d4b33be1675f0d69f55496cc175886043",
+   "bytes": 221507,
+   "src_commit": "3d3c991",
+   "built_utc": "2026-08-20T09:25:36Z",
+   "paths": [
+    "out/rms_cache/britain-crossings-wide-9e8222a6/20260820-092359/britain_crossings_wide_240.rms"
+   ],
+   "command": "uv run rwmaps 'Britain Crossings Wide' --region britain --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north -45 --feature-preset britain-crossings-wide",
+   "summary": {
+    "land_pct": 30.5,
+    "script_iou": 0.96,
+    "starts": 8,
+    "min_separation": 32.0,
+    "verdict": "unfair"
+   }
+  },
+  {
+   "sha256": "aed24d9a37d1466c35be18598fcecfdd475eff28976664d0c0a8e50c8b7d048f",
+   "bytes": 221507,
+   "src_commit": "3d3c991",
+   "built_utc": "2026-08-20T09:29:39Z",
+   "paths": [
+    "out/mod_capture/britain_crossings_wide/scripts/britain-crossings-wide/20260820-092759/britain_crossings_wide_240.rms"
+   ],
+   "command": "uv run rwmaps britain-crossings-wide --outdir C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\mod_capture\\britain_crossings_wide\\scripts\\britain-crossings-wide --no-preview --region britain --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north -45 --feature-preset britain-crossings-wide",
+   "summary": {
+    "land_pct": 30.5,
+    "script_iou": 0.96,
+    "starts": 8,
+    "min_separation": 32.0,
+    "verdict": "unfair"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "britain_crossings_wide",
+   "n_samples": 1,
+   "region": "britain-crossings-wide",
+   "captured_utc": "2026-08-20T09:31:32Z",
+   "started_local": "2026-08-20T02:27:54.359-07:00",
+   "commit": "3d3c991",
+   "commit_source": "run_start event",
+   "results": "out/mod_capture/britain_crossings_wide/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.7979,
+     "preserved_fraction": 0.75,
+     "land_pct": 29.5,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 15.5,
+       "stone": 11.0,
+       "forage": 6.0,
+       "sheep": 7.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 7,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1304.0,
+      "land_exclusive_min": 947,
+      "wood_exclusive_median": 199.0,
+      "neutral_total": 39,
+      "forest_share_of_land": 0.193
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/britain_crossings_wide/britain-crossings-wide/raw/sample_000.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [],
+ "id": "britain-crossings-wide-9e8222a6"
+}

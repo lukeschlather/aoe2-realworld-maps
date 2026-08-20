@@ -231,6 +231,51 @@ PRESETS: dict[str, list[Feature]] = {
         Feature("channel", 1.20, 51.15, 18, "Strait of Dover, Kent-Gris-Nez",
                 lon2=1.70, lat2=50.85),
     ],
+    # The same three lines at 24 km, because 18 km was measured in the engine
+    # and it is not enough. Run ``britain_crossings``, N=3 on each window:
+    #
+    # | crossing            | ford open | narrowest when open |
+    # |---------------------|-----------|---------------------|
+    # | Strait of Dover     | 6/6       | 1.4 - 2.8 tiles     |
+    # | North Channel       | 4/6       | 1.0 - 4.2 tiles     |
+    # | St George's Channel | 4/6       | 1.0 - 2.8 tiles     |
+    #
+    # Measured on the capture with SHALLOWS counted as ground and again with
+    # forest counted as a blocker; the two agreed in all 18 checks, so what
+    # shuts a chain is water, not trees. The paper model said all three were
+    # continuous with 2.4 tiles of overlap to spare, and it was wrong the same
+    # way for the same reason the sound model was: it stamps clean discs. The
+    # engine grows each block from a seed with ``clumping_factor 1``, and two
+    # ragged blobs 4.2 tiles apart do not reliably meet just because two
+    # circles of radius 3.3 would.
+    #
+    # 24 km is chosen on ``base_size``, not on the disc arithmetic.
+    # ``rms_land._land_block`` sets ``base_size = round(radius * 0.35)``, the
+    # half-width of a *solid square seed* laid before any growth happens:
+    #
+    # | radius | tiles/tile budget | base_size | seed  | max step |
+    # |--------|-------------------|-----------|-------|----------|
+    # | 18 km  | 3.3 t, 35 tiles   | 1         | 3x3   | 4.2 t    |
+    # | 24 km  | 4.4 t, 62 tiles   | **2**     | 5x5   | 5.0 t    |
+    # | 27 km  | 5.0 t, 79 tiles   | 2         | 5x5   | 5.8 t    |
+    #
+    # At 24 km consecutive seeds are 5 tiles wide and at most 5.0 tiles
+    # apart, so they abut before the engine grows anything - continuity stops
+    # depending on how two organic blobs happen to sprawl. 27 km buys a bigger
+    # budget but pushes the step to 5.8 and reopens the gap it is meant to
+    # close, which is why it is not the wider option that got picked.
+    #
+    # Cost: 340 shallows tiles over water against 246 at 18 km, and the
+    # straits read wider - 8.9 tiles across rather than 6.6.
+    "britain-crossings-wide": [
+        Feature("channel", -5.95, 54.85, 24, "North Channel, Larne-Galloway",
+                lon2=-4.95, lat2=54.85),
+        Feature("channel", -5.25, 51.88, 24,
+                "St George's Channel, Pembrokeshire-Wexford",
+                lon2=-6.45, lat2=52.22),
+        Feature("channel", 1.20, 51.15, 24, "Strait of Dover, Kent-Gris-Nez",
+                lon2=1.70, lat2=50.85),
+    ],
 }
 
 
