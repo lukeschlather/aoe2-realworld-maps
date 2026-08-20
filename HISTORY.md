@@ -319,3 +319,63 @@ The pair that measured 18 of 18 fords open,
 in 2 of 6 captures on each radius, so Ireland is not always walkable; the
 North Channel is 4/6 at 18 km and 6/6 at 24 km, Dover 6/6 on both. That is
 the difference between the two names in game.
+
+## 2026-08-20 (later still) - the Welsh end gets something to land on
+
+**Played first, measured second.** Several hand-driven generations of both
+wide windows joined Wales to Ireland every time but one, and the break was on
+the *18 km* preset, with a small island off St Davids Head - Ramsey, which
+usually merges into Britain - taking the ford instead of Britain. So the
+chain was continuous and still joined nothing.
+
+- **There is no Ramsey piece in the mask.** Ramsey is *water*, 1.0 tile off
+  Britain on `britain` and 2.2 off on `great-britain-n`; the island in the
+  game comes out of the disc cover and the engine's land growth. On
+  `great-britain-n` the wide St George's line's Welsh end (-5.25,51.88) is
+  itself water 1.0 tile offshore and St Davids 1.4 offshore.
+- **`britain-crossings-ramsey`** keeps the three wide lines where they are and
+  adds a fourth, -5.32,51.87 to -5.05,51.84 at 24 km, from the water off
+  Ramsey into solid Pembrokeshire. Chosen on quantised positions and end
+  anchoring: 2 distinct positions, 2.8/2.0-tile steps, and 35/61 and 38/61 of
+  the inland end disc on Britain against the Strait of Dover's 30/61. A
+  longer line to Haverfordwest scored 51/61 and was rejected - it floods that
+  much more of Pembrokeshire into lagoon for no better anchor.
+- **Run `britain_ramsey` (N=3 per window)**
+  `reports/20260820-111452_crossing_report_britain_ramsey.html`. **18 of 18
+  fords open**, St George's included on all six. 913-985 shallows tiles
+  against the wide preset's 812-915, IoU 0.793-0.848 against 0.797-0.847 - no
+  fidelity cost for the extra chain.
+- **The baseline failure reproduced, on the regenerated wide report**
+  `reports/20260820-102447_crossing_report_britain_crossings_wide.html`:
+  St George's SHUT in 2 of 6, both on `great-britain-n`, which is the window
+  whose Welsh end is offshore. On `britain` it was open 3/3 - which is why
+  hand play mostly saw it work.
+
+### What the reports show now, and three harness fixes
+
+- **The old analysis render is retired as a report visual.** Fish and whales
+  are drawn as white dots, sized by kind: a map carries several hundred deep
+  fish against ~120 shore (379/126 measured), and one size made the sea a
+  starfield that buried the coast. Every builder draws through the new
+  `automation/capture_render.py` - render, ownership walk and cache in one
+  place - and falls back to the stored `preview_png_b64` only when the
+  scenario is gone.
+- **`ensure_ready` used to abort a pass it could repair.** `recover()` reports
+  "game already running" and does nothing when the game is up with mods on, so
+  `setup()` walked a main menu that was not there. A hand-driven session
+  leaves exactly that state, and nothing in the editor puts the Random Map
+  selector back - the placeholder is picked up by sorting first on a *fresh*
+  editor. It closes the game now. The not-foreground branch was also
+  swallowing every other preflight failure, because "not foreground" is the
+  first thing preflight checks.
+- **`setup()`'s fixed-coordinate clicks now wait for the game to own the
+  input.** With a Steam chat window on top, AppActivate could not take the
+  foreground and the walk clicked on anyway, into whatever was there.
+- **A capture is checked against being our map before it is analysed.** An
+  interrupted pass left the editor on Blank Map / Small (3 player) [144],
+  preflight passed it - it can see the mod state and the selector template,
+  not the Map Size or the Blank/Random radio - and six samples generated stock
+  Arabia at 144x144. The only symptom was a numpy broadcast error out of the
+  aesthetic metrics. `save()` types `rw_capture_slot`, so a capture under any
+  other name did not come from our slot, and every capture here is 240x240;
+  either check now aborts the pass.
