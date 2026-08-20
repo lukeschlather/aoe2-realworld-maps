@@ -199,3 +199,34 @@ and mod report builders, archives no data dir.
   apart from its header comment, which is where the map name lives). Black
   Sea, Italy and Cramped Italy do not: they were rebuilt on 2026-08-15,
   after their last capture, so their engine evidence is about older scripts.
+
+## 2026-08-20 - Scandinavia is the shift-15 window
+
+No engine time. The evidence was already on disk: run `scand_shift`
+(2026-08-18) for the southern windows, and runs `scand_sound` /
+`scand_sound_top` the previous evening for the N=10 pass on the full-sound
+variant that was going to ship instead
+(`reports/20260819-215621_preset_report_scand_sound.html`, `bc0bc20`).
+
+- **`scand-shift-15` promoted, shipped as "Scandinavia"; the old
+  `scandinavia` retired** (`e5aea9d`). Same place 15 tiles south, with the
+  `zealand-funen` overrides. Land 52.1-53.0% -> 59.4-59.7% at the same IoU
+  (0.847-0.848), TC separation 47.9/40.0 -> 49.7, 8 TCs and one fully
+  reachable landmass in both samples, AI map type MEDITERRANEAN -> COASTAL.
+  The retired preset keeps its 25 captures across 5 runs - it is the baseline
+  every Scandinavia candidate was read against.
+- **It ships on N=2, and one of the two samples is under the land band.**
+  Exclusive land min/median is 0.77 and 0.81 against the 0.79-0.96 every
+  stock map holds; the sound variant measured 0.88 at N=10 but failed at
+  separating Zealand, which is what it existed for. Three of the ten maps -
+  Michigan, Great Britain N, Scandinavia - now ship at a window with no N=10
+  pass behind it. That is the obvious next capture pass.
+- **`build_mod` records the copy it ships** (`0723953`). `preset_cli.py audit`
+  looks for a build with a `mod/` path to answer "is what ships what was
+  captured?", and nothing wrote one for a map promoted after the registry was
+  reconstructed - `preset_import` only knows the frozen
+  `MOD_REGIONS_AT_IMPORT` list. Scandinavia read "no build recorded in mod/",
+  indistinguishable from shipping an uncaptured script; it reads "YES apart
+  from the header comment - scand_shift" now. The other nine shipped scripts
+  came out byte-identical to before.
+
