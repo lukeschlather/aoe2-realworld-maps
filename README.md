@@ -7,11 +7,19 @@ Caribbean and New Zealand were retired 2026-08-15 - unrecognisable
 projections, and measurably short on stone, wood and land besides.
 
 Michigan and Great Britain N were added 2026-08-17 from the candidate
-report (`reports/20260816-210117_candidate_report_candidates_n2.html`) and
-are the only two that have **not** had an N=10 real-engine pass yet - they
+report (`reports/20260816-210117_candidate_report_candidates_n2.html`) - they
 were picked by eye off an N=2 breadth sweep. They also ship north-up
 (`--north 0`) rather than with the north-toward-upper-left view the other
 eight use, because that is the orientation they were judged in.
+
+Scandinavia was **rewindowed 2026-08-20**: the `scand-shift-15` preset, the
+same place 15 tiles south, with the `zealand-funen` overrides for the Danish
+geography that is smaller than a tile. Land 59.4-59.7% against the old
+window's 52%, at the same IoU. The window it replaces is `status: retired`
+with its 25 captures intact.
+
+So three of the ten - Michigan, Great Britain N and Scandinavia - have
+**not** had an N=10 real-engine pass at the window they ship.
 
 All the code is vibecoded by Claude Sonnet, for some reason we ended up with code both in automation/ and src/rwmaps/ and there are even some tests in tests.
 

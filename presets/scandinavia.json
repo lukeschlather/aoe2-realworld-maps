@@ -63,8 +63,8 @@
  },
  "window_hash": "6c17813796680d9959f5e1f3f6d6de6a636f6245ec22962eed852d4122cf5da7",
  "params_hash": "891bc88e404be89f5f3f78d7a0f23c2c565933f1f47315de9d21b127a27a6e7d",
- "status": "shipped",
- "note": "the baseline every other row here is to be read against",
+ "status": "retired",
+ "note": "Superseded by scand-shift-15, the same window 15 tiles south. The scand_shift pass established that this window's north edge spends the map on empty Atlantic: land 52.1-53.0% here against 59.4-59.7% shifted, at the same IoU, and the southern window keeps Denmark on the map. Kept because 25 captures across 5 runs make it the baseline every Scandinavia candidate was read against.",
  "origin": {
   "source": "automation/build_mod.py:MOD_REGIONS",
   "shipped_filename": "RW Scandinavia.rms",
@@ -75,7 +75,8 @@
   "also_known_as": [
    "Scand current NW (ships today)"
   ],
-  "imported": "2026-08-20T00:51:55Z"
+  "imported": "2026-08-20T00:51:55Z",
+  "retired": "2026-08-20T07:36:40Z"
  },
  "builds": [
   {
@@ -132,6 +133,19 @@
    "command": "",
    "summary": {
     "note": "committed copy, archived beside the report that presented it"
+   }
+  },
+  {
+   "sha256": "40a9968793f79bea7f0b8a4958011f1258514cd36ff71e72421435135fe1f945",
+   "bytes": 228214,
+   "src_commit": "a9d5dfd",
+   "built_utc": "2026-08-20T07:37:36Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Scandinavia.rms"
+   ],
+   "command": "uv run rwmaps 'Scandinavia' --region scandinavia --north -45",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
    }
   }
  ],

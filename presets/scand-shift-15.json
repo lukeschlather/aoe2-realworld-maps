@@ -1,6 +1,6 @@
 {
  "label": "scand-shift-15",
- "name": "Scand shift 15",
+ "name": "Scandinavia",
  "argv": [
   "--center=21.5812,62.6412",
   "--span-km",
@@ -70,13 +70,16 @@
  },
  "window_hash": "6751c4050107cd0f52e5ee5898512c6d3033e6bb248e6e251d32d67e23a13a87",
  "params_hash": "731fa164547b0327a40ed8caba5bb864e5fa39c43e757c13a6feeb990f4204bf",
- "status": "candidate",
- "note": "",
+ "status": "shipped",
+ "note": "The shift-15 window: same place as the old Scandinavia, 15 tiles south, with the zealand-funen feature overrides. Land 59.4-59.7% against the old window's 52.1-53.0%, IoU 0.847-0.848 (old: 0.833-0.855), 8 TCs at 49.7 walked separation (old: 47.9/40.0), one landmass fully reachable. Ships with zealand-funen rather than the full-sound variant, which reached N=10 and did not separate Zealand in 9 of 9 captures (bc0bc20) - the thing it existed to do. N=2 on this window so far; exclusive land min/median is 0.77 and 0.81 across those two, so the low end sits just under the 0.79-0.96 band stock maps hold.",
  "origin": {
   "source": "out/mod_capture/scand_shift/results.jsonl (run scand_shift)",
   "kind": "capture",
-  "also_known_as": [],
-  "imported": "2026-08-20T00:51:55Z"
+  "also_known_as": [
+   "Scand shift 15"
+  ],
+  "imported": "2026-08-20T00:51:55Z",
+  "promoted": "2026-08-20T07:36:19Z"
  },
  "builds": [
   {
@@ -85,7 +88,8 @@
    "src_commit": "8eff8f9",
    "built_utc": "2026-08-19T06:39:30Z",
    "paths": [
-    "out/mod_capture/scand_shift/scripts/Scand shift 15/20260819-063808/scand_shift_15_240.rms"
+    "out/mod_capture/scand_shift/scripts/Scand shift 15/20260819-063808/scand_shift_15_240.rms",
+    "out/rms_cache/scand-shift-15-731fa164/scand-shift-15.rms"
    ],
    "command": "uv run rwmaps Scand shift 15 --outdir C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\mod_capture\\scand_shift\\scripts\\Scand shift 15 --no-preview --center=21.5812,62.6412 --span-km 2000 --min-water-width 2 --north -45 --feature-preset zealand-funen",
    "summary": {
@@ -94,6 +98,19 @@
     "starts": 8,
     "min_separation": 50.0,
     "verdict": "playable"
+   }
+  },
+  {
+   "sha256": "40a9968793f79bea7f0b8a4958011f1258514cd36ff71e72421435135fe1f945",
+   "bytes": 228214,
+   "src_commit": "8eff8f9",
+   "built_utc": "2026-08-19T06:39:30Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Scandinavia.rms"
+   ],
+   "command": "uv run rwmaps 'Scandinavia' --center=21.5812,62.6412 --span-km 2000 --min-water-width 2 --north -45 --feature-preset zealand-funen",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
    }
   }
  ],

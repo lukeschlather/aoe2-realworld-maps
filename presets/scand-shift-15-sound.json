@@ -127,7 +127,7 @@
    "commit": "2aa4aae",
    "commit_source": "run_start event",
    "results": "out/mod_capture/scand_sound/results.jsonl",
-   "report": "",
+   "report": "reports/20260819-220721_feature_report_scand_sound.html",
    "samples": [
     {
      "sample_index": 1,
