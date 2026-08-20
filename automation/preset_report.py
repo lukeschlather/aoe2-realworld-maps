@@ -273,6 +273,167 @@ def aggregate(samples: list[dict]) -> dict:
     return out
 
 
+# --------------------------------------------------------------------------
+# parameters: what varies, what does not, and what each one does
+# --------------------------------------------------------------------------
+
+#: Resolved into the window header rather than listed as knobs, because
+#: centre / span / rotation / size are what a *window* is and reading them
+#: as three entries in an alphabetical list of 37 is how "which place is
+#: this" became hard to answer.
+WINDOW_KEYS = ("proj", "north", "players")
+
+#: Plain-language notes for the window itself. The rotation one is the note
+#: this project has paid for twice (window_candidates.py, and the report
+#: previews before today), so it is stated in every report rather than
+#: assumed known.
+WINDOW_DOCS = [
+    ("centre", "Where the window is aimed, in degrees. Everything else is "
+               "measured from here."),
+    ("span", "The width of the square in kilometres, and what that works out "
+             "to per tile at this grid size. The tile scale is the sampling "
+             "rate: geography narrower than one tile cannot survive it, "
+             "whatever any width filter is set to."),
+    ("north", "Where geographic north points ON SCREEN, degrees clockwise "
+              "from straight up. 0 = north up. -45 = north toward the upper "
+              "left, which is what the engine does uncorrected and what "
+              "every map shipped before 2026-08-16 looks like."),
+    ("grid", "Tiles per side, and the player count it was chosen for. Land "
+             "areas in the script are absolute tile counts, so the lobby "
+             "Map Size has to match or the map breaks rather than shrinking."),
+]
+
+
+def cli_param_docs() -> dict[str, tuple[str, str, object]]:
+    """``{dest: (flags, help, default)}`` read off the CLI's own parser.
+
+    The argparse help IS the documentation - it is what a person running
+    ``rwmaps --help`` is told, and several of those strings carry measured
+    numbers and the reason a default is what it is. Re-describing the
+    parameters here would be a second copy to drift from the first.
+    """
+    from rwmaps.cli import build_parser
+    out = {}
+    for a in build_parser()._actions:
+        if a.dest in ("help",):
+            continue
+        flags = ", ".join(a.option_strings) or a.dest
+        # argparse doubles literal percent signs in help text.
+        out[a.dest] = (flags, (a.help or "").replace("%%", "%").strip(),
+                       a.default)
+    return out
+
+
+def split_params(presets: list[Preset]) -> tuple[dict, dict]:
+    """``(varied, constant)`` across the presets in this report.
+
+    "Varied" is deliberately two things at once: a parameter that differs
+    between these presets, and one they all share but that is NOT the CLI
+    default. Both are parameters a reader has to know about to understand
+    what they are looking at; the rest is the tool's own baseline and is
+    listed but not explained.
+    """
+    docs = cli_param_docs()
+    keys = {k for p in presets for k in p.params
+            if not k.startswith("_") and k not in WINDOW_KEYS}
+    varied, constant = {}, {}
+    for k in sorted(keys):
+        vals = [p.params.get(k) for p in presets]
+        default = docs.get(k, (None, None, None))[2]
+        differs = len({json.dumps(v, sort_keys=True, default=str)
+                       for v in vals}) > 1
+        if differs or vals[0] != default:
+            varied[k] = vals
+        else:
+            constant[k] = vals[0]
+    return varied, constant
+
+
+def show_value(v) -> str:
+    if v is None or v is False:
+        return "&mdash;"
+    if v is True:
+        return "on"
+    if isinstance(v, (list, tuple)):
+        return esc(" ".join(str(x) for x in v))
+    return esc(v)
+
+
+def params_section(presets: list[Preset]) -> str:
+    """The report's parameter documentation, written once for the whole set."""
+    docs = cli_param_docs()
+    varied, constant = split_params(presets)
+
+    win = "".join(f"<tr><td class='l'><b>{esc(name)}</b></td>"
+                  f"<td class='l'>{esc(text)}</td></tr>"
+                  for name, text in WINDOW_DOCS)
+
+    rows = []
+    for k, vals in varied.items():
+        flags, help_text, default = docs.get(k, (k, "", None))
+        seen = []
+        for v in vals:
+            s = show_value(v)
+            if s not in seen:
+                seen.append(s)
+        rows.append(
+            f"<tr><td class='l'><code>{esc(flags)}</code></td>"
+            f"<td class='l'>{' &middot; '.join(seen)}</td>"
+            # show_value already emits HTML (an em dash for "off"), so it
+            # must not go through esc() as well - that printed a literal
+            # &mdash; in the default column.
+            f"<td class='l'>{show_value(default)}</td>"
+            f"<td class='l'>{esc(help_text) or '&mdash;'}</td></tr>")
+
+    held = "".join(f"<div><span><code>{esc(docs.get(k, (k,))[0])}</code></span>"
+                   f"<span>{show_value(v)}</span></div>"
+                   for k, v in sorted(constant.items()))
+
+    return f"""
+<h2>What the window is</h2>
+<div class="wrap"><table>{win}</table></div>
+
+<h2>Parameters that vary across these {len(presets)} maps</h2>
+<p class="lead">Everything that differs between them, plus anything they all
+ share that is <em>not</em> the tool's default - those are the two ways a
+ parameter can be load-bearing here. Descriptions are the CLI's own help
+ text, so they cannot drift from what the flag does. Values are every
+ distinct value taken across this set.</p>
+<div class="wrap"><table>
+<tr><th class="l">flag</th><th class="l">values here</th>
+    <th class="l">default</th><th class="l">what it does</th></tr>
+{''.join(rows) or '<tr><td colspan="4">nothing varies</td></tr>'}
+</table></div>
+<details><summary>{len(constant)} parameters at their default and identical
+ across every map here</summary>
+ <div class="pgrid">{held}</div></details>
+"""
+
+
+def window_block(p: Preset) -> str:
+    """Centre, span, rotation, grid - labelled, and in that order."""
+    w = p.window
+    km_per_tile = w["span_km"] / w["size"]
+    ns = "N" if w["lat"] >= 0 else "S"
+    ew = "E" if w["lon"] >= 0 else "W"
+    facing = {0.0: "north up on screen",
+              -45.0: "north toward the upper left - the engine's "
+                     "uncorrected view"}.get(float(w["north_deg"]),
+                                             "north %g&deg; clockwise from "
+                                             "straight up" % w["north_deg"])
+    return f"""<table class="win">
+<tr><th class="l">centre</th><td class="l">{abs(w['lat']):.4f}&deg;{ns},
+    {abs(w['lon']):.4f}&deg;{ew}</td></tr>
+<tr><th class="l">span</th><td class="l">{w['span_km']:g} km across &middot;
+    {km_per_tile:.2f} km per tile</td></tr>
+<tr><th class="l">north</th><td class="l">{w['north_deg']:g}&deg; &mdash;
+    {facing}</td></tr>
+<tr><th class="l">grid</th><td class="l">{w['size']}&times;{w['size']} tiles
+    &middot; {w['players']} players &middot; projection
+    <code>{esc(w['proj'])}</code></td></tr>
+</table>"""
+
+
 def stock_rows() -> list[tuple[str, str, dict]]:
     """``[(cohort, map, aggregate), ...]`` from the stock capture baseline."""
     if not BASELINE.is_file():
@@ -328,6 +489,14 @@ summary{cursor:pointer;color:#9fd0ff;font-size:12.5px}
 .pgrid div{border-bottom:1px dotted #263140;display:flex;
   justify-content:space-between;gap:8px}
 .pgrid span:last-child{color:#cfe3ff}
+.pgrid.tuned{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  margin:2px 0 10px}
+h4{font-size:13px;margin:12px 0 2px;color:#9fb4cc;font-weight:600;
+  text-transform:uppercase;letter-spacing:.04em}
+table.win{margin:6px 0 4px;font-size:13px}
+table.win th{background:none;border:none;color:#8b9bb0;font-weight:600;
+  padding:1px 10px 1px 0;vertical-align:top;width:66px}
+table.win td{border:none;padding:1px 0;color:#dfe6ee}
 """
 
 COMPARE_COLS = [
@@ -364,10 +533,33 @@ def compare_table(rows: list[tuple[str, str, dict]]) -> str:
 
 
 def preset_card(p: Preset, samples: list[tuple[str, dict, dict]],
-                archive: Path | None) -> str:
+                archive: Path | None, varied: dict | None = None) -> str:
+    docs = cli_param_docs()
     params = "".join(
         f"<div><span>{esc(k)}</span><span>{esc(v)}</span></div>"
         for k, v in sorted(p.params.items()) if not k.startswith("_"))
+    # The knobs this set varies, with THIS map's value - the same rows the
+    # parameter table above documents, so a reader can look one up rather
+    # than being handed 33 values and left to spot the three that matter.
+    #
+    # Split, because a varied parameter that THIS map leaves alone is not a
+    # setting: with Britain in the set, every Scandinavia card was listing
+    # four forest flags as em dashes, which reads as four decisions where
+    # none were taken. Named on one line instead.
+    set_here, left = [], []
+    for k in (varied or {}):
+        flag = docs.get(k, (k, "", None))[0]
+        default = docs.get(k, (k, "", None))[2]
+        if p.params.get(k) == default:
+            left.append(flag)
+        else:
+            set_here.append(
+                f"<div><span><code>{esc(flag)}</code></span>"
+                f"<span>{show_value(p.params.get(k))}</span></div>")
+    tuned = "".join(set_here)
+    left_line = (f"<p class='meta'>left at the default here: "
+                 f"{', '.join(f'<code>{esc(f)}</code>' for f in left)}</p>"
+                 if left else "")
     builds = []
     for b in p.builds:
         alive = [x for x in b.paths if (REPO / x).is_file()]
@@ -442,12 +634,14 @@ def preset_card(p: Preset, samples: list[tuple[str, dict, dict]],
 <div class="card" id="{esc(p.label)}">
   <h3>{esc(p.name)} <span class="tag">{esc(p.status)}</span>
       <span class="tag">{esc(p.label)}</span></h3>
-  <p class="meta">{esc(p.describe_window())} &middot; window
-     <code>{p.window_hash[:8]}</code> &middot; params
+  <p class="meta">window <code>{p.window_hash[:8]}</code> &middot; params
      <code>{p.params_hash[:8]}</code>
      {(' &middot; also known as ' + esc(', '.join(p.origin['also_known_as'])))
       if p.origin.get('also_known_as') else ''}</p>
   {f'<p class="lead">{esc(p.note)}</p>' if p.note else ''}
+  {window_block(p)}
+  {f'<h4>tuned here</h4><div class="pgrid tuned">{tuned}</div>' if tuned else ''}
+  {left_line}
   <p class="args">{esc(p.command)}</p>
   {''.join(f'<p class="meta">legacy: {esc(l)}</p>' for l in p.legacy_notes)}
   <details><summary>complete resolved parameter set ({len(p.params) - 2}
@@ -534,7 +728,9 @@ def main() -> int:
                             f"{name}  (stock)", agg))
 
     total = sum(len(v) for v in per_preset.values())
-    cards = "".join(preset_card(p, per_preset[p.label], archive) for p in presets)
+    varied, _constant = split_params(presets)
+    cards = "".join(preset_card(p, per_preset[p.label], archive, varied)
+                    for p in presets)
     html_doc = f"""<!doctype html>
 <meta charset="utf-8"><title>{esc(args.title)}</title>
 <style>{CSS}</style>
@@ -565,6 +761,7 @@ def main() -> int:
  placed.</p>
 <h2>Side by side</h2>
 {compare_table(compare)}
+{params_section(presets)}
 <h2>Presets</h2>
 {cards}
 </main>

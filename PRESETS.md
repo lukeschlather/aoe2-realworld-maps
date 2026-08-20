@@ -140,6 +140,27 @@ So **every path in a preset is a last known location, never a promise.**
 `preset_report.py --archive` copies a set worth making durable into
 `reports/<stamp>_preset_report_data/`, the way the older report builders do.
 
+## What a report says about parameters
+
+`preset_report.py` leads with the window - **centre, span and km per tile,
+rotation, grid** - because that is what a map *is*, and reading those as
+three entries in an alphabetical list of 33 was how "which place is this"
+became hard to answer.
+
+Then it documents only the parameters that are load-bearing **for that set
+of maps**: the ones that differ between them, plus the ones they all share
+that are not the CLI default. Everything else is listed, collapsed, as "at
+their default and identical across every map here". Per map, the varied
+knobs are split again into what that map sets and what it leaves alone -
+otherwise a set containing Britain made every Scandinavia card list four
+forest flags as em dashes, which reads as four decisions where none were
+taken.
+
+The descriptions are **argparse's own help strings**, read off
+`cli.build_parser()`. That is what `rwmaps --help` tells a person, several of
+those strings carry the measurement behind a default, and a second copy
+written for reports would drift from the first.
+
 ## Reading history back
 
 Reconstruction from records written against older code needed three
@@ -175,4 +196,5 @@ Every substitution a preset needed is recorded in its `legacy_notes`.
 | `preset_cli.py region-set ... -o FILE` | a `mod_capture --region-set` file, for harnesses that still take one |
 | `preset_import.py [--dry-run]` | fold every run, condition set and screen on disk into the registry |
 | `preset_report.py --presets ...` | an HTML report over any set of presets, no engine time |
+| `preset_cli.py build <label>` | generate a candidate's script into the cache and record it, before spending engine time |
 | `build_mod.py [--presets ...] [--rebuild] [--list]` | build the mod from `status: shipped` |
