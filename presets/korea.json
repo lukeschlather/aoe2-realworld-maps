@@ -1,0 +1,265 @@
+{
+ "label": "korea",
+ "name": "Korea",
+ "argv": [
+  "--center=127.0,36.5",
+  "--span-km",
+  "1200",
+  "--north",
+  "0"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": 127.0,
+  "lat": 36.5,
+  "span_km": 1200.0,
+  "north_deg": 0.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": 0.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": 127.0,
+   "lat": 36.5,
+   "span_km": 1200.0,
+   "north_deg": 0.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "3285221be37ab8697028b6d054e4a4aeeb9395a7a0e51075b2f54ff42b51eede",
+ "params_hash": "02fc47a1f225acd54c21a845b3d215b943d8c7630731427261ce8a9ef42ff48e",
+ "status": "candidate",
+ "note": "",
+ "origin": {
+  "source": "out/mod_capture/cand_smoke/results.jsonl (run cand_smoke)",
+  "kind": "capture",
+  "also_known_as": [],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "5977e05f89eb187aba529b9db6b15ac0e69583a2c7652538bbd96ad832980b69",
+   "bytes": 216397,
+   "src_commit": "e05eba1",
+   "built_utc": "2026-08-15T23:19:15Z",
+   "paths": [
+    "out/mod_capture/cand_smoke/scripts/Korea/20260815-231752/korea_240.rms",
+    "out/mod_capture/candidates_n2/scripts/Korea/20260816-002426/korea_240.rms",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Korea/Korea.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "cand_smoke",
+   "n_samples": 1,
+   "captured_utc": "2026-08-15T23:20:58Z",
+   "commit": "e05eba1",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/cand_smoke/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.831,
+     "preserved_fraction": 1.0,
+     "land_pct": 31.2,
+     "n_tcs": 8,
+     "min_tc_separation": 49.6,
+     "landmasses_with_a_player": 4,
+     "reachable_fraction": 0.36,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 14.5,
+       "stone": 11.5,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 0,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 1,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 1,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 144.5,
+      "neutral_total": 52,
+      "forest_share_of_land": 0.233
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/cand_smoke/Korea/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "candidates_n2",
+   "n_samples": 2,
+   "captured_utc": "2026-08-16T00:35:20Z",
+   "commit": "afeda38",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/candidates_n2/results.jsonl",
+   "report": "reports/20260816-210117_candidate_report_candidates_n2.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8304,
+     "preserved_fraction": 1.0,
+     "land_pct": 31.3,
+     "n_tcs": 8,
+     "min_tc_separation": 49.6,
+     "landmasses_with_a_player": 4,
+     "reachable_fraction": 0.36,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 14.0,
+       "stone": 10.5,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 164.5,
+      "neutral_total": 56,
+      "forest_share_of_land": 0.24
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8304,
+     "preserved_fraction": 1.0,
+     "land_pct": 31.4,
+     "n_tcs": 8,
+     "min_tc_separation": 49.6,
+     "landmasses_with_a_player": 4,
+     "reachable_fraction": 0.36,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 15.0,
+       "stone": 13.0,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 5,
+       "deer": 2,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 152.5,
+      "neutral_total": 47,
+      "forest_share_of_land": 0.223
+     }
+    }
+   ],
+   "scenarios": [
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Korea/Korea__s000.aoe2scenario",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Korea/Korea__s001.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [
+  "--rotate 45 (grid space) -> --north 0"
+ ],
+ "id": "korea-02fc47a1"
+}

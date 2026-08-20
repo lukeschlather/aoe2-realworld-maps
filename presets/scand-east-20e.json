@@ -1,0 +1,83 @@
+{
+ "label": "scand-east-20e",
+ "name": "Scand east 20E",
+ "argv": [
+  "--center=20.0,62.0",
+  "--span-km",
+  "2000",
+  "--north",
+  "-45"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": 20.0,
+  "lat": 62.0,
+  "span_km": 2000.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": 20.0,
+   "lat": 62.0,
+   "span_km": 2000.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "abd36d07e0b43ff4e305ce668421a700a6613e1f08d1134c4e79c1ceb6d0cfb5",
+ "params_hash": "bd11d380b10bfb095689c5e37fe5fb5c42d528670390358536310fa625e6f5c8",
+ "status": "screened",
+ "note": "reference. The Baltic is a 5,351-tile ENCLOSED lake here and the northern sea is a second, separate ocean",
+ "origin": {
+  "source": "automation/window_candidates.py:CANDIDATES",
+  "kind": "paper screen",
+  "group": "scandinavia",
+  "report": "reports/20260818-224036_window_candidates.html",
+  "also_known_as": [
+   "east 20E @ mww4 (as first screened)"
+  ],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [],
+ "captures": [],
+ "legacy_notes": [],
+ "id": "scand-east-20e-bd11d380"
+}

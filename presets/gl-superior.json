@@ -1,0 +1,210 @@
+{
+ "label": "gl-superior",
+ "name": "GL Superior",
+ "argv": [
+  "--center=-87.5,47.5",
+  "--span-km",
+  "1200",
+  "--north",
+  "0",
+  "--overlap",
+  "0.85",
+  "--min-water-width",
+  "5",
+  "--min-land-width",
+  "3"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -87.5,
+  "lat": 47.5,
+  "span_km": 1200.0,
+  "north_deg": 0.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 5,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": 0.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -87.5,
+   "lat": 47.5,
+   "span_km": 1200.0,
+   "north_deg": 0.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "b48267a7870ad4feecc59123bd11a5f97a931c02827c1e93217479d441262ece",
+ "params_hash": "68aff8b9593f82a914e885322207f0e38ee958c09c230ce44a852199305f14e9",
+ "status": "candidate",
+ "note": "",
+ "origin": {
+  "source": "out/mod_capture/candidates_n2/results.jsonl (run candidates_n2)",
+  "kind": "capture",
+  "also_known_as": [],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "4ee822c55abe84df77093244bb528d0535b5c46aec225161fea19be9dd5e8da3",
+   "bytes": 216997,
+   "src_commit": "afeda38",
+   "built_utc": "2026-08-16T00:09:35Z",
+   "paths": [
+    "out/mod_capture/candidates_n2/scripts/GL Superior/20260816-000817/gl_superior_240.rms",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/GL Superior/GL Superior.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "candidates_n2",
+   "n_samples": 2,
+   "captured_utc": "2026-08-16T00:35:20Z",
+   "commit": "afeda38",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/candidates_n2/results.jsonl",
+   "report": "reports/20260816-210117_candidate_report_candidates_n2.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8984,
+     "preserved_fraction": 1.0,
+     "land_pct": 81.3,
+     "n_tcs": 8,
+     "min_tc_separation": 61.2,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "COASTAL",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 222.5,
+      "neutral_total": 129,
+      "forest_share_of_land": 0.134
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8944,
+     "preserved_fraction": 1.0,
+     "land_pct": 81.6,
+     "n_tcs": 8,
+     "min_tc_separation": 61.2,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "COASTAL",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 231.0,
+      "neutral_total": 124,
+      "forest_share_of_land": 0.136
+     }
+    }
+   ],
+   "scenarios": [
+    "reports/20260816-210117_candidate_report_data_candidates_n2/GL Superior/GL Superior__s000.aoe2scenario",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/GL Superior/GL Superior__s001.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [
+  "--rotate 45 (grid space) -> --north 0"
+ ],
+ "id": "gl-superior-68aff8b9"
+}

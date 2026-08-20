@@ -1,0 +1,214 @@
+{
+ "label": "michigan",
+ "name": "Michigan",
+ "argv": [
+  "--center=-85.0,44.5",
+  "--span-km",
+  "1200",
+  "--overlap",
+  "0.85",
+  "--min-water-width",
+  "5",
+  "--min-land-width",
+  "3",
+  "--north",
+  "0"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -85.0,
+  "lat": 44.5,
+  "span_km": 1200.0,
+  "north_deg": 0.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 5,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": 0.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -85.0,
+   "lat": 44.5,
+   "span_km": 1200.0,
+   "north_deg": 0.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "4513992af36ebb4171b11c34ee8f3bf3642edfb68311b48c1982f3723f478edc",
+ "params_hash": "6f0dcafb437949ea139e499ae10504885c47d75d403b3bf4bbf5d9cd36f94d6e",
+ "status": "shipped",
+ "note": "",
+ "origin": {
+  "source": "automation/build_mod.py:MOD_REGIONS",
+  "shipped_filename": "RW Michigan.rms",
+  "last_commit": "6c9b972",
+  "last_commit_date": "2026-08-18",
+  "first_commit": "953032d",
+  "first_commit_date": "2026-07-31",
+  "also_known_as": [],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "d141baab0c67137d2a35654c81335f0203f75ee85231ca020cb2f37ab12d40bf",
+   "bytes": 216987,
+   "src_commit": "6c9b972",
+   "built_utc": "2026-08-18T09:20:30Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Michigan.rms",
+    "out/mod_capture/candidates_n2/scripts/Michigan/20260815-232136/michigan_240.rms",
+    "reports/20260816-023454_candidate_report_data_candidates_n2/Michigan/Michigan.rms",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Michigan/Michigan.rms"
+   ],
+   "command": "uv run rwmaps 'Michigan' --center=-85.0,44.5 --span-km 1200 --overlap 0.85 --min-water-width 5 --min-land-width 3 --north 0",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "candidates_n2",
+   "n_samples": 2,
+   "captured_utc": "2026-08-16T00:35:20Z",
+   "commit": "afeda38",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/candidates_n2/results.jsonl",
+   "report": "reports/20260816-210117_candidate_report_candidates_n2.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8921,
+     "preserved_fraction": NaN,
+     "land_pct": 78.8,
+     "n_tcs": 8,
+     "min_tc_separation": 60.8,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "COASTAL",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 12,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 218.5,
+      "neutral_total": 129,
+      "forest_share_of_land": 0.14
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8844,
+     "preserved_fraction": 0.0,
+     "land_pct": 78.7,
+     "n_tcs": 8,
+     "min_tc_separation": 60.8,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "COASTAL",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 14,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 230.0,
+      "neutral_total": 125,
+      "forest_share_of_land": 0.139
+     }
+    }
+   ],
+   "scenarios": [
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Michigan/Michigan__s000.aoe2scenario",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Michigan/Michigan__s001.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [],
+ "id": "michigan-6f0dcafb"
+}

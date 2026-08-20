@@ -1,0 +1,212 @@
+{
+ "label": "britain-northup",
+ "name": "Britain northup",
+ "argv": [
+  "--center=-3.0,54.5",
+  "--span-km",
+  "1300",
+  "--north",
+  "0",
+  "--forest-clumps",
+  "36",
+  "--forest-alt",
+  "PINE_FOREST",
+  "--forest-spacing",
+  "3"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -3.0,
+  "lat": 54.5,
+  "span_km": 1300.0,
+  "north_deg": 0.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": [
+   "PINE_FOREST"
+  ],
+  "forest_clumping_factor": null,
+  "forest_clumps": 36,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": 3,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": 0.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -3.0,
+   "lat": 54.5,
+   "span_km": 1300.0,
+   "north_deg": 0.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "98e9626516894bba557439a00c8ccb013c1f7fef0533f253239f210100cf0b10",
+ "params_hash": "fbc65f99a7e007a5d5486a5337f60fff5cae29ca73381eded6ba198b73939113",
+ "status": "candidate",
+ "note": "",
+ "origin": {
+  "source": "out/mod_capture/candidates_n2/results.jsonl (run candidates_n2)",
+  "kind": "capture",
+  "also_known_as": [],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "8844215bdd80f7004834aa6b008b9b05988908af6127da8e4dc19f9ca763eb68",
+   "bytes": 217028,
+   "src_commit": "afeda38",
+   "built_utc": "2026-08-16T00:15:16Z",
+   "paths": [
+    "out/mod_capture/candidates_n2/scripts/Britain northup/20260816-001335/britain_northup_240.rms",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Britain northup/Britain northup.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "candidates_n2",
+   "n_samples": 2,
+   "captured_utc": "2026-08-16T00:35:20Z",
+   "commit": "afeda38",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/candidates_n2/results.jsonl",
+   "report": "reports/20260816-210117_candidate_report_candidates_n2.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.7872,
+     "preserved_fraction": 1.0,
+     "land_pct": 27.6,
+     "n_tcs": 8,
+     "min_tc_separation": 37.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.32,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 12.0,
+       "stone": 7.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 7,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 1,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 1,
+       "forage": 1,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 175.5,
+      "neutral_total": 68,
+      "forest_share_of_land": 0.221
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.7815,
+     "preserved_fraction": 1.0,
+     "land_pct": 27.4,
+     "n_tcs": 8,
+     "min_tc_separation": 37.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.32,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 13.0,
+       "stone": 7.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 9,
+       "stone": 0,
+       "forage": 6,
+       "sheep": 5,
+       "deer": 0,
+       "boar": 1,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 1,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 2,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 176.0,
+      "neutral_total": 86,
+      "forest_share_of_land": 0.226
+     }
+    }
+   ],
+   "scenarios": [
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Britain northup/Britain northup__s000.aoe2scenario",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Britain northup/Britain northup__s001.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [
+  "--rotate 45 (grid space) -> --north 0"
+ ],
+ "id": "britain-northup-fbc65f99"
+}

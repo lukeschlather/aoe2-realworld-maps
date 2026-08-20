@@ -1,0 +1,1843 @@
+{
+ "label": "britain-777f",
+ "name": "Britain",
+ "argv": [
+  "--region",
+  "britain",
+  "--north",
+  "-45"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -3.0,
+  "lat": 54.5,
+  "span_km": 1300.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -3.0,
+   "lat": 54.5,
+   "span_km": 1300.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "09499b8ea1187c0c91ad389c9011cb1786090585e58e4c55a1906c565f115d37",
+ "params_hash": "777f4b9101ae7d64ea9bdfc88f6e72970b6891b2cec8f77bb770c90cb1f63649",
+ "status": "candidate",
+ "note": "the shipped window - north reads to the upper left",
+ "origin": {
+  "source": "out/mod_capture/fA_base/results.jsonl (run fA_base)",
+  "kind": "capture",
+  "also_known_as": [
+   "Britain NW (current, keep)"
+  ],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "5f0354600b24b561d1f00fcd16a00e140729277ccca8252377fa6470e2439975",
+   "bytes": 201328,
+   "src_commit": "307c18e",
+   "built_utc": "2026-08-13T02:11:08Z",
+   "paths": [
+    "out/mod_capture/fA_base/scripts/Britain/20260813-020949/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "172999ebf415097cc26454e0cb7035a5b132463dac099437b2dd18a2a7eb5939",
+   "bytes": 201328,
+   "src_commit": "307c18e",
+   "built_utc": "2026-08-13T02:17:51Z",
+   "paths": [
+    "out/mod_capture/fB_c36/scripts/Britain/20260813-021624/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "84a642821dec2fa3415a8a0d80af66a7795f1884ea724bc61cebf46139e152c7",
+   "bytes": 201364,
+   "src_commit": "307c18e",
+   "built_utc": "2026-08-13T02:24:36Z",
+   "paths": [
+    "out/mod_capture/fC_c36k15/scripts/Britain/20260813-022307/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "ad62f2cf7c70183b69efc14d08c1b56b79fd29108a54308a332e0b9c8d96f68a",
+   "bytes": 201363,
+   "src_commit": "307c18e",
+   "built_utc": "2026-08-13T02:31:43Z",
+   "paths": [
+    "out/mod_capture/fD_c36k4/scripts/Britain/20260813-023012/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "5bc662dc205503352b73421a8c24dd139e00275cdeecff72b237b7acd3528d83",
+   "bytes": 201364,
+   "src_commit": "307c18e",
+   "built_utc": "2026-08-13T02:38:50Z",
+   "paths": [
+    "out/mod_capture/fE_c60k15/scripts/Britain/20260813-023719/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "055be130087e2098fec3a5aab00e27f93fc0a2711b5ff472bf035173c4f9a9f5",
+   "bytes": 201558,
+   "src_commit": "307c18e",
+   "built_utc": "2026-08-13T02:47:46Z",
+   "paths": [
+    "out/mod_capture/fF_split3/scripts/Britain/20260813-024611/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "eaef6e14c7d9b2c230d1e3adcfc1ecc731065e9006a8633cc26fd468b222d1b0",
+   "bytes": 201557,
+   "src_commit": "307c18e",
+   "built_utc": "2026-08-13T02:55:31Z",
+   "paths": [
+    "out/mod_capture/fG_split6/scripts/Britain/20260813-025354/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "dfaa12c9e2565414a0c5309eac9fe3c7f1c21719b6cab8099857171ac5ab4190",
+   "bytes": 201557,
+   "src_commit": "8a27fb0",
+   "built_utc": "2026-08-13T03:35:59Z",
+   "paths": [
+    "out/mod_capture/fH_split14/scripts/Britain/20260813-033418/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "655f611581cdfd456c8c3795bdba4786db980b17fa0beb3e17c5d078acfec18e",
+   "bytes": 201327,
+   "src_commit": "8a27fb0",
+   "built_utc": "2026-08-13T03:28:25Z",
+   "paths": [
+    "out/mod_capture/fI_p5single/scripts/Britain/20260813-032648/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "f58a3a05f364eff6b75dff7333dc0fb1461ff8dae17df56dd1a9c2c9eefbafa5",
+   "bytes": 189436,
+   "src_commit": "8626b77",
+   "built_utc": "2026-08-01T04:23:57Z",
+   "paths": [
+    "out/mod_capture/full_pass/scripts/Britain/20260801-042352/britain_240.rms",
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  },
+  {
+   "sha256": "43a486cd63b055ba731a1976a781c27b79945f0eb260d730d50fd11784bcc1fb",
+   "bytes": 200377,
+   "src_commit": "bf74321",
+   "built_utc": "2026-08-12T14:52:15Z",
+   "paths": [
+    "out/mod_capture/head_n1/scripts/Britain/RW Britain.rms",
+    "out/mod_capture/islands_n2/scripts/Britain/20260810-171146/britain_240.rms",
+    "out/mod_capture/neutral_v3/scripts/Britain/20260810-163459/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "f1842afadb50abf4fbce604dba181aae67a9770236c031ed1f621caf739e89c7",
+   "bytes": 205197,
+   "src_commit": "93502dd",
+   "built_utc": "2026-08-12T01:14:07Z",
+   "paths": [
+    "out/mod_capture/python_path_v1/scripts/Britain/20260812-011244/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "4e4aa9b685eb0a71a4886f4d7688c5e734c9b49776fe36a6e578d01f4bd92d77",
+   "bytes": 197589,
+   "src_commit": "e1b6e01",
+   "built_utc": "2026-08-09T03:17:09Z",
+   "paths": [
+    "out/mod_capture/sysa_n10/scripts/Britain/20260809-031701/britain_240.rms",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  },
+  {
+   "sha256": "293f515d9596b9622d55b2f81d15764829938150cbfa6e5d46fd2db4b7d19e5d",
+   "bytes": 201557,
+   "src_commit": "8a27fb0",
+   "built_utc": "2026-08-13T03:43:57Z",
+   "paths": [
+    "out/mod_capture/vBritain/scripts/Britain/20260813-034232/britain_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "fA_base",
+   "n_samples": 1,
+   "captured_utc": "2026-08-13T02:16:13Z",
+   "commit": "307c18e",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/fA_base/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.828,
+     "preserved_fraction": 0.8333333333333334,
+     "land_pct": 29.4,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 2,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 101.5,
+      "neutral_total": 59,
+      "forest_share_of_land": 0.214
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/fA_base/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "fB_c36",
+   "n_samples": 1,
+   "captured_utc": "2026-08-13T02:22:56Z",
+   "commit": "307c18e",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/fB_c36/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8188,
+     "preserved_fraction": 0.8333333333333334,
+     "land_pct": 29.2,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 15.0,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 121.0,
+      "neutral_total": 37,
+      "forest_share_of_land": 0.203
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/fB_c36/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "fC_c36k15",
+   "n_samples": 1,
+   "captured_utc": "2026-08-13T02:29:57Z",
+   "commit": "307c18e",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/fC_c36k15/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8228,
+     "preserved_fraction": 0.8571428571428571,
+     "land_pct": 29.4,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 17.0,
+       "stone": 14.5,
+       "forage": 6.0,
+       "sheep": 9.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 124.5,
+      "neutral_total": 60,
+      "forest_share_of_land": 0.242
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/fC_c36k15/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "fD_c36k4",
+   "n_samples": 1,
+   "captured_utc": "2026-08-13T02:37:07Z",
+   "commit": "307c18e",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/fD_c36k4/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8166,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.1,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 15.5,
+       "stone": 11.5,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 0,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 1,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 109.0,
+      "neutral_total": 69,
+      "forest_share_of_land": 0.217
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/fD_c36k4/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "fE_c60k15",
+   "n_samples": 1,
+   "captured_utc": "2026-08-13T02:45:04Z",
+   "commit": "307c18e",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/fE_c60k15/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.7951,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.1,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 18.0,
+       "stone": 11.5,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 119.5,
+      "neutral_total": 49,
+      "forest_share_of_land": 0.22
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/fE_c60k15/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "fF_split3",
+   "n_samples": 1,
+   "captured_utc": "2026-08-13T02:53:39Z",
+   "commit": "307c18e",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/fF_split3/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.7844,
+     "preserved_fraction": 1.0,
+     "land_pct": 28.9,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 15.5,
+       "stone": 11.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 0,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 1,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 223.0,
+      "neutral_total": 61,
+      "forest_share_of_land": 0.211
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/fF_split3/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "fG_split6",
+   "n_samples": 1,
+   "captured_utc": "2026-08-13T03:01:15Z",
+   "commit": "307c18e",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/fG_split6/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8271,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.2,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 15.5,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 8.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 85.0,
+      "neutral_total": 45,
+      "forest_share_of_land": 0.157
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/fG_split6/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "fH_split14",
+   "n_samples": 1,
+   "captured_utc": "2026-08-13T03:41:18Z",
+   "commit": "8a27fb0",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/fH_split14/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8038,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.3,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 13.0,
+       "stone": 10.0,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 3.5,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 3,
+       "deer": 0,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 2,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 210.0,
+      "neutral_total": 77,
+      "forest_share_of_land": 0.268
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/fH_split14/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "fI_p5single",
+   "n_samples": 1,
+   "captured_utc": "2026-08-13T03:34:06Z",
+   "commit": "8a27fb0",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/fI_p5single/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8225,
+     "preserved_fraction": 0.8571428571428571,
+     "land_pct": 29.1,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 14.5,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 125.0,
+      "neutral_total": 56,
+      "forest_share_of_land": 0.203
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/fI_p5single/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "full_pass",
+   "n_samples": 10,
+   "captured_utc": "2026-08-01T05:18:15Z",
+   "commit": "8626b77",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/full_pass/results.jsonl",
+   "report": "reports/20260801-053411_mod_report_full_pass.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8433,
+     "preserved_fraction": 0.625,
+     "land_pct": 32.7,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8306,
+     "preserved_fraction": 0.5,
+     "land_pct": 33.4,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.57,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.8286,
+     "preserved_fraction": 0.42857142857142855,
+     "land_pct": 33.7,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.57,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 3,
+     "iou_10m": 0.8185,
+     "preserved_fraction": 0.5714285714285714,
+     "land_pct": 33.8,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 4,
+     "iou_10m": 0.8307,
+     "preserved_fraction": 0.5714285714285714,
+     "land_pct": 33.5,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 5,
+     "iou_10m": 0.8273,
+     "preserved_fraction": 0.5555555555555556,
+     "land_pct": 33.4,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.57,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 6,
+     "iou_10m": 0.8239,
+     "preserved_fraction": 0.7142857142857143,
+     "land_pct": 33.6,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 7,
+     "iou_10m": 0.8177,
+     "preserved_fraction": 0.5714285714285714,
+     "land_pct": 34.0,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.57,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 8,
+     "iou_10m": 0.8269,
+     "preserved_fraction": 0.42857142857142855,
+     "land_pct": 33.8,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.57,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 9,
+     "iou_10m": 0.8326,
+     "preserved_fraction": 0.5,
+     "land_pct": 33.3,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.57,
+     "ai_map_type": "ISLANDS"
+    }
+   ],
+   "scenarios": [
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain__s000.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain__s001.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain__s002.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain__s003.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain__s004.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain__s005.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain__s006.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain__s007.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain__s008.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Britain/Britain__s009.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "head_n1",
+   "n_samples": 1,
+   "captured_utc": "2026-08-12T15:06:37Z",
+   "commit": "bf74321",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/head_n1/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8017,
+     "preserved_fraction": 1.0,
+     "land_pct": 28.9,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 13.0,
+       "stone": 11.5,
+       "forage": 6.0,
+       "sheep": 8.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 7,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 4,
+       "deer": 0,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 1,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 96.0,
+      "neutral_total": 79,
+      "forest_share_of_land": 0.228
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/head_n1/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "islands_n2",
+   "n_samples": 2,
+   "captured_utc": "2026-08-10T17:49:01Z",
+   "commit": "8fb61da",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/islands_n2/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8226,
+     "preserved_fraction": 0.8333333333333334,
+     "land_pct": 29.4,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 12.5,
+       "forage": 6.0,
+       "sheep": 7.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 5,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 109.0,
+      "neutral_total": 54,
+      "forest_share_of_land": 0.214
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8188,
+     "preserved_fraction": 0.8333333333333334,
+     "land_pct": 29.1,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 15.5,
+       "stone": 12.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 109.5,
+      "neutral_total": 56,
+      "forest_share_of_land": 0.214
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/islands_n2/Britain/raw/sample_000.aoe2scenario",
+    "out/mod_capture/islands_n2/Britain/raw/sample_001.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "neutral_v3",
+   "n_samples": 1,
+   "captured_utc": "2026-08-10T16:38:00Z",
+   "commit": "cb4b266",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/neutral_v3/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8231,
+     "preserved_fraction": 0.8333333333333334,
+     "land_pct": 29.3,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 13.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 128.5,
+      "neutral_total": 54,
+      "forest_share_of_land": 0.22
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/neutral_v3/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "python_path_v1",
+   "n_samples": 1,
+   "captured_utc": "2026-08-12T01:15:29Z",
+   "commit": "93502dd",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/python_path_v1/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.2983,
+     "preserved_fraction": 0.0,
+     "land_pct": 100.0,
+     "n_tcs": 8,
+     "min_tc_separation": 57.4,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 4.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 8.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 8,
+       "stone": 4,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 2,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 250.0,
+      "neutral_total": 259,
+      "forest_share_of_land": 0.121
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/python_path_v1/Britain/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "sysa_n10",
+   "n_samples": 10,
+   "captured_utc": "2026-08-09T05:24:03Z",
+   "commit": "e1b6e01",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/sysa_n10/results.jsonl",
+   "report": "reports/20260809-052633_mod_report_sysa_n10.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8213,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.1,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 10.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 128.0,
+      "neutral_total": null,
+      "forest_share_of_land": 0.248
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.832,
+     "preserved_fraction": 0.8571428571428571,
+     "land_pct": 29.0,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.57,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.5,
+       "forage": 6.0,
+       "sheep": 10.0,
+       "deer": 5.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 10,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 99.0,
+      "neutral_total": null,
+      "forest_share_of_land": 0.238
+     }
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.8063,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.4,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 109.5,
+      "neutral_total": null,
+      "forest_share_of_land": 0.196
+     }
+    },
+    {
+     "sample_index": 3,
+     "iou_10m": 0.8145,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.1,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 10.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 78.5,
+      "neutral_total": null,
+      "forest_share_of_land": 0.208
+     }
+    },
+    {
+     "sample_index": 4,
+     "iou_10m": 0.8238,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.3,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 118.5,
+      "neutral_total": null,
+      "forest_share_of_land": 0.232
+     }
+    },
+    {
+     "sample_index": 5,
+     "iou_10m": 0.8132,
+     "preserved_fraction": 0.6666666666666666,
+     "land_pct": 29.3,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 100.0,
+      "neutral_total": null,
+      "forest_share_of_land": 0.216
+     }
+    },
+    {
+     "sample_index": 6,
+     "iou_10m": 0.8057,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.2,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 110.5,
+      "neutral_total": null,
+      "forest_share_of_land": 0.209
+     }
+    },
+    {
+     "sample_index": 7,
+     "iou_10m": 0.818,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.2,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 10.0,
+       "deer": 5.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 7,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 89.5,
+      "neutral_total": null,
+      "forest_share_of_land": 0.205
+     }
+    },
+    {
+     "sample_index": 8,
+     "iou_10m": 0.8166,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.3,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 10.0,
+       "deer": 5.5,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 114.0,
+      "neutral_total": null,
+      "forest_share_of_land": 0.224
+     }
+    },
+    {
+     "sample_index": 9,
+     "iou_10m": 0.8051,
+     "preserved_fraction": 0.8571428571428571,
+     "land_pct": 29.2,
+     "n_tcs": 8,
+     "min_tc_separation": 43.9,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 7,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 5,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 95.5,
+      "neutral_total": null,
+      "forest_share_of_land": 0.225
+     }
+    }
+   ],
+   "scenarios": [
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain__s000.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain__s001.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain__s002.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain__s003.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain__s004.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain__s005.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain__s006.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain__s007.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain__s008.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Britain/Britain__s009.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "vBritain",
+   "n_samples": 3,
+   "captured_utc": "2026-08-13T03:49:42Z",
+   "commit": "8a27fb0",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/vBritain/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8132,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.4,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 13.0,
+       "stone": 14.5,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 4,
+       "deer": 2,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 188.5,
+      "neutral_total": 65,
+      "forest_share_of_land": 0.212
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8162,
+     "preserved_fraction": 0.8333333333333334,
+     "land_pct": 28.8,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 13.0,
+       "stone": 10.0,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 10,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 5,
+       "deer": 2,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 228.0,
+      "neutral_total": 57,
+      "forest_share_of_land": 0.213
+     }
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.8235,
+     "preserved_fraction": 0.7142857142857143,
+     "land_pct": 29.1,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 5,
+       "deer": 0,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 1,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 183.0,
+      "neutral_total": 46,
+      "forest_share_of_land": 0.204
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/vBritain/Britain/raw/sample_000.aoe2scenario",
+    "out/mod_capture/vBritain/Britain/raw/sample_001.aoe2scenario",
+    "out/mod_capture/vBritain/Britain/raw/sample_002.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [
+  "no orientation flag in a pre-2026-08-16 record -> --north -45 (the default then)"
+ ],
+ "id": "britain-777f-777f4b91"
+}

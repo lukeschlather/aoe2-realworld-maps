@@ -1,0 +1,1066 @@
+{
+ "label": "scandinavia",
+ "name": "Scandinavia",
+ "argv": [
+  "--region",
+  "scandinavia",
+  "--north",
+  "-45"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": 16.0,
+  "lat": 62.0,
+  "span_km": 2000.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": 16.0,
+   "lat": 62.0,
+   "span_km": 2000.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "6c17813796680d9959f5e1f3f6d6de6a636f6245ec22962eed852d4122cf5da7",
+ "params_hash": "891bc88e404be89f5f3f78d7a0f23c2c565933f1f47315de9d21b127a27a6e7d",
+ "status": "shipped",
+ "note": "the baseline every other row here is to be read against",
+ "origin": {
+  "source": "automation/build_mod.py:MOD_REGIONS",
+  "shipped_filename": "RW Scandinavia.rms",
+  "last_commit": "a9d5dfd",
+  "last_commit_date": "2026-08-15",
+  "first_commit": "953032d",
+  "first_commit_date": "2026-07-31",
+  "also_known_as": [
+   "Scand current NW (ships today)"
+  ],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "7213e009b2e3d9322525feb590ae166106f6f0009696b548a3962b9e0e6a203d",
+   "bytes": 216736,
+   "src_commit": "a9d5dfd",
+   "built_utc": "2026-08-15T22:43:36Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Scandinavia.rms",
+    "out/mod_capture/latency_4regions/scripts/Scandinavia/20260817-203524/scandinavia_240.rms",
+    "reports/capture_latency_data_latency_4regions/Scandinavia/Scandinavia.rms"
+   ],
+   "command": "uv run rwmaps 'Scandinavia' --region scandinavia --north -45",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
+   }
+  },
+  {
+   "sha256": "0e3c18a95ea2de9b0755d1e3d47fa614c9bd8228dc179d614f99e88933053fe8",
+   "bytes": 189628,
+   "src_commit": "8626b77",
+   "built_utc": "2026-08-01T04:58:57Z",
+   "paths": [
+    "out/mod_capture/full_pass/scripts/Scandinavia/20260801-045847/scandinavia_240.rms",
+    "reports/20260801-053411_mod_report_data_full_pass/Scandinavia/Scandinavia.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  },
+  {
+   "sha256": "b0e5f9432792f5637549616ca0a315482615285d3946af801939f2862a76e599",
+   "bytes": 200569,
+   "src_commit": "bf74321",
+   "built_utc": "2026-08-12T15:01:03Z",
+   "paths": [
+    "out/mod_capture/head_n1/scripts/Scandinavia/RW Scandinavia.rms",
+    "out/mod_capture/islands_n2/scripts/Scandinavia/20260810-173403/scandinavia_240.rms"
+   ],
+   "command": "",
+   "summary": {}
+  },
+  {
+   "sha256": "0bc6d35c77a8fce2ac574f4bcceff737812826009de39f6643e71761ab4c3973",
+   "bytes": 197781,
+   "src_commit": "e1b6e01",
+   "built_utc": "2026-08-09T04:36:41Z",
+   "paths": [
+    "out/mod_capture/sysa_n10/scripts/Scandinavia/20260809-043631/scandinavia_240.rms",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "full_pass",
+   "n_samples": 9,
+   "captured_utc": "2026-08-01T05:18:15Z",
+   "commit": "8626b77",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/full_pass/results.jsonl",
+   "report": "reports/20260801-053411_mod_report_full_pass.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8387,
+     "preserved_fraction": 0.3333333333333333,
+     "land_pct": 59.1,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN"
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8381,
+     "preserved_fraction": 0.5714285714285714,
+     "land_pct": 59.0,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN"
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.8478,
+     "preserved_fraction": 0.7142857142857143,
+     "land_pct": 58.1,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN"
+    },
+    {
+     "sample_index": 3,
+     "iou_10m": 0.848,
+     "preserved_fraction": 0.5714285714285714,
+     "land_pct": 58.3,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN"
+    },
+    {
+     "sample_index": 4,
+     "iou_10m": 0.8431,
+     "preserved_fraction": 0.3333333333333333,
+     "land_pct": 58.9,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN"
+    },
+    {
+     "sample_index": 6,
+     "iou_10m": 0.8398,
+     "preserved_fraction": 0.3333333333333333,
+     "land_pct": 59.2,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN"
+    },
+    {
+     "sample_index": 7,
+     "iou_10m": 0.8298,
+     "preserved_fraction": 0.375,
+     "land_pct": 59.7,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN"
+    },
+    {
+     "sample_index": 8,
+     "iou_10m": 0.8483,
+     "preserved_fraction": 0.5,
+     "land_pct": 58.0,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN"
+    },
+    {
+     "sample_index": 9,
+     "iou_10m": 0.8445,
+     "preserved_fraction": 0.5,
+     "land_pct": 58.5,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN"
+    }
+   ],
+   "scenarios": [
+    "reports/20260801-053411_mod_report_data_full_pass/Scandinavia/Scandinavia__s000.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Scandinavia/Scandinavia__s001.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Scandinavia/Scandinavia__s002.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Scandinavia/Scandinavia__s003.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Scandinavia/Scandinavia__s004.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Scandinavia/Scandinavia__s006.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Scandinavia/Scandinavia__s007.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Scandinavia/Scandinavia__s008.aoe2scenario",
+    "reports/20260801-053411_mod_report_data_full_pass/Scandinavia/Scandinavia__s009.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "head_n1",
+   "n_samples": 1,
+   "captured_utc": "2026-08-12T15:06:37Z",
+   "commit": "bf74321",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/head_n1/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8419,
+     "preserved_fraction": 0.6,
+     "land_pct": 52.3,
+     "n_tcs": 8,
+     "min_tc_separation": 40.0,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 14.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 173.5,
+      "neutral_total": 105,
+      "forest_share_of_land": 0.214
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/head_n1/Scandinavia/raw/sample_000.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "islands_n2",
+   "n_samples": 2,
+   "captured_utc": "2026-08-10T17:49:01Z",
+   "commit": "8fb61da",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/islands_n2/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8354,
+     "preserved_fraction": 0.5,
+     "land_pct": 52.3,
+     "n_tcs": 8,
+     "min_tc_separation": 40.0,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 18.0,
+       "stone": 10.0,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 161.0,
+      "neutral_total": 88,
+      "forest_share_of_land": 0.205
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8435,
+     "preserved_fraction": 0.8,
+     "land_pct": 52.1,
+     "n_tcs": 8,
+     "min_tc_separation": 40.0,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 13.5,
+       "stone": 13.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 10,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 151.0,
+      "neutral_total": 95,
+      "forest_share_of_land": 0.207
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/islands_n2/Scandinavia/raw/sample_000.aoe2scenario",
+    "out/mod_capture/islands_n2/Scandinavia/raw/sample_001.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "latency_4regions",
+   "n_samples": 3,
+   "captured_utc": "2026-08-17T20:42:18Z",
+   "commit": "6fd1eb1",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/latency_4regions/results.jsonl",
+   "report": "reports/20260817-135412_capture_latency_latency_4regions.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8419,
+     "preserved_fraction": 0.5,
+     "land_pct": 52.4,
+     "n_tcs": 8,
+     "min_tc_separation": 40.0,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 13.5,
+       "stone": 12.5,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 0,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 1,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1775.5,
+      "land_exclusive_min": 1033,
+      "wood_exclusive_median": 187.0,
+      "neutral_total": 108,
+      "forest_share_of_land": 0.208
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8534,
+     "preserved_fraction": 0.5,
+     "land_pct": 52.4,
+     "n_tcs": 8,
+     "min_tc_separation": 40.0,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 15.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 7.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1613.0,
+      "land_exclusive_min": 1341,
+      "wood_exclusive_median": 157.5,
+      "neutral_total": 102,
+      "forest_share_of_land": 0.205
+     }
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.8435,
+     "preserved_fraction": 0.5714285714285714,
+     "land_pct": 52.9,
+     "n_tcs": 8,
+     "min_tc_separation": 40.0,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 16.0,
+       "stone": 11.5,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 5,
+       "deer": 0,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 1,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1568.0,
+      "land_exclusive_min": 1415,
+      "wood_exclusive_median": 210.0,
+      "neutral_total": 102,
+      "forest_share_of_land": 0.213
+     }
+    }
+   ],
+   "scenarios": [
+    "reports/capture_latency_data_latency_4regions/Scandinavia/Scandinavia__s000.aoe2scenario",
+    "reports/capture_latency_data_latency_4regions/Scandinavia/Scandinavia__s001.aoe2scenario",
+    "reports/capture_latency_data_latency_4regions/Scandinavia/Scandinavia__s002.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "sysa_n10",
+   "n_samples": 10,
+   "captured_utc": "2026-08-09T05:24:03Z",
+   "commit": "e1b6e01",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/sysa_n10/results.jsonl",
+   "report": "reports/20260809-052633_mod_report_sysa_n10.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.838,
+     "preserved_fraction": 0.5,
+     "land_pct": 52.6,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 168.5,
+      "neutral_total": null,
+      "forest_share_of_land": 0.205
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8504,
+     "preserved_fraction": 0.5,
+     "land_pct": 52.5,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 7,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 208.0,
+      "neutral_total": null,
+      "forest_share_of_land": 0.211
+     }
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.8485,
+     "preserved_fraction": 0.5,
+     "land_pct": 51.8,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 0,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 1,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 204.5,
+      "neutral_total": null,
+      "forest_share_of_land": 0.209
+     }
+    },
+    {
+     "sample_index": 3,
+     "iou_10m": 0.8407,
+     "preserved_fraction": 0.6,
+     "land_pct": 52.6,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 200.0,
+      "neutral_total": null,
+      "forest_share_of_land": 0.208
+     }
+    },
+    {
+     "sample_index": 4,
+     "iou_10m": 0.8534,
+     "preserved_fraction": 0.4,
+     "land_pct": 52.3,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 216.0,
+      "neutral_total": null,
+      "forest_share_of_land": 0.214
+     }
+    },
+    {
+     "sample_index": 5,
+     "iou_10m": 0.8517,
+     "preserved_fraction": 0.5,
+     "land_pct": 52.3,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 197.0,
+      "neutral_total": null,
+      "forest_share_of_land": 0.211
+     }
+    },
+    {
+     "sample_index": 6,
+     "iou_10m": 0.8415,
+     "preserved_fraction": 0.5,
+     "land_pct": 52.5,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 194.5,
+      "neutral_total": null,
+      "forest_share_of_land": 0.204
+     }
+    },
+    {
+     "sample_index": 7,
+     "iou_10m": 0.8472,
+     "preserved_fraction": 0.5,
+     "land_pct": 52.9,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 7.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 191.0,
+      "neutral_total": null,
+      "forest_share_of_land": 0.206
+     }
+    },
+    {
+     "sample_index": 8,
+     "iou_10m": 0.8557,
+     "preserved_fraction": 0.3333333333333333,
+     "land_pct": 52.1,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 197.0,
+      "neutral_total": null,
+      "forest_share_of_land": 0.209
+     }
+    },
+    {
+     "sample_index": 9,
+     "iou_10m": 0.8327,
+     "preserved_fraction": 0.4,
+     "land_pct": 53.0,
+     "n_tcs": 8,
+     "min_tc_separation": 47.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 181.5,
+      "neutral_total": null,
+      "forest_share_of_land": 0.206
+     }
+    }
+   ],
+   "scenarios": [
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia__s000.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia__s001.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia__s002.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia__s003.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia__s004.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia__s005.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia__s006.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia__s007.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia__s008.aoe2scenario",
+    "reports/20260809-052633_mod_report_data_sysa_n10/Scandinavia/Scandinavia__s009.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [],
+ "id": "scandinavia-891bc88e"
+}

@@ -1,0 +1,229 @@
+{
+ "label": "caribbean-54fd",
+ "name": "Caribbean",
+ "argv": [
+  "--region",
+  "caribbean",
+  "--tight-resources",
+  "--north",
+  "-45"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -75.0,
+  "lat": 18.0,
+  "span_km": 2600.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": true,
+  "_window": {
+   "proj": "laea",
+   "lon": -75.0,
+   "lat": 18.0,
+   "span_km": 2600.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "04cf73941d0344d2817b4d83de9baeefc795bff80392318c7218cb0088076321",
+ "params_hash": "54fd5f6d77f64f5398391fb5fdbec48f1e0838340314bed3ce035b8cc4bf5f25",
+ "status": "candidate",
+ "note": "",
+ "origin": {
+  "source": "out/mod_capture/full_pass_v2/results.jsonl (run full_pass_v2)",
+  "kind": "capture",
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "6a41c4f6691a1c1969de67960270f62251d697f26421a37698329010351d1316",
+   "bytes": 190170,
+   "src_commit": "a52553e",
+   "built_utc": "2026-08-02T02:40:51Z",
+   "paths": [
+    "out/mod_capture/full_pass_v2/scripts/Caribbean/20260802-024046/caribbean_240.rms",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "full_pass_v2",
+   "n_samples": 10,
+   "captured_utc": "2026-08-02T02:52:56Z",
+   "commit": "a52553e",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/full_pass_v2/results.jsonl",
+   "report": "reports/20260802-025351_mod_report_full_pass_v2.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.7862,
+     "preserved_fraction": 1.0,
+     "land_pct": 24.2,
+     "n_tcs": 8,
+     "min_tc_separation": 48.6,
+     "landmasses_with_a_player": 5,
+     "reachable_fraction": 0.21,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.769,
+     "preserved_fraction": 0.9,
+     "land_pct": 24.7,
+     "n_tcs": 8,
+     "min_tc_separation": 48.6,
+     "landmasses_with_a_player": 4,
+     "reachable_fraction": 0.36,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.7701,
+     "preserved_fraction": 1.0,
+     "land_pct": 24.4,
+     "n_tcs": 8,
+     "min_tc_separation": 48.6,
+     "landmasses_with_a_player": 5,
+     "reachable_fraction": 0.21,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 3,
+     "iou_10m": 0.7786,
+     "preserved_fraction": 1.0,
+     "land_pct": 24.4,
+     "n_tcs": 8,
+     "min_tc_separation": 48.6,
+     "landmasses_with_a_player": 4,
+     "reachable_fraction": 0.36,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 4,
+     "iou_10m": 0.7636,
+     "preserved_fraction": 1.0,
+     "land_pct": 24.7,
+     "n_tcs": 8,
+     "min_tc_separation": 48.6,
+     "landmasses_with_a_player": 5,
+     "reachable_fraction": 0.21,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 5,
+     "iou_10m": 0.7654,
+     "preserved_fraction": 0.8888888888888888,
+     "land_pct": 24.6,
+     "n_tcs": 8,
+     "min_tc_separation": 48.6,
+     "landmasses_with_a_player": 4,
+     "reachable_fraction": 0.36,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 6,
+     "iou_10m": 0.7699,
+     "preserved_fraction": 1.0,
+     "land_pct": 24.6,
+     "n_tcs": 8,
+     "min_tc_separation": 48.6,
+     "landmasses_with_a_player": 4,
+     "reachable_fraction": 0.36,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 7,
+     "iou_10m": 0.7602,
+     "preserved_fraction": 1.0,
+     "land_pct": 24.7,
+     "n_tcs": 8,
+     "min_tc_separation": 48.6,
+     "landmasses_with_a_player": 5,
+     "reachable_fraction": 0.21,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 8,
+     "iou_10m": 0.788,
+     "preserved_fraction": 1.0,
+     "land_pct": 24.4,
+     "n_tcs": 8,
+     "min_tc_separation": 48.6,
+     "landmasses_with_a_player": 4,
+     "reachable_fraction": 0.36,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 9,
+     "iou_10m": 0.7781,
+     "preserved_fraction": 1.0,
+     "land_pct": 24.4,
+     "n_tcs": 8,
+     "min_tc_separation": 48.6,
+     "landmasses_with_a_player": 5,
+     "reachable_fraction": 0.21,
+     "ai_map_type": "ISLANDS"
+    }
+   ],
+   "scenarios": [
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean__s000.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean__s001.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean__s002.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean__s003.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean__s004.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean__s005.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean__s006.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean__s007.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean__s008.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Caribbean/Caribbean__s009.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [
+  "no orientation flag in a pre-2026-08-16 record -> --north -45 (the default then)"
+ ],
+ "id": "caribbean-54fd-54fd5f6d"
+}

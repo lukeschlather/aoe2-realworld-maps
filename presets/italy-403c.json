@@ -1,0 +1,258 @@
+{
+ "label": "italy-403c",
+ "name": "Italy",
+ "argv": [
+  "--region",
+  "italy",
+  "--spread-starts",
+  "--tight-resources",
+  "--north",
+  "-45"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": 13.0,
+  "lat": 42.0,
+  "span_km": 1300.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": true,
+  "teams": 2,
+  "tight_resources": true,
+  "_window": {
+   "proj": "laea",
+   "lon": 13.0,
+   "lat": 42.0,
+   "span_km": 1300.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "9d39b85eccaddf012c05b752d3257aeb32caae4f21f7a56dc5a359d13d1678d9",
+ "params_hash": "403c730f62b770d653221d18ddcf0cb10091f25efadf110a98543f60f9048d1c",
+ "status": "candidate",
+ "note": "",
+ "origin": {
+  "source": "out/mod_capture/full_pass_v2/results.jsonl (run full_pass_v2)",
+  "kind": "capture",
+  "also_known_as": [],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "4b03991e4bed922a2ee7e4e5b3c67a7d87c471d61df18327c4ec24626ee32399",
+   "bytes": 190230,
+   "src_commit": "a52553e",
+   "built_utc": "2026-08-02T02:21:29Z",
+   "paths": [
+    "out/mod_capture/full_pass_v2/scripts/Italy/20260802-021639/italy_240.rms",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy.rms",
+    "out/mod_capture/spread_islands_fix_verify/scripts/Italy/20260802-010550/italy_240.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "full_pass_v2",
+   "n_samples": 10,
+   "captured_utc": "2026-08-02T02:52:56Z",
+   "commit": "a52553e",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/full_pass_v2/results.jsonl",
+   "report": "reports/20260802-025351_mod_report_full_pass_v2.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8996,
+     "preserved_fraction": 0.375,
+     "land_pct": 53.7,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.39,
+     "ai_map_type": "ARCHIPELAGO"
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.901,
+     "preserved_fraction": 0.42857142857142855,
+     "land_pct": 53.3,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.39,
+     "ai_map_type": "ARCHIPELAGO"
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.9069,
+     "preserved_fraction": 0.42857142857142855,
+     "land_pct": 52.9,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.39,
+     "ai_map_type": "ARCHIPELAGO"
+    },
+    {
+     "sample_index": 3,
+     "iou_10m": 0.8919,
+     "preserved_fraction": 0.5714285714285714,
+     "land_pct": 54.1,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.39,
+     "ai_map_type": "ARCHIPELAGO"
+    },
+    {
+     "sample_index": 4,
+     "iou_10m": 0.8934,
+     "preserved_fraction": 0.5,
+     "land_pct": 53.7,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.39,
+     "ai_map_type": "ARCHIPELAGO"
+    },
+    {
+     "sample_index": 5,
+     "iou_10m": 0.8923,
+     "preserved_fraction": 0.375,
+     "land_pct": 53.7,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.39,
+     "ai_map_type": "ARCHIPELAGO"
+    },
+    {
+     "sample_index": 6,
+     "iou_10m": 0.8971,
+     "preserved_fraction": 0.2857142857142857,
+     "land_pct": 53.9,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.75,
+     "ai_map_type": "ARCHIPELAGO"
+    },
+    {
+     "sample_index": 7,
+     "iou_10m": 0.8907,
+     "preserved_fraction": 0.375,
+     "land_pct": 54.0,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.39,
+     "ai_map_type": "ARCHIPELAGO"
+    },
+    {
+     "sample_index": 8,
+     "iou_10m": 0.8972,
+     "preserved_fraction": 0.42857142857142855,
+     "land_pct": 53.4,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.39,
+     "ai_map_type": "ARCHIPELAGO"
+    },
+    {
+     "sample_index": 9,
+     "iou_10m": 0.8773,
+     "preserved_fraction": 0.6666666666666666,
+     "land_pct": 54.4,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.39,
+     "ai_map_type": "ARCHIPELAGO"
+    }
+   ],
+   "scenarios": [
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy__s000.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy__s001.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy__s002.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy__s003.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy__s004.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy__s005.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy__s006.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy__s007.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy__s008.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/Italy/Italy__s009.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "spread_islands_fix_verify",
+   "n_samples": 1,
+   "captured_utc": "2026-08-02T01:10:44Z",
+   "commit": "3882a48",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/spread_islands_fix_verify/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8939,
+     "preserved_fraction": 0.42857142857142855,
+     "land_pct": 53.7,
+     "n_tcs": 8,
+     "min_tc_separation": 46.5,
+     "landmasses_with_a_player": 4,
+     "reachable_fraction": 0.36,
+     "ai_map_type": "ARCHIPELAGO"
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/spread_islands_fix_verify/Italy/raw/sample_000.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [
+  "--spread-islands -> --spread-starts (renamed 2026-08-01)",
+  "no orientation flag in a pre-2026-08-16 record -> --north -45 (the default then)"
+ ],
+ "id": "italy-403c-403c730f"
+}

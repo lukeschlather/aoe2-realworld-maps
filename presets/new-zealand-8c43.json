@@ -1,0 +1,229 @@
+{
+ "label": "new-zealand-8c43",
+ "name": "New Zealand",
+ "argv": [
+  "--region",
+  "newzealand",
+  "--tight-resources",
+  "--north",
+  "-45"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": 172.5,
+  "lat": -41.5,
+  "span_km": 1500.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": true,
+  "_window": {
+   "proj": "laea",
+   "lon": 172.5,
+   "lat": -41.5,
+   "span_km": 1500.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "6e72252d9d9a56241961d943bc47c0a6870666048ac9c200617732d68104684e",
+ "params_hash": "8c43725c5e0f1c2cfda69c18f6136c1ad94341b3cc63c01076dd843863ed2cc0",
+ "status": "candidate",
+ "note": "",
+ "origin": {
+  "source": "out/mod_capture/full_pass_v2/results.jsonl (run full_pass_v2)",
+  "kind": "capture",
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "0754854c9b9856c3eea3d9720c2b043b0e334194086a5427dc71b889a00cd6dd",
+   "bytes": 190130,
+   "src_commit": "a52553e",
+   "built_utc": "2026-08-02T02:47:03Z",
+   "paths": [
+    "out/mod_capture/full_pass_v2/scripts/New Zealand/20260802-024658/new_zealand_240.rms",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "full_pass_v2",
+   "n_samples": 10,
+   "captured_utc": "2026-08-02T02:52:56Z",
+   "commit": "a52553e",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/full_pass_v2/results.jsonl",
+   "report": "reports/20260802-025351_mod_report_full_pass_v2.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.7113,
+     "preserved_fraction": 0.0,
+     "land_pct": 15.4,
+     "n_tcs": 8,
+     "min_tc_separation": 33.0,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.7104,
+     "preserved_fraction": 0.5,
+     "land_pct": 15.3,
+     "n_tcs": 8,
+     "min_tc_separation": 33.0,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.6893,
+     "preserved_fraction": 0.5,
+     "land_pct": 15.6,
+     "n_tcs": 8,
+     "min_tc_separation": 33.0,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 3,
+     "iou_10m": 0.7158,
+     "preserved_fraction": 0.5,
+     "land_pct": 15.2,
+     "n_tcs": 8,
+     "min_tc_separation": 33.0,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.46,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 4,
+     "iou_10m": 0.7069,
+     "preserved_fraction": 0.5,
+     "land_pct": 15.2,
+     "n_tcs": 8,
+     "min_tc_separation": 33.0,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.46,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 5,
+     "iou_10m": 0.7128,
+     "preserved_fraction": 0.5,
+     "land_pct": 15.4,
+     "n_tcs": 8,
+     "min_tc_separation": 33.0,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.46,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 6,
+     "iou_10m": 0.715,
+     "preserved_fraction": 0.5,
+     "land_pct": 15.3,
+     "n_tcs": 8,
+     "min_tc_separation": 33.0,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.46,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 7,
+     "iou_10m": 0.7165,
+     "preserved_fraction": 0.5,
+     "land_pct": 15.1,
+     "n_tcs": 8,
+     "min_tc_separation": 33.0,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.46,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 8,
+     "iou_10m": 0.7137,
+     "preserved_fraction": 0.5,
+     "land_pct": 15.1,
+     "n_tcs": 8,
+     "min_tc_separation": 33.0,
+     "landmasses_with_a_player": 2,
+     "reachable_fraction": 0.46,
+     "ai_map_type": "ISLANDS"
+    },
+    {
+     "sample_index": 9,
+     "iou_10m": 0.6858,
+     "preserved_fraction": 0.5,
+     "land_pct": 15.6,
+     "n_tcs": 8,
+     "min_tc_separation": 33.0,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "ISLANDS"
+    }
+   ],
+   "scenarios": [
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand__s000.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand__s001.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand__s002.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand__s003.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand__s004.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand__s005.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand__s006.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand__s007.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand__s008.aoe2scenario",
+    "reports/20260802-025351_mod_report_data_full_pass_v2/New Zealand/New Zealand__s009.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [
+  "no orientation flag in a pre-2026-08-16 record -> --north -45 (the default then)"
+ ],
+ "id": "new-zealand-8c43-8c43725c"
+}

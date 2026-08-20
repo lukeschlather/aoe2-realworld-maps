@@ -1,0 +1,229 @@
+{
+ "label": "great-britain-n",
+ "name": "Great Britain N",
+ "argv": [
+  "--center=-3.0,52.5",
+  "--span-km",
+  "1300",
+  "--forest-clumps",
+  "36",
+  "--forest-alt",
+  "PINE_FOREST",
+  "--forest-spacing",
+  "3",
+  "--north",
+  "0"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -3.0,
+  "lat": 52.5,
+  "span_km": 1300.0,
+  "north_deg": 0.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": [
+   "PINE_FOREST"
+  ],
+  "forest_clumping_factor": null,
+  "forest_clumps": 36,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": 3,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": 0.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -3.0,
+   "lat": 52.5,
+   "span_km": 1300.0,
+   "north_deg": 0.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "7100e31a99021c99838d5f372a0e07f8152de94233758e215d1c61966d4c7795",
+ "params_hash": "0399a5ecaa454e9e1928c740f4fe89df54446077bf1cad45261f3c3c9a6bffc5",
+ "status": "shipped",
+ "note": "",
+ "origin": {
+  "source": "automation/build_mod.py:MOD_REGIONS",
+  "shipped_filename": "RW Great Britain N.rms",
+  "last_commit": "6c9b972",
+  "last_commit_date": "2026-08-18",
+  "first_commit": "953032d",
+  "first_commit_date": "2026-07-31",
+  "also_known_as": [
+   "Britain northup France"
+  ],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "c83505cebf76cf296924803a621b9eedc7d015a5a9c30923b86a8e8bc5d40c6f",
+   "bytes": 217024,
+   "src_commit": "6c9b972",
+   "built_utc": "2026-08-18T09:21:36Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Great Britain N.rms"
+   ],
+   "command": "uv run rwmaps 'Great Britain N' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
+   }
+  },
+  {
+   "sha256": "5a69e382912f41fef17775daab53de081aacf162537afd55717f420d32c30840",
+   "bytes": 217031,
+   "src_commit": "afeda38",
+   "built_utc": "2026-08-16T00:20:57Z",
+   "paths": [
+    "out/mod_capture/candidates_n2/scripts/Britain northup France/20260816-001909/britain_northup_france_240.rms",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Britain northup France/Britain northup France.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "candidates_n2",
+   "n_samples": 2,
+   "captured_utc": "2026-08-16T00:35:20Z",
+   "commit": "afeda38",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/candidates_n2/results.jsonl",
+   "report": "reports/20260816-210117_candidate_report_candidates_n2.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8481,
+     "preserved_fraction": 1.0,
+     "land_pct": 35.2,
+     "n_tcs": 8,
+     "min_tc_separation": 47.2,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.32,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 315.5,
+      "neutral_total": 37,
+      "forest_share_of_land": 0.185
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8443,
+     "preserved_fraction": 1.0,
+     "land_pct": 35.4,
+     "n_tcs": 8,
+     "min_tc_separation": 47.2,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.32,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 300.5,
+      "neutral_total": 54,
+      "forest_share_of_land": 0.185
+     }
+    }
+   ],
+   "scenarios": [
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Britain northup France/Britain northup France__s000.aoe2scenario",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/Britain northup France/Britain northup France__s001.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [],
+ "id": "great-britain-n-0399a5ec"
+}

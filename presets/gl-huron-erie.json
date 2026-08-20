@@ -1,0 +1,210 @@
+{
+ "label": "gl-huron-erie",
+ "name": "GL Huron-Erie",
+ "argv": [
+  "--center=-82.0,44.0",
+  "--span-km",
+  "1100",
+  "--north",
+  "0",
+  "--overlap",
+  "0.85",
+  "--min-water-width",
+  "5",
+  "--min-land-width",
+  "3"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -82.0,
+  "lat": 44.0,
+  "span_km": 1100.0,
+  "north_deg": 0.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 5,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": 0.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -82.0,
+   "lat": 44.0,
+   "span_km": 1100.0,
+   "north_deg": 0.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "c723d674ad63a067eea853cb4b730c42afff43c18dba5bc80a80c4c4a0b80111",
+ "params_hash": "3a30ca77de84ebc0967f7d3c5b5e7841f52ae1172504431446f822a660bf4be3",
+ "status": "candidate",
+ "note": "",
+ "origin": {
+  "source": "out/mod_capture/candidates_n2/results.jsonl (run candidates_n2)",
+  "kind": "capture",
+  "also_known_as": [],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "8b7babc8446602ab6acc03ce9110b9e3dade08365eb836a7a984197475b0fd35",
+   "bytes": 216829,
+   "src_commit": "afeda38",
+   "built_utc": "2026-08-15T23:59:33Z",
+   "paths": [
+    "out/mod_capture/candidates_n2/scripts/GL Huron-Erie/20260815-235804/gl_huron_erie_240.rms",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/GL Huron-Erie/GL Huron-Erie.rms"
+   ],
+   "command": "",
+   "summary": {
+    "note": "committed copy, archived beside the report that presented it"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "candidates_n2",
+   "n_samples": 2,
+   "captured_utc": "2026-08-16T00:35:20Z",
+   "commit": "afeda38",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/candidates_n2/results.jsonl",
+   "report": "reports/20260816-210117_candidate_report_candidates_n2.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8998,
+     "preserved_fraction": NaN,
+     "land_pct": 79.2,
+     "n_tcs": 8,
+     "min_tc_separation": 63.5,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "COASTAL",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 16.0,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 258.5,
+      "neutral_total": 128,
+      "forest_share_of_land": 0.138
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.9016,
+     "preserved_fraction": NaN,
+     "land_pct": 79.0,
+     "n_tcs": 8,
+     "min_tc_separation": 63.5,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "COASTAL",
+     "fairness": {
+      "ownership_radius": null,
+      "median": {
+       "gold": 11.0,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 0.0,
+      "land_exclusive_min": 0,
+      "wood_exclusive_median": 239.0,
+      "neutral_total": 121,
+      "forest_share_of_land": 0.142
+     }
+    }
+   ],
+   "scenarios": [
+    "reports/20260816-210117_candidate_report_data_candidates_n2/GL Huron-Erie/GL Huron-Erie__s000.aoe2scenario",
+    "reports/20260816-210117_candidate_report_data_candidates_n2/GL Huron-Erie/GL Huron-Erie__s001.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [
+  "--rotate 45 (grid space) -> --north 0"
+ ],
+ "id": "gl-huron-erie-3a30ca77"
+}

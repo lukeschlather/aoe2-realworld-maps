@@ -1,0 +1,418 @@
+{
+ "label": "greece",
+ "name": "Greece",
+ "argv": [
+  "--region",
+  "greece",
+  "--forest-clumps",
+  "36",
+  "--forest-alt",
+  "PINE_FOREST",
+  "--forest-spacing",
+  "3",
+  "--forest-percent",
+  "14",
+  "--north",
+  "-45"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": 23.5,
+  "lat": 38.5,
+  "span_km": 900.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": [
+   "PINE_FOREST"
+  ],
+  "forest_clumping_factor": null,
+  "forest_clumps": 36,
+  "forest_last": null,
+  "forest_percent": 14,
+  "forest_spacing": 3,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": 23.5,
+   "lat": 38.5,
+   "span_km": 900.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "f1587ca156d2843dfef05def29479a0e35161435d86f66ea1db75391cbd1fa29",
+ "params_hash": "f83710109cfaea046aa012eb551be2abc9e6c96db58137b699211a0a413075bd",
+ "status": "shipped",
+ "note": "",
+ "origin": {
+  "source": "automation/build_mod.py:MOD_REGIONS",
+  "shipped_filename": "RW Greece.rms",
+  "last_commit": "a9d5dfd",
+  "last_commit_date": "2026-08-15",
+  "first_commit": "953032d",
+  "first_commit_date": "2026-07-31",
+  "also_known_as": [],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "3fc5e7691e592aba9b0b177473e4f061c70c6095afea4ca3ac2c7a4608354e26",
+   "bytes": 216852,
+   "src_commit": "a9d5dfd",
+   "built_utc": "2026-08-15T22:38:25Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Greece.rms",
+    "out/mod_capture/latency_4regions/scripts/Greece/20260817-202852/greece_240.rms",
+    "reports/capture_latency_data_latency_4regions/Greece/Greece.rms",
+    "out/mod_capture/save_fix_check/scripts/Greece/20260817-204501/greece_240.rms"
+   ],
+   "command": "uv run rwmaps 'Greece' --region greece --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --forest-percent 14 --north -45",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "latency_4regions",
+   "n_samples": 3,
+   "captured_utc": "2026-08-17T20:42:18Z",
+   "commit": "6fd1eb1",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/latency_4regions/results.jsonl",
+   "report": "reports/20260817-135412_capture_latency_latency_4regions.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8406,
+     "preserved_fraction": 1.0,
+     "land_pct": 37.8,
+     "n_tcs": 8,
+     "min_tc_separation": 35.2,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 15.5,
+       "stone": 10.0,
+       "forage": 6.0,
+       "sheep": 9.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 2,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1338.0,
+      "land_exclusive_min": 924,
+      "wood_exclusive_median": 316.0,
+      "neutral_total": 71,
+      "forest_share_of_land": 0.241
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8422,
+     "preserved_fraction": 0.875,
+     "land_pct": 38.1,
+     "n_tcs": 8,
+     "min_tc_separation": 35.2,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 11.5,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 7.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 0,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 1,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1283.0,
+      "land_exclusive_min": 1029,
+      "wood_exclusive_median": 306.0,
+      "neutral_total": 102,
+      "forest_share_of_land": 0.241
+     }
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.8328,
+     "preserved_fraction": 1.0,
+     "land_pct": 37.8,
+     "n_tcs": 8,
+     "min_tc_separation": 35.2,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 11.0,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 9.0,
+       "deer": 5.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 1,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1338.5,
+      "land_exclusive_min": 913,
+      "wood_exclusive_median": 268.0,
+      "neutral_total": 85,
+      "forest_share_of_land": 0.234
+     }
+    }
+   ],
+   "scenarios": [
+    "reports/capture_latency_data_latency_4regions/Greece/Greece__s000.aoe2scenario",
+    "reports/capture_latency_data_latency_4regions/Greece/Greece__s001.aoe2scenario",
+    "reports/capture_latency_data_latency_4regions/Greece/Greece__s002.aoe2scenario"
+   ]
+  },
+  {
+   "run_id": "save_fix_check",
+   "n_samples": 3,
+   "captured_utc": "2026-08-17T20:51:58Z",
+   "commit": "6fd1eb1",
+   "commit_source": "HEAD at the run's date (pre-runlog run)",
+   "results": "out/mod_capture/save_fix_check/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8323,
+     "preserved_fraction": 0.7142857142857143,
+     "land_pct": 37.4,
+     "n_tcs": 8,
+     "min_tc_separation": 35.2,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 16.0,
+       "stone": 10.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 6.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1289.5,
+      "land_exclusive_min": 846,
+      "wood_exclusive_median": 299.0,
+      "neutral_total": 80,
+      "forest_share_of_land": 0.244
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.837,
+     "preserved_fraction": 1.0,
+     "land_pct": 37.9,
+     "n_tcs": 8,
+     "min_tc_separation": 35.2,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 13.0,
+       "stone": 13.5,
+       "forage": 6.0,
+       "sheep": 7.0,
+       "deer": 4.5,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 3,
+       "deer": 2,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1294.0,
+      "land_exclusive_min": 992,
+      "wood_exclusive_median": 277.5,
+      "neutral_total": 82,
+      "forest_share_of_land": 0.236
+     }
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.8183,
+     "preserved_fraction": 0.8,
+     "land_pct": 37.9,
+     "n_tcs": 8,
+     "min_tc_separation": 35.2,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "MEDITERRANEAN",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 16.0,
+       "stone": 9.0,
+       "forage": 6.0,
+       "sheep": 10.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 7,
+       "deer": 1,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1247.0,
+      "land_exclusive_min": 1155,
+      "wood_exclusive_median": 292.5,
+      "neutral_total": 86,
+      "forest_share_of_land": 0.232
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/save_fix_check/Greece/raw/sample_000.aoe2scenario",
+    "out/mod_capture/save_fix_check/Greece/raw/sample_001.aoe2scenario",
+    "out/mod_capture/save_fix_check/Greece/raw/sample_002.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [],
+ "id": "greece-f8371010"
+}

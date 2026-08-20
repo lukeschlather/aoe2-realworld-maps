@@ -1,0 +1,207 @@
+{
+ "label": "scand-plain",
+ "name": "Scand plain",
+ "argv": [
+  "--center=21.5,63.8",
+  "--span-km",
+  "2000",
+  "--min-water-width",
+  "2",
+  "--north",
+  "-45"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": 21.5,
+  "lat": 63.8,
+  "span_km": 2000.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": null,
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 2,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": 21.5,
+   "lat": 63.8,
+   "span_km": 2000.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "489a14584f0cf69dab41b7360ea4b14d614821e4596dcb1df67743b0b7d84e7d",
+ "params_hash": "236d48563a3d76ae1edfddca42d7e3173d28c4187884bb68a1dfe4166f25e39c",
+ "status": "candidate",
+ "note": "",
+ "origin": {
+  "source": "out/mod_capture/scand_feat/results.jsonl (run scand_feat)",
+  "kind": "capture",
+  "also_known_as": [],
+  "imported": "2026-08-20T00:35:55Z"
+ },
+ "builds": [
+  {
+   "sha256": "7c1d4cdae095a4cc25b89d4624ea4142a1ebf8201f4ddba19b640f7067d53b23",
+   "bytes": 217135,
+   "src_commit": "1663138",
+   "built_utc": "2026-08-18T23:13:25Z",
+   "paths": [
+    "out/mod_capture/scand_feat/scripts/Scand plain/20260818-231215/scand_plain_240.rms"
+   ],
+   "command": "uv run rwmaps Scand plain --outdir C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\mod_capture\\scand_feat\\scripts\\Scand plain --no-preview --center=21.5,63.8 --span-km 2000 --min-water-width 2 --north -45",
+   "summary": {
+    "land_pct": 55.6,
+    "script_iou": 0.97,
+    "starts": 8,
+    "min_separation": 52.0,
+    "verdict": "playable"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "scand_feat",
+   "n_samples": 2,
+   "captured_utc": "2026-08-19T01:09:31Z",
+   "commit": "1663138",
+   "commit_source": "run_start event",
+   "results": "out/mod_capture/scand_feat/results.jsonl",
+   "report": "reports/20260818-181500_feature_report_scand_feat.html",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8512,
+     "preserved_fraction": 1.0,
+     "land_pct": 53.4,
+     "n_tcs": 8,
+     "min_tc_separation": 51.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "COASTAL",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 16.0,
+       "stone": 10.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 13,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1903.0,
+      "land_exclusive_min": 1255,
+      "wood_exclusive_median": 242.0,
+      "neutral_total": 80,
+      "forest_share_of_land": 0.204
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.8484,
+     "preserved_fraction": 1.0,
+     "land_pct": 53.5,
+     "n_tcs": 8,
+     "min_tc_separation": 51.9,
+     "landmasses_with_a_player": 1,
+     "reachable_fraction": 1.0,
+     "ai_map_type": "COASTAL",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 16.0,
+       "stone": 14.0,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 9,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1937.0,
+      "land_exclusive_min": 1397,
+      "wood_exclusive_median": 238.0,
+      "neutral_total": 80,
+      "forest_share_of_land": 0.204
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/scand_feat/Scand plain/raw/sample_000.aoe2scenario",
+    "out/mod_capture/scand_feat/Scand plain/raw/sample_001.aoe2scenario"
+   ]
+  }
+ ],
+ "legacy_notes": [],
+ "id": "scand-plain-236d4856"
+}

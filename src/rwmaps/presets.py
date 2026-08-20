@@ -235,6 +235,10 @@ class Capture:
     n_samples: int
     captured_utc: str = ""
     commit: str = "unknown"
+    #: How ``commit`` was established. Runs before ``runlog`` (2026-08-17)
+    #: recorded none of their own, so theirs is HEAD-at-the-date - a weaker
+    #: claim, and one that has to say it is weaker.
+    commit_source: str = "unknown"
     results: str = ""          # results.jsonl this was read from
     report: str = ""           # reports/ HTML that presented it, if any
     #: Per-sample summary, copied out of results.jsonl rather than pointed
