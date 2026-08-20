@@ -79,10 +79,189 @@
  "note": "britain-crossings-wide plus a fourth shallows chain across Ramsey Sound (-5.32,51.87 to -5.05,51.84 at 24 km), so the St George's ford's Welsh end is joined to Pembrokeshire even when the engine leaves a fragment - read in game as Ramsey Island - detached off St Davids Head. Everything else identical to britain-crossings-wide.",
  "origin": {
   "source": "automation/preset_cli.py new",
-  "created": "2026-08-20T17:09:03Z"
+  "created": "2026-08-20T17:09:03Z",
+  "also_known_as": [
+   "britain-crossings-ramsey"
+  ],
+  "imported": "2026-08-20T18:14:47Z"
  },
- "builds": [],
- "captures": [],
+ "builds": [
+  {
+   "sha256": "3b1ff94d81e315e3c0e4586372b49ad297dacf907c74d4f80225fc9ff73fa4f7",
+   "bytes": 222043,
+   "src_commit": "9a7e762",
+   "built_utc": "2026-08-20T17:58:04Z",
+   "paths": [
+    "out/mod_capture/britain_ramsey/scripts/britain-crossings-ramsey/20260820-175618/britain_crossings_ramsey_240.rms"
+   ],
+   "command": "uv run rwmaps britain-crossings-ramsey --outdir C:\\Users\\luke.schlather\\aoe2-realworld-maps\\out\\mod_capture\\britain_ramsey\\scripts\\britain-crossings-ramsey --no-preview --region britain --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north -45 --feature-preset britain-crossings-ramsey",
+   "summary": {
+    "land_pct": 30.5,
+    "script_iou": 0.96,
+    "starts": 8,
+    "min_separation": 32.0,
+    "verdict": "unfair"
+   }
+  }
+ ],
+ "captures": [
+  {
+   "run_id": "britain_ramsey",
+   "n_samples": 3,
+   "region": "britain-crossings-ramsey",
+   "captured_utc": "2026-08-20T18:13:05Z",
+   "started_local": "2026-08-20T10:52:12.730-07:00",
+   "commit": "9a7e762",
+   "commit_source": "run_start event",
+   "results": "out/mod_capture/britain_ramsey/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "iou_10m": 0.8091,
+     "preserved_fraction": 0.8571428571428571,
+     "land_pct": 29.2,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 13.5,
+       "stone": 9.5,
+       "forage": 6.0,
+       "sheep": 8.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 9,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 8,
+       "deer": 3,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1323.5,
+      "land_exclusive_min": 831,
+      "wood_exclusive_median": 219.5,
+      "neutral_total": 71,
+      "forest_share_of_land": 0.2
+     }
+    },
+    {
+     "sample_index": 1,
+     "iou_10m": 0.7934,
+     "preserved_fraction": 1.0,
+     "land_pct": 28.8,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 16.5,
+       "stone": 11.5,
+       "forage": 6.0,
+       "sheep": 8.5,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 7,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 1,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1217.5,
+      "land_exclusive_min": 844,
+      "wood_exclusive_median": 192.0,
+      "neutral_total": 58,
+      "forest_share_of_land": 0.2
+     }
+    },
+    {
+     "sample_index": 2,
+     "iou_10m": 0.8094,
+     "preserved_fraction": 1.0,
+     "land_pct": 29.0,
+     "n_tcs": 8,
+     "min_tc_separation": 32.0,
+     "landmasses_with_a_player": 3,
+     "reachable_fraction": 0.29,
+     "ai_map_type": "ISLANDS",
+     "fairness": {
+      "ownership_radius": 30.0,
+      "median": {
+       "gold": 15.0,
+       "stone": 11.0,
+       "forage": 6.0,
+       "sheep": 9.0,
+       "deer": 4.0,
+       "boar": 2.0,
+       "small_game": 0.0
+      },
+      "min": {
+       "gold": 11,
+       "stone": 5,
+       "forage": 6,
+       "sheep": 6,
+       "deer": 4,
+       "boar": 2,
+       "small_game": 0
+      },
+      "players_without_any": {
+       "gold": 0,
+       "stone": 0,
+       "forage": 0,
+       "sheep": 0,
+       "deer": 0,
+       "boar": 0,
+       "small_game": 8
+      },
+      "land_exclusive_median": 1142.5,
+      "land_exclusive_min": 881,
+      "wood_exclusive_median": 207.5,
+      "neutral_total": 73,
+      "forest_share_of_land": 0.196
+     }
+    }
+   ],
+   "scenarios": [
+    "out/mod_capture/britain_ramsey/britain-crossings-ramsey/raw/sample_000.aoe2scenario",
+    "out/mod_capture/britain_ramsey/britain-crossings-ramsey/raw/sample_001.aoe2scenario",
+    "out/mod_capture/britain_ramsey/britain-crossings-ramsey/raw/sample_002.aoe2scenario"
+   ]
+  }
+ ],
  "legacy_notes": [],
  "id": "britain-crossings-ramsey-777b3807"
 }
