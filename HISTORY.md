@@ -293,3 +293,29 @@ are committed; `britain-crossings-anchored` is the answer.
 
 Both presets stay `candidate`; neither shipped map is touched.
 
+
+## 2026-08-20 (later still) - four ford maps ship
+
+Promoted the 18 km and 24 km crossings presets on both Britain windows, at
+the user's pick, and shipped them under the names they asked for:
+
+| shipped name       | preset                           | fords |
+|--------------------|----------------------------------|-------|
+| `Brit Shallows`    | `britain-crossings`              | 18 km |
+| `Brit LShallows`   | `britain-crossings-wide`         | 24 km |
+| `Brit Shallows N`  | `great-britain-n-crossings`      | 18 km |
+| `Brit LShallows N` | `great-britain-n-crossings-wide` | 24 km |
+
+`build_mod.py` reused all four builds from cache, hash-verified, so each
+shipped script is the script the engine measured in runs `britain_crossings`
+and `britain_crossings_wide` - `preset_cli.py audit` reports all four as
+"YES apart from the header comment (renamed)". 14/14 maps in the mod, 0
+regenerated, and `install_mod.py --all` re-synced both variants to
+`mods/local/`.
+
+The pair that measured 18 of 18 fords open,
+`britain-crossings-anchored` / `great-britain-n-crossings-anchored`, stays
+`candidate` and does not ship. On what ships, St George's Channel was shut
+in 2 of 6 captures on each radius, so Ireland is not always walkable; the
+North Channel is 4/6 at 18 km and 6/6 at 24 km, Dover 6/6 on both. That is
+the difference between the two names in game.
