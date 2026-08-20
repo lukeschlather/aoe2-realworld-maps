@@ -366,6 +366,21 @@ def main():
         dest.write_text(text, encoding="ascii", newline="\n")
         (debug_scripts / shipped_filename(preset.name)).write_text(
             text, encoding="ascii", newline="\n")
+        # Record the copy that ships. retitle() may have changed the header
+        # line, so this can be a sha256 the registry has never seen - it is
+        # merged by hash, so an unrenamed map just gains a path on its
+        # existing build. Without it, `preset_cli.py audit` cannot answer
+        # "is what ships what was captured?" for anything promoted after the
+        # registry was reconstructed: its only other source of mod/ paths is
+        # preset_import's frozen MOD_REGIONS_AT_IMPORT list.
+        preset.record_build(Build(
+            sha256=sha256_file(dest), bytes=dest.stat().st_size,
+            src_commit=build.src_commit if build else commit,
+            built_utc=build.built_utc if build else utc_now(),
+            paths=[dest.resolve().relative_to(REPO.resolve()).as_posix()],
+            command=f"uv run rwmaps {preset.name!r} " + " ".join(preset.argv),
+            summary={"note": "the copy that ships, committed in mod/"}))
+        reg.save(preset)
         if first_src is None:
             first_src = dest
         if args.placeholder and preset.label in (
