@@ -1,0 +1,110 @@
+{
+ "label": "great-britain-n-rot4",
+ "name": "Great Britain N rot4",
+ "argv": [
+  "--center=-3.0,52.5",
+  "--span-km",
+  "1300",
+  "--forest-clumps",
+  "36",
+  "--forest-alt",
+  "PINE_FOREST",
+  "--forest-spacing",
+  "3",
+  "--north",
+  "0",
+  "--feature-preset",
+  "britain-crossings-ramsey",
+  "--rotations",
+  "4"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": -3.0,
+  "lat": 52.5,
+  "span_km": 1300.0,
+  "north_deg": 0.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": [
+   "britain-crossings-ramsey"
+  ],
+  "features": null,
+  "forest_alt": [
+   "PINE_FOREST"
+  ],
+  "forest_clumping_factor": null,
+  "forest_clumps": 36,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": 3,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 4,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": 0.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "rotations": 4,
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": -3.0,
+   "lat": 52.5,
+   "span_km": 1300.0,
+   "north_deg": 0.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "7100e31a99021c99838d5f372a0e07f8152de94233758e215d1c61966d4c7795",
+ "params_hash": "7996798608cdad27dfd908ed7e3d98b780713583fbf6b5e830e37288ac5aaa6b",
+ "status": "candidate",
+ "note": "Shipped Great Britain N with the engine rolling one of 4 quarter turns per generation (--rotations 4). Same map to the tile in each orientation; built to measure whether the 4-way conditional land_position costs generation time.",
+ "origin": {
+  "source": "automation/preset_cli.py new",
+  "created": "2026-08-21T02:15:12Z"
+ },
+ "builds": [
+  {
+   "sha256": "08c3906172828cdfc65043ce6c9595fd91aa3f6b6a9add583e92e200678f82b0",
+   "bytes": 355807,
+   "src_commit": "9585a25",
+   "built_utc": "2026-08-21T02:17:40Z",
+   "paths": [
+    "out/rms_cache/great-britain-n-rot4-79967986/20260821-021550/great_britain_n_rot4_240.rms"
+   ],
+   "command": "uv run rwmaps 'Great Britain N rot4' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0 --feature-preset britain-crossings-ramsey --rotations 4",
+   "summary": {
+    "land_pct": 37.6,
+    "script_iou": 0.97,
+    "starts": 8,
+    "min_separation": 46.0,
+    "verdict": "unfair"
+   }
+  }
+ ],
+ "captures": [],
+ "legacy_notes": [],
+ "id": "great-britain-n-rot4-79967986"
+}

@@ -122,6 +122,12 @@ def build_parser() -> argparse.ArgumentParser:
     proj = p.add_argument_group("projection")
     proj.add_argument("--proj", default="laea",
                       help="projection name, PROJ string, or EPSG code")
+    proj.add_argument("--rotations", type=int, default=1, choices=(1, 2, 4),
+                      help="let the ENGINE roll the orientation, one of this "
+                           "many quarter turns, per generation. 1 (default) = "
+                           "always north-up as built. The thumbnail keeps "
+                           "showing orientation 0 on purpose, so the map in "
+                           "game is not necessarily the one in the preview.")
     proj.add_argument("--north", type=float, default=0.0, dest="north",
                       help="where north points ON SCREEN, degrees clockwise "
                            "from straight up. 0 (default) = north up in game "
@@ -423,6 +429,7 @@ def generate(args) -> dict:
         mask=mask if not args.legacy_resources else None,
         islands_out=islands,
         shallows=shallow_patches or None,
+        rotations=args.rotations,
         # Painting the player lands with a placeholder is what makes the
         # per-player forest addressable; without that pass they must stay
         # ordinary land or the placeholder would never be cleaned up.

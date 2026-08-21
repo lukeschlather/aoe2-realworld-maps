@@ -82,6 +82,20 @@ OUTPUT_ONLY = frozenset({"name", "outdir", "install", "mod_name",
 #: values are hashed instead, under ``_window``.
 LOCATION_INPUTS = frozenset({"region", "center", "span_km", "size"})
 
+#: Knobs added to the CLI *after* presets were already recorded, with the
+#: value that means "as it was before this knob existed". Dropped from
+#: ``params_hash`` when they hold that value, and only then.
+#:
+#: Without this, adding one argparse default rehashes all 92 presets: every
+#: ``id`` changes, every recorded build stops matching its cache key, and a
+#: rebuild re-anneals for 70s a map to produce byte-identical output. The
+#: elision is safe because it is not information-losing - a key absent from
+#: the hashed set means exactly one value, the one below - and it is only
+#: about the *hash*: ``params`` still carries the complete resolved set, so
+#: a report shows the default like any other.
+HASH_ELIDE_AT_DEFAULT = {"rotations": 1}
+
+
 #: The orientation default before 2026-08-16 (``d56001a``), in today's
 #: screen-space terms. An argv from before then that says nothing about
 #: orientation meant this, not 0.
@@ -103,6 +117,16 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def hashable_params(params: dict) -> dict:
+    """``params`` minus the post-hoc knobs that are at their default.
+
+    See :data:`HASH_ELIDE_AT_DEFAULT`. A preset that actually sets one of
+    them keeps it, so it hashes - and builds - as the different map it is.
+    """
+    return {k: v for k, v in params.items()
+            if HASH_ELIDE_AT_DEFAULT.get(k, object()) != v}
 
 
 def _hash(obj) -> str:
@@ -320,7 +344,7 @@ class Preset:
         window, params = resolve(name, argv)
         return cls(label=slug(label), name=name, argv=argv, window=window,
                    params=params, window_hash=_hash(window),
-                   params_hash=_hash(params), legacy_notes=notes, **kw)
+                   params_hash=_hash(hashable_params(params)), legacy_notes=notes, **kw)
 
     # -- artifacts ---------------------------------------------------------
 

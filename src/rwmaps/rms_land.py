@@ -97,6 +97,53 @@ def to_land_position(y: int, x: int, size: int) -> tuple[int, int]:
     return max(0, min(100, px)), max(0, min(100, py))
 
 
+#: The labels the script rolls between when ``rotations`` is 4. Stock
+#: precedent for the whole mechanism: ``Forest Breach.rms`` (``ROTATE_A``..``D``)
+#: and ``Mountain_Ridge.rms`` (``ROTATE_LEFT``/``RIGHT``) both roll a define in
+#: a ``start_random`` inside ``<LAND_GENERATION>`` and then branch on it
+#: *inside* each ``create_land``, around the ``land_position`` line only.
+ROTATION_LABELS = ("ROT_0", "ROT_90", "ROT_180", "ROT_270")
+
+
+def rotate_position(px: int, py: int, quarters: int) -> tuple[int, int]:
+    """Turn a ``land_position`` by ``quarters`` * 90 degrees about the centre.
+
+    Done in percent space rather than by rotating the mask, and that is the
+    point: ``100 - p`` is exact in integers, so the four orientations are the
+    same map to the tile, with no second round of quantising and no risk of a
+    re-run of ``choose_starts`` or ``cover_mask`` drifting between them.
+
+    The grid is ``[y][x]`` with y=0 north and x=0 west (``projection.py``), so
+    ``(px, py) -> (100 - py, px)`` is one quarter turn of the stored image.
+    """
+    for _ in range(quarters % 4):
+        px, py = 100 - py, px
+    return px, py
+
+
+def rotation_roll(rotations: int) -> str:
+    """The ``start_random`` that picks this generation's orientation.
+
+    Emitted once, inside ``<LAND_GENERATION>``; every ``create_land`` below
+    then branches on the label it defined.
+    """
+    if rotations <= 1:
+        return ""
+    labels = ROTATION_LABELS[:rotations]
+    share = 100 // len(labels)
+    lines = ["/* one of the %d orientations, rolled per generation: the map is"
+             % len(labels),
+             "   the same to the tile in each, since a quarter turn is a rigid",
+             "   motion - so start separation and land share do not change */",
+             "start_random"]
+    for i, label in enumerate(labels):
+        # The shares must total exactly 100; give the remainder to the first.
+        pct = share + (100 - share * len(labels) if i == 0 else 0)
+        lines.append(f"  percent_chance {pct} #define {label}")
+    lines.append("end_random")
+    return "\n".join(lines)
+
+
 def _land_block(
     d: Disc,
     size: int,
@@ -105,6 +152,7 @@ def _land_block(
     player: int | None = None,
     tiles: int | None = None,
     clumping_factor: int = 8,
+    rotations: int = 1,
 ) -> str:
     px, py = to_land_position(d.y, d.x, size)
     if tiles is None:
@@ -113,11 +161,24 @@ def _land_block(
     # (2*base + 1)^2 tiles. Keep it well under the tile budget or every land
     # overshoots and the whole map floods with land.
     base = max(0, int(round(d.radius * 0.35)))
+    # Only the position turns. Everything else in the block - the terrain,
+    # the tile budget, base_size, the land id - is invariant under a quarter
+    # turn, so the branch wraps one line instead of the whole block: ~8 extra
+    # lines per land against a 4x copy of the section.
+    if rotations > 1:
+        pos = []
+        for i, label in enumerate(ROTATION_LABELS[:rotations]):
+            rx, ry = rotate_position(px, py, i)
+            pos.append(f"  {'if' if i == 0 else 'elseif'} {label}")
+            pos.append(f"    land_position               {rx} {ry}")
+        pos.append("  endif")
+    else:
+        pos = [f"  land_position                 {px} {py}"]
     lines = [
         "create_land",
         "{",
         f"  terrain_type                  {terrain_type}",
-        f"  land_position                 {px} {py}",
+        *pos,
         f"  base_size                     {base}",
         f"  number_of_tiles               {tiles}",
         "  other_zone_avoidance_distance 0",
@@ -236,6 +297,7 @@ def build_land_generation(
     mask: np.ndarray | None = None,
     islands_out: list[Island] | None = None,
     shallows: list[Disc] | None = None,
+    rotations: int = 1,
 ) -> str:
     """Render the ``<LAND_GENERATION>`` section.
 
@@ -256,6 +318,12 @@ def build_land_generation(
     the terrain *label* changes; the land's shape and size are untouched, so
     the coastline is unaffected.
 
+    ``rotations`` > 1 makes the *engine* pick the orientation: a
+    ``start_random`` rolls one of ``ROTATION_LABELS`` and every land carries
+    its position under all ``rotations`` branches. The thumbnail beside the
+    script keeps showing orientation 0, deliberately - the point is that the
+    map in game is not necessarily the one in the preview.
+
     ``mask`` opts into per-island land ids: every unowned landmass of
     ``MIN_ISLAND_TILES`` or more gets its own id, and the islands found are
     appended to ``islands_out`` so the resource layer can aim at them with
@@ -268,6 +336,9 @@ def build_land_generation(
         f"base_terrain {base_terrain}",
         "",
     ]
+    roll = rotation_roll(rotations)
+    if roll:
+        parts += [roll, ""]
 
     areas = [math.pi * d.radius**2 for d in discs]
     total = sum(areas) or 1.0
@@ -284,7 +355,8 @@ def build_land_generation(
                 _land_block(Disc(y, x, 9.0), size,
                             player_terrain or terrain_type, 0,
                             player=i, tiles=PLAYER_LAND_TILES,
-                            clumping_factor=clumping_factor)
+                            clumping_factor=clumping_factor,
+                            rotations=rotations)
             )
             parts.append("")
 
@@ -310,7 +382,8 @@ def build_land_generation(
             _land_block(d, size, terrain_type,
                         land_id=island_ids.get(i, COASTLINE_LAND_ID),
                         tiles=max(1, int(round(area * scale))),
-                        clumping_factor=clumping_factor)
+                        clumping_factor=clumping_factor,
+                        rotations=rotations)
         )
 
     # Shallows go last: create_land blocks paint in order, and these are
@@ -335,6 +408,6 @@ def build_land_generation(
             parts.append(
                 _land_block(d, size, "SHALLOWS", land_id=COASTLINE_LAND_ID,
                             tiles=max(1, int(round(math.pi * d.radius ** 2))),
-                            clumping_factor=1)
+                            clumping_factor=1, rotations=rotations)
             )
     return "\n".join(parts) + "\n"

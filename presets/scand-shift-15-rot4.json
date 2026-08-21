@@ -1,0 +1,104 @@
+{
+ "label": "scand-shift-15-rot4",
+ "name": "Scandinavia rot4",
+ "argv": [
+  "--center=21.5812,62.6412",
+  "--span-km",
+  "2000",
+  "--min-water-width",
+  "2",
+  "--north",
+  "-45",
+  "--feature-preset",
+  "zealand-funen",
+  "--rotations",
+  "4"
+ ],
+ "window": {
+  "proj": "laea",
+  "lon": 21.5812,
+  "lat": 62.6412,
+  "span_km": 2000.0,
+  "north_deg": -45.0,
+  "size": 240,
+  "players": 8
+ },
+ "params": {
+  "ai_map_type": null,
+  "biome": "temperate",
+  "clumping_factor": 8,
+  "feature_presets": [
+   "zealand-funen"
+  ],
+  "features": null,
+  "forest_alt": null,
+  "forest_clumping_factor": null,
+  "forest_clumps": null,
+  "forest_last": null,
+  "forest_percent": null,
+  "forest_spacing": null,
+  "island_land_id_objects": false,
+  "island_resources": false,
+  "lands": null,
+  "legacy_resources": false,
+  "max_radius": 12.0,
+  "min_island_tiles": 0,
+  "min_land_width": 3,
+  "min_water_width": 2,
+  "no_elevation": false,
+  "no_island_resources": false,
+  "no_island_trees": false,
+  "no_neutral_resources": false,
+  "no_neutral_stragglers": false,
+  "north": -45.0,
+  "overlap": 0.85,
+  "players": 8,
+  "proj": "laea",
+  "resolution": "50m",
+  "resource_flavor": "default",
+  "rotations": 4,
+  "spread_starts": false,
+  "teams": 2,
+  "tight_resources": false,
+  "_window": {
+   "proj": "laea",
+   "lon": 21.5812,
+   "lat": 62.6412,
+   "span_km": 2000.0,
+   "north_deg": -45.0,
+   "size": 240,
+   "players": 8
+  },
+  "_lobby_size": "Huge [240]"
+ },
+ "window_hash": "6751c4050107cd0f52e5ee5898512c6d3033e6bb248e6e251d32d67e23a13a87",
+ "params_hash": "d3aa1c0816727aee3800d9ef316986bd886a2302e1d336655511b2088ab08d33",
+ "status": "candidate",
+ "note": "Shipped Scandinavia (scand-shift-15) with the engine rolling one of 4 quarter turns per generation (--rotations 4).",
+ "origin": {
+  "source": "automation/preset_cli.py new",
+  "created": "2026-08-21T02:15:30Z"
+ },
+ "builds": [
+  {
+   "sha256": "ee8af311a7f2684e761def9f79b1a0af83a782b98c80538281c84cf0690f93b0",
+   "bytes": 365317,
+   "src_commit": "9585a25",
+   "built_utc": "2026-08-21T02:19:17Z",
+   "paths": [
+    "out/rms_cache/scand-shift-15-rot4-d3aa1c08/20260821-021745/scandinavia_rot4_240.rms"
+   ],
+   "command": "uv run rwmaps 'Scandinavia rot4' --center=21.5812,62.6412 --span-km 2000 --min-water-width 2 --north -45 --feature-preset zealand-funen --rotations 4",
+   "summary": {
+    "land_pct": 61.6,
+    "script_iou": 0.97,
+    "starts": 8,
+    "min_separation": 50.0,
+    "verdict": "playable"
+   }
+  }
+ ],
+ "captures": [],
+ "legacy_notes": [],
+ "id": "scand-shift-15-rot4-d3aa1c08"
+}

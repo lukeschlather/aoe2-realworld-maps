@@ -9,11 +9,14 @@ import numpy as np
 from rwmaps.rms import build_rms
 from rwmaps.rms_land import (
     PLAYER_LAND_TILES,
+    ROTATION_LABELS,
     Disc,
     build_land_generation,
     cover_mask,
     iou,
     rasterize_discs,
+    rotate_position,
+    rotation_roll,
     to_land_position,
 )
 
@@ -223,3 +226,56 @@ def test_per_player_forest_needs_placeholder_player_lands():
     assert "per-player forest" in text
     # the coastline itself must NOT be painted with the placeholder
     assert land.count(PLAYER_SPAWN_PLACEHOLDER) == 1
+
+
+def test_a_quarter_turn_is_exact_and_cycles_in_four():
+    """Rotation is done in percent space, so it must be exact in integers."""
+    for px, py in ((0, 0), (40, 30), (100, 0), (13, 87)):
+        p = (px, py)
+        assert rotate_position(*p, 4) == p, "four turns is the identity"
+        assert rotate_position(*p, 1) != p or p == (50, 50)
+        # A quarter turn preserves distance from the centre, which is what
+        # makes the four orientations the same map.
+        for q in range(4):
+            rx, ry = rotate_position(px, py, q)
+            assert (rx - 50) ** 2 + (ry - 50) ** 2 == (px - 50) ** 2 + (py - 50) ** 2
+
+
+def test_rotation_shares_total_one_hundred():
+    for n in (2, 4):
+        roll = rotation_roll(n)
+        pcts = [int(v) for v in re.findall(r"percent_chance (\d+)", roll)]
+        assert len(pcts) == n and sum(pcts) == 100
+    assert rotation_roll(1) == "", "one orientation needs no roll"
+
+
+def test_every_land_carries_all_four_orientations():
+    """The engine picks the orientation, so every land must be in every branch.
+
+    A land that appears under only some labels would generate a different
+    coastline in those games, not a rotated one.
+    """
+    mask = _island()
+    starts = [(40, 40), (85, 80)]
+    text = build_land_generation(cover_mask(mask, 40), mask.shape[0], starts,
+                                 rotations=4, shallows=[Disc(50, 50, 4.0)])
+    assert text.count("#define ROT_") == 4
+    blocks = text.split("create_land")[1:]
+    assert blocks
+    for block in blocks:
+        found = re.findall(r"(?:if|elseif) (ROT_\w+)\n\s*land_position\s+(\d+) (\d+)",
+                           block)
+        assert [f[0] for f in found] == list(ROTATION_LABELS)
+        first = (int(found[0][1]), int(found[0][2]))
+        for q, f in enumerate(found):
+            assert (int(f[1]), int(f[2])) == rotate_position(*first, q)
+        assert "endif" in block
+
+
+def test_one_orientation_emits_no_conditional():
+    """The default has to stay byte-identical to what the mod already ships."""
+    mask = _island()
+    args = (cover_mask(mask, 40), mask.shape[0], [(40, 40)])
+    plain = build_land_generation(*args)
+    assert "ROT_" not in plain and "start_random" not in plain
+    assert build_land_generation(*args, rotations=1) == plain
