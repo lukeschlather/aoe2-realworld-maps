@@ -1032,6 +1032,74 @@
     "reports/20260809-052633_mod_report_data_sysa_n10/Chesapeake Bay/Chesapeake Bay__s008.aoe2scenario",
     "reports/20260809-052633_mod_report_data_sysa_n10/Chesapeake Bay/Chesapeake Bay__s009.aoe2scenario"
    ]
+  },
+  {
+   "run_id": "latency_v1",
+   "n_samples": 9,
+   "region": "RW Chesapeake Bay",
+   "captured_utc": "2026-08-18T06:54:54Z",
+   "started_local": "",
+   "commit": "a6af42a",
+   "commit_source": "runlog",
+   "results": "out/gen_latency/latency_v1/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "generate_s": 47.636,
+     "save_s": 1.999,
+     "verified": true
+    },
+    {
+     "sample_index": 1,
+     "generate_s": 45.087,
+     "save_s": 1.967,
+     "verified": true
+    },
+    {
+     "sample_index": 2,
+     "generate_s": 52.25,
+     "save_s": 1.951,
+     "verified": true
+    },
+    {
+     "sample_index": 3,
+     "generate_s": 47.857,
+     "save_s": 1.892,
+     "verified": true
+    },
+    {
+     "sample_index": 4,
+     "generate_s": 51.985,
+     "save_s": 1.956,
+     "verified": true
+    },
+    {
+     "sample_index": 5,
+     "generate_s": 50.201,
+     "save_s": 2.043,
+     "verified": true
+    },
+    {
+     "sample_index": 6,
+     "generate_s": 50.669,
+     "save_s": 2.119,
+     "verified": true
+    },
+    {
+     "sample_index": 7,
+     "generate_s": 52.698,
+     "save_s": 2.041,
+     "verified": true
+    },
+    {
+     "sample_index": 8,
+     "generate_s": 47.697,
+     "save_s": 1.951,
+     "verified": true
+    }
+   ],
+   "scenarios": []
   }
  ],
  "legacy_notes": [],

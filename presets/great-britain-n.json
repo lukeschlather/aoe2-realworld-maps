@@ -115,6 +115,19 @@
    "summary": {
     "note": "committed copy, archived beside the report that presented it"
    }
+  },
+  {
+   "sha256": "dcfce4a9c0045fdde61ab393a540796178dd13fe1c0122568f7311f0181a6b66",
+   "bytes": 222496,
+   "src_commit": "9585a25",
+   "built_utc": "2026-08-20T20:24:55Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Great Britain N.rms"
+   ],
+   "command": "uv run rwmaps 'Great Britain N' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
+   }
   }
  ],
  "captures": [

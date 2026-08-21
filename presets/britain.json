@@ -101,6 +101,19 @@
    "summary": {
     "note": "the copy that ships, committed in mod/"
    }
+  },
+  {
+   "sha256": "23387103cae9b1e2ef7550b03a90bbaeeb642291e2b76bc1dfb6e8af1149d127",
+   "bytes": 222026,
+   "src_commit": "9585a25",
+   "built_utc": "2026-08-20T20:24:55Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Britain.rms"
+   ],
+   "command": "uv run rwmaps 'Britain' --region britain --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north -45",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
+   }
   }
  ],
  "captures": [

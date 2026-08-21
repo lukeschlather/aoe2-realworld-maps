@@ -922,6 +922,74 @@
     "reports/20260809-052633_mod_report_data_sysa_n10/Black Sea/Black Sea__s008.aoe2scenario",
     "reports/20260809-052633_mod_report_data_sysa_n10/Black Sea/Black Sea__s009.aoe2scenario"
    ]
+  },
+  {
+   "run_id": "latency_v1",
+   "n_samples": 9,
+   "region": "RW Black Sea",
+   "captured_utc": "2026-08-18T06:54:54Z",
+   "started_local": "",
+   "commit": "a6af42a",
+   "commit_source": "runlog",
+   "results": "out/gen_latency/latency_v1/results.jsonl",
+   "report": "",
+   "samples": [
+    {
+     "sample_index": 0,
+     "generate_s": 54.061,
+     "save_s": 1.96,
+     "verified": true
+    },
+    {
+     "sample_index": 1,
+     "generate_s": 47.353,
+     "save_s": 1.975,
+     "verified": true
+    },
+    {
+     "sample_index": 2,
+     "generate_s": 46.271,
+     "save_s": 1.992,
+     "verified": true
+    },
+    {
+     "sample_index": 3,
+     "generate_s": 49.193,
+     "save_s": 1.889,
+     "verified": true
+    },
+    {
+     "sample_index": 4,
+     "generate_s": 51.063,
+     "save_s": 1.915,
+     "verified": true
+    },
+    {
+     "sample_index": 5,
+     "generate_s": 55.793,
+     "save_s": 1.915,
+     "verified": true
+    },
+    {
+     "sample_index": 6,
+     "generate_s": 47.088,
+     "save_s": 1.912,
+     "verified": true
+    },
+    {
+     "sample_index": 7,
+     "generate_s": 47.392,
+     "save_s": 2.011,
+     "verified": true
+    },
+    {
+     "sample_index": 8,
+     "generate_s": 49.659,
+     "save_s": 1.933,
+     "verified": true
+    }
+   ],
+   "scenarios": []
   }
  ],
  "legacy_notes": [],

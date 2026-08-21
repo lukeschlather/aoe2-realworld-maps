@@ -62,6 +62,7 @@ from rwmaps.presets import (Build, Capture, Preset, Registry,  # noqa: E402
                             sha256_file, utc_now)
 
 CAPTURE_ROOT = REPO / "out" / "mod_capture"
+LATENCY_ROOT = REPO / "out" / "gen_latency"
 REPORTS = REPO / "reports"
 
 
@@ -571,6 +572,94 @@ def attach_cache(reg: Registry) -> int:
     return n
 
 
+def attach_gen_latency(reg: Registry) -> int:
+    """Attach ``out/gen_latency/<run>/`` passes to the presets they ran.
+
+    A latency pass is a capture pass with a narrow question - it generates
+    real maps in the real engine - so leaving it out of the registry is
+    exactly the "folder nobody can join back to a parameter set" this
+    reconstruction existed to end. It records no argv, though, and it can
+    run scripts that are not in the mod (``--extra-dir``), so the join is by
+    **provenance**: the plan event names the absolute path of every script
+    the pass ran, and that file's sha256 is matched against the builds
+    already on record. A script nothing recognises is skipped rather than
+    guessed at.
+
+    ``--keep-scenarios`` passes also carry the orientation each sample
+    rolled, if ``rot_orientation.py`` has been run over them.
+    """
+    if not LATENCY_ROOT.is_dir():
+        return 0
+    by_sha: dict[str, object] = {}
+    for preset in reg.presets.values():
+        for build in preset.builds:
+            by_sha.setdefault(build.sha256, preset)
+
+    n = 0
+    for run_dir in sorted(LATENCY_ROOT.iterdir()):
+        results = run_dir / "results.jsonl"
+        events = run_dir / "events.jsonl"
+        if not results.is_file() or not events.is_file():
+            continue
+        plan = commit = started = None
+        for line in events.open(encoding="utf-8"):
+            ev = json.loads(line)
+            if ev.get("kind") == "plan":
+                plan = ev
+            if ev.get("commit"):
+                commit = commit or ev["commit"]
+            if ev.get("kind") == "run_start":
+                started = ev.get("local") or ev.get("started_local") or started
+        if not plan:
+            continue
+        # map label -> the script that label actually ran, hashed now.
+        script_sha: dict[str, str] = {}
+        for m in plan.get("maps", []):
+            q = Path(m["path"])
+            if q.is_file():
+                script_sha[m["map"]] = sha256_file(q)
+
+        turns = {}
+        orient = run_dir / "orientation.json"
+        if orient.is_file():
+            for row in json.loads(orient.read_text(encoding="utf-8")):
+                turns[(row["map"], row["round"])] = row
+
+        rows = [json.loads(l) for l in results.open(encoding="utf-8")]
+        by_map: dict[str, list[dict]] = {}
+        for row in rows:
+            by_map.setdefault(row["map"], []).append(row)
+
+        for label, samples in sorted(by_map.items()):
+            preset = by_sha.get(script_sha.get(label, ""))
+            if preset is None:
+                continue
+            scen = run_dir / "scenarios"
+            out_samples = []
+            paths = []
+            for row in samples:
+                rec = {"sample_index": row["round"],
+                       "generate_s": row["generate_s"],
+                       "save_s": row["save_s"],
+                       "verified": row["verified"]}
+                hit = turns.get((label, row["round"]))
+                if hit:
+                    rec["orientation_turn"] = hit["turn"]
+                    rec["orientation_iou"] = hit["iou"]
+                    rec["orientation_margin"] = hit["margin"]
+                out_samples.append(rec)
+                if row.get("scenario") and (scen / row["scenario"]).is_file():
+                    paths.append(rel(scen / row["scenario"]))
+            preset.record_capture(Capture(
+                run_id=run_dir.name, n_samples=len(out_samples), region=label,
+                captured_utc=mtime_utc(results), started_local=started or "",
+                commit=commit or "unknown",
+                commit_source="runlog" if commit else "unknown",
+                results=rel(results), samples=out_samples, scenarios=paths))
+            n += 1
+    return n
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -617,6 +706,11 @@ def main() -> int:
     n_cache = attach_cache(reg)
     if n_cache:
         print(f"  build cache     {n_cache} scripts in out/rms_cache attached")
+
+    n_lat = attach_gen_latency(reg)
+    if n_lat:
+        print(f"  gen_latency     {n_lat} (run, map) passes attached by "
+              f"script sha256")
 
     n_built = sum(1 for p in reg.presets.values() if p.builds)
     n_cap = sum(1 for p in reg.presets.values() if p.captures)

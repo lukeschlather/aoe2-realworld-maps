@@ -430,3 +430,72 @@ shipped to be looked at. That distinction is what the new
 have filed them as failures. The fordless `britain` and `great-britain-n`
 presets *are* retired, with their captures kept - they are the baseline
 every crossing report compares IoU against.
+
+## 2026-08-21 - the engine picks the orientation, at +7% generation time
+
+**`--rotations 4`** (`49517c7`). There is no rotate command in RMS, but
+there is a stock idiom for this: `Forest Breach.rms` and `Mountain_Ridge.rms`
+both roll a `#define` in a `start_random` inside `<LAND_GENERATION>` and then
+branch on it *inside* each `create_land`, around the `land_position` line
+only. That is what we emit. Only the position turns - terrain, tile budget,
+`base_size` and `land_id` are invariant under a quarter turn - so the
+coastline section grows by ~8 lines a land instead of being copied four
+times, and the engine still creates 728 lands, not 2912. 217 KB -> 347 KB.
+
+Rotation is done in **percent space** (`100 - p` is exact in integers), so
+the four orientations are the same map to the tile: no second round of
+`land_position` quantising, and no re-run of `choose_starts` or `cover_mask`
+that could drift between them. A quarter turn is a rigid motion, so start
+separation and land share are unchanged by construction - this needs no
+fairness re-capture, and the `--rotations 1` path regenerates the shipped
+`RW Great Britain N.rms` byte-identically below its header line.
+
+The thumbnail stays pinned to orientation 0, deliberately: the point is
+unpredictability, and `thumbnail.parse_script` reads each block's *first*
+`land_position`, which is the `ROT_0` branch. So the map in game is not
+necessarily the map in the preview.
+
+**Does the engine honour it, and does it vary?** Two runs, both real
+generations (`rot4_probe`, `rot4_v1`), read back with the new
+`automation/rot_orientation.py` - which classifies a capture against
+`np.rot90` of the script's own ROT_0 geometry, independently of the
+percent-space arithmetic that emitted it:
+
+- a probe forced to `percent_chance 100 #define ROT_180` came back as
+  **turn 2**, IoU 0.757 against a half turn and 0.174 against ROT_0. ROT_180
+  on purpose: a half turn is the same array rotation whichever way the
+  quarter turns run, so the result does not depend on the detector's sign
+  convention;
+- over 20 real rolls: Britain N drew all four turns (3/2/3/2), Scandinavia
+  three of four (4/0/1/5). Weakest identification margin +0.370.
+
+**The cost** (`rot4_v1`, 4 maps x 10 samples, interleaved so the variant and
+its own baseline share the moment; 40/40 verified, no crash, no editor
+recovery):
+
+| map                     |  KB | median | mean | sd  | min-max     |
+|-------------------------|----:|-------:|-----:|----:|-------------|
+| Great Britain N         | 217 |  49.1s | 50.2 | 2.8 | 48.2 - 56.0 |
+| Great Britain N rot4    | 347 |  52.5s | 53.1 | 2.8 | 50.1 - 57.8 |
+| Scandinavia             | 223 |  49.1s | 50.1 | 3.2 | 47.0 - 57.2 |
+| Scandinavia rot4        | 357 |  52.3s | 52.3 | 2.4 | 48.0 - 55.8 |
+
+**+3.3s, about +7%**, on both maps, by median-of-10 and by pairing samples
+within a round (+3.0s / +3.3s). Save time unchanged. For scale, the same
+harness measures stock from 6.9s (City of Lakes) to 93.1s (Team Islands),
+Arabia at 59.7s. `--rotations 2` would roughly halve the added script volume
+if that mattered; it has not been measured.
+
+Two pieces of registry plumbing this needed (`6d1ea56`):
+`gen_latency --extra-dir` (measure a variant against its shipped baseline in
+one interleaved pass, without staging it into the mod) and
+`--keep-scenarios` (the editor saves to one fixed, overwritten filename).
+`preset_import` now attaches latency passes too, joined to a preset by the
+**sha256 of the script the pass actually ran** rather than by name - 14
+(run, map) passes, `latency_v1` included. Adding an argparse default would
+otherwise have rehashed all 92 presets and broken every build-cache key, so
+`presets.HASH_ELIDE_AT_DEFAULT` drops a post-hoc knob from `params_hash`
+while it holds the value that means "as before"; verified 0 of 92 moved.
+
+The two rotating maps are **candidates, not shipped**:
+`great-britain-n-rot4`, `scand-shift-15-rot4`.

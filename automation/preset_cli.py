@@ -148,6 +148,21 @@ def cmd_show(args) -> int:
                 for s in c.scenarios:
                     print(f"        {'ok ' if _exists(s) else 'GONE'} {s}")
             for s in c.samples:
+                # A latency pass captures real maps but measures only
+                # generation time, so its samples carry none of the fairness
+                # fields below. Print what a sample has rather than assuming
+                # every capture came from mod_capture.
+                if "iou_10m" not in s:
+                    turn = s.get("orientation_turn")
+                    print(f"      s{s['sample_index']:<3d} "
+                          f"generate {s.get('generate_s')}s "
+                          f"save {s.get('save_s')}s "
+                          f"verified {s.get('verified')}"
+                          + (f"  orientation turn {turn} "
+                             f"(iou {s.get('orientation_iou')}, margin "
+                             f"{s.get('orientation_margin'):+})"
+                             if turn is not None else ""))
+                    continue
                 f = s.get("fairness") or {}
                 med = f.get("median") or {}
                 print(f"      s{s['sample_index']:<3d} iou {s['iou_10m']!s:<7.7s} "
