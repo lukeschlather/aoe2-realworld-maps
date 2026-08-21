@@ -49,6 +49,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 import time
 from collections import defaultdict
@@ -111,9 +112,19 @@ HYPERRANDOM = [
 ]
 
 
-def build_map_list() -> list[tuple[str, str, Path]]:
-    """(label, group, path) for everything in the pass."""
+def build_map_list(extra_dir: Path | None = None) -> list[tuple[str, str, Path]]:
+    """(label, group, path) for everything in the pass.
+
+    ``extra_dir`` adds scripts that are not in the mod, under the group
+    ``extra``. That is what makes an experimental variant measurable against
+    its own shipped baseline **in one interleaved pass** - the only way the
+    comparison is not confounded with the moment - without staging the
+    variant into the mod first.
+    """
     maps: list[tuple[str, str, Path]] = []
+    if extra_dir:
+        for q in sorted(extra_dir.glob("*.rms")):
+            maps.append((q.stem, "extra", q))
     for p in sorted(OURS_DIR.glob("*.rms")):
         maps.append((p.stem, "ours", p))
     for label, filename in STOCK:
@@ -151,7 +162,16 @@ def parse_args():
     p.add_argument("--maps", default=None,
                    help="comma-separated subset of labels (default: all)")
     p.add_argument("--groups", default=None,
-                   help="comma-separated subset of ours,stock,hyperrandom")
+                   help="comma-separated subset of ours,stock,hyperrandom,extra")
+    p.add_argument("--extra-dir", default=None,
+                   help="a directory of extra .rms to include, group 'extra' - "
+                        "for measuring a variant against its shipped baseline "
+                        "without staging it into the mod")
+    p.add_argument("--keep-scenarios", action="store_true",
+                   help="copy each saved scenario into the run dir. The editor "
+                        "saves to one fixed name and overwrites it, so without "
+                        "this the only surviving fact about a generation is "
+                        "its timing.")
     p.add_argument("--timeout", type=float, default=300.0,
                    help="seconds before a generation is called hung")
     p.add_argument("--no-save", action="store_true",
@@ -165,7 +185,7 @@ def parse_args():
 def main() -> int:
     args = parse_args()
 
-    maps = build_map_list()
+    maps = build_map_list(Path(args.extra_dir) if args.extra_dir else None)
     if args.groups:
         want = {g.strip() for g in args.groups.split(",")}
         maps = [m for m in maps if m[1] in want]
@@ -187,6 +207,10 @@ def main() -> int:
     outroot = REPO / "out" / "gen_latency" / args.run_id
     outroot.mkdir(parents=True, exist_ok=True)
     results_path = outroot / "results.jsonl"
+
+    scenarios = outroot / "scenarios"
+    if args.keep_scenarios:
+        scenarios.mkdir(exist_ok=True)
 
     log = RunLog(outroot, args.run_id)
     log.attach_editor(editor)
@@ -239,6 +263,11 @@ def main() -> int:
                     saved = editor.save(SCENARIO_DIR)
                     save_s = time.time() - t0
 
+                kept = None
+                if saved is not None and args.keep_scenarios:
+                    kept = scenarios / f"{label}_r{rnd}{saved.suffix}"
+                    shutil.copy2(saved, kept)
+
                 verified = gen.ok and (args.no_save or saved is not None)
                 rec = {
                     "map": label, "group": group, "round": rnd,
@@ -248,6 +277,7 @@ def main() -> int:
                     "generate_ok": gen.ok, "generate_detail": gen.detail,
                     "save_s": round(save_s, 3),
                     "saved_bytes": saved.stat().st_size if saved else None,
+                    "scenario": kept.name if kept else None,
                     "verified": verified,
                 }
                 fh.write(json.dumps(rec) + "\n")
