@@ -1,6 +1,6 @@
 {
  "label": "great-britain-n-rot4",
- "name": "Great Britain N rot4",
+ "name": "Britain Rotates",
  "argv": [
   "--center=-3.0,52.5",
   "--span-km",
@@ -79,12 +79,18 @@
  },
  "window_hash": "7100e31a99021c99838d5f372a0e07f8152de94233758e215d1c61966d4c7795",
  "params_hash": "7996798608cdad27dfd908ed7e3d98b780713583fbf6b5e830e37288ac5aaa6b",
- "status": "candidate",
+ "status": "shipped",
  "note": "Shipped Great Britain N with the engine rolling one of 4 quarter turns per generation (--rotations 4). Same map to the tile in each orientation; built to measure whether the 4-way conditional land_position costs generation time.",
  "origin": {
   "source": "automation/preset_cli.py new",
   "created": "2026-08-21T02:15:12Z",
-  "imported": "2026-08-21T03:21:52Z"
+  "imported": "2026-08-21T03:21:52Z",
+  "also_known_as": [
+   "Great Britain N rot4",
+   "Britain Rotates",
+   "BritainRotates"
+  ],
+  "promoted": "2026-08-21T06:04:14Z"
  },
  "builds": [
   {
@@ -93,7 +99,8 @@
    "src_commit": "9585a25",
    "built_utc": "2026-08-21T02:17:40Z",
    "paths": [
-    "out/rms_cache/great-britain-n-rot4-79967986/20260821-021550/great_britain_n_rot4_240.rms"
+    "out/rms_cache/great-britain-n-rot4-79967986/20260821-021550/great_britain_n_rot4_240.rms",
+    "out/rms_cache/great-britain-n-rot4-79967986/great-britain-n-rot4.rms"
    ],
    "command": "uv run rwmaps 'Great Britain N rot4' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0 --feature-preset britain-crossings-ramsey --rotations 4",
    "summary": {
@@ -102,6 +109,19 @@
     "starts": 8,
     "min_separation": 46.0,
     "verdict": "unfair"
+   }
+  },
+  {
+   "sha256": "b2857fc863c912ff2ed447b43d124b8aa3f13343fb796c7f5243c268e33cf7b2",
+   "bytes": 355802,
+   "src_commit": "9585a25",
+   "built_utc": "2026-08-21T02:17:40Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Britain Rotates.rms"
+   ],
+   "command": "uv run rwmaps 'Britain Rotates' --center=-3.0,52.5 --span-km 1300 --forest-clumps 36 --forest-alt PINE_FOREST --forest-spacing 3 --north 0 --feature-preset britain-crossings-ramsey --rotations 4",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
    }
   }
  ],

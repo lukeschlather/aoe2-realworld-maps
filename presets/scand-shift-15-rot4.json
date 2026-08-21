@@ -1,6 +1,6 @@
 {
  "label": "scand-shift-15-rot4",
- "name": "Scandinavia rot4",
+ "name": "Scandanavia Rotates",
  "argv": [
   "--center=21.5812,62.6412",
   "--span-km",
@@ -73,12 +73,16 @@
  },
  "window_hash": "6751c4050107cd0f52e5ee5898512c6d3033e6bb248e6e251d32d67e23a13a87",
  "params_hash": "d3aa1c0816727aee3800d9ef316986bd886a2302e1d336655511b2088ab08d33",
- "status": "candidate",
+ "status": "shipped",
  "note": "Shipped Scandinavia (scand-shift-15) with the engine rolling one of 4 quarter turns per generation (--rotations 4).",
  "origin": {
   "source": "automation/preset_cli.py new",
   "created": "2026-08-21T02:15:30Z",
-  "imported": "2026-08-21T03:21:52Z"
+  "imported": "2026-08-21T03:21:52Z",
+  "also_known_as": [
+   "Scandinavia rot4"
+  ],
+  "promoted": "2026-08-21T06:05:59Z"
  },
  "builds": [
   {
@@ -87,7 +91,8 @@
    "src_commit": "9585a25",
    "built_utc": "2026-08-21T02:19:17Z",
    "paths": [
-    "out/rms_cache/scand-shift-15-rot4-d3aa1c08/20260821-021745/scandinavia_rot4_240.rms"
+    "out/rms_cache/scand-shift-15-rot4-d3aa1c08/20260821-021745/scandinavia_rot4_240.rms",
+    "out/rms_cache/scand-shift-15-rot4-d3aa1c08/scand-shift-15-rot4.rms"
    ],
    "command": "uv run rwmaps 'Scandinavia rot4' --center=21.5812,62.6412 --span-km 2000 --min-water-width 2 --north -45 --feature-preset zealand-funen --rotations 4",
    "summary": {
@@ -96,6 +101,19 @@
     "starts": 8,
     "min_separation": 50.0,
     "verdict": "playable"
+   }
+  },
+  {
+   "sha256": "4ad0791c37cbd6c016054c7e1859e0953d1ebe0e1a103c04855d4766b28b0faf",
+   "bytes": 365320,
+   "src_commit": "9585a25",
+   "built_utc": "2026-08-21T02:19:17Z",
+   "paths": [
+    "mod/Real World Maps/resources/_common/random-map-scripts/RW Scandanavia Rotates.rms"
+   ],
+   "command": "uv run rwmaps 'Scandanavia Rotates' --center=21.5812,62.6412 --span-km 2000 --min-water-width 2 --north -45 --feature-preset zealand-funen --rotations 4",
+   "summary": {
+    "note": "the copy that ships, committed in mod/"
    }
   }
  ],
