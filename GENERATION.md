@@ -114,6 +114,26 @@ with `assign_to_player`, painted with `SPAWN_PLACEHOLDER` terrain - that
 placeholder is what makes each player's own land addressable later for the
 per-player forest pass.
 
+**`--rotations 4` hands the choice of orientation to the engine.** There is
+no rotate command in RMS; the stock idiom (`Forest Breach.rms`,
+`Mountain_Ridge.rms`) is to roll a `#define` in a `start_random` inside
+`<LAND_GENERATION>` and branch on it *inside* each `create_land`, around the
+`land_position` line only - and that is what `rotation_roll` and
+`_land_block` emit. Only the position turns; terrain, tile budget,
+`base_size` and `land_id` are invariant under a quarter turn, so the section
+grows ~8 lines a land rather than being copied four times, and the engine
+still creates one land per disc. The turn is computed in percent space
+(`rotate_position`, `100 - p` exact in integers), so the four orientations
+are the same map to the tile and a rigid motion of each other - start
+separation and land share do not change, and no fairness re-capture is
+needed.
+
+Measured 2026-08-21 (`rot4_v1`): **+3.3s, about +7%** of generation time on
+both Britain N and Scandinavia, 217 KB -> 347 KB of script. The thumbnail
+stays on orientation 0 because `thumbnail.parse_script` reads each block's
+first `land_position`; that mismatch is the point, not a bug.
+`automation/rot_orientation.py` reads back which turn a capture rolled.
+
 `iou(approx, mask)` reports how much of the intended coastline survived. Per
 `CLAUDE.md` this is a diagnostic, not the optimization target - the target is
 human-judged recognizability, and a Python preview of the disc union is
