@@ -7,9 +7,9 @@ this project already wrote:
   ``build_mod.MOD_REGIONS`` held until 2026-08-19. It really was the
   parameter record for the 10 shipped maps; what it lacked was a date, a
   commit and a link to the captures. Frozen here as an import fixture -
-  ``build_mod.py`` reads ``status: shipped`` out of the registry now.
+  ``update_mod.py`` reads ``status: shipped`` out of the registry now.
 * **retired** - the argv the retired regions were actually captured with,
-  read off ``results.jsonl`` (``build_mod.RETIRED_REGIONS`` names them but
+  read off ``results.jsonl`` (``update_mod.RETIRED_REGIONS`` names them but
   no longer carries their args).
 * **candidate** - the condition sets: ``automation/candidate_set.py`` and
   every ``out/*_set.json`` a session left behind.
@@ -202,7 +202,7 @@ def north_of(row: dict) -> float:
 
 #: The hand-edited shipping list ``build_mod.MOD_REGIONS`` held until
 #: 2026-08-19, frozen here as the fixture the registry was reconstructed
-#: from. **Nothing reads it to decide what ships** - ``build_mod.py`` reads
+#: from. **Nothing reads it to decide what ships** - ``update_mod.py`` reads
 #: ``status: shipped`` out of ``presets/`` now. It stays so that deleting
 #: ``presets/`` and re-importing reproduces the same 10 shipped presets
 #: rather than silently producing none, and so the exact list that was
@@ -267,13 +267,13 @@ SHIPPED_NOTES = {
 
 
 def shipped_presets() -> list[Preset]:
-    import build_mod
+    import update_mod
     out = []
     for name, extra in MOD_REGIONS_AT_IMPORT:
-        rms = (REPO / "mod" / build_mod.MOD_NAME / "resources" / "_common"
-               / "random-map-scripts" / build_mod.shipped_filename(name))
+        rms = (REPO / "mod" / update_mod.MOD_NAME / "resources" / "_common"
+               / "random-map-scripts" / update_mod.shipped_filename(name))
         origin = {"source": "automation/build_mod.py:MOD_REGIONS",
-                  "shipped_filename": build_mod.shipped_filename(name)}
+                  "shipped_filename": update_mod.shipped_filename(name)}
         origin.update(file_history(rms))
         p = Preset.create(name, name, extra, status="shipped", origin=origin,
                           note=SHIPPED_NOTES.get(name, ""))
@@ -291,9 +291,9 @@ def shipped_presets() -> list[Preset]:
 def retired_presets(rows_by_region: dict[str, list[tuple[str, dict]]]) -> list[Preset]:
     """The three regions dropped 2026-08-15, with the argv they were
     captured with - MOD_REGIONS no longer carries it."""
-    import build_mod
+    import update_mod
     out = []
-    for name in build_mod.RETIRED_REGIONS:
+    for name in update_mod.RETIRED_REGIONS:
         rows = rows_by_region.get(name) or []
         if not rows:
             continue
@@ -303,8 +303,8 @@ def retired_presets(rows_by_region: dict[str, list[tuple[str, dict]]]) -> list[P
         out.append(Preset.create(
             name, name, argv, status="retired", legacy_default_north=legacy,
             note="dropped from the shipped mod 2026-08-15 - see "
-                 "build_mod.RETIRED_REGIONS for the supply and land numbers",
-            origin={"source": "captured argv (build_mod.RETIRED_REGIONS keeps "
+                 "update_mod.RETIRED_REGIONS for the supply and land numbers",
+            origin={"source": "captured argv (update_mod.RETIRED_REGIONS keeps "
                               "only the names)"}))
     return out
 
@@ -548,7 +548,7 @@ def capture_presets(rows: dict[str, list[dict]], meta: dict[str, dict]
 def attach_cache(reg: Registry) -> int:
     """Attach anything sitting in ``out/rms_cache/<preset id>/``.
 
-    build_mod's cache is named by preset id, so a rebuilt registry can find
+    update_mod's cache is named by preset id, so a rebuilt registry can find
     its builds again instead of regenerating them. The sha256 is recomputed
     here, not trusted from the name: the point of the cache is that the
     script it holds is the one that was measured.
@@ -567,7 +567,7 @@ def attach_cache(reg: Registry) -> int:
                 sha256=sha256_file(rms), bytes=rms.stat().st_size,
                 built_utc=mtime_utc(rms), paths=[rel(rms)],
                 summary={"note": "build cache (out/rms_cache), written by "
-                                 "build_mod"}))
+                                 "update_mod"}))
             n += 1
     return n
 

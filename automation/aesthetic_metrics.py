@@ -143,7 +143,7 @@ def true_mask_geo(lon: float, lat: float, span: float, rot: float, resolution: s
     """Same rasterization true_mask() does, but keyed directly off window
     geometry rather than a lookup into tuning_matrix.WINDOWS - lets callers
     outside that frozen 5-window research set (e.g. the mod's 10 named
-    regions in build_mod.py, which use --region/--center, not that dict)
+    regions in update_mod.py, which use --region/--center, not that dict)
     reuse this without needing an entry there."""
     window = MapWindow.from_center(PROJ, lon, lat, span, size, rot)
     result = raster.rasterize(window, terrain.BIOMES[BIOME], resolution=resolution,

@@ -42,7 +42,7 @@ from rwmaps import scx_read  # noqa: E402
 from rwmaps.cli import REGIONS  # noqa: E402
 from rwmaps.projection import north_from_legacy_rotate  # noqa: E402
 from aesthetic_metrics import cached_true_mask_geo, compute_metrics_from_truth  # noqa: E402
-from build_mod import (DEBUG_MOD_NAME, MOD_NAME,  # noqa: E402
+from update_mod import (DEBUG_MOD_NAME, MOD_NAME,  # noqa: E402
                        shipped_filename, shipped_regions)
 from rwmaps.presets import Preset, Registry  # noqa: E402
 import editor  # noqa: E402

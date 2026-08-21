@@ -10,13 +10,11 @@ parameters, builds and captures are joined up.
         --center=21.58,63.0 --span-km 2000 --min-water-width 2 --north -45
     uv run python automation/preset_cli.py region-set scand-shift-10 scand-shallows \\
         -o out/scand_pick.json
-    uv run python automation/preset_cli.py promote scand-shift-10 --name Scandinavia
 
-``promote`` is the whole point of the registry: it flips a status and ships
-that preset (``build_mod.ship``) from a build it already has - byte-identical
-to the script the engine was measured on, if one is still on disk. Nothing
-regenerates and no annealing runs. ``--no-build`` keeps the status flip on
-its own, for promoting several maps before one full build.
+Shipping a preset is ``update_mod.py --promote-preset LABEL``, which flips
+the status and puts the script in ``mod/`` in one step - it owns the mod
+directories, so both halves happen or neither does. ``retire`` and ``demote``
+here are its counterpart, and take the script back out.
 
 ``audit`` answers the question the reconstruction raised and no report had
 been asking: is the script that ships the script that was captured? It is a
@@ -201,7 +199,7 @@ def cmd_audit(args) -> int:
       * which presets have a build but no capture, or neither?
     """
     reg = load()
-    import build_mod
+    import update_mod
 
     print("shipped: is the script that ships the script that was captured?")
     print(f"{'preset':22s} {'caps':>4s} {'runs':>4s}  ships a captured build?")
@@ -269,7 +267,7 @@ def cmd_audit(args) -> int:
         print(f"  {status:10s} {', '.join(names) if names else 'none'}")
     print(f"  screened   {len(reg.select(status='screened'))} paper screens, by "
           f"definition never built")
-    retired = ", ".join(build_mod.RETIRED_REGIONS)
+    retired = ", ".join(update_mod.RETIRED_REGIONS)
     print(f"\nretired regions (kept for their evidence): {retired}")
     return 0
 
@@ -322,46 +320,28 @@ def cmd_region_set(args) -> int:
     return 0
 
 
-def cmd_promote(args) -> int:
-    reg = load()
-    p = reg.get(args.preset)
-    if args.name:
-        if args.name != p.name:
-            aka = p.origin.setdefault("also_known_as", [])
-            if p.name not in aka:
-                aka.append(p.name)
-            p.name = args.name
-    p.status = "shipped"
-    p.origin["promoted"] = utc_now()
-    if args.why:
-        p.note = args.why
-    reg.save(p)
-    hit = p.find_build(REPO)
-    print(f"{p.label} -> shipped as {p.name!r}")
-    print(f"  {p.describe_window()}")
-    print(f"  {p.n_captured} captures on record across {len(p.captures)} runs")
-    soon = "build_mod will " if args.no_build else ""
-    if hit:
-        build, path = hit
-        print(f"  build on disk, hash-verified: {build.sha256[:12]} {path}")
-        print(f"  {soon}ship that script as-is - no regeneration")
-    else:
-        print(f"  no build on disk - {soon}generate one (~70s of annealing) "
-              f"and record it")
-    if args.no_build:
-        print("\n--no-build: mod/ untouched. next: uv run python "
-              f"automation/build_mod.py --presets {p.label}")
-        return 0
-    # Flipping a status used to leave the map out of mod/ until a second
-    # command was pasted back, so the registry and the mod on disk disagreed
-    # for as long as that took - and a printed command was the only thing
-    # that closed the gap. Ship it here: same partial build, same
-    # hash-verified script, no engine time.
-    print()
-    import build_mod
-    build_mod.ship([p.label])
-    print("\nnext: uv run python automation/install_mod.py --all")
-    return 0
+def _unship(reg: Registry, p: Preset) -> None:
+    """Take a no-longer-shipped map out of mod/.
+
+    Only ``update_mod.py --all`` wipes mod/, so without this a withdrawn
+    map keeps playing until someone remembers to run one - the registry and
+    the mod disagreeing in the meantime.
+
+    The shipped filename comes from the *display name*, and two presets can
+    share one (a replacement window promoted under the name it is replacing,
+    or an old candidate that was never renamed). So a name another shipped
+    preset still uses is left alone: withdrawing a candidate must not delete
+    the map that ships.
+    """
+    import update_mod
+    still = [q.label for q in reg.presets.values()
+             if q.status == "shipped" and q.name == p.name and q.label != p.label]
+    if still:
+        print(f"  left {update_mod.shipped_filename(p.name)} in the mod - "
+              f"{', '.join(still)} still ships under that name")
+        return
+    for path in update_mod.unship(p.name):
+        print(f"  removed {path.relative_to(REPO)}")
 
 
 def cmd_retire(args) -> int:
@@ -373,6 +353,7 @@ def cmd_retire(args) -> int:
         p.note = args.why
     reg.save(p)
     print(f"{p.label} -> retired. {p.note}")
+    _unship(reg, p)
     return 0
 
 
@@ -395,6 +376,7 @@ def cmd_demote(args) -> int:
         p.note = args.why
     reg.save(p)
     print(f"{p.label}: {was} -> candidate. {p.note}")
+    _unship(reg, p)
     return 0
 
 
@@ -442,14 +424,14 @@ def cmd_history(args) -> int:
 def cmd_build(args) -> int:
     """Generate a preset's script and record the build - no engine, no mod.
 
-    The gap this fills: build_mod only builds what ships, so a candidate's
+    The gap this fills: update_mod only builds what ships, so a candidate's
     script could only be produced as a side effect of a capture pass. That
     put ~70s of annealing and any generation failure *inside* the pass, where
     it costs editor time and shows up as a skipped region. Building here
     first means the capture pass starts from a script that exists, is
     recorded by sha256, and can be diffed against the last one.
     """
-    import build_mod
+    import update_mod
     reg = load()
     for key in args.presets:
         p = reg.get(key)
@@ -460,7 +442,7 @@ def cmd_build(args) -> int:
                   f"({path}) - --force to build again")
             continue
         print(f"{p.label}: generating ...")
-        src, stdout, stderr = build_mod.generate(p)
+        src, stdout, stderr = update_mod.generate(p)
         if src is None:
             print("  FAILED")
             print(stderr[-1500:])
@@ -543,15 +525,6 @@ def main() -> int:
                    help="key the file by display name instead of preset label "
                         "(names collide; labels do not)")
     p.set_defaults(fn=cmd_region_set)
-
-    p = sub.add_parser("promote", help="mark a preset shipped")
-    p.add_argument("preset")
-    p.add_argument("--name", help="in-game map name to ship it under")
-    p.add_argument("--why", help="what decided it - stored as the preset's note")
-    p.add_argument("--no-build", action="store_true",
-                   help="flip the status only, leaving mod/ alone - for "
-                        "promoting several maps before one full build_mod run")
-    p.set_defaults(fn=cmd_promote)
 
     p = sub.add_parser("retire", help="withdraw a preset from the mod")
     p.add_argument("preset")

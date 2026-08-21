@@ -16,11 +16,12 @@ condition-set module, no hand-edited shipping list.
   back to a parameter set.
 - **A preset before engine time, not after.** `preset_cli.py new` (or
   `mod_capture --presets`) so the samples carry the preset's hash.
-- **Promote, don't re-specify.** `preset_cli.py promote` flips a status and
-  ships the exact script the engine was measured on into both mod roots —
-  one command, no build step to remember (`--no-build` opts out). A
-  cached build is reused on *content*, never refreshed for being old —
-  `--rebuild` is deliberate, and what it produces has not been captured yet.
+- **Promote, don't re-specify.** `update_mod.py --promote-preset LABEL`
+  flips the status and ships the exact script the engine was measured on
+  into both mod roots, in one step; `preset_cli.py retire`/`demote` take it
+  back out. A cached build is reused on *content*, never refreshed for
+  being old — `--rebuild` is deliberate, and what it produces has not been
+  captured yet.
 - **Every path in the registry is a last known location, not a promise.**
   Storage is index-only: the registry is committed, the artifacts stay in
   `out/`. `preset_cli.py audit` says what is still there.

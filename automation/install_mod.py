@@ -23,13 +23,13 @@ REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "src"))
 
 from rwmaps import install as install_mod  # noqa: E402
-from build_mod import DEBUG_MOD_NAME, MOD_NAME  # noqa: E402
+from update_mod import DEBUG_MOD_NAME, MOD_NAME  # noqa: E402
 
 
 def sync(mod_name: str) -> None:
     src = REPO / "mod" / mod_name
     if not src.is_dir():
-        raise FileNotFoundError(f"{src} doesn't exist - run automation/build_mod.py first")
+        raise FileNotFoundError(f"{src} doesn't exist - run automation/update_mod.py first")
     dest = install_mod.find_profile() / "mods" / "local" / mod_name
     if dest.exists():
         shutil.rmtree(dest)

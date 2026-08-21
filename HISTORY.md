@@ -500,7 +500,7 @@ while it holds the value that means "as before"; verified 0 of 92 moved.
 The two rotating maps are **candidates, not shipped**:
 `great-britain-n-rot4`, `scand-shift-15-rot4`.
 
-## 2026-08-21 (later) - promote ships the map
+## 2026-08-21 (later) - one command puts a map in the mod
 
 The two rotating maps are shipped: `great-britain-n-rot4` as **Britain
 Rotates**, `scand-shift-15-rot4` as **Scandanavia Rotates**. Both reuse
@@ -508,16 +508,34 @@ their `rot4_v1` build - `audit` reports each as the captured script apart
 from the header comment, so what ships is what was measured at 52.5s and
 52.3s median.
 
-`promote` now does the mod build itself (`build_mod.ship`, the same
-`--presets LABEL` partial build) instead of printing that command for the
-operator to paste back. The two-step version left the registry saying
-"shipped" and `mod/` not carrying the map for as long as the second command
-took to run, and the printed line was the only thing that closed the gap -
-which is the class of manual step this repo is supposed to design out.
-`--no-build` keeps the old behaviour for promoting several maps before one
-full build. No engine time either way: a hash-verified build is copied.
+Promoting used to be two commands: `preset_cli.py promote` flipped a status
+and *printed* the `build_mod.py --presets LABEL` line that would actually
+put the script in `mod/`. Between the two, the registry said "shipped" and
+the mod did not carry the map, and the printed line was the only thing that
+closed the gap - the class of manual step this repo is supposed to design
+out. `build_mod.py` is **`update_mod.py`** now and owns both halves:
 
-Nothing else moved: 64 tests pass, `build_mod --list` unchanged, and the
-placeholder slot still takes whatever the build built first (for a
-one-preset promote, the map just promoted - what `--placeholder LABEL` did
-by hand).
+```
+uv run python automation/update_mod.py --promote-preset LABEL [--name ..] [--why ..]
+uv run python automation/update_mod.py --all [--rebuild ..]
+uv run python automation/install_mod.py --all
+```
+
+`--promote-preset` flips the status, saves the registry, then ships that
+preset in place; `--all` is the from-scratch build that wipes `mod/` so a
+renamed or retired map's script cannot linger. `preset_cli.py promote` is
+gone - one implementation, one command - and `retire` / `demote` gained the
+counterpart: they delete the script and icon from both mod roots, skipping
+a name another shipped preset still uses (two presets can share a display
+name, and `britain-715d` is a candidate called "Britain" while
+`britain-crossings-ramsey` ships under it - demoting the candidate must not
+delete the shipped map).
+
+Dropped on the way through: `--list` (`preset_cli list` / `audit` already
+answer it), `--placeholder` (nothing reads the committed slot - every
+capture harness writes the *installed* one via `slot.py`), and the dead
+`NW` / `NORTH_UP` constants. The slot is now filled only when `mod/` was
+wiped or the file is missing, instead of 350KB of committed churn per
+promote. The retired-regions and forest-split comment blocks shrank to
+pointers at the presets and the report that hold the numbers. Net -38
+lines across the two files, and 64 tests still pass.

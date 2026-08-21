@@ -32,7 +32,7 @@ from pathlib import Path
 REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(Path(__file__).parent))
 
-from build_mod import FOREST_SPLIT  # noqa: E402
+from update_mod import FOREST_SPLIT  # noqa: E402
 
 #: Salish Sea's raster settings, as MOD_REGIONS spells them.
 PUGET = ["--overlap", "0.85", "--min-water-width", "5", "--min-land-width", "3"]

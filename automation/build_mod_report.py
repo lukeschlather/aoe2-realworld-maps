@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import json  # noqa: E402
 
-from build_mod import shipped_regions  # noqa: E402
+from update_mod import shipped_regions  # noqa: E402
 from mod_capture import resolve_geo  # noqa: E402
 import capture_render  # noqa: E402
 

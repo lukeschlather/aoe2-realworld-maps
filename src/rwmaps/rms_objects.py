@@ -381,7 +381,7 @@ FLAVORS: dict[str, ResourceFlavor] = {
     #: kinds -> 7) and Caribbean (1 -> 2). Those differences are inside RNG
     #: variance at one sample - the same New Zealand config measured 2 and
     #: then 3 on two different generations - so nothing here is settled.
-    #: `build_mod.py` therefore ships every region on "default"; this waits
+    #: `update_mod.py` therefore ships every region on "default"; this waits
     #: on an N=10 pass to decide.
     #:
     #: The more likely real cause is upstream of resources entirely. Across

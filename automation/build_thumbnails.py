@@ -27,7 +27,7 @@ Two outputs, because they are read in different places:
   ``mapicons/rm_arabia.png`` and the two subscribed mods that ship their
   own (Legacy ES Maps, Zetnus HyperRandom) all use the same 420x420 RGBA
   diamond - so these are isometric, the orientation the map-selection
-  screen displays.  ``build_mod.py`` calls this at the end of a build,
+  screen displays.  ``update_mod.py`` calls this at the end of a build,
   since a full build wipes the mod directories.
 * **A gallery** under ``reports/``, north-up, for judging how recognisable
   a coastline is without the 45-degree rotation in the way.
@@ -57,7 +57,7 @@ from rwmaps import thumbnail  # noqa: E402
 from rwmaps.presets import Registry  # noqa: E402
 
 SCRIPTS_SUBDIR = Path("resources") / "_common" / "random-map-scripts"
-#: Both mod roots build_mod.py maintains; the debug one carries the extra
+#: Both mod roots update_mod.py maintains; the debug one carries the extra
 #: placeholder slot, which gets an icon like any other script.
 MOD_ROOTS = [REPO / "mod" / "Real World Maps", REPO / "mod" / "Real World Maps (Debug)"]
 MOD_SCRIPTS = MOD_ROOTS[0] / SCRIPTS_SUBDIR
@@ -106,11 +106,11 @@ def write_icons(roots=MOD_ROOTS, quiet: bool = False,
                 px: int = thumbnail.ICON_PX) -> int:
     """Write ``<stem>.png`` beside every script in each mod root.
 
-    Called by ``build_mod.py`` after a build, since a full build wipes the
+    Called by ``update_mod.py`` after a build, since a full build wipes the
     mod directories - an icon left behind for a renamed script would show up
     against nothing, and a script with no icon gets the game's generic one.
     """
-    from build_mod import shipped_filename
+    from update_mod import shipped_filename
 
     reg = Registry(REPO).load()
     by_file = {shipped_filename(pr.name): pr for pr in reg.presets.values()

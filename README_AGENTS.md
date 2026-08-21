@@ -155,7 +155,7 @@ uv run python automation/preset_cli.py new LABEL "Map Name" -- --center=.. --spa
 uv run python automation/mod_capture.py --run-id <id> --presets LABEL --n-samples 2
 uv run python automation/preset_import.py              # fold the run into the registry
 uv run python automation/preset_report.py --presets LABEL <others>   # no engine time
-uv run python automation/preset_cli.py promote LABEL --why "..."     # ships it into mod/ too
+uv run python automation/update_mod.py --promote-preset LABEL --why "..."  # ships it
 uv run python automation/install_mod.py --all
 uv run pytest tests -q
 ```
@@ -164,7 +164,7 @@ uv run pytest tests -q
 (see `automation/candidate_set.py`), so a candidate can be captured without
 adding it to `MOD_REGIONS`.
 
-A full `build_mod.py` is ~70s of `choose_starts` annealing per region.
+A full `update_mod.py --all` is ~70s of `choose_starts` annealing per region.
 `choose_starts` uses a fixed RNG seed, so rebuilds are byte-identical and a
 diff shows only what you actually changed.
 

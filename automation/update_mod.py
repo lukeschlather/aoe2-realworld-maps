@@ -1,41 +1,40 @@
-"""Build the installable "Real World Maps" mod from the preset registry -
-plus a debug variant that additionally carries the AA_rw_placeholder_tester
-slot this project's tuning automation (tuning_matrix.py et al) depends on to
-work around the Scenario Editor's list-widget crash bug (see
-TUNING_STATUS.md / RENDER_PIPELINE.md).
+"""Update ``mod/`` - the installable "Real World Maps" mod, and the debug
+variant that also carries the AA_rw_placeholder_tester slot every capture
+harness writes over (see EDITOR_AUTOMATION.md).
 
-**What ships is ``presets/*.json`` with ``status: shipped``.** There is no
-hand-edited region list here any more. Adding a map to the mod is
-``preset_cli.py promote``; the parameters, the window, the captures that
-justified it and the date it was promoted all live in the one record.
+Usage:
+    # promote a preset and ship it - the usual way a map reaches the mod
+    uv run python automation/update_mod.py --promote-preset salish-sea
+
+    # every shipped map, from scratch (wipes mod/, so a renamed or retired
+    # map's script cannot linger)
+    uv run python automation/update_mod.py --all
+
+    # ... regenerating rather than reusing, to pick up a generation change
+    uv run python automation/update_mod.py --all --rebuild greece
+
+``uv run python automation/install_mod.py --all`` then syncs mod/ into the
+game. What ships is ``presets/*.json`` with ``status: shipped``; nothing
+here is a hand-edited list.
 
 **A build is reused, never rebuilt for its own sake.** Each preset records
-the ``.rms`` it has been built into, by sha256, with every place a copy was
-last seen. If one of those copies is still on disk and still hashes to what
-was recorded, that file ships as-is: the map that ships is then provably the
-map the engine was measured on, and a full rebuild costs seconds instead of
-~70s per region of choose_starts annealing. Only a preset with no surviving
-build generates, and what it generates is recorded so the next build reuses
-it.
+the ``.rms`` it has been built into by sha256, with every place a copy was
+last seen; if a copy is still on disk and still hashes to what was
+recorded, that file ships as-is. The map that ships is then provably the
+map the engine was measured on, and a full update costs seconds instead of
+~70s per region of choose_starts annealing.
 
-That is deliberately a *content* claim rather than a freshness claim. A
-cached build was made by an older ``src/``, and it is not upgraded when
-``src/`` changes - because a script that has been through the engine is
-worth more than a script that is merely current. Pass ``--rebuild`` when the
-point is to pick up a generation change; then capture the result before
-trusting it.
+That is deliberately a *content* claim, not a freshness one: a cached build
+made by an older ``src/`` is not upgraded when ``src/`` changes, because a
+script that has been through the engine is worth more than one that is
+merely current. ``--rebuild`` is how you opt out, and what it produces has
+not been captured yet.
 
 The one edit a shipped copy gets is its first line: the header comment
 carries the map name, so a preset promoted under a new name has that line
-rewritten and nothing else. Measured, not assumed - shipped
-"RW Great Britain N.rms" and the script captured as "Britain northup
-France" differ in exactly that line.
-
-Usage:
-    uv run python automation/build_mod.py
-    uv run python automation/build_mod.py --presets salish-sea --placeholder salish-sea
-    uv run python automation/build_mod.py --rebuild greece
-    uv run python automation/build_mod.py --list
+rewritten and nothing else (measured - shipped "RW Great Britain N.rms" and
+the script captured as "Britain northup France" differ in exactly that
+line).
 """
 
 from __future__ import annotations
@@ -73,83 +72,26 @@ BUILD_CACHE = REPO / "out" / "rms_cache"
 SHIPPED_PREFIX = "RW "
 
 
-#: Dropped from the shipped mod 2026-08-15 because their projections do not
-#: read as the real place.
-#:
-#: Re-profiling the archived N=10 captures on 2026-08-16 showed they were
-#: also **broken on supply**, which is a harder fact than the aesthetic
-#: call. Stone per player within 30 walked tiles, against stock Arabia's
-#: median of 9 (80 player-samples each, 24 for Arabia):
-#:
-#: | map         | median stone | players with none |
-#: |-------------|--------------|-------------------|
-#: | Arabia      | 9            | 0/24              |
-#: | Japan       | **2**        | **39/80**         |
-#: | New Zealand | 5            | 28/80             |
-#: | Caribbean   | 9            | 14/80             |
-#: | Britain     | 9            | 0/80              |
-#: | Salish Sea  | 9            | 0/80              |
-#:
-#: Two stone is not a start. Every shipped region that survived has zero
-#: players missing gold or stone across all 80 samples. Japan also ran a
-#: median of 7 gold against Arabia's 15, with 18/80 players at none.
-#:
-#: Land, added to the model 2026-08-16, says the same thing a third time
-#: and says it about the shape rather than the placement. Worst-off player
-#: as a fraction of that map's own median - every stock map holds
-#: 0.79-0.96:
-#:
-#: | map         | min land | median | min/med |
-#: |-------------|----------|--------|---------|
-#: | Arabia      | 2,676    | 3,248  | 0.82    |
-#: | New Zealand | **300**  | 848    | 0.35    |
-#: | Japan       | 456      | 756    | 0.60    |
-#:
-#: A long thin island chain has no interior, so eight starts have nowhere
-#: to go but the coastline and no arrangement of them fixes it. Neither
-#: window is redeemable by tuning, and at 240 tiles the two look
-#: interchangeable anyway. Do not revisit these two; pick chunkier targets.
-#:
-#: They are ``status: retired`` presets now, so their parameters, their
-#: captures and this reasoning stay joined up instead of the reasoning
-#: living here and the parameters being lost.
+#: Withdrawn 2026-08-15/16: the projections do not read as the real place,
+#: and re-profiling their N=10 captures found them broken on supply and on
+#: land too (Japan: median 2 stone against Arabia's 9; New Zealand: its
+#: worst-off player on 0.35 of its own median land, where every stock map
+#: holds 0.79-0.96). The numbers and the reasoning are on the retired
+#: presets themselves - ``preset_cli.py show japan`` - and in HISTORY.md.
+#: Named here only so the report builders can label them. Do not revisit
+#: these windows; a long thin island chain has no interior to give eight
+#: starts.
 RETIRED_REGIONS = ("Japan", "Caribbean", "New Zealand")
 
 
-#: More woods, kept apart. A single forest terrain has no spacing against
-#: itself, so its clumps fuse: asking Greece for 36 clumps instead of 12
-#: gave it FEWER woods (21 against 28) with 61% of the wood in the largest.
-#: Split across two terrain types they are "other terrain types" to each
-#: other and the spacing clause finally applies between them.
-#:
-#: Measured N=3 per map, 24 player-starts each, against the N=1 baseline:
-#:
-#: | map     | wood     | blobs   | largest  | p90 blocked | worst |
-#: |---------|----------|---------|----------|-------------|-------|
-#: | Britain | 21 -> 21 | 27 -> 93| 37% -> 7%| 58% -> 32%  | 60->52|
-#: | Greece  | 25 -> 23 | 28 ->126| 33% -> 5%| 55% -> 43%  | 62->45|
-#:
-#: and no start on either map is walled, sealed or tight in 48 starts,
-#: against Britain's France player sitting on one corridor at 87% blocked.
-#:
-#: Kept here as the recipe for *new* presets. The presets that use it carry
-#: it in their own argv.
+#: More woods, kept apart: one forest terrain has no spacing against
+#: itself, so its clumps fuse - split across two terrains they are "other
+#: terrain types" to each other and the spacing clause applies. Measured
+#: N=3 (RESOURCE_REWORK_STATUS.md): same wood, 3-4x the blobs, largest
+#: blob 37%->7%, no walled or sealed start in 48. The recipe for *new*
+#: presets; the presets using it carry it in their own argv.
 FOREST_SPLIT = ["--forest-clumps", "36", "--forest-alt", "PINE_FOREST",
                 "--forest-spacing", "3"]
-
-#: North toward the upper left - the engine's uncorrected view, and what
-#: every region shipped before 2026-08-16 looks like. Orientation is
-#: screen-space now and 0 means north-up, so a region that ships this way
-#: says so out loud in its argv. This is a knob to revisit per region, not a
-#: law: north-up reads better for most places (see the window-candidate
-#: report).
-NW = ["--north", "-45"]
-
-#: North-up. Identical to omitting the flag, stated out loud for the same
-#: reason NW is. The regions taken from the 2026-08-16 candidate report are
-#: north-up because that is the orientation they were judged in - see
-#: reports/20260816-210117_candidate_report_candidates_n2.html.
-NORTH_UP = ["--north", "0"]
 
 
 def shipped_filename(name: str) -> str:
@@ -221,60 +163,110 @@ def _summary_from_stdout(text: str) -> dict:
 def _parse_args():
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--presets", "--regions", nargs="+", metavar="LABEL",
-                   default=None, dest="presets",
-                   help="build only these presets, in place, leaving the rest "
-                        "of the mod untouched. Labels or display names.")
+    p.add_argument("--promote-preset", nargs="+", metavar="LABEL",
+                   default=None, dest="promote",
+                   help="mark these presets shipped and put them in the mod, "
+                        "leaving the rest of it untouched. Already-shipped "
+                        "labels are simply re-shipped.")
+    p.add_argument("--name", help="with one --promote-preset: the in-game map "
+                                  "name to ship it under")
+    p.add_argument("--why", help="with --promote-preset: what decided it - "
+                                 "stored as the preset's note")
+    p.add_argument("--all", action="store_true",
+                   help="every shipped preset, from scratch: mod/ is wiped "
+                        "first, so a renamed or retired map's script cannot "
+                        "linger beside the current one")
     p.add_argument("--rebuild", nargs="*", metavar="LABEL", default=None,
-                   help="regenerate rather than reuse - all shipped presets "
-                        "with no argument, or just the named ones. Use when "
-                        "the point is to pick up a generation change; the "
-                        "result has not been through the engine.")
-    p.add_argument("--placeholder", metavar="LABEL", default=None,
-                   help="preset to copy into the AA_rw_placeholder_tester "
-                        "slot. Defaults to whichever built first.")
-    p.add_argument("--list", action="store_true",
-                   help="list what ships, and where each one's build stands")
-    return p.parse_args()
+                   help="regenerate rather than reuse - everything being "
+                        "built with no argument, or just the named ones. Use "
+                        "when the point is to pick up a generation change; "
+                        "the result has not been through the engine.")
+    args = p.parse_args()
+    if not args.all and not args.promote:
+        p.error("nothing to do - pass --all, or --promote-preset LABEL")
+    if args.name and len(args.promote or []) != 1:
+        p.error("--name applies to a single --promote-preset")
+    return args
 
 
-def ship(labels: list[str], placeholder: str | None = None) -> None:
-    """Build just ``labels`` into both mod roots, in place.
+def promote_preset(reg: Registry, label: str, name: str | None = None,
+                   why: str | None = None) -> Preset:
+    """Flip one preset to ``shipped`` and say what that will ship.
 
-    The in-process entry point for the one-preset build - what
-    ``--presets`` does from the command line. ``preset_cli.py promote``
-    calls this so that promoting a map puts the script in ``mod/``, rather
-    than printing a command whose only job was to be pasted back.
+    The registry half of ``--promote-preset``: the status, the new name if
+    it is being renamed (the old one is kept in ``also_known_as``, since a
+    capture run recorded under it still belongs to this preset), and the
+    date. Saved before anything is built, so a build that fails leaves the
+    decision recorded rather than losing it.
     """
-    main(argparse.Namespace(presets=list(labels), rebuild=None,
-                            placeholder=placeholder, list=False))
+    p = reg.get(label)
+    if name and name != p.name:
+        aka = p.origin.setdefault("also_known_as", [])
+        if p.name not in aka:
+            aka.append(p.name)
+        p.name = name
+    p.status = "shipped"
+    p.origin["promoted"] = utc_now()
+    if why:
+        p.note = why
+    reg.save(p)
+    hit = p.find_build(REPO)
+    print(f"{p.label} -> shipped as {p.name!r}")
+    print(f"  {p.describe_window()}")
+    print(f"  {p.n_captured} captures on record across {len(p.captures)} runs")
+    if hit:
+        build, path = hit
+        print(f"  build on disk, hash-verified: {build.sha256[:12]} {path}")
+        print("  shipping that script as-is - no regeneration")
+    else:
+        print("  no build on disk - generating one (~70s of annealing) and "
+              "recording it")
+    return p
+
+
+def unship(name: str) -> list[Path]:
+    """Remove a map's script and icon from both mod roots.
+
+    Called when a preset stops being shipped (``preset_cli.py retire`` /
+    ``demote``): only ``--all`` wipes mod/, so without this a withdrawn map
+    keeps playing until someone remembers to run a full update.
+    """
+    gone = []
+    for root in (REPO / "mod" / MOD_NAME, REPO / "mod" / DEBUG_MOD_NAME):
+        rms = (root / "resources" / "_common" / "random-map-scripts"
+               / shipped_filename(name))
+        for path in (rms, rms.with_suffix(".png")):
+            if path.is_file():
+                path.unlink()
+                gone.append(path)
+    return gone
 
 
 def main(args=None):
     args = _parse_args() if args is None else args
     reg = Registry(REPO).load()
+
+    if getattr(args, "promote", None):
+        for label in args.promote:
+            promote_preset(reg, label, name=args.name, why=args.why)
+        print()
+
     shipped = shipped_presets(reg)
     if not shipped:
-        sys.exit("nothing has status 'shipped' in presets/ - promote something "
-                 "with automation/preset_cli.py promote <label>")
-
-    if args.list:
-        for p in shipped:
-            hit = p.find_build(REPO)
-            where = "reuse " + hit[1].name if hit else "GENERATE (no build on disk)"
-            print(f"{p.label:22s} {p.name:18s} {p.n_captured:3d} caps  "
-                  f"{where}\n{'':22s} {' '.join(p.argv)}")
-        return
+        sys.exit("nothing has status 'shipped' in presets/ - ship something "
+                 "with --promote-preset <label>")
 
     selected = shipped
-    partial = args.presets is not None
+    # Everything but --all leaves the rest of the mod as it is.
+    labels = getattr(args, "presets", None) or getattr(args, "promote", None)
+    partial = not args.all
     if partial:
-        selected = [reg.get(k) for k in args.presets]
+        selected = [reg.get(k) for k in labels]
         not_shipped = [p.label for p in selected if p.status != "shipped"]
         if not_shipped:
-            sys.exit(f"not shipped: {not_shipped}. promote them first "
-                     f"(preset_cli.py promote <label>) so the mod's contents "
-                     f"and the registry cannot disagree.")
+            sys.exit(f"not shipped: {not_shipped}. pass them to "
+                     f"--promote-preset instead, so the mod's contents and "
+                     f"the registry cannot disagree.")
 
     force_all = args.rebuild is not None and not args.rebuild
     force = {reg.get(k).label for k in (args.rebuild or [])}
@@ -346,7 +338,6 @@ def main(args=None):
 
     commit = git_commit()
     first_src = None
-    placeholder_src = None
     failures = []
     reused = built = 0
     for preset, src, build in plan:
@@ -395,20 +386,18 @@ def main(args=None):
         reg.save(preset)
         if first_src is None:
             first_src = dest
-        if args.placeholder and preset.label in (
-                args.placeholder, reg.get(args.placeholder).label):
-            placeholder_src = dest
         print(f"  -> {dest}")
 
-    if args.placeholder and placeholder_src is None:
-        sys.exit(f"--placeholder {args.placeholder!r} did not build - it must "
-                 f"be one of the presets this run built")
-    slot_src = placeholder_src or first_src
-    if slot_src:
-        shutil.copyfile(slot_src, debug_scripts / PLACEHOLDER_SLOT)
-        why = "requested" if placeholder_src else "whatever built first"
-        print(f"  -> {debug_scripts / PLACEHOLDER_SLOT} (placeholder slot, "
-              f"content = {why}, currently {slot_src.name})")
+    # The debug mod's slot only has to hold *a* valid script so the entry
+    # exists in the editor's Random Map list: every capture harness writes
+    # over the installed copy (slot.py) before it generates, and nothing
+    # reads the committed one. So fill it when mod/ was just wiped or when
+    # it is missing, and otherwise leave it alone - rewriting it on every
+    # promote churned 350KB of committed file for no reader.
+    slot = debug_scripts / PLACEHOLDER_SLOT
+    if first_src is not None and (args.all or not slot.is_file()):
+        shutil.copyfile(first_src, slot)
+        print(f"  -> {slot} (placeholder slot, content = {first_src.name})")
 
     # The map-selection screen shows <script>.png from beside the script, and
     # a full build has just wiped both mod roots, so the icons have to be

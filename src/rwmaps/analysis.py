@@ -469,7 +469,7 @@ def _multistart_anneal(
     iteration budget, so starting from a few structurally different layouts
     (already-spread-out vs. one-guaranteed-seed-per-island) makes it far less
     likely every attempt lands in the same one. Uses a fixed RNG seed so
-    ``build_mod.py`` reruns produce the same script byte-for-byte.
+    ``update_mod.py`` reruns produce the same script byte-for-byte.
     """
     if len(coords) == 0:
         return []

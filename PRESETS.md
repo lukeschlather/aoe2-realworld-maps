@@ -68,9 +68,9 @@ screened  ->  candidate  ->  shipped
   decision record is complete: this window was looked at, on this date, in
   this report, beside these others.
 - **candidate** - has a build and/or captures, does not ship.
-- **shipped** - `build_mod.py` puts it in the mod. Nothing else does.
+- **shipped** - `update_mod.py` puts it in the mod. Nothing else does.
 - **retired** - shipped once, withdrawn. Kept because the *reason* is
-  evidence (see `build_mod.RETIRED_REGIONS`).
+  evidence (see the retired presets' own notes).
 
 A full pass, with no manual step in it:
 
@@ -92,11 +92,10 @@ uv run python automation/preset_import.py
 uv run python automation/preset_report.py --presets scand-south scandinavia \
     --slug scand_south --title "Scandinavia south, against what ships"
 
-# 5. ship one. promote copies it into both mod roots itself, reusing the
-#    exact script the engine was measured on (--no-build to only flip the
-#    status, e.g. when promoting several before one full build).
-uv run python automation/preset_cli.py promote scand-south --name Scandinavia \
-    --why "..."
+# 5. ship one: the status flip and the copy into both mod roots are one
+#    step, reusing the exact script the engine was measured on.
+uv run python automation/update_mod.py --promote-preset scand-south \
+    --name Scandinavia --why "..."
 uv run python automation/install_mod.py --all
 ```
 
@@ -215,9 +214,10 @@ Every substitution a preset needed is recorded in its `legacy_notes`.
 | `preset_cli.py window <label>` | which other presets share this window |
 | `preset_cli.py history [-v]` | every capture run, oldest first, with commit and N |
 | `preset_cli.py audit` | is what ships what was captured; which artifacts are gone; what is promotable now |
-| `preset_cli.py new`, `promote`, `retire`, `note` | edit the registry |
+| `preset_cli.py new`, `retire`, `demote`, `note` | edit the registry (`retire`/`demote` also take the script out of `mod/`) |
 | `preset_cli.py region-set ... -o FILE` | a `mod_capture --region-set` file, for harnesses that still take one |
 | `preset_import.py [--dry-run]` | fold every run, condition set and screen on disk into the registry |
 | `preset_report.py --presets ...` | an HTML report over any set of presets, no engine time |
 | `preset_cli.py build <label>` | generate a candidate's script into the cache and record it, before spending engine time |
-| `build_mod.py [--presets ...] [--rebuild] [--list]` | build the mod from `status: shipped` |
+| `update_mod.py --promote-preset LABEL` | ship a preset: status flip + script into `mod/`, in one step |
+| `update_mod.py --all [--rebuild ...]` | rebuild the whole mod from `status: shipped`, wiping stale scripts |

@@ -373,22 +373,23 @@ trees against those ids.
 
 ## Building and installing the mod
 
-`mod/` is *generated*, not hand-edited - `build_mod.py` regenerates it from
-its own `MOD_REGIONS` list, which is where each region's CLI flags live.
+`mod/` is *generated*, not hand-edited - `update_mod.py` regenerates it from
+`presets/*.json` with `status: shipped`, which is where each map's CLI flags
+live. `preset_cli.py list` / `audit` say what ships and whether each map has
+a build to reuse.
 
 ```sh
-uv run python automation/build_mod.py --list   # what ships; reuse or generate
+# ship one map: the preset is flipped to shipped and the script written
+# into both mod roots, the rest of the mod untouched
+uv run python automation/update_mod.py --promote-preset salish-sea
 
-# full rebuild: ~20s. Every map ships a build already on disk, hash-verified
-# against the script the engine was measured on - nothing re-anneals.
-uv run python automation/build_mod.py
-
-# one map, in place, the rest untouched
-uv run python automation/build_mod.py --presets salish-sea --placeholder salish-sea
+# every shipped map, from scratch: ~20s, because each ships a build already
+# on disk, hash-verified against the script the engine was measured on
+uv run python automation/update_mod.py --all
 
 # regenerate rather than reuse - ~70s of annealing per map, and the result
 # has not been through the engine yet
-uv run python automation/build_mod.py --rebuild salish-sea
+uv run python automation/update_mod.py --all --rebuild salish-sea
 
 uv run python automation/install_mod.py --all
 ```

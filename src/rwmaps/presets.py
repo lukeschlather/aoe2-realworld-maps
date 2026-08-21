@@ -24,7 +24,7 @@ A preset fixes that by being the join key:
 
 ``name`` is deliberately **not** in ``params_hash``. The map name reaches
 the script only as a comment in its header (``rms._HEADER``); the filename
-the game lists comes from ``build_mod.shipped_filename``. So a candidate
+the game lists comes from ``update_mod.shipped_filename``. So a candidate
 captured as "Scand shift 10" and shipped as "Scandinavia" is the same
 script, and promoting it must not force a 70-second re-anneal to change a
 comment.
@@ -295,7 +295,7 @@ class Preset:
     params_hash: str
     #: candidate - captured or not, not shipped. shipped - in the mod.
     #: retired - shipped once, withdrawn; kept because the *reason* is
-    #: evidence (see build_mod's retired notes).
+    #: evidence (see the retired presets' own notes).
     status: str = "candidate"
     note: str = ""
     origin: dict = field(default_factory=dict)

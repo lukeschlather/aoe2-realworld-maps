@@ -157,7 +157,7 @@ class Candidate:
 #
 # Great Lakes and Britain are the two the user named. Every other group is a
 # proposed replacement for the three regions retired on 2026-08-15 (Japan,
-# Caribbean, New Zealand - see build_mod.RETIRED_REGIONS), chosen to lean
+# Caribbean, New Zealand - see update_mod.RETIRED_REGIONS), chosen to lean
 # continental/peninsular rather than archipelago: all three retirees were
 # ISLANDS-type with narrow coastlines, which is also the shape that starved
 # gold and stone placement (MOD_STATUS.md).

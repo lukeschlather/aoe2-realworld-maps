@@ -46,13 +46,12 @@ Other hypotheses for why it was crashing:
 ## Operating it
 
 ```sh
-# what ships, and whether each map has a build to reuse or must generate
-uv run python automation/build_mod.py --list
+# ship a map: flips the preset to shipped and puts the script in mod/
+uv run python automation/update_mod.py --promote-preset salish-sea
 
-# a full build is ~20s now: a preset ships the exact script the engine was
-# measured on, so nothing re-anneals unless there is no build on disk.
-uv run python automation/build_mod.py
-uv run python automation/build_mod.py --presets salish-sea --placeholder salish-sea
+# every shipped map, from scratch - ~20s, because each one ships the exact
+# script the engine was measured on and nothing re-anneals
+uv run python automation/update_mod.py --all
 uv run python automation/install_mod.py --all
 
 # the record: one JSON per map, window + resolved parameters + builds +
@@ -86,7 +85,7 @@ uv run pytest tests -q
 ```
 
 `mod/` is generated from `presets/*.json` with `status: shipped`, never
-hand-edited; adding a map to it is `preset_cli.py promote`. The lobby Map Size must be `Huge
+hand-edited; adding a map to it is `update_mod.py --promote-preset`. The lobby Map Size must be `Huge
 [240]` - land areas are absolute tile counts, so the wrong size breaks the
 map rather than shrinking it.
 

@@ -60,7 +60,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from rwmaps import install as install_mod  # noqa: E402
-from build_mod import DEBUG_MOD_NAME  # noqa: E402
+from update_mod import DEBUG_MOD_NAME  # noqa: E402
 
 SLOT = install_mod.scripts_dir(DEBUG_MOD_NAME) / "AA_rw_placeholder_tester.rms"
 WORK = REPO / "out" / "crash_bisect"
