@@ -17,7 +17,8 @@ condition-set module, no hand-edited shipping list.
 - **A preset before engine time, not after.** `preset_cli.py new` (or
   `mod_capture --presets`) so the samples carry the preset's hash.
 - **Promote, don't re-specify.** `preset_cli.py promote` flips a status and
-  `build_mod.py` ships the exact script the engine was measured on. A
+  ships the exact script the engine was measured on into both mod roots —
+  one command, no build step to remember (`--no-build` opts out). A
   cached build is reused on *content*, never refreshed for being old —
   `--rebuild` is deliberate, and what it produces has not been captured yet.
 - **Every path in the registry is a last known location, not a promise.**

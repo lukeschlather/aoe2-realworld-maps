@@ -238,8 +238,20 @@ def _parse_args():
     return p.parse_args()
 
 
-def main():
-    args = _parse_args()
+def ship(labels: list[str], placeholder: str | None = None) -> None:
+    """Build just ``labels`` into both mod roots, in place.
+
+    The in-process entry point for the one-preset build - what
+    ``--presets`` does from the command line. ``preset_cli.py promote``
+    calls this so that promoting a map puts the script in ``mod/``, rather
+    than printing a command whose only job was to be pasted back.
+    """
+    main(argparse.Namespace(presets=list(labels), rebuild=None,
+                            placeholder=placeholder, list=False))
+
+
+def main(args=None):
+    args = _parse_args() if args is None else args
     reg = Registry(REPO).load()
     shipped = shipped_presets(reg)
     if not shipped:

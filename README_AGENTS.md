@@ -155,8 +155,7 @@ uv run python automation/preset_cli.py new LABEL "Map Name" -- --center=.. --spa
 uv run python automation/mod_capture.py --run-id <id> --presets LABEL --n-samples 2
 uv run python automation/preset_import.py              # fold the run into the registry
 uv run python automation/preset_report.py --presets LABEL <others>   # no engine time
-uv run python automation/preset_cli.py promote LABEL --why "..."     # when it is the one
-uv run python automation/build_mod.py --presets LABEL --placeholder LABEL
+uv run python automation/preset_cli.py promote LABEL --why "..."     # ships it into mod/ too
 uv run python automation/install_mod.py --all
 uv run pytest tests -q
 ```

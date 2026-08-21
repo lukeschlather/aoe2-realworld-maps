@@ -92,10 +92,12 @@ uv run python automation/preset_import.py
 uv run python automation/preset_report.py --presets scand-south scandinavia \
     --slug scand_south --title "Scandinavia south, against what ships"
 
-# 5. ship one. build_mod reuses the exact script the engine was measured on.
+# 5. ship one. promote copies it into both mod roots itself, reusing the
+#    exact script the engine was measured on (--no-build to only flip the
+#    status, e.g. when promoting several before one full build).
 uv run python automation/preset_cli.py promote scand-south --name Scandinavia \
     --why "..."
-uv run python automation/build_mod.py --presets scand-south
+uv run python automation/install_mod.py --all
 ```
 
 ## Builds are content-addressed, and reused

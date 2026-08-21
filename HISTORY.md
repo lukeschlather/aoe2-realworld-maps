@@ -499,3 +499,25 @@ while it holds the value that means "as before"; verified 0 of 92 moved.
 
 The two rotating maps are **candidates, not shipped**:
 `great-britain-n-rot4`, `scand-shift-15-rot4`.
+
+## 2026-08-21 (later) - promote ships the map
+
+The two rotating maps are shipped: `great-britain-n-rot4` as **Britain
+Rotates**, `scand-shift-15-rot4` as **Scandanavia Rotates**. Both reuse
+their `rot4_v1` build - `audit` reports each as the captured script apart
+from the header comment, so what ships is what was measured at 52.5s and
+52.3s median.
+
+`promote` now does the mod build itself (`build_mod.ship`, the same
+`--presets LABEL` partial build) instead of printing that command for the
+operator to paste back. The two-step version left the registry saying
+"shipped" and `mod/` not carrying the map for as long as the second command
+took to run, and the printed line was the only thing that closed the gap -
+which is the class of manual step this repo is supposed to design out.
+`--no-build` keeps the old behaviour for promoting several maps before one
+full build. No engine time either way: a hash-verified build is copied.
+
+Nothing else moved: 64 tests pass, `build_mod --list` unchanged, and the
+placeholder slot still takes whatever the build built first (for a
+one-preset promote, the map just promoted - what `--placeholder LABEL` did
+by hand).

@@ -12,10 +12,11 @@ parameters, builds and captures are joined up.
         -o out/scand_pick.json
     uv run python automation/preset_cli.py promote scand-shift-10 --name Scandinavia
 
-``promote`` is the whole point of the registry: it flips a status, and
-``build_mod.py`` then ships that preset from a build it already has -
-byte-identical to the script the engine was measured on, if one is still on
-disk. Nothing regenerates and no annealing runs.
+``promote`` is the whole point of the registry: it flips a status and ships
+that preset (``build_mod.ship``) from a build it already has - byte-identical
+to the script the engine was measured on, if one is still on disk. Nothing
+regenerates and no annealing runs. ``--no-build`` keeps the status flip on
+its own, for promoting several maps before one full build.
 
 ``audit`` answers the question the reconstruction raised and no report had
 been asking: is the script that ships the script that was captured? It is a
@@ -339,15 +340,27 @@ def cmd_promote(args) -> int:
     print(f"{p.label} -> shipped as {p.name!r}")
     print(f"  {p.describe_window()}")
     print(f"  {p.n_captured} captures on record across {len(p.captures)} runs")
+    soon = "build_mod will " if args.no_build else ""
     if hit:
         build, path = hit
         print(f"  build on disk, hash-verified: {build.sha256[:12]} {path}")
-        print(f"  build_mod will ship that script as-is - no regeneration")
+        print(f"  {soon}ship that script as-is - no regeneration")
     else:
-        print("  no build on disk - build_mod will generate one (~70s of "
-              "annealing) and record it")
-    print("\nnext: uv run python automation/build_mod.py "
-          f"--presets {p.label}")
+        print(f"  no build on disk - {soon}generate one (~70s of annealing) "
+              f"and record it")
+    if args.no_build:
+        print("\n--no-build: mod/ untouched. next: uv run python "
+              f"automation/build_mod.py --presets {p.label}")
+        return 0
+    # Flipping a status used to leave the map out of mod/ until a second
+    # command was pasted back, so the registry and the mod on disk disagreed
+    # for as long as that took - and a printed command was the only thing
+    # that closed the gap. Ship it here: same partial build, same
+    # hash-verified script, no engine time.
+    print()
+    import build_mod
+    build_mod.ship([p.label])
+    print("\nnext: uv run python automation/install_mod.py --all")
     return 0
 
 
@@ -535,6 +548,9 @@ def main() -> int:
     p.add_argument("preset")
     p.add_argument("--name", help="in-game map name to ship it under")
     p.add_argument("--why", help="what decided it - stored as the preset's note")
+    p.add_argument("--no-build", action="store_true",
+                   help="flip the status only, leaving mod/ alone - for "
+                        "promoting several maps before one full build_mod run")
     p.set_defaults(fn=cmd_promote)
 
     p = sub.add_parser("retire", help="withdraw a preset from the mod")
